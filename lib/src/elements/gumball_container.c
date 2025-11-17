@@ -1,5 +1,7 @@
 #include <gumball/elements/gumball_container.h>
 
+// TODO: only resize and realign widgets on signal firing instead of every frame
+
 static GBL_RESULT GUM_Container_init_(GblInstance *pInstance) {
     GUM_CONTAINER(pInstance)->resizeWidgets = true;
     GUM_CONTAINER(pInstance)->alignWidgets  = true;

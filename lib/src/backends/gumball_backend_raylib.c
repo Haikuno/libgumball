@@ -1,4 +1,5 @@
-#include <gumball/gumball_backend.h>
+#include <gumball/core/gumball_backend.h>
+#include <gumball/core/gumball_logger.h>
 #include <raylib.h>
 
 struct GUM_Font {
@@ -17,12 +18,41 @@ GUM_Vector2 GUM_Texture_size(GUM_Texture* pSelf) {
 	return size;
 }
 
+static void GUM_raylibTraceLog(int logLevel, const char *text, va_list args) {
+	char buf[1024];
+    vsnprintf(buf, sizeof(buf), text, args);
+	switch (logLevel) {
+		case LOG_ALL:
+		case LOG_TRACE:
+		case LOG_DEBUG:
+			GBL_LOG_DEBUG("raylib ", buf);
+			break;
+		case LOG_INFO:
+			GBL_LOG_INFO("raylib ", buf);
+			break;
+		case LOG_WARNING:
+			GBL_LOG_WARN("raylib ", buf);
+			break;
+		case LOG_ERROR:
+		case LOG_FATAL:
+			GBL_LOG_ERROR("raylib ", buf);
+			break;
+	}
+}
+
+void GUM_Backend_setLogger(void) {
+	SetTraceLogCallback(GUM_raylibTraceLog);
+}
+
 void GUM_Texture_loadFromBytes(GUM_Texture* pSelf) {
 	if (!pSelf) return;
 	GblByteArray *pByteArray = *(GblByteArray**)GblBox_field(GBL_BOX(pSelf), GblQuark_fromStatic("GUM_Resource_byteArray"));
 	GblStringRef *extension  = (GblStringRef*)GblBox_field(GBL_BOX(pSelf), GblQuark_fromStatic("GUM_Resource_extension"));
+
 	Image image = LoadImageFromMemory(extension, GblByteArray_data(pByteArray), GblByteArray_size(pByteArray));
 	Texture2D texture = LoadTextureFromImage(image);
+
+
 	void* pTexture = malloc(sizeof(Texture2D));
 	if (!pTexture) {
 		UnloadImage(image);
@@ -30,7 +60,15 @@ void GUM_Texture_loadFromBytes(GUM_Texture* pSelf) {
 	}
 	memcpy(pTexture, &texture, sizeof(Texture2D));
 	UnloadImage(image);
+	GblByteArray_clear(pByteArray);
 	GblBox_setField(GBL_BOX(pSelf), GblQuark_fromStatic("GUM_Texture_texture"), (uintptr_t)pTexture);
+}
+
+void GUM_Texture_unload(GUM_Texture* pSelf) {
+	if (!pSelf) return;
+	void* pTexture = (void*)GblBox_field(GBL_BOX(pSelf), GblQuark_fromStatic("GUM_Texture_texture"));
+	UnloadTexture(*(Texture2D*)pTexture);
+	free(pTexture);
 }
 
 GUM_Font *GUM_Font_create(void *pFont) {
@@ -60,22 +98,22 @@ GUM_Vector2 GUM_Font_measureText(GUM_Font *pFont, GblStringRef *pText, uint8_t f
 	return size;
 }
 
-GUM_Renderer* GUM_Renderer_create(void *pRenderer) {
+GUM_Renderer *GUM_Renderer_create(void *pRenderer) {
 	return nullptr;
 }
 
-typedef struct {
-	KeyboardKey key;
-	GUM_CONTROLLER_BUTTON button_ui;
-} KeyBinding;
+GBL_RESULT GUM_Backend_pollInput(GUM_Controller *pController) {
+	typedef struct {
+		KeyboardKey key;
+		GUM_CONTROLLER_BUTTON_ID button_ui;
+	} KeyBinding;
 
-typedef struct {
-	GamepadButton button_gamepad;
-	GUM_CONTROLLER_BUTTON button_ui;
-} ButtonBinding;
+	typedef struct {
+		GamepadButton button_gamepad;
+		GUM_CONTROLLER_BUTTON_ID button_ui;
+	} ButtonBinding;
 
-GBL_RESULT GUM_Backend_inputPoll(GUM_Controller *pController) {
-		static KeyBinding constexpr key_bindings[] = {
+	static KeyBinding constexpr key_bindings[] = {
 		{ KEY_UP,		GUM_CONTROLLER_UP		},
 		{ KEY_RIGHT,	GUM_CONTROLLER_RIGHT		},
 		{ KEY_DOWN,		GUM_CONTROLLER_DOWN		},

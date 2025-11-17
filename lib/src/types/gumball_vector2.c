@@ -9,3 +9,31 @@ GblType GUM_Vector2_type(void) {
 
     return type;
 }
+
+GUM_Vector2 GUM_Vector2_add(GUM_Vector2 a, GUM_Vector2 b) {
+    return (GUM_Vector2) {
+        .x = a.x + b.x,
+        .y = a.y + b.y
+    };
+}
+
+GUM_Vector2 GUM_Vector2_subtract(GUM_Vector2 a, GUM_Vector2 b) {
+    return (GUM_Vector2) {
+        .x = a.x - b.x,
+        .y = a.y - b.y
+    };
+}
+
+GUM_Vector2 GUM_Vector2_scale(GUM_Vector2 a, float scalar) {
+    return (GUM_Vector2) {
+        .x = a.x * scalar,
+        .y = a.y * scalar
+    };
+}
+
+float   GUM_Vector2_distance(GUM_Vector2 a, GUM_Vector2 b) {
+    return sqrtf((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+float   GUM_Vector2_angle(GUM_Vector2 a, GUM_Vector2 b) {
+    return atan2f(b.y - a.y, b.x - a.x);
+}

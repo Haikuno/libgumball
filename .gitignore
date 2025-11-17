@@ -1,3 +1,7 @@
 build/
 .vscode/
 .cache/
+docs/*.txt
+docs/*.tag
+docs/*/
+lib/libgimbal/doc/html/

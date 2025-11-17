@@ -9,6 +9,7 @@ GBL_RESULT GUM_Texture_init_(GblInstance* pInstance) {
 
     GblBox_setField(GBL_BOX(pInstance), GblQuark_fromStatic("GUM_Resource_byteArray"), 0);
     GblBox_setField(GBL_BOX(pInstance), GblQuark_fromStatic("GUM_Resource_quark"), 0);
+    GblBox_setField(GBL_BOX(pInstance), GblQuark_fromStatic("GUM_Resource_type"), (uintptr_t)GUM_TEXTURE_TYPE);
 
     return GBL_RESULT_SUCCESS;
 }
@@ -18,6 +19,7 @@ GBL_RESULT GUM_Texture_create_(GUM_IResource *pResource, GblByteArray **ppByteAr
     GblBox_setField(GBL_BOX(pSelf), GblQuark_fromStatic("GUM_Resource_byteArray"), (uintptr_t)ppByteArray);
     GblBox_setField(GBL_BOX(pSelf), GblQuark_fromStatic("GUM_Resource_quark"), (uintptr_t)quark);
     GblBox_setField(GBL_BOX(pSelf), GblQuark_fromStatic("GUM_Resource_extension"), (uintptr_t)extension);
+    GblBox_setField(GBL_BOX(pSelf), GblQuark_fromStatic("GUM_Resource_type"), (uintptr_t)GUM_TEXTURE_TYPE);
     return GBL_RESULT_SUCCESS;
 }
 
@@ -27,9 +29,10 @@ GBL_RESULT GUM_TextureClass_init_(GblClass* pClass, const void* pData) {
     if (!GblType_classRefCount(GUM_TEXTURE_TYPE)) {
         GblQuark_internStatic("GUM_Resource_byteArray");
         GblQuark_internStatic("GUM_Resource_quark");
+        GblQuark_internStatic("GUM_Resource_type");
     }
 
-    GUM_IRESOURCE_CLASS(pClass)->pFnCreate      = GUM_Texture_create_;
+    GUM_IRESOURCE_CLASS(pClass)->pFnCreate = GUM_Texture_create_;
 
     return GBL_RESULT_SUCCESS;
 }

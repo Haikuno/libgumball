@@ -1,5 +1,5 @@
-#ifndef GUM_GENERAL_H
-#define GUM_GENERAL_H
+#ifndef GUM_COMMON_H
+#define GUM_COMMON_H
 
 #include <gimbal/gimbal_meta.h>
 #include <gumball/types/gumball_renderer.h>

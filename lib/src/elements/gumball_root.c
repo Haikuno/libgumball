@@ -1,6 +1,7 @@
 #include <gumball/elements/gumball_widget.h>
 #include <gumball/elements/gumball_root.h>
 #include <gumball/types/gumball_renderer.h>
+#include <gumball/core/gumball_backend.h>
 
 #include <gimbal/gimbal_algorithms.h>
 
@@ -21,6 +22,7 @@ static GBL_RESULT GUM_RootClass_init_(GblClass* pClass, const void* pData) {
         GUM_drawQueue_init();
         GblLogger *logger = GblLogger_create(GBL_LOGGER_TYPE, sizeof(GblLogger), nullptr);
 	    GblLogger_register(logger);
+        GUM_Backend_setLogger();
     }
 
     return GBL_RESULT_SUCCESS;

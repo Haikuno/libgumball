@@ -1,48 +1,72 @@
-/*| \file
-	 *  \brief Gumball Button
- *  \ingroup elements
+#ifndef GUM_BUTTON_H
+#define GUM_BUTTON_H
+
+/*! \file
+ * 	\ref		GUM_Button "GUM_Button data structure and hierarchy graph"
+ *  \ingroup 	elements
  *
- * 	GUM_Button is a basic button element that can be selected and pressed,
- *  firing a signal you can attach to.
+ *	GUM_Button is a basic button element that can be selected and pressed,
+ *	firing a signal you can connect a callback to.
  *
- *  \details
- *
- *
+ *  \todo
+ *  	- Add a way to override cursor movement to the desired GUM_Button pointer.
+ *      - Button highlighting animations
+ *      - Make variables private
+ * 		- Document signals.
  *
  * 	\author 2025 Agustín Bellagamba
  *	\copyright MIT License
 */
 
-#ifndef GUM_BUTTON_H
-#define GUM_BUTTON_H
-
 #include "gumball_widget.h"
 
-/*! \name Type System
+/*! \name  Type System
  *  \brief Type UUID and cast operators
  *  @{
- */
-#define GUM_BUTTON_TYPE				(GBL_TYPEID(GUM_Button))
-#define GUM_BUTTON(self)			(GBL_CAST(GUM_Button, self))
-#define GUM_BUTTON_CLASS(klass)		(GBL_CLASS_CAST(GUM_Button, klass))
-#define GUM_BUTTON_CLASSOF(self)	(GBL_CLASSOF(GUM_Button, self))
+*/
+#define GUM_BUTTON_TYPE				(GBL_TYPEID		(GUM_Button)) 			//!< Returns the GUM_Button Type UUID
+#define GUM_BUTTON(self)			(GBL_CAST		(GUM_Button, self)) 	//!< Casts an instance of a compatible element to a GUM_Button
+#define GUM_BUTTON_CLASS(klass)		(GBL_CLASS_CAST	(GUM_Button, klass)) 	//!< Casts an class of a compatible element to a GUM_ButtonClass
+#define GUM_BUTTON_CLASSOF(self)	(GBL_CLASSOF	(GUM_Button, self))		//!< Casts an instance of a compatible element to a GUM_ButtonClass
+//! @}
 
-#define GBL_SELF_TYPE GUM_Button
+#define GBL_SELF_TYPE 				 GUM_Button
 
 GBL_DECLS_BEGIN
-
 GBL_FORWARD_DECLARE_STRUCT(GUM_Button);
 
+/*!
+ * 	\struct  GUM_ButtonClass
+ *	\extends GUM_WidgetClass
+ *	\brief   GUM_Button structure
+ *
+ *	GUM_ButtonClass derives from GUM_WidgetClass,
+ *	adding nothing new.
+*/
 GBL_CLASS_DERIVE_EMPTY(GUM_Button, GUM_Widget)
 
-// TODO: flags
+/*!
+ *	\class   GUM_Button
+ *	\extends GUM_Widget
+ *	\brief   Basic button element
+ *
+*/
+
+/*!
+ *	\name  Properties
+ *	\brief Button properties you can set/get at or after creation.
+ *	\note  You can also set/get properties from parent classes (see \ref GUM_Button).
+ *	@{
+*/
 GBL_INSTANCE_DERIVE(GUM_Button, GUM_Widget)
-	bool 			isActive;				// if this button can be pressed
-	bool 			isSelectable;			// if this button can be selected
-	bool 			isSelected;				// if this button is currently selected
-	bool 			isSelectedByDefault;	// if this button is selected by default
-	GblArrayList
+	bool 			isActive; 			 //!< If this button can be pressed. 																Default value is true
+	bool 			isSelectable; 		 //!< If this button can be selected.																Default value is true
+	//! \cond
+	bool 			isSelected; 		 // If this button is currently selected
+	//! \endcond
+	bool 			isSelectedByDefault; //!< If this button should be selected by default when the cursor doesn't have a button selected.	Default value is false
 GBL_INSTANCE_END
+//! @}
 
 GBL_PROPERTIES(GUM_Button,
 	(isActive,				GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE),
@@ -50,9 +74,7 @@ GBL_PROPERTIES(GUM_Button,
 	(isSelectedByDefault,	GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE)
 )
 
-
-// You can connect to the signals with GUM_connect() like so:
-// GUM_connect(button, onPressPrimary, myFunction);
+//! \cond
 GBL_SIGNALS(GUM_Button,
 	(onPressPrimary, 	(GBL_INSTANCE_TYPE, pReceiver)),
 	(onPressSecondary, 	(GBL_INSTANCE_TYPE, pReceiver)),
@@ -60,13 +82,13 @@ GBL_SIGNALS(GUM_Button,
 )
 
 GblType GUM_Button_type(void);
+//! \endcond
 
-// Takes a list of Name/Value pairs
+//! Returns a new GUM_Button. Optionally takes in a list of Name/Value pairs for properties
 #define GUM_Button_create(/* propertyName, propertyValue */ ...) GBL_NEW(GUM_Button __VA_OPT__(,) __VA_ARGS__)
 
 GBL_DECLS_END
 
 #undef GBL_SELF_TYPE
-
 
 #endif // GUM_BUTTON_H

@@ -1,4 +1,4 @@
-#include <gumball/gumball_backend.h>
+#include <gumball/core/gumball_backend.h>
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -13,7 +13,7 @@ struct GUM_Font {
 
 typedef struct {
 	SDL_Keycode key;
-	GUM_CONTROLLER_BUTTON button_ui;
+	GUM_CONTROLLER_BUTTON_ID button_ui;
 } KeyBinding;
 
 struct GUM_Renderer{
@@ -42,7 +42,7 @@ constexpr static KeyBinding keyBindings[] = {
 };
 constexpr size_t keyBindingCount = sizeof(keyBindings) / sizeof(KeyBinding);
 
-GBL_RESULT GUM_Backend_inputPoll(GUM_Controller *pController) {
+GBL_RESULT GUM_Backend_pollInput(GUM_Controller *pController) {
 	return GBL_RESULT_SUCCESS;
 }
 

@@ -2,18 +2,20 @@
 #include <gumball/elements/gumball_button.h>
 #include <gumball/elements/gumball_container.h>
 #include <gumball/elements/gumball_root.h>
-#include <gumball/gumball_general.h>
-#include <gumball/gumball_backend.h>
+#include <gumball/elements/gumball_common.h>
+#include <gumball/core/gumball_backend.h>
+
+// TODO: set root as parent after creation is parent prop is not set, to avoid doing it twice
 
 static GBL_RESULT GUM_Widget_init_(GblInstance *pInstance) {
 	GUM_Widget *pSelf = GUM_WIDGET(pInstance);
 
-	pSelf->z_index = 0;
+	pSelf->z_index = 50;
 
-	pSelf->x 		  = 160;
-	pSelf->y 		  = 120;
-	pSelf->w 		  = 320;
-	pSelf->h 		  = 240;
+	pSelf->x 		  = 0;
+	pSelf->y 		  = 0;
+	pSelf->w 		  = 200;
+	pSelf->h 		  = 200;
 	pSelf->isRelative = false;
 
 	pSelf->r = 0;
@@ -321,7 +323,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget *pSelf, GUM_Renderer *pRenderer) {
 	GUM_Widget *pParent = GBL_AS(GUM_Widget, GblObject_parent(GBL_OBJECT(pSelf)));
 
 	if (pParent && pSelf->isRelative) {
-		Vector2 parent_pos	= GUM_get_absolute_position_(GUM_WIDGET(pParent));
+		GUM_Vector2 parent_pos	= GUM_get_absolute_position_(GUM_WIDGET(pParent));
 		rec.x				+= parent_pos.x;
 		rec.y				+= parent_pos.y;
 	}
@@ -467,9 +469,9 @@ GblType GUM_Widget_type(void) {
 	return type;
 }
 
-Vector2 GUM_get_absolute_position_(GUM_Widget *pWidget) {
+GUM_Vector2 GUM_get_absolute_position_(GUM_Widget *pWidget) {
 	GUM_Widget	*parent	= GBL_AS(GUM_Widget, GblObject_parent(GBL_OBJECT(pWidget)));
-	Vector2		pos		= { pWidget->x, pWidget->y };
+	GUM_Vector2		pos		= { pWidget->x, pWidget->y };
 
 	if (!parent || !pWidget->isRelative) {
 		return pos;
@@ -479,7 +481,7 @@ Vector2 GUM_get_absolute_position_(GUM_Widget *pWidget) {
 		if (!GBL_AS(GUM_Container, parent)->alignWidgets) return pos;
 	}
 
-	Vector2 parent_pos = GUM_get_absolute_position_(GUM_WIDGET(parent));
+	GUM_Vector2 parent_pos = GUM_get_absolute_position_(GUM_WIDGET(parent));
 
 	pos.x += parent_pos.x;
 	pos.y += parent_pos.y;

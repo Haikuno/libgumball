@@ -2,7 +2,10 @@
   <h3 align="center">libGumball</h3>
 
   <p align="center">
-    C23, libGimbal-based UI library
+    C23-Based, libGimbal-powered UI Library
+    <br />
+    <a href="http://libgumball.psyops.studio"><strong>Explore the docs »</strong></a>
+    <br />
   </p>
 
 </div>
@@ -46,4 +49,7 @@ taget_link_libraries(yourproject libGumball)
 Agustín Bellagamba ([Haikuno](https://github.com/Haikuno))
 ## Dependencies ##
 - [libGimbal](https://github.com/gyrovorbis/libgimbal)
-- Default Backend: [SDL](https://github.com/libsdl-org/SDL) and [SDL_ttf](https://github.com/libsdl-org/SDL_ttf)
+
+## Optional Dependencies ##
+- Backend: [raylib](https://github.com/raysan5/raylib)
+- Backend: [SDL](https://github.com/libsdl-org/SDL) and [SDL_ttf](https://github.com/libsdl-org/SDL_ttf)

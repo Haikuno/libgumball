@@ -1,27 +1,70 @@
 #ifndef GUM_CONTAINER_H
 #define GUM_CONTAINER_H
 
+/*! \file
+ *  \ref     GUM_Container "GUM_Container data structure and hierarchy graph"
+ *  \ingroup elements
+ *
+ * 	GUM_Container is a container element that can hold other widgets.
+ *  It can be used to group widgets together, and to optionally automatically resize / align them as needed.
+ *
+ *  \todo
+ *  	- Make variables private
+ *      - Make orientation an enum
+ *      - Add scrolling
+ *
+ *  \author 2025 Agustín Bellagamba
+ *  \copyright MIT License
+*/
+
 #include "gumball_widget.h"
 
-#define GUM_CONTAINER_TYPE				(GBL_TYPEID(GUM_Container))
-#define GUM_CONTAINER(self)				(GBL_CAST(GUM_Container, self))
-#define GUM_CONTAINER_CLASS(klass)		(GBL_CLASS_CAST(GUM_Container, klass))
-#define GUM_CONTAINER_CLASSOF(self)	(GBL_CLASSOF(GUM_Container, self))
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
+*/
+#define GUM_CONTAINER_TYPE				(GBL_TYPEID     (GUM_Container))            //!< Returns the GUM_Container Type UUID
+#define GUM_CONTAINER(self)				(GBL_CAST       (GUM_Container, self))      //!< Casts an instance of a compatible element to a GUM_Container
+#define GUM_CONTAINER_CLASS(klass)		(GBL_CLASS_CAST (GUM_Container, klass))     //!< Casts an class of a compatible element to a GUM_ContainerClass
+#define GUM_CONTAINER_CLASSOF(self)	    (GBL_CLASSOF    (GUM_Container, self))      //!< Casts an instance of a compatible element to a GUM_Container
+//! @}
 
-#define GBL_SELF_TYPE GUM_Container
+#define GBL_SELF_TYPE                    GUM_Container
 
-GBL_FORWARD_DECLARE_STRUCT(GUM_Container);
 GBL_DECLS_BEGIN
+GBL_FORWARD_DECLARE_STRUCT(GUM_Container);
 
+/*!
+    \struct  GUM_ContainerClass
+    \extends GUM_WidgetClass
+    \brief   GUM_Container structure
+
+    GUM_ContainerClass derives from GUM_WidgetClass,
+    adding nothing new.
+*/
 GBL_CLASS_DERIVE_EMPTY(GUM_Container, GUM_Widget)
 
+/*!
+ *	\class   GUM_Container
+ *	\extends GUM_Widget
+ *	\brief   Container element
+ *
+*/
+
+/*!
+	\name  Properties
+	\brief Properties you can set/get at or after creation.
+    \note  You can also set/get properties from parent classes (see \ref GUM_Container).
+	@{
+*/
 GBL_INSTANCE_DERIVE(GUM_Container, GUM_Widget)
-    char orientation;       // 'h' for horizontal, 'v' for vertical layout of child widgets GUM_TODO: make this an enum
-    bool resizeWidgets;     // if true, child widgets will be resized to fit the container's width/height
-    bool alignWidgets;      // if true, child widgets will be aligned automatically
-    float padding;          // the space between the container's border and its child widgets
-    float margin;           // the space between child widgets
+    char orientation;       //!< 'h' for horizontal, 'v' for vertical layout of child widgets.                          Default value is 'v'    \warning This is planned to be replaced by an enum.
+    bool resizeWidgets;     //!< If child widgets should be resized to take an equal amount of space.                   Default value is true
+    bool alignWidgets;      //!< If child widgets should be aligned.                                                    Default value is true
+    float padding;          //!< The space between the container's border and its child widgets.                        Default value is 5
+    float margin;           //!< The space between child widgets.                                                       Default value is 5
 GBL_INSTANCE_END
+//! @}
 
 GBL_PROPERTIES(GUM_Container,
     (orientation,       GBL_GENERIC, (READ, WRITE), GBL_CHAR_TYPE),
@@ -33,7 +76,7 @@ GBL_PROPERTIES(GUM_Container,
 
 GblType GUM_Container_type(void);
 
-// Takes a list of Name/Value pairs
+//! Returns a new GUM_Container. Optionally takes in a list of Name/Value pairs for properties
 #define GUM_Container_create(/* propertyName, propertyValue */ ...) GBL_NEW(GUM_Container __VA_OPT__(,) __VA_ARGS__)
 
 GBL_DECLS_END

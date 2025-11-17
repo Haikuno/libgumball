@@ -1,6 +1,6 @@
 #include <gumball/elements/gumball_widget.h>
 #include <gumball/elements/gumball_root.h>
-#include <gumball/gumball_general.h>
+#include <gumball/elements/gumball_common.h>
 
 #include <gimbal/gimbal_containers.h>
 #include <gimbal/gimbal_algorithms.h>

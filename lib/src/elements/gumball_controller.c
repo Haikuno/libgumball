@@ -1,13 +1,10 @@
 #include <gumball/elements/gumball_controller.h>
 #include <gumball/elements/gumball_container.h>
 #include <gumball/elements/gumball_root.h>
-#include <gumball/gumball_backend.h>
+#include <gumball/core/gumball_backend.h>
 
 
 #include <gimbal/gimbal_containers.h>
-
-#include <raylib.h>
-#include <raymath.h>
 
 static GblObject *GblObject_findDescendantByType(GblObject *pSelf, GblType descendantType) {
     GblObject *result = nullptr;
@@ -121,7 +118,7 @@ static GBL_RESULT GUM_Controller_update_(GUM_Widget *pSelf) {
         }
     }
 
-    GUM_Backend_inputPoll(GUM_CONTROLLER(pSelf));
+    GUM_Backend_pollInput(GUM_CONTROLLER(pSelf));
 
     return GBL_RESULT_SUCCESS;
 }
@@ -228,13 +225,13 @@ static GUM_Button* findSelectableInContainer_(GblObject* pContainer, bool last, 
     return nullptr;
 }
 
-static Vector2 vector2_FindClosestPoint_(Vector2 startCenter, Rectangle targetRect) {
+static GUM_Vector2 vector2_FindClosestPoint_(GUM_Vector2 startCenter, GUM_Rectangle targetRect) {
     float min_x = targetRect.x;
     float max_x = targetRect.x + targetRect.width;
     float min_y = targetRect.y;
     float max_y = targetRect.y + targetRect.height;
 
-    Vector2 closestPoint = {
+    GUM_Vector2 closestPoint = {
         .x = GBL_CLAMP(startCenter.x, min_x, max_x),
         .y = GBL_CLAMP(startCenter.y, min_y, max_y)
     };
@@ -242,13 +239,13 @@ static Vector2 vector2_FindClosestPoint_(Vector2 startCenter, Rectangle targetRe
     return closestPoint;
 }
 
-static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLER_BUTTON direction) {
+static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLER_BUTTON_ID direction) {
     GUM_Root *pRoot = GBL_REQUIRE(GUM_Root, "GUM_Root");
     if GBL_UNLIKELY(!pRoot) return nullptr;
 
-    Vector2 currPos    =   GUM_get_absolute_position_(GUM_WIDGET(pCurrent));
-    Vector2 currSize   =  {GUM_WIDGET(pCurrent)->w, GUM_WIDGET(pCurrent)->h};
-    Vector2 currCenter = {
+    GUM_Vector2 currPos    =   GUM_get_absolute_position_(GUM_WIDGET(pCurrent));
+    GUM_Vector2 currSize   =  {GUM_WIDGET(pCurrent)->w, GUM_WIDGET(pCurrent)->h};
+    GUM_Vector2 currCenter = {
         currPos.x + currSize.x * 0.5f,
         currPos.y + currSize.y * 0.5f
     };
@@ -268,32 +265,32 @@ static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLE
             continue;
         }
 
-        Vector2 candPos          =   GUM_get_absolute_position_(GUM_WIDGET(pCandidate));
-        Vector2 candSize         =  {GUM_WIDGET(pCandidate)->w, GUM_WIDGET(pCandidate)->h};
-        Vector2 candClosestPoint =   vector2_FindClosestPoint_(currCenter, (Rectangle){candPos.x, candPos.y,
+        GUM_Vector2 candPos          =   GUM_get_absolute_position_(GUM_WIDGET(pCandidate));
+        GUM_Vector2 candSize         =  {GUM_WIDGET(pCandidate)->w, GUM_WIDGET(pCandidate)->h};
+        GUM_Vector2 candClosestPoint =   vector2_FindClosestPoint_(currCenter, (GUM_Rectangle){candPos.x, candPos.y,
                                                                                        candSize.x, candSize.y});
 
-        Vector2 cursorDir        = {0,0};
-        Vector2 delta            = Vector2Subtract(candClosestPoint, currCenter);
-        float   dist             = Vector2Distance(candClosestPoint, currCenter);
-        float   angle            = Vector2Angle(cursorDir, delta);
+        GUM_Vector2 cursorDir        = {0,0};
+        GUM_Vector2 delta            = GUM_Vector2_subtract(candClosestPoint, currCenter);
+        float   dist                 = GUM_Vector2_distance(candClosestPoint, currCenter);
+        float   angle                = GUM_Vector2_angle(cursorDir, delta);
 
         switch (direction) {
             case GUM_CONTROLLER_UP:
                 if (delta.y >= 0) continue; // must be above
-                cursorDir = (Vector2){0, -1};
+                cursorDir = (GUM_Vector2){0, -1};
                 break;
             case GUM_CONTROLLER_DOWN:
                 if (delta.y <= 0) continue; // must be below
-                cursorDir = (Vector2){0, 1};
+                cursorDir = (GUM_Vector2){0, 1};
                 break;
             case GUM_CONTROLLER_LEFT:
                 if (delta.x >= 0) continue; // must be left
-                cursorDir = (Vector2){-1, 0};
+                cursorDir = (GUM_Vector2){-1, 0};
                 break;
             case GUM_CONTROLLER_RIGHT:
                 if (delta.x <= 0) continue; // must be right
-                cursorDir = (Vector2){1, 0};
+                cursorDir = (GUM_Vector2){1, 0};
                 break;
             default:
                 continue;
@@ -313,7 +310,7 @@ static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLE
     return pBest;
 }
 
-static GUM_Button* moveCursor_(GblObject* pSelf, GUM_CONTROLLER_BUTTON buttonPress) {
+static GUM_Button* moveCursor_(GblObject* pSelf, GUM_CONTROLLER_BUTTON_ID buttonPress) {
     GblObject* pParent = GblObject_parent(pSelf);
     if (!pParent || !GBL_AS(GUM_Container, pParent)) return nullptr;
 
@@ -361,7 +358,7 @@ static GUM_Button* moveCursor_(GblObject* pSelf, GUM_CONTROLLER_BUTTON buttonPre
     return findSelectableInContainer_(pNewContainer, useLast, preferredIndex);
 }
 
-static GBL_RESULT GUM_Controller_handleButton_(GUM_Controller *pSelf, GUM_CONTROLLER_BUTTON_STATE eventState, GUM_CONTROLLER_BUTTON eventButton) {
+static GBL_RESULT GUM_Controller_handleButton_(GUM_Controller *pSelf, GUM_CONTROLLER_BUTTON_STATE eventState, GUM_CONTROLLER_BUTTON_ID eventButton) {
     GUM_Button		**ppButton		= &pSelf->pSelectedButton;
     auto            root            = GBL_REQUIRE(GUM_Root, "GUM_Root");
 
@@ -412,7 +409,7 @@ static GBL_RESULT GUM_Controller_handleButton_(GUM_Controller *pSelf, GUM_CONTRO
     return GBL_RESULT_SUCCESS;
 }
 
-void GUM_Controller_sendButton(GUM_Controller *pSelf, GUM_CONTROLLER_BUTTON_STATE state, GUM_CONTROLLER_BUTTON button) {
+void GUM_Controller_sendButton(GUM_Controller *pSelf, GUM_CONTROLLER_BUTTON_STATE state, GUM_CONTROLLER_BUTTON_ID button) {
     GUM_Controller_handleButton_(pSelf, state, button);
 }
 

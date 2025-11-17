@@ -10,11 +10,11 @@ file(GLOB_RECURSE SRCS    CONFIGURE_DEPENDS	  src/*.c)
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS   api/gumball/*.h)
 list(FILTER SRCS EXCLUDE REGEX ".*/backends/.*")
 
-if (GUM_ENABLE_BACKEND_SDL3)
+if (GUM_BUILD_BACKEND_SDL3)
 	list(APPEND SRCS src/backends/gumball_backend_SDL3.c)
 endif()
 
-if (GUM_ENABLE_BACKEND_RAYLIB)
+if (GUM_BUILD_BACKEND_RAYLIB)
 	list(APPEND SRCS src/backends/gumball_backend_raylib.c)
 endif()
 
