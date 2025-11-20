@@ -2,6 +2,7 @@
 #include <gumball/elements/gumball_container.h>
 #include <gumball/elements/gumball_root.h>
 #include <gumball/core/gumball_backend.h>
+#include <gumball/core/gumball_logger.h>
 
 
 #include <gimbal/gimbal_containers.h>
@@ -97,7 +98,11 @@ static GBL_RESULT GUM_Controller_GblObject_property_(const GblObject *pObject, c
 static GBL_RESULT GUM_Controller_update_(GUM_Widget *pSelf) {
     // find first selected by default button
     if (!GUM_CONTROLLER(pSelf)->pSelectedButton) {
-        auto root = GBL_REQUIRE(GUM_Root, "GUM_Root");
+       auto root = GBL_AS(GUM_Root, GblModule_find("GUM_Root"));
+       if(!root) {
+        GUM_LOG_ERROR("No root element found! Create one first.");
+        return GBL_RESULT_ERROR;
+       }
 
         GUM_Container *pContainer = GBL_AS(GUM_Container, GblObject_findDescendantByType(GBL_OBJECT(root), GUM_CONTAINER_TYPE));
         if(!pContainer) return GBL_RESULT_ERROR;
@@ -241,9 +246,6 @@ static GUM_Vector2 vector2_FindClosestPointInRec_(GUM_Vector2 startCenter, GUM_R
 }
 
 static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLER_BUTTON_ID direction) {
-    GUM_Root *pRoot = GBL_REQUIRE(GUM_Root, "GUM_Root");
-    if GBL_UNLIKELY(!pRoot) return nullptr;
-
     GUM_Vector2 currPos    =   GUM_get_absolute_position_(GUM_WIDGET(pCurrent));
     GUM_Vector2 currSize   =  {GUM_WIDGET(pCurrent)->w, GUM_WIDGET(pCurrent)->h};
     GUM_Vector2 currCenter = {
@@ -360,7 +362,7 @@ static GUM_Button* moveCursor_(GblObject* pSelf, GUM_CONTROLLER_BUTTON_ID button
 
 static GBL_RESULT GUM_Controller_handleButton_(GUM_Controller *pSelf, GUM_CONTROLLER_BUTTON_STATE eventState, GUM_CONTROLLER_BUTTON_ID eventButton) {
     GUM_Button		**ppButton		= &pSelf->pSelectedButton;
-    auto            root            = GBL_REQUIRE(GUM_Root, "GUM_Root");
+    auto            root            = GBL_AS(GUM_Root, GblModule_find("GUM_Root"));
 
     const bool isDirection         =    eventButton == GUM_CONTROLLER_UP   ||
                                         eventButton == GUM_CONTROLLER_DOWN ||

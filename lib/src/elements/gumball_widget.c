@@ -9,7 +9,6 @@
 // TODO: set root as parent after creation is parent prop is not set, to avoid doing it twice
 
 static void GUM_Widget_GblObject_onPropertyChange_(GblObject *pSelf, GblProperty *pProp) {
-	GUM_LOG_INFO("a property changed for a %s", GblType_name(GBL_TYPEOF(pSelf)));
 	switch(pProp->id) {
 		default:
 			break;
@@ -65,7 +64,7 @@ static GBL_RESULT GUM_Widget_init_(GblInstance *pInstance) {
 static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject *pSelf) {
 	if(!GblObject_parent(pSelf)) {
 		if GBL_LIKELY(GBL_TYPEOF(pSelf) != GUM_ROOT_TYPE) {
-			auto root = GBL_REQUIRE(GUM_Root, "GUM_Root");
+			auto root = GBL_AS(GUM_Root, GblModule_find("GUM_Root"));
 
 			if GBL_UNLIKELY(!root) {
 				GUM_LOG_ERROR("No root element found! Create one first.");
