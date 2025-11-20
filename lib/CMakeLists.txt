@@ -19,8 +19,13 @@ if (GUM_BUILD_BACKEND_RAYLIB)
     list(APPEND SRCS ${RAYLIB_SRCS})
 endif()
 
+
+if (PLATFORM_DREAMCAST)
+	include_directories(${KOS_PORTS}/include/raylib)
+endif()
+
 add_library(libGumball STATIC ${SRCS} ${HEADERS})
-target_link_libraries(libGumball libGimbal raylib SDL3)
+target_link_libraries(libGumball libGimbal raylib)
 target_include_directories(libGumball
 	PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/api

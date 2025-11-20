@@ -32,5 +32,5 @@ endif()
 
 add_subdirectory(lib)
 
-add_executable(testlibGumball main.c)
-target_link_libraries(testlibGumball libGumball)
+# add_executable(testlibGumball main.c)
+# target_link_libraries(testlibGumball libGumball)

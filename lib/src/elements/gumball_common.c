@@ -48,7 +48,11 @@ GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
     size_t childCount = GblObject_childCount(pSelf);
     for (size_t i = childCount; i-- > 0;) {
         GblObject* childObj = GblObject_findChildByIndex(pSelf, i);
-        if GBL_UNLIKELY(childObj) GUM_unref(childObj);
+        if (childObj) GUM_unref(childObj);
+    }
+
+    if GBL_UNLIKELY(GBL_TYPEOF(pSelf) == GUM_ROOT_TYPE) {
+        GblModule_unregister(GBL_MODULE(pSelf));
     }
 
     GBL_UNREF(pSelf);

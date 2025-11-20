@@ -226,7 +226,7 @@ static GUM_Button* findSelectableInContainer_(GblObject* pContainer, bool last, 
     return nullptr;
 }
 
-static GUM_Vector2 vector2_FindClosestPoint_(GUM_Vector2 startCenter, GUM_Rectangle targetRect) {
+static GUM_Vector2 vector2_FindClosestPointInRec_(GUM_Vector2 startCenter, GUM_Rectangle targetRect) {
     float min_x = targetRect.x;
     float max_x = targetRect.x + targetRect.width;
     float min_y = targetRect.y;
@@ -268,13 +268,12 @@ static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLE
 
         GUM_Vector2 candPos          =   GUM_get_absolute_position_(GUM_WIDGET(pCandidate));
         GUM_Vector2 candSize         =  {GUM_WIDGET(pCandidate)->w, GUM_WIDGET(pCandidate)->h};
-        GUM_Vector2 candClosestPoint =   vector2_FindClosestPoint_(currCenter, (GUM_Rectangle){candPos.x, candPos.y,
+        GUM_Vector2 candClosestPoint =   vector2_FindClosestPointInRec_(currCenter, (GUM_Rectangle){candPos.x, candPos.y,
                                                                                        candSize.x, candSize.y});
 
         GUM_Vector2 cursorDir        = {0,0};
         GUM_Vector2 delta            = GUM_Vector2_subtract(candClosestPoint, currCenter);
         float   dist                 = GUM_Vector2_distance(candClosestPoint, currCenter);
-        float   angle                = GUM_Vector2_angle(cursorDir, delta);
 
         switch (direction) {
             case GUM_CONTROLLER_UP:
@@ -297,10 +296,10 @@ static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLE
                 continue;
         }
 
+        float   angle                = GUM_Vector2_signedAngleTo(currCenter, candClosestPoint, cursorDir);
 
         if(fabsf(angle) > 0.4f) continue;
-
-        float score = 10.0f - dist;
+        float score = 10 - dist;
 
         if (score > bestScore) {
             bestScore = score;
