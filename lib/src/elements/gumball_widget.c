@@ -3,14 +3,23 @@
 #include <gumball/elements/gumball_container.h>
 #include <gumball/elements/gumball_root.h>
 #include <gumball/elements/gumball_common.h>
+#include <gumball/core/gumball_logger.h>
 #include <gumball/core/gumball_backend.h>
 
 // TODO: set root as parent after creation is parent prop is not set, to avoid doing it twice
 
+static void GUM_Widget_GblObject_onPropertyChange_(GblObject *pSelf, GblProperty *pProp) {
+	GUM_LOG_INFO("a property changed for a %s", GblType_name(GBL_TYPEOF(pSelf)));
+	switch(pProp->id) {
+		default:
+			break;
+	}
+}
+
 static GBL_RESULT GUM_Widget_init_(GblInstance *pInstance) {
 	GUM_Widget *pSelf = GUM_WIDGET(pInstance);
 
-	pSelf->z_index = 50;
+	pSelf->z_index    = 50;
 
 	pSelf->x 		  = 0;
 	pSelf->y 		  = 0;
@@ -31,7 +40,7 @@ static GBL_RESULT GUM_Widget_init_(GblInstance *pInstance) {
 	pSelf->border_radius	= 0.0f;
 	pSelf->border_highlight = false;
 
-	pSelf->font 				 = GUM_Font_create(nullptr);
+	pSelf->font 				 = GUM_Backend_Font_default();
 	pSelf->font_size 			 = 22;
 	pSelf->font_r 				 = 255;
 	pSelf->font_g 				 = 255;
@@ -46,12 +55,39 @@ static GBL_RESULT GUM_Widget_init_(GblInstance *pInstance) {
 
 	pSelf->texture = nullptr;
 
-	auto root = GBL_REQUIRE(GUM_Root, "GUM_Root");
-	if GBL_UNLIKELY(!root) return GBL_RESULT_ERROR;
-	GblObject_setParent(GBL_OBJECT(pInstance), GBL_OBJECT(root));
-
 	GUM_drawQueue_push(GBL_OBJECT(pInstance));
 
+	GBL_CONNECT(pInstance, "propertyChange", GUM_Widget_GblObject_onPropertyChange_);
+
+	return GBL_RESULT_SUCCESS;
+}
+
+static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject *pSelf) {
+	if(!GblObject_parent(pSelf)) {
+		if GBL_LIKELY(GBL_TYPEOF(pSelf) != GUM_ROOT_TYPE) {
+			auto root = GBL_REQUIRE(GUM_Root, "GUM_Root");
+
+			if GBL_UNLIKELY(!root) {
+				GUM_LOG_ERROR("No root element found! Create one first.");
+				return GBL_RESULT_ERROR;
+			}
+
+			GblObject_setParent(pSelf, GBL_OBJECT(root));
+		}
+	}
+
+	// bump z-index of children (if any)
+	GblObject *pChild = GblObject_childFirst(pSelf);
+	if (!pChild)
+		return GBL_RESULT_SUCCESS;
+
+	while (pChild) {
+		GUM_Widget *pWidget = GBL_AS(GUM_Widget, pChild);
+		if (pWidget) pWidget->z_index++;
+		pChild = GblObject_siblingNext(pChild);
+	}
+
+	GUM_drawQueue_sort();
 	return GBL_RESULT_SUCCESS;
 }
 
@@ -176,20 +212,12 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject *pObject, const Gb
 			GblVariant_valueCopy(pValue, &pSelf->font_border_thickness);
 			break;
 		case GUM_Widget_Property_Id_font:
-			GblVariant_valueCopy(pValue, &pSelf->font);
+			GblBox *pFont = GblVariant_boxMove(pValue);
+			pSelf->font = GUM_FONT(pFont);
 			break;
 		case GUM_Widget_Property_Id_texture:
 			GblBox *pTexture = GblVariant_boxMove(pValue);
 			pSelf->texture = GUM_TEXTURE(pTexture);
-			break;
-		case GUM_Widget_Property_Id_parent:
-			GblObject *pOldParent = GblObject_parent(pObject);
-			if(pOldParent) {
-				GblObject_removeChild(pOldParent, pObject);
-			}
-
-			GblObject *pNewParent = GblVariant_objectPeek(pValue);
-			GblObject_addChild(pNewParent, pObject);
 			break;
 		default:
 			return GBL_RESULT_ERROR_INVALID_PROPERTY;
@@ -299,13 +327,10 @@ static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject *pObject, const
 			GblVariant_setUint8(pValue, pSelf->font_border_thickness);
 			break;
 		case GUM_Widget_Property_Id_font:
-			GblVariant_setPointer(pValue, GUM_FONT_TYPE, &pSelf->font);
+			GblVariant_setBoxCopy(pValue, GBL_BOX(pSelf->font));
 			break;
 		case GUM_Widget_Property_Id_texture:
 			GblVariant_setBoxCopy(pValue, GBL_BOX(pSelf->texture));
-			break;
-		case GUM_Widget_Property_Id_parent:
-			GblVariant_setObjectCopy(pValue, GblObject_parent(pObject));
 			break;
 		default:
 			return GBL_RESULT_ERROR_INVALID_PROPERTY;
@@ -389,12 +414,18 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget *pSelf, GUM_Renderer *pRenderer) {
 			for (int dx = -pSelf->font_border_thickness; dx <= pSelf->font_border_thickness; dx++) {
 				for (int dy = -pSelf->font_border_thickness; dy <= pSelf->font_border_thickness; dy++) {
 					if (dx == 0 && dy == 0) continue;
-					GUM_Backend_textDraw(pRenderer, pSelf->font, pSelf->label, textPos.x + dx, textPos.y + dy, (GUM_Color){ pSelf->font_border_r, pSelf->font_border_g, pSelf->font_border_b, pSelf->font_border_a });
+					GUM_Backend_Font_draw(pRenderer, pSelf->font, pSelf->label,
+										  (GUM_Vector2){.x = textPos.x + dx, .y = textPos.y + dy},
+		  								  (GUM_Color){ pSelf->font_border_r, pSelf->font_border_g, pSelf->font_border_b, pSelf->font_border_a },
+										  pSelf->font_size, 1.2f);
 				}
 			}
 		}
 
-		GUM_Backend_textDraw(pRenderer, pSelf->font, pSelf->label, textPos.x, textPos.y, (GUM_Color){ pSelf->font_r, pSelf->font_g, pSelf->font_b, pSelf->font_a });
+		GUM_Backend_Font_draw(pRenderer, pSelf->font, pSelf->label,
+										  (GUM_Vector2){.x = textPos.x, .y = textPos.y},
+		  								  (GUM_Color){ pSelf->font_r, pSelf->font_g, pSelf->font_b, pSelf->font_a },
+										  pSelf->font_size, 1.2f);
 	}
 
 
@@ -431,7 +462,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget *pSelf, GUM_Renderer *pRenderer) {
 
 		GUM_Rectangle rec = { texturePos.x, texturePos.y, textureSize.x, textureSize.y };
 
-		GUM_Backend_textureDraw(pRenderer, pSelf->texture, rec, (GUM_Color){ 255, 255, 255, 255 });
+		GUM_Backend_Texture_draw(pRenderer, pSelf->texture, rec, (GUM_Color){ 255, 255, 255, 255 });
 	}
 
 	return GBL_RESULT_SUCCESS;
@@ -442,12 +473,13 @@ static GBL_RESULT GUM_WidgetClass_init_(GblClass *pClass, const void *pData) {
 
 	if (!GblType_classRefCount(GUM_WIDGET_TYPE)) GBL_PROPERTIES_REGISTER(GUM_Widget);
 
-	GBL_OBJECT_CLASS(pClass)->pFnSetProperty = GUM_Widget_GblObject_setProperty_;
-	GBL_OBJECT_CLASS(pClass)->pFnProperty    = GUM_Widget_GblObject_property_;
-	GUM_WIDGET_CLASS(pClass)->pFnActivate	 = nullptr;
-	GUM_WIDGET_CLASS(pClass)->pFnDeactivate	 = GUM_Widget_deactivate_;
-	GUM_WIDGET_CLASS(pClass)->pFnUpdate		 = GUM_Widget_update_;
-	GUM_WIDGET_CLASS(pClass)->pFnDraw		 = GUM_Widget_draw_;
+	GBL_OBJECT_CLASS(pClass)->pFnSetProperty  = GUM_Widget_GblObject_setProperty_;
+	GBL_OBJECT_CLASS(pClass)->pFnProperty     = GUM_Widget_GblObject_property_;
+	GBL_OBJECT_CLASS(pClass)->pFnInstantiated = GUM_Widget_Object_instantiated_;
+	GUM_WIDGET_CLASS(pClass)->pFnActivate	  = nullptr;
+	GUM_WIDGET_CLASS(pClass)->pFnDeactivate	  = GUM_Widget_deactivate_;
+	GUM_WIDGET_CLASS(pClass)->pFnUpdate		  = GUM_Widget_update_;
+	GUM_WIDGET_CLASS(pClass)->pFnDraw		  = GUM_Widget_draw_;
 
 	return GBL_RESULT_SUCCESS;
 }

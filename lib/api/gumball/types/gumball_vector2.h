@@ -1,6 +1,8 @@
 #ifndef GUM_VECTOR2_H
 #define GUM_VECTOR2_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__vector2_8h.html
+
 /*! \file
  *  \ingroup types
  *
@@ -28,11 +30,11 @@ typedef struct {
 GblType GUM_Vector2_type(void);
 //! \endcond
 
-GUM_Vector2 GUM_Vector2_add		(GUM_Vector2 a, GUM_Vector2 b); //!< Returns the sum of two vectors
-GUM_Vector2 GUM_Vector2_subtract(GUM_Vector2 a, GUM_Vector2 b); //!< Returns the difference of two vectors
-GUM_Vector2 GUM_Vector2_scale	(GUM_Vector2 a, float scalar);  //!< Returns the product of a vector and a scalar
-float 		GUM_Vector2_distance(GUM_Vector2 a, GUM_Vector2 b); //!< Returns the distance between two vectors
-float 		GUM_Vector2_angle	(GUM_Vector2 a, GUM_Vector2 b); //!< Returns the angle between two vectors
+GBL_EXPORT GUM_Vector2 GUM_Vector2_add		(GUM_Vector2 a, GUM_Vector2 b) GBL_NOEXCEPT; //!< Returns the sum of two vectors
+GBL_EXPORT GUM_Vector2 GUM_Vector2_subtract (GUM_Vector2 a, GUM_Vector2 b) GBL_NOEXCEPT; //!< Returns the difference of two vectors
+GBL_EXPORT GUM_Vector2 GUM_Vector2_scale	(GUM_Vector2 a, float scalar ) GBL_NOEXCEPT; //!< Returns the product of a vector and a scalar
+GBL_EXPORT float 	   GUM_Vector2_distance (GUM_Vector2 a, GUM_Vector2 b) GBL_NOEXCEPT; //!< Returns the distance between two vectors
+GBL_EXPORT float 	   GUM_Vector2_angle	(GUM_Vector2 a, GUM_Vector2 b) GBL_NOEXCEPT; //!< Returns the angle between two vectors
 
 GBL_DECLS_END
 

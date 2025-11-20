@@ -1,6 +1,8 @@
 #ifndef GUM_BUTTON_H
 #define GUM_BUTTON_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__button_8h.html
+
 /*! \file
  * 	\ref		GUM_Button "GUM_Button data structure and hierarchy graph"
  *  \ingroup 	elements
@@ -76,9 +78,9 @@ GBL_PROPERTIES(GUM_Button,
 
 //! \cond
 GBL_SIGNALS(GUM_Button,
-	(onPressPrimary, 	(GBL_INSTANCE_TYPE, pReceiver)),
-	(onPressSecondary, 	(GBL_INSTANCE_TYPE, pReceiver)),
-	(onPressTertiary, 	(GBL_INSTANCE_TYPE, pReceiver))
+    (onPressPrimary, (GBL_INSTANCE_TYPE, pReceiver)),  //!< \copydoc \ref gum_button_clicked
+    (onPressSecondary, (GBL_INSTANCE_TYPE, pReceiver)), //!< For secondary actions (e.g., right-click)
+    (onPressTertiary, (GBL_INSTANCE_TYPE, pReceiver))   //!< For tertiary actions (e.g., middle-click)
 )
 
 GblType GUM_Button_type(void);

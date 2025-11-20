@@ -1,6 +1,8 @@
 #ifndef GUM_ROOT_H
 #define GUM_ROOT_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__root_8h.html
+
 /*! \file
  *	\ref	GUM_Root "GUM_Root data structure and hierarchy graph"
  *  \ingroup elements
@@ -49,13 +51,14 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Root, GblModule)
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Root, GblModule)
 
-GUM_Root* GUM_Root_create(void); //!< Returns a new GUM_Root. \note Currently there is no support for having multiple roots at once.
+#define GUM_Root_create() GBL_NEW(GUM_Root) //!< Returns a new GUM_Root. \note Currently there is no support for having multiple roots at once.
 //! \cond
 GblType GUM_Root_type(void);
 
 void 			GUM_drawQueue_init(void);
 void 			GUM_drawQueue_push(GblObject *pObj);
 void 			GUM_drawQueue_remove(GblObject *pObj);
+void 			GUM_drawQueue_sort(void);
 GblArrayList 	*GUM_drawQueue_get(void);
 //!\endcond
 

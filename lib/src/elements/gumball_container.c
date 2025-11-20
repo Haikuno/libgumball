@@ -64,12 +64,12 @@ static GBL_RESULT GUM_Container_GblObject_property_(const GblObject *pObject, co
 }
 
 static GBL_RESULT GUM_Container_update_(GUM_Widget *pSelf) {
-    size_t childCount        = GblObject_childCount(GBL_OBJECT(pSelf));
+    size_t childCount         = GblObject_childCount(GBL_OBJECT(pSelf));
     GUM_Container *pContainer = GUM_CONTAINER(pSelf);
     if GBL_UNLIKELY(childCount == 0) return GBL_RESULT_SUCCESS;
 
 	const bool 	isHorizontal 				= pContainer->orientation == 'h' || pContainer->orientation == 'H';
-    const float totalMargin  				= pContainer->margin * (float)(childCount + 1);
+    const float totalMargin  				= pContainer->margin * 2.0f * (float)childCount;
     const float totalPadding 				= pContainer->padding * 2.0f;
 
 	const float container_mainPos 			= isHorizontal ? pSelf->x : pSelf->y;
@@ -80,7 +80,7 @@ static GBL_RESULT GUM_Container_update_(GUM_Widget *pSelf) {
 	float offset 							= container_mainPos + pContainer->padding + pContainer->margin;
 
 	for (size_t i = 0; i < childCount; ++i) {
-		GblObject *child_obj    = GblObject_findChildByIndex(GBL_OBJECT(pSelf), i);
+		GblObject  *child_obj    = GblObject_findChildByIndex(GBL_OBJECT(pSelf), i);
 		GUM_Widget *child_widget = GBL_AS(GUM_Widget, child_obj);
 
         if GBL_UNLIKELY(!child_widget) continue;
@@ -96,10 +96,10 @@ static GBL_RESULT GUM_Container_update_(GUM_Widget *pSelf) {
 		}
 
 		if (pContainer->alignWidgets) {
-			*widget_mainPos		    = offset;
+			*widget_mainPos		        = offset;
 			const float availableSecDim = container_secondaryDim - totalPadding;
-            *widget_secondaryPos = container_secondaryPos + pContainer->padding + (availableSecDim - *widget_secondaryDim) / 2.0f;
-			offset += *widget_mainDim + pContainer->margin;
+            *widget_secondaryPos        = container_secondaryPos + pContainer->padding + (availableSecDim - *widget_secondaryDim) / 2.0f;
+			offset                     += *widget_mainDim + pContainer->margin * 2.0f;
 		}
 	}
 

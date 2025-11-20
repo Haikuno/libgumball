@@ -1,6 +1,8 @@
 #ifndef GUM_CONTROLLER_H
 #define GUM_CONTROLLER_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__controller_8h.html
+
 /*! \file
  *  \ref   	 GUM_Controller "GUM_Controller data structure and hierarchy graph"
  *  \ingroup elements
@@ -100,10 +102,10 @@ GblType GUM_Controller_type(void);
  *	a GUM_CONTROLLER_BUTTON_STATE, and a GUM_CONTROLLER_BUTTON_ID.
  *	Handles the event.
 */
-void GUM_Controller_sendButton			(GBL_SELF, GUM_CONTROLLER_BUTTON_STATE state, GUM_CONTROLLER_BUTTON_ID button);
+GBL_EXPORT void GUM_Controller_sendButton			(GBL_SELF, GUM_CONTROLLER_BUTTON_STATE state, GUM_CONTROLLER_BUTTON_ID button) GBL_NOEXCEPT;
 
 //! Takes in a GUM_Controller, and sets its selected button to the passed GUM_Button
-void GUM_Controller_setSelectedButton	(GBL_SELF, GUM_Button *pButton);
+GBL_EXPORT void GUM_Controller_setSelectedButton	(GBL_SELF, GUM_Button *pButton) 											   GBL_NOEXCEPT;
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

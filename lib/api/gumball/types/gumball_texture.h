@@ -1,6 +1,8 @@
 #ifndef GUM_TEXTURE_H
 #define GUM_TEXTURE_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__texture_8h.html
+
 /*! \file
  *  \ref     GUM_Texture "GUM_Texture data structure and hierarchy graph"
  *  \ingroup types
@@ -31,12 +33,12 @@ GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Texture);
 
 /*!
- *	\struct  GUM_TextureClass
- *	\extends GblBox
+ *	\struct  	GUM_TextureClass
+ *	\extends 	GblBoxClass
  *	\implements GUM_IResource
- *	\brief   GUM_Texture structure
+ *	\brief   	GUM_Texture structure
  *
- *	GUM_TextureClass derives from GblBox, adding nothing new.
+ *	GUM_TextureClass derives from GblBoxClass, adding nothing new.
  *  It also implements the GUM_IResource interface.
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Texture, GblBox, GUM_IResource)
@@ -55,10 +57,8 @@ GblType GUM_Texture_type(void);
 //! Returns the size of the texture as a GUM_Vector2
 GUM_Vector2 GUM_Texture_size(GBL_SELF);
 
-//! Loads the texture from a byte array
-//! \note This load happens from the byte array stored inside its GblBox
-void GUM_Texture_loadFromBytes(GBL_SELF);
-void GUM_Texture_unload(GBL_SELF);
+//! Returns a void pointer to the underlying backend specific texture
+void *GUM_Texture_getTexture(GBL_SELF);
 
 GBL_DECLS_END
 

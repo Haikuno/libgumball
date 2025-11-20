@@ -15,7 +15,8 @@ if (GUM_BUILD_BACKEND_SDL3)
 endif()
 
 if (GUM_BUILD_BACKEND_RAYLIB)
-	list(APPEND SRCS src/backends/gumball_backend_raylib.c)
+    file(GLOB RAYLIB_SRCS src/backends/raylib/*.c)
+    list(APPEND SRCS ${RAYLIB_SRCS})
 endif()
 
 add_library(libGumball STATIC ${SRCS} ${HEADERS})

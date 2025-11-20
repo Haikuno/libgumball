@@ -1,6 +1,8 @@
 #ifndef GUM_MANAGER_H
 #define GUM_MANAGER_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__manager_8h.html
+
 /*! \file
  *  \ingroup core
  *
@@ -39,11 +41,11 @@ GBL_STATIC_CLASS_DERIVE_EMPTY(GUM_Manager)
 GblType GUM_Manager_type(void);
 //! \endcond
 
-//! Loads a resource from the given path. If the resource has already been loaded, returns a reference to the existing resource.
-GUM_IResource *GUM_Manager_load(GblStringRef *path);
+//! Loads a resource from the given path, and stores it in the internal hashset. If the resource has already been loaded, returns a reference to the existing resource.
+GBL_EXPORT GUM_IResource *GUM_Manager_load(GblStringRef *path) GBL_NOEXCEPT;
 
 //! Unloads a resource from the manager, removing it from the internal hashset.
-void GUM_Manager_unload(GUM_IResource *pResource);
+GBL_EXPORT void GUM_Manager_unload(GUM_IResource *pResource) GBL_NOEXCEPT;
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

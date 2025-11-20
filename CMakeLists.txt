@@ -16,7 +16,7 @@ if(GUM_BUILD_DOCS)
     add_custom_target(docs ALL
         COMMAND ${CMAKE_COMMAND} -E rm -rf html latex
         COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
-        COMMAND xdg-open html/index.html || true
+        # COMMAND xdg-open html/index.html || true
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs
         VERBATIM
     )

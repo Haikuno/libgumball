@@ -100,6 +100,7 @@ static GBL_RESULT GUM_Controller_update_(GUM_Widget *pSelf) {
         auto root = GBL_REQUIRE(GUM_Root, "GUM_Root");
 
         GUM_Container *pContainer = GBL_AS(GUM_Container, GblObject_findDescendantByType(GBL_OBJECT(root), GUM_CONTAINER_TYPE));
+        if(!pContainer) return GBL_RESULT_ERROR;
         GUM_Button    *pButton    = findDefaultSelectableInContainer_(pContainer);
 
         while (pContainer) {
@@ -409,10 +410,10 @@ static GBL_RESULT GUM_Controller_handleButton_(GUM_Controller *pSelf, GUM_CONTRO
     return GBL_RESULT_SUCCESS;
 }
 
-void GUM_Controller_sendButton(GUM_Controller *pSelf, GUM_CONTROLLER_BUTTON_STATE state, GUM_CONTROLLER_BUTTON_ID button) {
+GBL_EXPORT void GUM_Controller_sendButton(GUM_Controller *pSelf, GUM_CONTROLLER_BUTTON_STATE state, GUM_CONTROLLER_BUTTON_ID button) {
     GUM_Controller_handleButton_(pSelf, state, button);
 }
 
-void GUM_Controller_setSelectedButton(GUM_Controller *pSelf, GUM_Button* pButton) {
+GBL_EXPORT void GUM_Controller_setSelectedButton(GUM_Controller *pSelf, GUM_Button* pButton) {
 	GUM_CONTROLLER(pSelf)->pSelectedButton = pButton;
 }

@@ -1,6 +1,8 @@
 #ifndef GUM_IRESOURCE_H
 #define GUM_IRESOURCE_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__iresource_8h.html
+
 /*!
  * \file    gumball_iresource.h
  * \ref     GUM_IResource "GUM_IResource data structure and hierarchy graph"
@@ -37,16 +39,25 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_IResource);
 */
 //! \cond
 GBL_INTERFACE_DERIVE(GUM_IResource)
-	GUM_IResource*  (*pFnRef)		(GBL_SELF);
-	GblRefCount 	(*pFnUnref)		(GBL_SELF);
-	GBL_RESULT 		(*pFnCreate)	(GBL_SELF, GblByteArray **ppByteArray, GblQuark quark, GblStringRef *extension);
+	GBL_RESULT		(*pFnLoad)			(GBL_SELF, GblStringRef *path);
+	GBL_RESULT		(*pFnUnload)		(GBL_SELF);
+	void*			(*pFnValue)			(GBL_CSELF);
+	GBL_RESULT		(*pFnSetValue)		(GBL_SELF, void *pValue);
+	GBL_RESULT		(*pFnQuark)			(GBL_CSELF, GblQuark *quark);
+	GBL_RESULT		(*pFnSetQuark)		(GBL_SELF,  GblQuark quark);
 GBL_INTERFACE_END
 
 GblType GUM_IResource_type(void);
 //! \endcond
 
-GUM_IResource *GUM_IResource_ref(GUM_IResource *pResource);  //!< Returns a reference to a GUM_IResource, increasing the reference count.
-GblRefCount   GUM_IResource_unref(GUM_IResource *pResource); //!< Decrements the reference count for the passed GUM_IResource. \note The GUM_Manager holds a reference to the resource, so to free the resource, call GUM_Manager_unload()
+//! Returns a new reference to a GUM_IResource, increasing the reference count.
+GBL_EXPORT GUM_IResource  *GUM_IResource_ref   	  (GBL_SELF)   				GBL_NOEXCEPT;
+//! Decrements the reference count for the passed GUM_IResource. \note The GUM_Manager holds a reference to the resource, so to free the resource, call GUM_Manager_unload()
+GBL_EXPORT GblRefCount     GUM_IResource_unref 	  (GBL_SELF) 				GBL_NOEXCEPT;
+//! Returns the backend-specific data of the resource as a void*
+GBL_EXPORT void		   	  *GUM_IResource_data  	  (GBL_CSELF) 				GBL_NOEXCEPT;
+//! Sets the backend-specific data of the resource to the passed void* \note Don't use this function unless you know what you're doing!
+GBL_EXPORT void		   	   GUM_IResource_setData  (GBL_SELF, void *pValue) 	GBL_NOEXCEPT;
 
 GBL_DECLS_END
 

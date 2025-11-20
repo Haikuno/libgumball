@@ -1,11 +1,12 @@
 #include <gumball/elements/gumball_widget.h>
 #include <gumball/elements/gumball_root.h>
 #include <gumball/elements/gumball_common.h>
+#include <gumball/core/gumball_logger.h>
 
 #include <gimbal/gimbal_containers.h>
 #include <gimbal/gimbal_algorithms.h>
 
-GBL_RESULT (GUM_update)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_update)(GblObject* pSelf) {
     size_t childCount = GblObject_childCount(pSelf);
 
     GblObjectClass *pClass           = GBL_OBJECT_GET_CLASS(pSelf); // GUM_TODO: change this to GBL_OBJECT_CLASSOF once libGimbal is updated
@@ -17,13 +18,13 @@ GBL_RESULT (GUM_update)(GblObject* pSelf) {
 
     for (size_t i = 0; i < childCount; i++) {
         GblObject* childObj = GblObject_findChildByIndex(pSelf, i);
-        GUM_update(childObj);
+        (GUM_update)(childObj);
     }
 
     return GBL_RESULT_SUCCESS;
 }
 
-GBL_RESULT GUM_draw(GUM_Renderer *pRenderer) {
+GBL_EXPORT GBL_RESULT GUM_draw(GUM_Renderer *pRenderer) {
     size_t queueSize = GblArrayList_size(GUM_drawQueue_get());
 
     for (size_t i = 0; i < queueSize; i++) {
@@ -36,7 +37,7 @@ GBL_RESULT GUM_draw(GUM_Renderer *pRenderer) {
 }
 
 
-GBL_RESULT (GUM_unref)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
     GUM_draw_disableAll(pSelf);
 
     GUM_Widget *pWidget = GBL_AS(GUM_Widget, pSelf);
@@ -55,15 +56,15 @@ GBL_RESULT (GUM_unref)(GblObject* pSelf) {
     return GBL_RESULT_SUCCESS;
 }
 
-void (GUM_draw_disable)(GblObject *pSelf) {
+GBL_EXPORT void (GUM_draw_disable)(GblObject *pSelf) {
     GUM_drawQueue_remove(pSelf);
 }
 
-void (GUM_draw_enable)(GblObject *pSelf) {
+GBL_EXPORT void (GUM_draw_enable)(GblObject *pSelf) {
     GUM_drawQueue_push(pSelf);
 }
 
-void (GUM_draw_disableAll)(GblObject *pSelf) {
+GBL_EXPORT void (GUM_draw_disableAll)(GblObject *pSelf) {
     size_t childCount = GblObject_childCount(pSelf);
     for (size_t i = 0; i < childCount; i++) {
         GblObject *childObj = GblObject_findChildByIndex(pSelf, i);
@@ -72,7 +73,7 @@ void (GUM_draw_disableAll)(GblObject *pSelf) {
     GUM_draw_disable(pSelf);
 }
 
-void (GUM_draw_enableAll)(GblObject *pSelf) {
+GBL_EXPORT void (GUM_draw_enableAll)(GblObject *pSelf) {
     GUM_draw_enable(pSelf);
     size_t childCount = GblObject_childCount(pSelf);
     for (size_t i = childCount; i -- > 0;) {

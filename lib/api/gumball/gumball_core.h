@@ -1,6 +1,8 @@
 #ifndef GUM_CORE_H
 #define GUM_CORE_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__core_8h.html
+
 /*! \file
  *  \brief 		Core module-wide include
  *  \ingroup 	core

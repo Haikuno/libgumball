@@ -1,6 +1,8 @@
 #ifndef GUM_CONTAINER_H
 #define GUM_CONTAINER_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__container_8h.html
+
 /*! \file
  *  \ref     GUM_Container "GUM_Container data structure and hierarchy graph"
  *  \ingroup elements

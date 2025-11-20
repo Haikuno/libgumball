@@ -1,6 +1,8 @@
 #ifndef GUM_RENDERER_H
 #define GUM_RENDERER_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__renderer_8h.html
+
 /*! \file
  *  \ingroup types
  *

@@ -1,6 +1,8 @@
 #ifndef GUM_COLOR_H
 #define GUM_COLOR_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__color_8h.html
+
 /*! \file
  *  \ingroup types
  *

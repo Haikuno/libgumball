@@ -1,46 +1,52 @@
 #include <gumball/gumball.h>
 #include <raylib.h>
 
-int main(int argc, char *argv[]) {
-	auto root 		= GUM_Root_create();
-
-	InitWindow(320, 240, "UILib Example");
+void initRaylib(void) {
+	InitWindow(640, 480, "UILib Example");
 	SetTargetFPS(60);
+}
 
-    auto controller = GUM_Controller_create("controllerId", 1, "color", 0xFF0000FF, "isKeyboard", true, "name", "main controller");
+int main(int argc, char *argv[]) {
+	auto root = GUM_Root_create();
 
-	auto container_parent = GUM_Container_create("a", 0, "alignWidgets", false, "resizeWidgets", false, "isRelative", false, "name", "parent container");
+	initRaylib();
+	auto font    = GUM_Manager_load("../Nimbus.fnt");
+	auto texture = GUM_Manager_load("../babyfish_test.png");
 
-    auto container_1 = GUM_Container_create("x", 10.0f, "y", 10.0f, "w", 120.0f, "h", 150.0f,
-										   "color", 0x000000FF,
-										   "orientation", 'v',
-										   "border_color", 0x000000FF,
-										   "parent", container_parent,
-											"name", "container 1");
+	#define prop_list(x) "label", x, "font_size", 32, "color", 0xFF000FFF, "border_color", 0xAAAAAAFF
 
-    auto container_2 = GUM_Container_create("x", 140.0f, "y", 10.0f, "w", 170.0f, "h", 150.0f,
-										   "color", 0xE08616FF, "border_color", 0x000000FF,
-										   "orientation", 'v',
-										   "parent", container_parent, "name", "container 2");
+	auto widget = GUM_Widget_create(prop_list("test"), "font", font, "texture", texture);
 
-	auto container_3 = GUM_Container_create("children", GblRingList_create(
-												GUM_Button_create("label", "X", "color", 0xE08616FF, "border_radius", 0.5f, "border_color", 0x000000FF),
-												GUM_Button_create("label", "Y", "color", 0xE08616FF, "border_radius", 0.5f, "border_color", 0x000000FF)
-										   ));
+	auto container   = GUM_Container_create("x", 160.0f, "y", 120.0f, "w", 320.0f, "h", 240.0f,
+										    "color", 0x1E1E1EFF,
+											"children",
+											GblRingList_create(
+												widget,
+												GUM_Widget_create(prop_list("test")))
+											);
+	#undef prop_list
+
+	int count = 0;
 
 	// main loop
 	while (!WindowShouldClose()) {
 		GUM_update(root);
 
+
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
-		GUM_draw(nullptr);
+		GUM_draw();
 		EndDrawing();
-	}
 
-	// GUM_Manager_unload(pRes);
+		GUM_setProperty(widget, "border_color", 0x666666FF);
+
+		if ((int)GetTime() % 2 == 0)
+			GUM_setProperty(widget, "border_color", 0xEEFFFFFF);
+
+	}
 
 	GUM_unref(root);
 	CloseWindow();
 	return 0;
 }
+

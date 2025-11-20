@@ -1,6 +1,8 @@
 #ifndef GUM_ELEMENTS_H
 #define GUM_ELEMENTS_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__elements_8h.html
+
 /*! \file
 	\brief   Elements module-wide include
 	\ingroup elements

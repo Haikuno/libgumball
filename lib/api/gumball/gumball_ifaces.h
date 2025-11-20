@@ -1,6 +1,8 @@
 #ifndef GUMBALL_IFACES_H
 #define GUMBALL_IFACES_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__ifaces_8h.html
+
 /*! \file
  *  \brief Interfaces module-wide include
  *  \ingroup ifaces

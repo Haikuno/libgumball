@@ -1,6 +1,8 @@
 #ifndef GUM_RECTANGLE_H
 #define GUM_RECTANGLE_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__rectangle_8h.html
+
 /*! \file
  *  \ingroup types
  *

@@ -1,6 +1,8 @@
 #ifndef GUM_WIDGET_H
 #define GUM_WIDGET_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__widget_8h.html
+
 /*! \file
  *  \ref     GUM_Widget "GUM_Widget data structure and hierarchy graph"
  *  \ingroup elements
@@ -142,8 +144,7 @@ GBL_PROPERTIES(GUM_Widget,
 	(font_border_b,			GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE),
 	(font_border_a,			GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE),
 	(font_border_thickness, GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE),
-	(z_index,				GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE),
-	(parent,				GBL_GENERIC, (READ, WRITE), GBL_OBJECT_TYPE)
+	(z_index,				GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE)
 )
 
 GblType GUM_Widget_type(void);

@@ -1,6 +1,8 @@
 #ifndef GUM_TYPES_H
 #define GUM_TYPES_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__types_8h.html
+
 /*! \file
  *  \brief Types module-wide include
  *  \ingroup types

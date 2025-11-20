@@ -1,6 +1,8 @@
 #ifndef GUM_LOGGER_H
 #define GUM_LOGGER_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__logger_8h.html
+
 /*! \file
  *  \brief 		Gumball logger
  *  \ingroup 	core

@@ -1,6 +1,8 @@
 #ifndef GUM_EVENT_H
 #define GUM_EVENT_H
 
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__event_8h.html
+
 /*! \file
  *  \ingroup types
  *

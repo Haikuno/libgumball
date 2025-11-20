@@ -44,11 +44,6 @@ GblType GUM_Root_type(void) {
     return type;
 }
 
-GUM_Root *GUM_Root_create(void) {
-    GUM_Root *pRoot = GBL_NEW(GUM_Root);
-    return pRoot;
-}
-
 static int GUM_zIndex_cmp_(const void *pA, const void *pB) {
     GblObject *a = *(GblObject**)pA;
     GblObject *b = *(GblObject**)pB;
@@ -61,7 +56,7 @@ static int GUM_zIndex_cmp_(const void *pA, const void *pB) {
     return aWidget->z_index - bWidget->z_index;
 }
 
-static void GUM_drawQueue_sort_(void) {
+void GUM_drawQueue_sort(void) {
     gblSortInsertion(GblArrayList_data(&GUM_drawQueue_), GblArrayList_size(&GUM_drawQueue_), sizeof(GblObject*), GUM_zIndex_cmp_);
 }
 
@@ -79,7 +74,7 @@ void GUM_drawQueue_push(GblObject *pObj) {
     if (!pWidget) return;
 
     GblArrayList_pushBack(&GUM_drawQueue_, &pObj);
-    GUM_drawQueue_sort_();
+    GUM_drawQueue_sort();
 }
 
 void GUM_drawQueue_remove(GblObject *pObj) {
@@ -90,7 +85,7 @@ void GUM_drawQueue_remove(GblObject *pObj) {
         GblObject *pObjQueue = *(GblObject**)GblArrayList_at(&GUM_drawQueue_, i);
         if (pObjQueue == pObj) {
             GblArrayList_erase(&GUM_drawQueue_, i, 1);
-            GUM_drawQueue_sort_();
+            GUM_drawQueue_sort();
             return;
         }
     }
