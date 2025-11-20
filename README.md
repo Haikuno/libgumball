@@ -34,7 +34,7 @@ You can also pass `-DGUM_ENABLE_EXAMPLES=ON` and/or `-DGUM_ENABLE_TESTS=ON` if y
 This library is meant to be included as a submodule of your own project.
 From your project root directory, run:
 ```
-git submodule add git@github.com/haikuno/libgumball.git libgumball
+git submodule add git@github.com:haikuno/libgumball.git libgumball
 git submodule update --init --recursive
 ```
 
