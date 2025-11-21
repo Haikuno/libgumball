@@ -19,7 +19,6 @@ if (GUM_BUILD_BACKEND_RAYLIB)
     list(APPEND SRCS ${RAYLIB_SRCS})
 endif()
 
-
 if (PLATFORM_DREAMCAST)
 	include_directories(${KOS_PORTS}/include/raylib)
 endif()

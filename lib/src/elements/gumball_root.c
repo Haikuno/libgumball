@@ -5,7 +5,9 @@
 
 #include <gimbal/gimbal_algorithms.h>
 
+
 static GblArrayList GUM_drawQueue_;
+static GblLogger    *pLogger_ = nullptr;
 
 static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
     GblObject_setName(GBL_OBJECT(pInstance), "GUM_Root");
@@ -19,10 +21,24 @@ static GBL_RESULT GUM_RootClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
     if (!GblType_classRefCount(GUM_ROOT_TYPE)) {
+        if GBL_UNLIKELY(!pLogger_)
+            pLogger_ = GblLogger_create(GBL_LOGGER_TYPE, sizeof(GblLogger), nullptr);
+
         GUM_drawQueue_init();
-        GblLogger *logger = GblLogger_create(GBL_LOGGER_TYPE, sizeof(GblLogger), nullptr);
-	    GblLogger_register(logger);
+	    GblLogger_register(pLogger_);
         GUM_Backend_setLogger();
+    }
+
+    return GBL_RESULT_SUCCESS;
+}
+
+static GBL_RESULT GUM_RootClass_final_(GblClass* pClass, const void* pData) {
+    GBL_UNUSED(pData);
+
+    if (!GblType_classRefCount(GUM_ROOT_TYPE)) {
+        GUM_drawQueue_free();
+        GblLogger_unregister(pLogger_);
+        GUM_Backend_resetLogger();
     }
 
     return GBL_RESULT_SUCCESS;
@@ -37,6 +53,7 @@ GblType GUM_Root_type(void) {
                                 &(static GblTypeInfo){.classSize = sizeof(GUM_RootClass),
                                                       .instanceSize = sizeof(GUM_Root),
                                                       .pFnClassInit = GUM_RootClass_init_,
+                                                      .pFnClassFinal = GUM_RootClass_final_,
                                                       .pFnInstanceInit = GUM_Root_init_},
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC);
     }
@@ -66,6 +83,10 @@ GblArrayList *GUM_drawQueue_get(void) {
 
 void GUM_drawQueue_init(void) {
     GblArrayList_construct(&GUM_drawQueue_, sizeof(GblObject*));
+}
+
+void GUM_drawQueue_free(void) {
+    GblArrayList_destruct(&GUM_drawQueue_);
 }
 
 void GUM_drawQueue_push(GblObject *pObj) {

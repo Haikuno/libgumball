@@ -27,3 +27,7 @@ static void GUM_raylibTraceLog_(int logLevel, const char *text, va_list args) {
 void GUM_Backend_setLogger(void) {
 	SetTraceLogCallback(GUM_raylibTraceLog_);
 }
+
+void GUM_Backend_resetLogger(void) {
+	SetTraceLogCallback(nullptr);
+}

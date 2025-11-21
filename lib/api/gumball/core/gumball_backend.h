@@ -29,6 +29,8 @@ GBL_RESULT GUM_Backend_rectangleDraw	 				(GUM_Renderer   *pRenderer, GUM_Rectan
 GBL_RESULT GUM_Backend_rectangleLinesDraw				(GUM_Renderer   *pRenderer, GUM_Rectangle rectangle, float roundness, float border_width, GUM_Color color);
 //! Overrides the library's logger with libGumball's logger
 void 	   GUM_Backend_setLogger						(void);
+//! Resets the library's logger back to the default
+void 	   GUM_Backend_resetLogger						(void);
 
 //! Loads a texture
 GBL_RESULT GUM_Backend_Texture_load						(GUM_IResource  *pResource, GblStringRef *pPath);

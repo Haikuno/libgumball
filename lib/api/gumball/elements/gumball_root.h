@@ -56,6 +56,7 @@ GBL_INSTANCE_DERIVE_EMPTY(GUM_Root, GblModule)
 GblType GUM_Root_type(void);
 
 void 			GUM_drawQueue_init(void);
+void 			GUM_drawQueue_free(void);
 void 			GUM_drawQueue_push(GblObject *pObj);
 void 			GUM_drawQueue_remove(GblObject *pObj);
 void 			GUM_drawQueue_sort(void);

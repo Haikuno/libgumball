@@ -100,8 +100,8 @@ static GBL_RESULT GUM_Controller_update_(GUM_Widget *pSelf) {
     if (!GUM_CONTROLLER(pSelf)->pSelectedButton) {
        auto root = GBL_AS(GUM_Root, GblModule_find("GUM_Root"));
        if(!root) {
-        GUM_LOG_ERROR("No root element found! Create one first.");
-        return GBL_RESULT_ERROR;
+            GUM_LOG_ERROR("No root element found! Create one first.");
+            return GBL_RESULT_ERROR;
        }
 
         GUM_Container *pContainer = GBL_AS(GUM_Container, GblObject_findDescendantByType(GBL_OBJECT(root), GUM_CONTAINER_TYPE));
