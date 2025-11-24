@@ -11,7 +11,7 @@ static GblLogger    *pLogger_ = nullptr;
 
 static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
     GblObject_setName(GBL_OBJECT(pInstance), "GUM_Root");
-    if (!GblType_instanceCount(GUM_ROOT_TYPE)) {
+    if (!GblModule_isLoaded(GBL_MODULE(pInstance))) {
         GblModule_register(GBL_MODULE(pInstance));
     }
     return GBL_RESULT_SUCCESS;

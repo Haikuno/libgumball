@@ -64,14 +64,17 @@ static GBL_RESULT GUM_Widget_init_(GblInstance *pInstance) {
 static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject *pSelf) {
 	if(!GblObject_parent(pSelf)) {
 		if GBL_LIKELY(GBL_TYPEOF(pSelf) != GUM_ROOT_TYPE) {
-			auto root = GBL_AS(GUM_Root, GblModule_find("GUM_Root"));
 
-			if GBL_UNLIKELY(!root) {
-				GUM_LOG_ERROR("No root element found! Create one first.");
-				return GBL_RESULT_ERROR;
+			static GUM_Root *pRoot = nullptr;
+
+			GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
+				if (!pRoot) {
+					GUM_LOG_ERROR("No root element found! Create one first.");
+					return GBL_RESULT_ERROR;
+				}
+				GblObject_setParent(pSelf, GBL_OBJECT(pRoot));
 			}
 
-			GblObject_setParent(pSelf, GBL_OBJECT(root));
 		}
 	}
 
@@ -329,7 +332,8 @@ static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject *pObject, const
 			GblVariant_setBoxCopy(pValue, GBL_BOX(pSelf->font));
 			break;
 		case GUM_Widget_Property_Id_texture:
-			GblVariant_setBoxCopy(pValue, GBL_BOX(pSelf->texture));
+			if (pSelf->texture)
+				GblVariant_setBoxCopy(pValue, GBL_BOX(pSelf->texture));
 			break;
 		default:
 			return GBL_RESULT_ERROR_INVALID_PROPERTY;
