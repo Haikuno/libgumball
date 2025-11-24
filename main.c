@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
 		GUM_Button_create("color", 0xFF0000FF)
 	));
 
-	GUM_update_disableAll(container_2);
-	GUM_draw_disableAll(container_2);
+	// GUM_update_disableAll(container_2);
+	// GUM_draw_disableAll(container_2);
 
 	// main loop
 	while (!WindowShouldClose()) {
@@ -42,6 +42,8 @@ int main(int argc, char *argv[]) {
 		EndDrawing();
 	}
 
+	GUM_Manager_unload(texture);
+	GUM_unref(root);
 	CloseWindow();
 	return 0;
 }

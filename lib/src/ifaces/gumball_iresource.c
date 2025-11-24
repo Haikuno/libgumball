@@ -11,7 +11,6 @@ GBL_EXPORT GUM_IResource *GUM_IResource_ref(GUM_IResource* pResource) {
 GBL_EXPORT GblRefCount GUM_IResource_unref(GUM_IResource* pResource) {
 	GUM_LOG_DEBUG_SCOPE("GUM_IResource_unref() called...") {
 		if (!pResource) {
-			GUM_LOG_ERROR("Tried to unref a null resource!");
 			GBL_SCOPE_EXIT;
 		}
 

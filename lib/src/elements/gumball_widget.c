@@ -96,6 +96,13 @@ static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject *pSelf) {
 
 static GBL_RESULT GUM_Widget_deactivate_(GUM_Widget *pSelf) {
 	GblStringRef_unref(pSelf->label);
+
+	if (pSelf->texture)
+		GUM_IResource_unref(GUM_IRESOURCE(pSelf->texture));
+
+	if (pSelf->label)
+		GUM_IResource_unref(GUM_IRESOURCE(pSelf->font));
+
 	return GBL_RESULT_SUCCESS;
 }
 
