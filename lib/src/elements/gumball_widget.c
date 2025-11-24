@@ -70,7 +70,7 @@ static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject *pSelf) {
 			GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
 				if (!pRoot) {
 					GUM_LOG_ERROR("No root element found! Create one first.");
-					return GBL_RESULT_ERROR;
+					GBL_SCOPE_EXIT;
 				}
 				GblObject_setParent(pSelf, GBL_OBJECT(pRoot));
 			}

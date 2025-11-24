@@ -6,7 +6,7 @@ static GBL_RESULT GUM_Container_init_(GblInstance *pInstance) {
     GUM_CONTAINER(pInstance)->resizeWidgets = true;
     GUM_CONTAINER(pInstance)->alignWidgets  = true;
     GUM_CONTAINER(pInstance)->padding        = 5.0f;
-    GUM_CONTAINER(pInstance)->margin         = 5.0f;
+    GUM_CONTAINER(pInstance)->margin         = 2.0f;
     GUM_CONTAINER(pInstance)->orientation    = 'v';
     return GBL_RESULT_SUCCESS;
 }
