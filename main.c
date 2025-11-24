@@ -29,9 +29,12 @@ int main(int argc, char *argv[]) {
 		GUM_Button_create("color", 0xFF0000FF)
 	));
 
+	GUM_update_disableAll(container_2);
+	GUM_draw_disableAll(container_2);
+
 	// main loop
 	while (!WindowShouldClose()) {
-		GUM_update(root);
+		GUM_update();
 
 		BeginDrawing();
 		ClearBackground(RAYWHITE);

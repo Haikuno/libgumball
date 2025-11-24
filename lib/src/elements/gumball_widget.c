@@ -18,7 +18,8 @@ static void GUM_Widget_GblObject_onPropertyChange_(GblObject *pSelf, GblProperty
 static GBL_RESULT GUM_Widget_init_(GblInstance *pInstance) {
 	GUM_Widget *pSelf = GUM_WIDGET(pInstance);
 
-	pSelf->z_index    = 50;
+	pSelf->z_index      = 50;
+	pSelf->shouldUpdate = true;
 
 	pSelf->x 		  = 0;
 	pSelf->y 		  = 0;

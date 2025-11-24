@@ -16,8 +16,43 @@
 #include <gimbal/gimbal_meta.h>
 #include <gumball/types/gumball_renderer.h>
 
-//! Takes in a UI element, updates it and all of its children.
-#define GUM_update(obj) 			  ((GUM_update)(GBL_OBJECT(obj)))
+//! Updates all the UI elements
+#define GUM_update() 				   ((GUM_update)())
+
+//! Disables updating for a given element
+#define GUM_update_disable(element)    ((GUM_update_disable)	(GBL_OBJECT(element)))
+
+//! Enables updating for a given element
+#define GUM_update_enable(element) 	   ((GUM_update_enable)		(GBL_OBJECT(element)))
+
+//! Disables updating for a given element and all of its children
+#define GUM_update_disableAll(element) ((GUM_update_disableAll)	(GBL_OBJECT(element)))
+
+//! Enables updating for a given element and all of its children
+#define GUM_update_enableAll(element)  ((GUM_update_enableAll)	(GBL_OBJECT(element)))
+
+/*!
+ *	\brief Draws all the UI elements in the draw queue
+ *
+ *	Drawable elements are added to the draw queue when they are created
+ *	Elements are drawn from z-index 0 to z-index 255, with 255 being the front
+ *	If two elements have the same z-index, they are drawn in the order they were created (or enabled!)
+ *	Optionally takes in a GUM_Renderer if your backend needs one (defaults to nullptr)
+*/
+#define GUM_draw(/* renderer=nullptr */...) GUM_draw_(__VA_OPT__(__VA_ARGS__,) nullptr)
+
+
+//! Disables drawing for a given element
+#define GUM_draw_disable(obj) 	 ((GUM_draw_disable)	(GBL_OBJECT(obj)))
+
+//! Enables drawing for a given element
+#define GUM_draw_enable(obj) 	 ((GUM_draw_enable)		(GBL_OBJECT(obj)))
+
+//! Disables drawing for a given element and all of its children
+#define GUM_draw_disableAll(obj) ((GUM_draw_disableAll)	(GBL_OBJECT(obj)))
+
+//! Enables drawing for a given element and all of its children
+#define GUM_draw_enableAll(obj)  ((GUM_draw_enableAll)	(GBL_OBJECT(obj)))
 
 //! Takes in two UI elements, adds the second one as a child of the first.
 #define GUM_add_child(self, child) 	  (GblObject_addChild(GBL_OBJECT(self), GBL_OBJECT(child)))
@@ -44,7 +79,7 @@
  *	Optionally takes in userdata (a void* of whatever you want to pass in).
  *	See GUM_Button for signal names
  *
- *  \code
+ *  \code {.c}
  * 		void buttonCallback(GUM_Button *pButton) {
  * 			void *ud = GUM_userData();
  *			printf("Button pressed!\n");
@@ -62,29 +97,6 @@
 //! Inside a callback connected to a signal, returns the userdata that was passed in
 #define GUM_userData() GblClosure_currentUserdata()
 
-/*!
- *	\brief Draws all the UI elements in the draw queue
- *
- *	Drawable elements are added to the draw queue when they are created
- *	Elements are drawn from z-index 0 to z-index 255, with 255 being the front
- *	If two elements have the same z-index, they are drawn in the order they were created (or enabled!)
- *	Optionally takes in a GUM_Renderer if your backend needs one (defaults to nullptr)
-*/
-#define GUM_draw(/* renderer=nullptr */...) GUM_draw_(__VA_OPT__(__VA_ARGS__,) nullptr)
-
-
-//! Disables drawing for a given element
-#define GUM_draw_disable(obj) 	 ((GUM_draw_disable)	(GBL_OBJECT(obj)))
-
-//! Enables drawing for a given element
-#define GUM_draw_enable(obj) 	 ((GUM_draw_enable)		(GBL_OBJECT(obj)))
-
-//! Disables drawing for a given element and all of its children
-#define GUM_draw_disableAll(obj) ((GUM_draw_disableAll)	(GBL_OBJECT(obj)))
-
-//! Enables drawing for a given element and all of its children
-#define GUM_draw_enableAll(obj)  ((GUM_draw_enableAll)	(GBL_OBJECT(obj)))
-
 //! Looks up the property of an element by name, storing its value in the pointer passed as a variadic argument
 #define GUM_property(obj, name, /*value*/ ...) (GblObject_property(GBL_OBJECT(obj), name, __VA_ARGS__))
 
@@ -96,7 +108,11 @@
 #define GUM_draw_(renderer, ...) (GUM_draw)(renderer)
 
 GBL_EXPORT GBL_RESULT 	(GUM_draw)			  (GUM_Renderer *pRenderer)   GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT	(GUM_update)		  (GblObject *pSelf) 		  GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT	(GUM_update)		  (void) 		  			  GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT	(GUM_update_disable)  (GblObject *pSelf) 		  GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT	(GUM_update_enable)   (GblObject *pSelf) 		  GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT	(GUM_update_disableAll)(GblObject *pSelf) 		  GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT	(GUM_update_enableAll)(GblObject *pSelf) 		  GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT	(GUM_unref)			  (GblObject *pSelf) 		  GBL_NOEXCEPT;
 GBL_EXPORT void			(GUM_draw_enable)	  (GblObject *pSelf) 		  GBL_NOEXCEPT;
 GBL_EXPORT void			(GUM_draw_disable)	  (GblObject *pSelf) 		  GBL_NOEXCEPT;

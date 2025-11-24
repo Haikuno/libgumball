@@ -107,6 +107,7 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
 	uint8_t				font_border_a;	 	 	//!< Alpha component of the font border color.						   				Default value is 0
 	uint8_t				font_border_thickness;	//!< Width of the font border, in pixels. 						   					Default value is 1
 	uint8_t				z_index;			  	//!< Z-index of the widget. The higher the value, the higher the priority.			Default value is 50
+	bool				shouldUpdate;		  	//!< If the widget should be updated. 								   				Default value is true
 GBL_INSTANCE_END
 //! @}
 
