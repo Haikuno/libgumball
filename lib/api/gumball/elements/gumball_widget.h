@@ -89,7 +89,7 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
 	uint8_t 			border_b; 		  		//!< Blue component of the border color. 								   			Default value is 0
 	uint8_t 			border_a; 		  		//!< Alpha component of the border color. 							   				Default value is 0
 	uint8_t 			border_width;	  		//!< Width of the border, in pixels.									   			Default value is 4
-	float				border_radius;	  		//!< Radius of the border.											   				Default value is 0
+	float				border_radius;	  		//!< Radius of the border. Range is from 0.0f to 1.0f.								Default value is 0
 	bool				border_highlight; 		//!< If the border should be highlighted. 							   				Default value is false
 	bool				isRelative;	      		//!< If the widget's position and size should be relative to its parent. 			Default value is false
 	GblStringRef 		*label;			  		//!< Optional text label of the widget. 							   				Default value is nullptr

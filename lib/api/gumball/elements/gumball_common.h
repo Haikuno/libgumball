@@ -90,7 +90,6 @@
  * 		int data = 42;
  *       GUM_connect(pButton, "onPressPrimary", buttonCallback, &data);
  *	\endcode
- })
 */
 #define GUM_connect(emitter, signal, callback, /* userdata=nullptr */...) (GBL_CONNECT(emitter, signal, emitter, callback __VA_OPT__(,) __VA_ARGS__))
 

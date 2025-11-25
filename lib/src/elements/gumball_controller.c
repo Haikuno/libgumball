@@ -425,7 +425,7 @@ static GBL_RESULT GUM_Controller_update_(GUM_Widget *pSelf) {
     // find first selected by default button
     static GUM_Root *pRoot = nullptr;
 
-    if (!GUM_CONTROLLER(pSelf)->pSelectedButton) {
+    if GBL_UNLIKELY(!GUM_CONTROLLER(pSelf)->pSelectedButton) {
 
         GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
 

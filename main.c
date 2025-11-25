@@ -3,7 +3,6 @@
 
 void initRaylib(void) {
 	InitWindow(320, 240, "libGumball");
-	SetTargetFPS(60);
 }
 
 int main(int argc, char *argv[]) {
@@ -17,10 +16,11 @@ int main(int argc, char *argv[]) {
 
 	auto container = GUM_Container_create("parent", parent_container,
 		"children", GblRingList_create(
-		GUM_Button_create("border_radius", 2.0f, "color", 0x0000FFFF, "isSelectable", false),
-		GUM_Button_create("border_radius", 2.0f, "color", 0xF0F0F0FF),
-		GUM_Button_create("border_radius", 2.0f, "color", 0xFF0000FF)
+		GUM_Button_create("name", "1", "border_radius", 2.0f, "color", 0x0000FFFF, "isSelectable", false),
+		GUM_Button_create("name", "2", "border_radius", 2.0f, "color", 0xF0F0F0FF),
+		GUM_Button_create("name", "3", "border_radius", 2.0f, "color", 0xFF0000FF)
 	));
+
 
 	auto container_2 = GUM_Container_create("x", 200.0f, "parent", parent_container, "border_radius", 0.8f, "orientation", 'v',
 		"children", GblRingList_create(
@@ -39,6 +39,25 @@ int main(int argc, char *argv[]) {
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
 		GUM_draw();
+
+		static float timer = 0;
+		static int frames = 0;
+		static float avgFps = 0;
+
+		float dt = GetFrameTime();
+		timer += dt;
+		frames++;
+
+		if (timer >= 2.0f) {
+			avgFps = frames / timer;
+			timer = 0;
+			frames = 0;
+		}
+
+		DrawText(TextFormat("FPS: %.1f", avgFps), 10, 10, 20, WHITE);
+
+
+
 		EndDrawing();
 	}
 

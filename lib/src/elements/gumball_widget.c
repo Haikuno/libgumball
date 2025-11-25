@@ -6,11 +6,14 @@
 #include <gumball/core/gumball_logger.h>
 #include <gumball/core/gumball_backend.h>
 
-// TODO: set root as parent after creation is parent prop is not set, to avoid doing it twice
-
 static void GUM_Widget_GblObject_onPropertyChange_(GblObject *pSelf, GblProperty *pProp) {
 	switch(pProp->id) {
-		default:
+		GUM_Widget_Property_Id_x:
+		GUM_Widget_Property_Id_y:
+		GUM_Widget_Property_Id_w:
+		GUM_Widget_Property_Id_h:
+			GblObject *pParent = GblObject_parent(pSelf);
+			GUM_CONTAINER_CLASSOF(pParent)->pFnUpdateContent(GUM_CONTAINER(pParent));
 			break;
 	}
 }
@@ -57,8 +60,6 @@ static GBL_RESULT GUM_Widget_init_(GblInstance *pInstance) {
 
 	GUM_drawQueue_push(GBL_OBJECT(pInstance));
 
-	GBL_CONNECT(pInstance, "propertyChange", GUM_Widget_GblObject_onPropertyChange_);
-
 	return GBL_RESULT_SUCCESS;
 }
 
@@ -76,6 +77,11 @@ static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject *pSelf) {
 				GblObject_setParent(pSelf, GBL_OBJECT(pRoot));
 			}
 
+		}
+	} else {
+		GblObject *pParent = GblObject_parent(pSelf);
+		if (GBL_TYPEOF(pParent) == GUM_CONTAINER_TYPE) {
+			GUM_CONTAINER_CLASSOF(pParent)->pFnUpdateContent(GUM_CONTAINER(pParent));
 		}
 	}
 
@@ -179,7 +185,9 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject *pObject, const Gb
 			GblVariant_valueCopy(pValue, &pSelf->border_width);
 			break;
 		case GUM_Widget_Property_Id_border_radius:
+			pValue->f32 = GBL_CLAMP(pValue->f32, 0.0f, 1.0f);
 			GblVariant_valueCopy(pValue, &pSelf->border_radius);
+			printf("border radius is now %f\n", pSelf->border_radius);
 			break;
 		case GUM_Widget_Property_Id_border_highlight:
 			GblVariant_valueCopy(pValue, &pSelf->border_highlight);

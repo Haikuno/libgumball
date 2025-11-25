@@ -42,9 +42,11 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Container);
     \brief   GUM_Container structure
 
     GUM_ContainerClass derives from GUM_WidgetClass,
-    adding nothing new.
+    adding a virtual function to update the content of the container.
 */
-GBL_CLASS_DERIVE_EMPTY(GUM_Container, GUM_Widget)
+GBL_CLASS_DERIVE(GUM_Container, GUM_Widget)
+    GBL_RESULT (*pFnUpdateContent)(GBL_SELF); //!< Updates the content of the container, resizing and realigning child widgets as needed.
+GBL_CLASS_END
 
 /*!
  *	\class   GUM_Container
