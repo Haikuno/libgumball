@@ -72,12 +72,16 @@ static GBL_RESULT GUM_Container_update_(GUM_Widget *pSelf) {
     const float totalMargin  				= pContainer->margin * 2.0f * (float)childCount;
     const float totalPadding 				= pContainer->padding * 2.0f;
 
-	const float container_mainPos 			= isHorizontal ? pSelf->x : pSelf->y;
+    const float container_mainPos 			= isHorizontal ? pSelf->x : pSelf->y;
 	const float container_secondaryPos		= isHorizontal ? pSelf->y : pSelf->x;
 	const float container_mainDim			= isHorizontal ? pSelf->w : pSelf->h;
 	const float container_secondaryDim		= isHorizontal ? pSelf->h : pSelf->w;
 
-	float offset 							= container_mainPos + pContainer->padding + pContainer->margin;
+	const float cornerRadius   = pSelf->border_radius * GBL_MIN(container_mainDim, container_secondaryDim) * 0.5f;
+	const float roundnessInset = cornerRadius * 0.293f; // 0.293f = 1 - 1/sqrt(2)
+
+	const float totalPaddingWithRoundness 	= totalPadding + roundnessInset * 2.0f;
+	float offset 							= container_mainPos + pContainer->padding + pContainer->margin + roundnessInset;
 
 	for (size_t i = 0; i < childCount; ++i) {
 		GblObject  *child_obj    = GblObject_findChildByIndex(GBL_OBJECT(pSelf), i);
@@ -91,20 +95,14 @@ static GBL_RESULT GUM_Container_update_(GUM_Widget *pSelf) {
 		float *widget_secondaryDim  = isHorizontal ? &child_widget->h : &child_widget->w;
 
 		if (pContainer->resizeWidgets) {
-			*widget_mainDim		    = (container_mainDim - totalMargin - totalPadding) / (float)childCount;
-            *widget_secondaryDim	= container_secondaryDim - totalPadding;
-
-            if (pSelf->border_radius) {
-                float maxSize = container_secondaryDim - container_mainDim * GBL_CLAMP(pSelf->border_radius, 0.0f, 1.0f);
-                *widget_secondaryDim = GBL_CLAMP(*widget_secondaryDim, 0, maxSize);
-            }
-
+			*widget_mainDim		    = (container_mainDim - totalMargin - totalPaddingWithRoundness) / (float)childCount;
+			*widget_secondaryDim	= container_secondaryDim - totalPaddingWithRoundness;
 		}
 
 		if (pContainer->alignWidgets) {
 			*widget_mainPos		        = offset;
-			const float availableSecDim = container_secondaryDim - totalPadding;
-            *widget_secondaryPos        = container_secondaryPos + pContainer->padding + (availableSecDim - *widget_secondaryDim) / 2.0f;
+			const float availableSecDim = container_secondaryDim - totalPaddingWithRoundness;
+            *widget_secondaryPos        = container_secondaryPos + pContainer->padding + roundnessInset + (availableSecDim - *widget_secondaryDim) / 2.0f;
 			offset                     += *widget_mainDim + pContainer->margin * 2.0f;
 		}
 	}

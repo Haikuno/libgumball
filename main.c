@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 	auto texture = GUM_Manager_load("../Vmu.png");
 	auto controller = GUM_Controller_create("isKeyboard", true);
 
-	auto parent_container = GUM_Container_create("color", 0, "w", 320.0f, "h", 240.0f, "orientation", 'v');
+	auto parent_container = GUM_Container_create("color", 0, "w", 320.0f, "h", 240.0f, "orientation", 'h');
 
 	auto container = GUM_Container_create("parent", parent_container,
 		"children", GblRingList_create(
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 		GUM_Button_create("border_radius", 2.0f, "color", 0xFF0000FF)
 	));
 
-	auto container_2 = GUM_Container_create("x", 200.0f, "parent", parent_container, "border_radius", 0.95f,
+	auto container_2 = GUM_Container_create("x", 200.0f, "parent", parent_container, "border_radius", 0.8f, "orientation", 'v',
 		"children", GblRingList_create(
 		GUM_Button_create("color", 0x0000FFFF),
 		GUM_Button_create("color", 0xF0F0F0FF, "isSelectedByDefault", true),
