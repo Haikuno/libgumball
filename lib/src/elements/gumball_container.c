@@ -92,7 +92,13 @@ static GBL_RESULT GUM_Container_update_(GUM_Widget *pSelf) {
 
 		if (pContainer->resizeWidgets) {
 			*widget_mainDim		    = (container_mainDim - totalMargin - totalPadding) / (float)childCount;
-			*widget_secondaryDim	= container_secondaryDim - totalPadding;
+            *widget_secondaryDim	= container_secondaryDim - totalPadding;
+
+            if (pSelf->border_radius) {
+                float maxSize = container_secondaryDim - container_mainDim * GBL_CLAMP(pSelf->border_radius, 0.0f, 1.0f);
+                *widget_secondaryDim = GBL_CLAMP(*widget_secondaryDim, 0, maxSize);
+            }
+
 		}
 
 		if (pContainer->alignWidgets) {

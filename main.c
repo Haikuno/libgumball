@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 		GUM_Button_create("border_radius", 2.0f, "color", 0xFF0000FF)
 	));
 
-	auto container_2 = GUM_Container_create("x", 200.0f, "parent", parent_container,
+	auto container_2 = GUM_Container_create("x", 200.0f, "parent", parent_container, "border_radius", 0.95f,
 		"children", GblRingList_create(
 		GUM_Button_create("color", 0x0000FFFF),
 		GUM_Button_create("color", 0xF0F0F0FF, "isSelectedByDefault", true),
