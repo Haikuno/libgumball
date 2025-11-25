@@ -4,6 +4,7 @@ project(LibGumball)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0")
 
 option(GUM_BUILD_DOCS             "Build docs"            OFF)
 option(GUM_BUILD_EXAMPLES         "Build examples"        OFF)

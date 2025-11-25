@@ -459,7 +459,10 @@ static GBL_RESULT GUM_Controller_draw_(GUM_Widget *pSelf, GUM_Renderer *pRendere
 			.height = GUM_WIDGET(pController->pSelectedButton)->h
 		};
 
-        GUM_Backend_rectangleLinesDraw(pRenderer, rec, pSelf->border_radius, pSelf->border_width * 0.75, (GUM_Color){ pSelf->r, pSelf->g, pSelf->b, pSelf->a });
+        GUM_Backend_rectangleLinesDraw(pRenderer, rec,
+                                       GUM_WIDGET(GUM_CONTROLLER(pSelf)->pSelectedButton)->border_radius,
+                                       GUM_WIDGET(GUM_CONTROLLER(pSelf)->pSelectedButton)->border_width * 0.75,
+                                       (GUM_Color){ pSelf->r, pSelf->g, pSelf->b, pSelf->a });
 	}
 
 	return GBL_RESULT_SUCCESS;

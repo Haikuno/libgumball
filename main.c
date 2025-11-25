@@ -17,9 +17,9 @@ int main(int argc, char *argv[]) {
 
 	auto container = GUM_Container_create("parent", parent_container,
 		"children", GblRingList_create(
-		GUM_Button_create("color", 0x0000FFFF, "isSelectable", false),
-		GUM_Button_create("color", 0xF0F0F0FF),
-		GUM_Button_create("color", 0xFF0000FF)
+		GUM_Button_create("border_radius", 2.0f, "color", 0x0000FFFF, "isSelectable", false),
+		GUM_Button_create("border_radius", 2.0f, "color", 0xF0F0F0FF),
+		GUM_Button_create("border_radius", 2.0f, "color", 0xFF0000FF)
 	));
 
 	auto container_2 = GUM_Container_create("x", 200.0f, "parent", parent_container,
