@@ -8,7 +8,17 @@
 
 GBL_EXPORT GBL_RESULT (GUM_update)(void) {
     static GUM_Root *pRoot = nullptr;
-    GblArrayDeque queue;
+
+    struct {
+        GblArrayList array;
+        char         stackData[64 * sizeof(GblObject*)];
+    } stackArray;
+
+    GblArrayList_construct(&stackArray.array,
+                        sizeof(GblObject*),
+                        0,
+                        NULL,
+                        sizeof(stackArray));
 
     GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
         if(!pRoot) {
@@ -16,29 +26,27 @@ GBL_EXPORT GBL_RESULT (GUM_update)(void) {
             GBL_SCOPE_EXIT;
         }
 
-        GblObject *data[32];
-        GblObject *pRootSelf = GBL_OBJECT(pRoot);
+        GblObject *pRootObject = GBL_OBJECT(pRoot);
+        GblArrayList_pushBack(&stackArray.array, &pRootObject);
 
-        GblArrayDeque_construct(&queue, sizeof(GblObject*), 32, 0, data);
-        GblArrayDeque_pushBack(&queue, &pRootSelf);
-
-        while (GblArrayDeque_size(&queue)) {
-            GblObject **ppObject = GblArrayDeque_popFront(&queue);
-            GblObject  *pObject  = *ppObject;
-            GblObject  *pChild   = GblObject_childFirst(pObject);
+        while (GblArrayList_size(&stackArray.array)) {
+            GblObject *pObject;
+            GblArrayList_popFront(&stackArray.array, &pObject);
+            GblObject *pChild = GblObject_childFirst(pObject);
 
             while (pChild) {
                 GUM_Widget *pChildWidget = GBL_AS(GUM_Widget, pChild);
                 if (pChildWidget && pChildWidget->shouldUpdate) {
                     GUM_WIDGET_CLASSOF(pChildWidget)->pFnUpdate(pChildWidget);
                 }
-                GblArrayDeque_pushBack(&queue, &pChild);
+                GblArrayList_pushBack(&stackArray.array, &pChild);
                 pChild = GblObject_siblingNext(pChild);
             }
+
         }
     }
 
-    GblArrayDeque_destruct(&queue);
+    GblArrayList_destruct(&stackArray.array);
     return GBL_RESULT_SUCCESS;
 }
 
