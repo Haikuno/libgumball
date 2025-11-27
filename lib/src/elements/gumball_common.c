@@ -24,11 +24,12 @@ GBL_EXPORT GBL_RESULT (GUM_update)(void) {
 
         while (GblArrayDeque_size(&queue)) {
             GblObject **ppObject = GblArrayDeque_popFront(&queue);
-            GblObject  *pChild   = GblObject_childFirst(*ppObject);
+            GblObject  *pObject  = *ppObject;
+            GblObject  *pChild   = GblObject_childFirst(pObject);
 
             while (pChild) {
                 GUM_Widget *pChildWidget = GBL_AS(GUM_Widget, pChild);
-                if (pChildWidget->shouldUpdate) {
+                if (pChildWidget && pChildWidget->shouldUpdate) {
                     GUM_WIDGET_CLASSOF(pChildWidget)->pFnUpdate(pChildWidget);
                 }
                 GblArrayDeque_pushBack(&queue, &pChild);

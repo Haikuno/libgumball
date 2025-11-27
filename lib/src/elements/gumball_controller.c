@@ -58,8 +58,8 @@ static GBL_RESULT GUM_Controller_GblObject_property_(const GblObject *pObject, c
 }
 
 static GblObject *GblObject_findDescendantByType(GblObject *pSelf, GblType descendantType) {
+    if (!pSelf) return nullptr;
     GblObject *pResultObj = nullptr;
-    if (!pSelf) goto done;
 
     GblArrayDeque queue;
     GblObject *data[32];
@@ -176,8 +176,9 @@ static GUM_Button *findSelectableByPosition_(GUM_Button *pCurrent, GUM_CONTROLLE
     // Iterate over all widgets in draw order
     GblArrayList *drawQueue = GUM_drawQueue_get();
     for (size_t i = 0; i < GblArrayList_size(drawQueue); ++i) {
-        GblObject **ppObj      = GblArrayList_at(drawQueue, i);
-        GUM_Button  *pCandidate = GBL_AS(GUM_Button, *ppObj);
+        GblObject **ppObject   = GblArrayList_at(drawQueue, i);
+        GblObject  *pObject    = *ppObject;
+        GUM_Button *pCandidate = GBL_AS(GUM_Button, pObject);
 
         if (!pCandidate               ||
              pCandidate == pCurrent   ||
@@ -277,6 +278,7 @@ static GUM_Button *moveCursor_(GblObject *pSelf, GUM_CONTROLLER_BUTTON_ID button
 }
 
 static GUM_Button *findSelectableDescendant(GblObject *pSelf) {
+    if (!pSelf) return nullptr;
     GUM_Button *pResultButton = nullptr;
 
     GblArrayDeque queue;
@@ -286,7 +288,8 @@ static GUM_Button *findSelectableDescendant(GblObject *pSelf) {
 
     while (GblArrayDeque_size(&queue)) {
         GblObject **ppObject = GblArrayDeque_popFront(&queue);
-        GblObject  *pChild   = GblObject_childFirst(*ppObject);
+        GblObject  *pObject  = *ppObject;
+        GblObject  *pChild   = GblObject_childFirst(pObject);
 
         while (pChild) {
             GUM_Button *pChildButton = GBL_AS(GUM_Button, pChild);
@@ -307,8 +310,8 @@ static GUM_Button *findSelectableDescendant(GblObject *pSelf) {
 }
 
 static GUM_Button *findDefaultSelectableDescendant(GblObject *pSelf) {
+    if (!pSelf) return nullptr;
     GUM_Button *pResultButton = nullptr;
-    if (!pSelf) goto done;
 
     GblArrayDeque queue;
     GblObject *data[32];
@@ -317,7 +320,8 @@ static GUM_Button *findDefaultSelectableDescendant(GblObject *pSelf) {
 
     while (GblArrayDeque_size(&queue)) {
         GblObject **ppObject = GblArrayDeque_popFront(&queue);
-        GblObject  *pChild   = GblObject_childFirst(*ppObject);
+        GblObject  *pObject  = *ppObject;
+        GblObject  *pChild   = GblObject_childFirst(pObject);
 
         while (pChild) {
             GUM_Button *pChildButton = GBL_AS(GUM_Button, pChild);
