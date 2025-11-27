@@ -284,8 +284,7 @@ static GUM_Button *findSelectableDescendant(GblObject *pSelf, bool filterByDefau
     }
 
     done:
-    printf("good shit, filterByDefault was %s\n", filterByDefault ? "true" : "false");
-    // GblArrayList_destruct(&stackArray.array);
+    GblArrayList_destruct(&stackArray.array);
     return pResultButton;
 }
 static GBL_RESULT GUM_Controller_handleButton_(GUM_Controller *pSelf, GUM_CONTROLLER_BUTTON_STATE eventState, GUM_CONTROLLER_BUTTON_ID eventButton) {
