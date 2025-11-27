@@ -187,7 +187,6 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject *pObject, const Gb
 		case GUM_Widget_Property_Id_border_radius:
 			pValue->f32 = GBL_CLAMP(pValue->f32, 0.0f, 1.0f);
 			GblVariant_valueCopy(pValue, &pSelf->border_radius);
-			printf("border radius is now %f\n", pSelf->border_radius);
 			break;
 		case GUM_Widget_Property_Id_border_highlight:
 			GblVariant_valueCopy(pValue, &pSelf->border_highlight);

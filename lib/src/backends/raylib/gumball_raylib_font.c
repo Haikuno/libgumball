@@ -27,20 +27,20 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource *pSelf, GblStringRef *pPath) {
     if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     Font font = LoadFont(pPath);
-    void* pFont = malloc(sizeof(Font));
+    void *pFont = malloc(sizeof(Font));
     memcpy(pFont, &font, sizeof(Font));
     GUM_IResource_setData(pSelf, pFont);
 }
 
-GBL_RESULT GUM_Backend_Font_unload(GUM_IResource* pSelf) {
+GBL_RESULT GUM_Backend_Font_unload(GUM_IResource *pSelf) {
     if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
-    void* pFont = (Font*)GUM_IResource_data(pSelf);
+    void *pFont = (Font*)GUM_IResource_data(pSelf);
     UnloadFont(*(Font*)pFont);
     free(pFont);
     return GBL_RESULT_SUCCESS;
 }
 
-GUM_Font* GUM_Backend_Font_default(void) {
+GUM_Font *GUM_Backend_Font_default(void) {
     if (defaultFont_) return defaultFont_;
 
     Font font = GetFontDefault();

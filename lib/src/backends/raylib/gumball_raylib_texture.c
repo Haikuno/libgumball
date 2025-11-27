@@ -1,9 +1,9 @@
 #include <gumball/core/gumball_backend.h>
 #include <raylib.h>
 
-GBL_EXPORT GUM_Vector2 GUM_Texture_size(GUM_Texture* pSelf) {
+GBL_EXPORT GUM_Vector2 GUM_Texture_size(GUM_Texture *pSelf) {
 	GUM_Vector2 size;
-	Texture2D* pTexture = (Texture2D*)GUM_IResource_data(GUM_IRESOURCE(pSelf));
+	Texture2D *pTexture = (Texture2D*)GUM_IResource_data(GUM_IRESOURCE(pSelf));
 	if (pTexture) {
 		size.x = (float)pTexture->width;
 		size.y = (float)pTexture->height;
@@ -25,7 +25,7 @@ GBL_RESULT GUM_Backend_Texture_load(GUM_IResource *pSelf, GblStringRef *path) {
 
 	Texture2D texture = LoadTexture(path);
 
-	void* pTexture = malloc(sizeof(Texture2D));
+	void *pTexture = malloc(sizeof(Texture2D));
 	if (!pTexture)
 		return GBL_RESULT_ERROR_MEM_ALLOC;
 
@@ -38,7 +38,7 @@ GBL_RESULT GUM_Backend_Texture_load(GUM_IResource *pSelf, GblStringRef *path) {
 
 GBL_RESULT GUM_Backend_Texture_unload(GUM_IResource *pSelf) {
 	if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
-	void* pTexture = (Texture2D*)GUM_IResource_data(pSelf);
+	void *pTexture = (Texture2D*)GUM_IResource_data(pSelf);
 	UnloadTexture(*(Texture2D*)pTexture);
 	free(pTexture);
 	return GBL_RESULT_SUCCESS;

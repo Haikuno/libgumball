@@ -80,7 +80,7 @@ static GBL_RESULT GUM_ButtonClass_init_(GblClass *pClass, const void *pData) {
 	return GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_ButtonClass_final_(GblClass* pClass, const void* pClassData) {
+static GBL_RESULT GUM_ButtonClass_final_(GblClass *pClass, const void *pClassData) {
     GBL_UNUSED(pClassData);
 
     if(!GblType_classRefCount(GUM_BUTTON_TYPE)) {

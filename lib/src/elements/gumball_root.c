@@ -9,7 +9,7 @@
 static GblArrayList GUM_drawQueue_;
 static GblLogger    *pLogger_ = nullptr;
 
-static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
+static GBL_RESULT GUM_Root_init_(GblInstance *pInstance) {
     GblObject_setName(GBL_OBJECT(pInstance), "GUM_Root");
     if (!GblModule_isLoaded(GBL_MODULE(pInstance))) {
         GblModule_register(GBL_MODULE(pInstance));
@@ -17,7 +17,7 @@ static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
     return GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_RootClass_init_(GblClass* pClass, const void* pData) {
+static GBL_RESULT GUM_RootClass_init_(GblClass *pClass, const void *pData) {
     GBL_UNUSED(pData);
 
     if (!GblType_classRefCount(GUM_ROOT_TYPE)) {
@@ -32,7 +32,7 @@ static GBL_RESULT GUM_RootClass_init_(GblClass* pClass, const void* pData) {
     return GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_RootClass_final_(GblClass* pClass, const void* pData) {
+static GBL_RESULT GUM_RootClass_final_(GblClass *pClass, const void *pData) {
     GBL_UNUSED(pData);
 
     if (!GblType_classRefCount(GUM_ROOT_TYPE)) {

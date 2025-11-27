@@ -185,7 +185,7 @@ GBL_EXPORT void GUM_Manager_unload(GUM_IResource *pResource) {
     }
 }
 
-GBL_RESULT GUM_ManagerClass_init_(GblClass* pClass, const void* pData) {
+GBL_RESULT GUM_ManagerClass_init_(GblClass *pClass, const void *pData) {
 	GBL_UNUSED(pData);
 
     if (!GblType_classRefCount(GUM_MANAGER_TYPE)) {

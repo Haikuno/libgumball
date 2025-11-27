@@ -64,10 +64,7 @@ static GBL_RESULT GUM_Container_GblObject_property_(const GblObject *pObject, co
 }
 
 static GBL_RESULT GUM_Container_updateContent_(GUM_Container *pSelf) {
-    size_t childCount = GblObject_childCount(GBL_OBJECT(pSelf));
-
-    printf("hi!\n");
-
+    size_t      childCount  = GblObject_childCount(GBL_OBJECT(pSelf));
     GUM_Widget *pSelfWidget = GUM_WIDGET(pSelf);
 
     if GBL_UNLIKELY(childCount == 0) return GBL_RESULT_SUCCESS;

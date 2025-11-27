@@ -4,11 +4,11 @@
 #define GUM_IRESOURCE_QUARK_FIELD_NAME "GUM_IResource_quark"
 #define GUM_IRESOURCE_VALUE_FIELD_NAME "GUM_IResource_value"
 
-GBL_EXPORT GUM_IResource *GUM_IResource_ref(GUM_IResource* pResource) {
+GBL_EXPORT GUM_IResource *GUM_IResource_ref(GUM_IResource *pResource) {
 	return GUM_IRESOURCE(GBL_REF(pResource));
 }
 
-GBL_EXPORT GblRefCount GUM_IResource_unref(GUM_IResource* pResource) {
+GBL_EXPORT GblRefCount GUM_IResource_unref(GUM_IResource *pResource) {
 	GUM_LOG_DEBUG_SCOPE("GUM_IResource_unref() called...") {
 		if (!pResource) {
 			GBL_SCOPE_EXIT;

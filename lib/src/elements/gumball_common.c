@@ -8,6 +8,7 @@
 
 GBL_EXPORT GBL_RESULT (GUM_update)(void) {
     static GUM_Root *pRoot = nullptr;
+    GblArrayDeque queue;
 
     GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
         if(!pRoot) {
@@ -15,29 +16,28 @@ GBL_EXPORT GBL_RESULT (GUM_update)(void) {
             GBL_SCOPE_EXIT;
         }
 
-        GblArrayDeque queue;
-        GblArrayDeque_construct(&queue, sizeof(GUM_Widget*), 16);
-        GblArrayDeque_pushBack(&queue, &pRoot);
+        GblObject *data[32];
+        GblObject *pRootSelf = GBL_OBJECT(pRoot);
+
+        GblArrayDeque_construct(&queue, sizeof(GblObject*), 32, 0, data);
+        GblArrayDeque_pushBack(&queue, &pRootSelf);
 
         while (GblArrayDeque_size(&queue)) {
-            GUM_Widget **ppWidget = GblArrayDeque_popFront(&queue);
-            GUM_Widget *pWidget   = *ppWidget;
+            GblObject **ppObject = GblArrayDeque_popFront(&queue);
+            GblObject  *pChild   = GblObject_childFirst(*ppObject);
 
-            GblObject *pChild = GblObject_childFirst(GBL_OBJECT(pWidget));
             while (pChild) {
                 GUM_Widget *pChildWidget = GBL_AS(GUM_Widget, pChild);
-                if (pChildWidget) {
-                    if (pChildWidget->shouldUpdate) {
-                        GUM_WIDGET_CLASSOF(pChildWidget)->pFnUpdate(pChildWidget);
-                    }
+                if (pChildWidget->shouldUpdate) {
+                    GUM_WIDGET_CLASSOF(pChildWidget)->pFnUpdate(pChildWidget);
                 }
                 GblArrayDeque_pushBack(&queue, &pChild);
                 pChild = GblObject_siblingNext(pChild);
             }
-
         }
     }
 
+    GblArrayDeque_destruct(&queue);
     return GBL_RESULT_SUCCESS;
 }
 
@@ -114,7 +114,7 @@ GBL_EXPORT void (GUM_draw_enableAll)(GblObject *pSelf) {
     }
 }
 
-GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject *pSelf) {
     GUM_draw_disableAll(pSelf);
 
     GUM_Widget *pWidget = GBL_AS(GUM_Widget, pSelf);
@@ -124,7 +124,7 @@ GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
 
     size_t childCount = GblObject_childCount(pSelf);
     for (size_t i = childCount; i-- > 0;) {
-        GblObject* childObj = GblObject_findChildByIndex(pSelf, i);
+        GblObject *childObj = GblObject_findChildByIndex(pSelf, i);
         if (childObj) GUM_unref(childObj);
     }
 

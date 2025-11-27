@@ -62,7 +62,8 @@ static GblObject *GblObject_findDescendantByType(GblObject *pSelf, GblType desce
     if (!pSelf) goto done;
 
     GblArrayDeque queue;
-    GblArrayDeque_construct(&queue, sizeof(GblObject*), 16);
+    GblObject *data[32];
+    GblArrayDeque_construct(&queue, sizeof(GblObject*), 32, 0, data);
     GblArrayDeque_pushBack(&queue, &pSelf);
 
     while (GblArrayDeque_size(&queue)) {
@@ -79,14 +80,6 @@ static GblObject *GblObject_findDescendantByType(GblObject *pSelf, GblType desce
             pChild = GblObject_siblingNext(pChild);
         }
 
-        // GblObject_foreachChild(pObj, pChild) {
-        //     if (GBL_TYPEOF(pChild) == descendantType) {
-        //         pResultObj = pChild;
-        //         goto done;
-        //     }
-        //     GblArrayDeque_pushBack(&queue, &pChild);
-        // }
-
     }
 
     done:
@@ -94,7 +87,7 @@ static GblObject *GblObject_findDescendantByType(GblObject *pSelf, GblType desce
     return pResultObj;
 }
 
-static GUM_Button* findSelectableSibling_(GblObject *pObj, bool next) {
+static GUM_Button *findSelectableSibling_(GblObject *pObj, bool next) {
     GblObject *pSibling = next  ? GblObject_siblingNextByType    (pObj, GUM_BUTTON_TYPE)
                                 : GblObject_siblingPreviousByType(pObj, GUM_BUTTON_TYPE);
     while (pSibling) {
@@ -106,7 +99,7 @@ static GUM_Button* findSelectableSibling_(GblObject *pObj, bool next) {
     return nullptr;
 }
 
-static GUM_Button* findSelectableInContainer_(GblObject *pContainer, size_t preferredIndex, bool next) {
+static GUM_Button *findSelectableInContainer_(GblObject *pContainer, size_t preferredIndex, bool next) {
     if (preferredIndex != GBL_INDEX_INVALID) {
         GUM_Button *pButton = GBL_AS(GUM_Button,
                               GblObject_findChildByIndex(pContainer, preferredIndex));
@@ -140,8 +133,8 @@ static GUM_Button* findSelectableInContainer_(GblObject *pContainer, size_t pref
     return nullptr;
 }
 
-static GblObject* findSiblingContainerWithSelectable_(GblObject* pContainer, bool next) {
-    GblObject* sibling = next  ? GblObject_siblingNextByType    (pContainer, GUM_CONTAINER_TYPE)
+static GblObject *findSiblingContainerWithSelectable_(GblObject *pContainer, bool next) {
+    GblObject *sibling = next  ? GblObject_siblingNextByType    (pContainer, GUM_CONTAINER_TYPE)
                                : GblObject_siblingPreviousByType(pContainer, GUM_CONTAINER_TYPE);
     while (sibling) {
         GblObject *pButtonObj = GblObject_findChildByType(sibling, GUM_BUTTON_TYPE);
@@ -169,7 +162,7 @@ static GUM_Vector2 vector2_FindClosestPointInRec_(GUM_Vector2 startCenter, GUM_R
     return closestPoint;
 }
 
-static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLER_BUTTON_ID direction) {
+static GUM_Button *findSelectableByPosition_(GUM_Button *pCurrent, GUM_CONTROLLER_BUTTON_ID direction) {
     GUM_Vector2 currPos    =   GUM_get_absolute_position_(GUM_WIDGET(pCurrent));
     GUM_Vector2 currSize   =  {GUM_WIDGET(pCurrent)->w, GUM_WIDGET(pCurrent)->h};
     GUM_Vector2 currCenter = {
@@ -177,8 +170,8 @@ static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLE
         currPos.y + currSize.y * 0.5f
     };
 
-    GUM_Button* pBest      = nullptr;
-    float      bestScore  = -FLT_MAX;
+    GUM_Button *pBest      = nullptr;
+    float       bestScore  = -FLT_MAX;
 
     // Iterate over all widgets in draw order
     GblArrayList *drawQueue = GUM_drawQueue_get();
@@ -237,12 +230,12 @@ static GUM_Button *findSelectableByPosition_(GUM_Button* pCurrent, GUM_CONTROLLE
     return pBest;
 }
 
-static GUM_Button* moveCursor_(GblObject* pSelf, GUM_CONTROLLER_BUTTON_ID buttonPress) {
-    GblObject* pParent = GblObject_parent(pSelf);
+static GUM_Button *moveCursor_(GblObject *pSelf, GUM_CONTROLLER_BUTTON_ID buttonPress) {
+    GblObject *pParent = GblObject_parent(pSelf);
     if (!pParent || !GBL_AS(GUM_Container, pParent)) return nullptr;
 
     const char parent_orientation       = tolower(GBL_AS(GUM_Container, pParent)->orientation);
-    GblObject* pGrandParent             = GblObject_parent(pParent);
+    GblObject *pGrandParent             = GblObject_parent(pParent);
     const char grand_parent_orientation = (pGrandParent && GBL_AS(GUM_Container, pGrandParent)) ?
                                            tolower(GBL_AS(GUM_Container, pGrandParent)->orientation) : 'N';
 
@@ -255,13 +248,13 @@ static GUM_Button* moveCursor_(GblObject* pSelf, GUM_CONTROLLER_BUTTON_ID button
 
     // Intra-container movement if axis matches parent
     if (axis == parent_orientation) {
-        GUM_Button* sibling = findSelectableSibling_(pSelf, next);
+        GUM_Button *sibling = findSelectableSibling_(pSelf, next);
         if (sibling) return sibling;
     }
 
     // Inter-container movement
 
-    GblObject* pNewContainer = nullptr;
+    GblObject *pNewContainer = nullptr;
 
     // If axis matches grandparent's orientation, find sibling container
     if (axis == grand_parent_orientation) {
@@ -287,33 +280,25 @@ static GUM_Button *findSelectableDescendant(GblObject *pSelf) {
     GUM_Button *pResultButton = nullptr;
 
     GblArrayDeque queue;
-    GblArrayDeque_construct(&queue, sizeof(GUM_Button*), 16);
+    GblObject *data[32];
+    GblArrayDeque_construct(&queue, sizeof(GblObject*), 32, 0, data);
     GblArrayDeque_pushBack(&queue, &pSelf);
 
     while (GblArrayDeque_size(&queue)) {
-        GUM_Button **ppButton = GblArrayDeque_popFront(&queue);
-        GUM_Button *pButton   = *ppButton;
+        GblObject **ppObject = GblArrayDeque_popFront(&queue);
+        GblObject  *pChild   = GblObject_childFirst(*ppObject);
 
-        size_t childCount = GblObject_childCount(GBL_OBJECT(pButton));
-        for (size_t i = 0; i < childCount; i++) {
-            GblObject *pChildObj = GblObject_findChildByIndex(GBL_OBJECT(pButton), i);
-            GUM_Button *pChildButton = GBL_AS(GUM_Button, pChildObj);
-            if (pChildButton && pChildButton->isSelectable && GUM_WIDGET(pChildButton)->shouldUpdate) {
-                bool shouldupdate = GUM_WIDGET(pChildButton)->shouldUpdate;
+        while (pChild) {
+            GUM_Button *pChildButton = GBL_AS(GUM_Button, pChild);
+            if (pChildButton && pChildButton->isSelectable &&
+                GUM_WIDGET(pChildButton)->shouldUpdate)
+            {
                 pResultButton = pChildButton;
                 goto done;
             }
-            GblArrayDeque_pushBack(&queue, &pChildObj);
+            GblArrayDeque_pushBack(&queue, &pChild);
+            pChild = GblObject_siblingNext(pChild);
         }
-
-        // GblObject_foreachChild(GBL_OBJECT(pButton), pChild) {
-        //     GUM_Button *pButtonChild = GBL_AS(GUM_Button, pChild);
-        //     if (pButtonChild && pButtonChild->isSelectable) {
-        //         pResultButton = pButtonChild;
-        //         goto done;
-        //     }
-        //     GblArrayDeque_pushBack(&queue, &pChild);
-        // }
     }
 
     done:
@@ -326,33 +311,28 @@ static GUM_Button *findDefaultSelectableDescendant(GblObject *pSelf) {
     if (!pSelf) goto done;
 
     GblArrayDeque queue;
-    GblArrayDeque_construct(&queue, sizeof(GUM_Button*), 16);
+    GblObject *data[32];
+    GblArrayDeque_construct(&queue, sizeof(GblObject*), 32, 0, data);
     GblArrayDeque_pushBack(&queue, &pSelf);
 
     while (GblArrayDeque_size(&queue)) {
-        GUM_Button **ppButton = GblArrayDeque_popFront(&queue);
-        GUM_Button *pButton   = *ppButton;
+        GblObject **ppObject = GblArrayDeque_popFront(&queue);
+        GblObject  *pChild   = GblObject_childFirst(*ppObject);
 
-        size_t childCount = GblObject_childCount(GBL_OBJECT(pButton));
-        for (size_t i = 0; i < childCount; i++) {
-            GblObject *pChildObj = GblObject_findChildByIndex(GBL_OBJECT(pButton), i);
-            GUM_Button *pChildButton = GBL_AS(GUM_Button, pChildObj);
-            if (pChildButton && pChildButton->isSelectable && pChildButton->isSelectedByDefault && GUM_WIDGET(pChildButton)->shouldUpdate) {
+        while (pChild) {
+            GUM_Button *pChildButton = GBL_AS(GUM_Button, pChild);
+            if (pChildButton && pChildButton->isSelectable &&
+                pChildButton->isSelectedByDefault          &&
+                GUM_WIDGET(pChildButton)->shouldUpdate)
+            {
                 pResultButton = pChildButton;
                 goto done;
             }
-            GblArrayDeque_pushBack(&queue, &pChildObj);
+            GblArrayDeque_pushBack(&queue, &pChild);
+            pChild = GblObject_siblingNext(pChild);
         }
-
-        // GblObject_foreachChild(GBL_OBJECT(pButton), pChild) {
-        //     GUM_Button *pButtonChild = GBL_AS(GUM_Button, pChild);
-        //     if (pButtonChild && pButtonChild->isSelectable && pButtonChild->isSelectedByDefault) {
-        //         pResultButton = pButtonChild;
-        //         goto done;
-        //     }
-        //     GblArrayDeque_pushBack(&queue, &pChild);
-        // }
     }
+
 
     done:
     GblArrayDeque_destruct(&queue);
@@ -504,6 +484,6 @@ GBL_EXPORT void GUM_Controller_sendButton(GUM_Controller *pSelf, GUM_CONTROLLER_
     GUM_Controller_handleButton_(pSelf, state, button);
 }
 
-GBL_EXPORT void GUM_Controller_setSelectedButton(GUM_Controller *pSelf, GUM_Button* pButton) {
+GBL_EXPORT void GUM_Controller_setSelectedButton(GUM_Controller *pSelf, GUM_Button *pButton) {
 	GUM_CONTROLLER(pSelf)->pSelectedButton = pButton;
 }
