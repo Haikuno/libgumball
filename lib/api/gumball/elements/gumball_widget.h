@@ -37,7 +37,7 @@
 #define GUM_WIDGET_TYPE				(GBL_TYPEID		(GUM_Widget)) 			//!< Returns the GUM_Widget Type UUID
 #define GUM_WIDGET(self)			(GBL_CAST		(GUM_Widget, self)) 	//!< Casts an instance of a compatible element to a GUM_Widget
 #define GUM_WIDGET_CLASS(klass)		(GBL_CLASS_CAST (GUM_Widget, klass))	//!< Casts an class of a compatible element to a GUM_WidgetClass
-#define GUM_WIDGET_CLASSOF(self)	(GBL_CLASSOF	(GUM_Widget, self))		//!< Casts an instance of a compatible element to a GUM_Widget
+#define GUM_WIDGET_CLASSOF(self)	(GBL_CLASSOF	(GUM_Widget, self))		//!< Casts an instance of a compatible element to a GUM_WidgetClass
 //! @}
 
 #define GBL_SELF_TYPE 				 GUM_Widget

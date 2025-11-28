@@ -18,10 +18,10 @@
  *  \brief Type UUID and Cast Operators
  *  @{
 */
-#define GUM_EVENT_TYPE				(GBL_TYPEID(GUM_Event)) 			//!< Returns the GUM_Event Type UUID
-#define GUM_EVENT(self)				(GBL_CAST(GUM_Event, self))			//!< Casts an instance of a compatible element to a GUM_Event
-#define GUM_EVENT_CLASS(klass)		(GBL_CLASS_CAST(GUM_Event, klass))	//!< Casts an class of a compatible element to a GUM_Event
-#define GUM_EVENT_CLASSOF(self)		(GBL_CLASSOF(GUM_Event, self))		//!< Casts an instance of a compatible element to a GUM_Event
+#define GUM_EVENT_TYPE				(GBL_TYPEID		(GUM_Event)) 		//!< Returns the GUM_Event Type UUID
+#define GUM_EVENT(self)				(GBL_CAST		(GUM_Event, self))	//!< Casts an instance of a compatible element to a GUM_Event
+#define GUM_EVENT_CLASS(klass)		(GBL_CLASS_CAST	(GUM_Event, klass))	//!< Casts an class of a compatible element to a GUM_Event
+#define GUM_EVENT_CLASSOF(self)		(GBL_CLASSOF	(GUM_Event, self))	//!< Casts an instance of a compatible element to a GUM_EventClass
 //! @}
 
 #define GBL_SELF_TYPE GUM_Event

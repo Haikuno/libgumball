@@ -362,13 +362,13 @@ static GBL_RESULT GUM_Widget_update_(GUM_Widget *pSelf) {
 }
 
 static GBL_RESULT GUM_Widget_draw_(GUM_Widget *pSelf, GUM_Renderer *pRenderer) {
-	GUM_Rectangle rec = (GUM_Rectangle){ pSelf->x, pSelf->y, pSelf->w, pSelf->h };
-	GUM_Widget *pParent = GBL_AS(GUM_Widget, GblObject_parent(GBL_OBJECT(pSelf)));
+	GUM_Rectangle rec     = (GUM_Rectangle){ pSelf->x, pSelf->y, pSelf->w, pSelf->h };
+	GblObject    *pParent = GblObject_parent(GBL_OBJECT(pSelf));
 
-	if (pParent && pSelf->isRelative) {
-		GUM_Vector2 parent_pos	= GUM_get_absolute_position_(GUM_WIDGET(pParent));
-		rec.x				+= parent_pos.x;
-		rec.y				+= parent_pos.y;
+	if (pParent && GBL_TYPEOF(pParent) != GUM_ROOT_TYPE && pSelf->isRelative) {
+		GUM_Vector2 parent_pos = GUM_get_absolute_position_(GUM_WIDGET(pParent));
+		rec.x				  += parent_pos.x;
+		rec.y				  += parent_pos.y;
 	}
 
 	if (pSelf->a) {
@@ -376,8 +376,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget *pSelf, GUM_Renderer *pRenderer) {
 	}
 
 	GUM_Button *pButton = GBL_AS(GUM_Button, pSelf);
-
-	bool isSelected = pButton && pButton->isSelected;
+	bool isSelected 	= pButton && pButton->isSelected;
 
 	if (pSelf->border_a && !isSelected) {
 		GUM_Backend_rectangleLinesDraw(pRenderer, rec, pSelf->border_radius, pSelf->border_width, (GUM_Color){ pSelf->border_r, pSelf->border_g, pSelf->border_b, pSelf->border_a });
@@ -398,7 +397,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget *pSelf, GUM_Renderer *pRenderer) {
 	// text and texture rendering
 	GUM_Vector2 textSize	= { 0, 0 };
 	GUM_Vector2 textPos		= { 0, 0 };
-	const float margin	= 3.0f;
+	const float margin		= 3.0f;
 
 	if (GblStringRef_length(pSelf->label)) {
 		textSize = GUM_Font_measureText(pSelf->font, pSelf->label, pSelf->font_size);
@@ -520,18 +519,17 @@ GblType GUM_Widget_type(void) {
 }
 
 GUM_Vector2 GUM_get_absolute_position_(GUM_Widget *pWidget) {
-	GUM_Widget	*parent	= GBL_AS(GUM_Widget, GblObject_parent(GBL_OBJECT(pWidget)));
-	GUM_Vector2		pos		= { pWidget->x, pWidget->y };
+	GblObject     *pParent    		= GblObject_parent(GBL_OBJECT(pWidget));
+	GUM_Container *pParentContainer = GBL_AS(GUM_Container, pParent);
+	GUM_Vector2    pos	      		= { pWidget->x, pWidget->y };
 
-	if (!parent || !pWidget->isRelative) {
+	if (!pParent || !pWidget->isRelative)
 		return pos;
-	}
 
-	if (GBL_AS(GUM_Container, parent)) {
-		if (!GBL_AS(GUM_Container, parent)->alignWidgets) return pos;
-	}
+	if (pParentContainer && !pParentContainer->alignWidgets)
+		return pos;
 
-	GUM_Vector2 parent_pos = GUM_get_absolute_position_(GUM_WIDGET(parent));
+	GUM_Vector2 parent_pos = GUM_get_absolute_position_(GUM_WIDGET(pParent));
 
 	pos.x += parent_pos.x;
 	pos.y += parent_pos.y;

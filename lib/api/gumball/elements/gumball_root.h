@@ -26,7 +26,7 @@
 #define GUM_ROOT_TYPE			(GBL_TYPEID		(GUM_Root))			//!< Returns the GUM_Root Type UUID
 #define GUM_ROOT(self)			(GBL_CAST		(GUM_Root, self))	//!< Casts an instance of a compatible element to a GUM_Root
 #define GUM_ROOT_CLASS(klass)	(GBL_CLASS_CAST	(GUM_Root, klass)) 	//!< Casts an class of a compatible element to a GUM_Root
-#define GUM_ROOT_CLASSOF(self)	(GBL_CLASSOF	(GUM_Root, self)) 	//!< Casts an instance of a compatible element to a GUM_Root
+#define GUM_ROOT_CLASSOF(self)	(GBL_CLASSOF	(GUM_Root, self)) 	//!< Casts an instance of a compatible element to a GUM_RootClass
 //! @}
 
 #define GBL_SELF_TYPE 			 GUM_Root

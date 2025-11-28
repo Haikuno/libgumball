@@ -22,7 +22,7 @@
 #define GUM_IRESOURCE_TYPE				(GBL_TYPEID		(GUM_IResource)) 			//!< Returns the GUM_IResource Type UUID
 #define GUM_IRESOURCE(instance)	        (GBL_CAST		(GUM_IResource, instance)) 	//!< Casts an instance of a compatible element to a GUM_IResource
 #define GUM_IRESOURCE_CLASS(klass)		(GBL_CLASS_CAST (GUM_IResource, klass)) 	//!< Casts an class of a compatible element to a GUM_IResource
-#define GUM_IRESOURCE_CLASSOF(instance)	(GBL_CLASSOF	(GUM_IResource, instance))	//!< Casts an instance of a compatible element to a GUM_IResource
+#define GUM_IRESOURCE_CLASSOF(instance)	(GBL_CLASSOF	(GUM_IResource, instance))	//!< Casts an instance of a compatible element to a GUM_IResourceClass
 //! @}
 
 #define GBL_SELF_TYPE 					 GUM_IResource

@@ -23,12 +23,12 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_FONT_TYPE 		    (GBL_TYPEID(GUM_Font))			  //!< Returns the GUM_Font Type UUID
-#define GUM_FONT(self) 		    (GBL_CAST(GUM_Font, self))		  //!< Casts an instance of a compatible element to a GUM_Font
-#define GUM_FONT_CLASS(klass)   (GBL_CLASS_CAST(GUM_Font, klass)) //!< Casts an class of a compatible element to a GUM_Font
-#define GUM_FONT_CLASSOF(self)  (GBL_CLASSOF(GUM_Font, self))	  //!< Casts an instance of a compatible element to a GUM_Font
+#define GUM_FONT_TYPE 		    (GBL_TYPEID		(GUM_Font))		   //!< Returns the GUM_Font Type UUID
+#define GUM_FONT(self) 		    (GBL_CAST		(GUM_Font, self))  //!< Casts an instance of a compatible element to a GUM_Font
+#define GUM_FONT_CLASS(klass)   (GBL_CLASS_CAST	(GUM_Font, klass)) //!< Casts an class of a compatible element to a GUM_Font
+#define GUM_FONT_CLASSOF(self)  (GBL_CLASSOF	(GUM_Font, self))  //!< Casts an instance of a compatible element to a GUM_FontClass
 
-#define GUM_TEXT_ALIGNMENT_TYPE (GBL_TYPEID(GUM_TextAlignment))	  //!< Returns the GUM_TextAlignment Type UUID
+#define GUM_TEXT_ALIGNMENT_TYPE (GBL_TYPEID(GUM_TextAlignment))	   //!< Returns the GUM_TextAlignment Type UUID
 //! @}
 
 GBL_DECLS_BEGIN

@@ -6,47 +6,30 @@
 #include <gimbal/gimbal_containers.h>
 #include <gimbal/gimbal_algorithms.h>
 
+static void GUM_update_recursive_(GblObject *pObject) {
+    GUM_Widget *pWidget = GBL_AS(GUM_Widget, pObject);
+    if (pWidget && pWidget->shouldUpdate) {
+        GUM_WIDGET_CLASSOF(pWidget)->pFnUpdate(pWidget);
+    }
+
+    GblObject *pChild = GblObject_childFirst(pObject);
+    while (pChild) {
+        GUM_update_recursive_(pChild);
+        pChild = GblObject_siblingNext(pChild);
+    }
+}
+
 GBL_EXPORT GBL_RESULT (GUM_update)(void) {
     static GUM_Root *pRoot = nullptr;
-
-    struct {
-        GblArrayList array;
-        char         stackData[64 * sizeof(GblObject*)];
-    } stackArray;
-
-    GblArrayList_construct(&stackArray.array,
-                        sizeof(GblObject*),
-                        0,
-                        NULL,
-                        sizeof(stackArray));
 
     GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
         if(!pRoot) {
             GUM_LOG_ERROR("No root element found! Create one first.");
             GBL_SCOPE_EXIT;
         }
-
-        GblObject *pRootObject = GBL_OBJECT(pRoot);
-        GblArrayList_pushBack(&stackArray.array, &pRootObject);
-
-        while (GblArrayList_size(&stackArray.array)) {
-            GblObject *pObject;
-            GblArrayList_popFront(&stackArray.array, &pObject);
-            GblObject *pChild = GblObject_childFirst(pObject);
-
-            while (pChild) {
-                GUM_Widget *pChildWidget = GBL_AS(GUM_Widget, pChild);
-                if (pChildWidget && pChildWidget->shouldUpdate) {
-                    GUM_WIDGET_CLASSOF(pChildWidget)->pFnUpdate(pChildWidget);
-                }
-                GblArrayList_pushBack(&stackArray.array, &pChild);
-                pChild = GblObject_siblingNext(pChild);
-            }
-
-        }
+        GUM_update_recursive_(GBL_OBJECT(pRoot));
     }
 
-    GblArrayList_destruct(&stackArray.array);
     return GBL_RESULT_SUCCESS;
 }
 
@@ -85,12 +68,14 @@ GBL_EXPORT GBL_RESULT (GUM_update_enableAll)(GblObject *pSelf) {
 }
 
 GBL_EXPORT GBL_RESULT GUM_draw(GUM_Renderer *pRenderer) {
-    size_t queueSize = GblArrayList_size(GUM_drawQueue_get());
+    const GblArrayList *pDrawQueue = GUM_drawQueue_get();
+    const size_t        queueSize  = GblArrayList_size(pDrawQueue);
+    GblObject **ppObjects          = (GblObject**)GblArrayList_data(pDrawQueue);
 
     for (size_t i = 0; i < queueSize; i++) {
-        GblObject **pObj = GblArrayList_at(GUM_drawQueue_get(), i);
-        GUM_WidgetClass *pWidgetClass = GBL_CLASS_AS(GUM_Widget, GBL_OBJECT_GET_CLASS(*pObj));
-        pWidgetClass->pFnDraw(GUM_WIDGET(*pObj), pRenderer);
+        GUM_WidgetClass *pWidgetClass = GUM_WIDGET_CLASSOF(ppObjects[i]);
+        GUM_Widget      *pWidget      = GUM_WIDGET(ppObjects[i]);
+        pWidgetClass->pFnDraw(pWidget, pRenderer);
     }
 
     return GBL_RESULT_SUCCESS;
