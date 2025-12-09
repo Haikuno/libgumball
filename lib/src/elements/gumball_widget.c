@@ -485,6 +485,10 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget *pSelf, GUM_Renderer *pRenderer) {
 	return GBL_RESULT_SUCCESS;
 }
 
+static GBL_RESULT GUM_Widget_postDraw_(GUM_Widget *pSelf, GUM_Renderer *pRenderer) {
+    return GBL_RESULT_SUCCESS;
+}
+
 static GBL_RESULT GUM_WidgetClass_init_(GblClass *pClass, const void *pData) {
 	GBL_UNUSED(pData);
 

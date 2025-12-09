@@ -25,7 +25,7 @@
 */
 #define GUM_ROOT_TYPE			(GBL_TYPEID		(GUM_Root))			//!< Returns the GUM_Root Type UUID
 #define GUM_ROOT(self)			(GBL_CAST		(GUM_Root, self))	//!< Casts an instance of a compatible element to a GUM_Root
-#define GUM_ROOT_CLASS(klass)	(GBL_CLASS_CAST	(GUM_Root, klass)) 	//!< Casts an class of a compatible element to a GUM_Root
+#define GUM_ROOT_CLASS(klass)	(GBL_CLASS_CAST	(GUM_Root, klass)) 	//!< Casts a  class    of a compatible element to a GUM_RootClass
 #define GUM_ROOT_CLASSOF(self)	(GBL_CLASSOF	(GUM_Root, self)) 	//!< Casts an instance of a compatible element to a GUM_RootClass
 //! @}
 
@@ -39,8 +39,7 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Root);
  *  \extends GblModuleClass
  *  \brief   GUM_Root structure
  *
- * GUM_RootClass derives from GblModuleClass,
- * adding nothing new.
+ * GUM_RootClass derives from GblModuleClass, adding nothing new.
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Root, GblModule)
 
@@ -55,12 +54,12 @@ GBL_INSTANCE_DERIVE_EMPTY(GUM_Root, GblModule)
 //! \cond
 GblType GUM_Root_type(void);
 
-void 			GUM_drawQueue_init(void);
-void 			GUM_drawQueue_free(void);
-void 			GUM_drawQueue_push(GblObject *pObj);
-void 			GUM_drawQueue_remove(GblObject *pObj);
-void 			GUM_drawQueue_sort(void);
-GblArrayList 	*GUM_drawQueue_get(void);
+void 			GUM_drawQueue_init		(void);
+void 			GUM_drawQueue_free		(void);
+void 			GUM_drawQueue_push		(GblObject *pObj);
+void 			GUM_drawQueue_remove	(GblObject *pObj);
+void 			GUM_drawQueue_sort		(void);
+GblArrayList   *GUM_drawQueue_get		(void);
 //!\endcond
 
 GBL_DECLS_END

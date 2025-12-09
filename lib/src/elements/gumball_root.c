@@ -1,3 +1,4 @@
+#include "gumball/types/gumball_rectangle.h"
 #include <gumball/elements/gumball_widget.h>
 #include <gumball/elements/gumball_root.h>
 #include <gumball/types/gumball_renderer.h>
@@ -6,7 +7,7 @@
 #include <gimbal/gimbal_algorithms.h>
 
 
-static GblArrayList GUM_drawQueue_;
+static GblArrayList  GUM_drawQueue_;
 static GblLogger    *pLogger_ = nullptr;
 
 static GBL_RESULT GUM_Root_init_(GblInstance *pInstance) {

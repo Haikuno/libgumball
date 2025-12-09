@@ -9,8 +9,8 @@
  *
  * 	libGumball interfaces that can be implemented by types
  *
- * 	\author 2025 Agustín Bellagamba
- *	\copyright MIT License
+ * 	\author		2025 Agustín Bellagamba
+ *	\copyright	MIT License
 */
 
 #include "ifaces/gumball_iresource.h"

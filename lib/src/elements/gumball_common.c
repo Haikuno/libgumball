@@ -2,6 +2,7 @@
 #include <gumball/elements/gumball_root.h>
 #include <gumball/elements/gumball_common.h>
 #include <gumball/core/gumball_logger.h>
+#include <gumball/types/gumball_rectangle.h>
 
 #include <gimbal/gimbal_containers.h>
 #include <gimbal/gimbal_algorithms.h>

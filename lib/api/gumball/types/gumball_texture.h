@@ -21,10 +21,10 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_TEXTURE_TYPE 		  (GBL_TYPEID	  (GUM_Texture))
-#define GUM_TEXTURE(self) 		  (GBL_CAST		  (GUM_Texture, self))
-#define GUM_TEXTURE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Texture, klass))
-#define GUM_TEXTURE_CLASSOF(self) (GBL_CLASSOF	  (GUM_Texture, self))
+#define GUM_TEXTURE_TYPE 		  (GBL_TYPEID	  (GUM_Texture))		//!< Returns the GUM_Texture Type UUID
+#define GUM_TEXTURE(self) 		  (GBL_CAST		  (GUM_Texture, self))	//!< Casts an instance of a compatible resource to a GUM_Texture
+#define GUM_TEXTURE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Texture, klass))	//!< Casts a  class    of a compatible resource to a GUM_TextureClass
+#define GUM_TEXTURE_CLASSOF(self) (GBL_CLASSOF	  (GUM_Texture, self))	//!< Casts an instance of a compatible resource to a GUM_TextureClass
 //! @}
 
 #define GBL_SELF_TYPE GUM_Texture

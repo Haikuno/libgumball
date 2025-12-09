@@ -10,7 +10,7 @@
  *  It is used to load resources, returning refcounted pointers to them.
  *
  *  \todo
- * 		- Add support for audio and fonts
+ * 		- Add support for audio
  * 		- Back resources with a GblArena
  *
  *  \author 	2025 Agustín Bellagamba
@@ -31,8 +31,7 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Manager);
  *  \extends GblStaticClass
  * 	\brief GUM_Manager structure
  *
- *  GUM_ManagerClass derives from GblStaticClass,
- * 	adding nothing new to it.
+ *  GUM_ManagerClass derives from GblStaticClass, adding nothing new.
  *
 */
 //! \cond

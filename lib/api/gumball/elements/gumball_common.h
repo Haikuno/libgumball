@@ -9,8 +9,8 @@
  * 	gumball_common is a collection of macros that are
  * 	common to all elements in libGumball.
  *
- *  \author    2025 Agustín Bellagamba
- *  \copyright MIT License
+ *  \author		2025 Agustín Bellagamba
+ *  \copyright	MIT License
 */
 
 #include <gimbal/gimbal_meta.h>

@@ -14,12 +14,12 @@
  *
  *  \todo
  * 		- Make variables private
- * 		- Separate isRelative into position and size relative
+ * 		- Separate isRelative into position and size
  * 		- Add GUM_Vector2 position and size as properties
  * 		- Make border highlight configurable (color, thickness)
  *
- * 	\author 2025 Agustín Bellagamba
- *	\copyright MIT License
+ * 	\author		2025 Agustín Bellagamba
+ *	\copyright	MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
@@ -36,7 +36,7 @@
 */
 #define GUM_WIDGET_TYPE				(GBL_TYPEID		(GUM_Widget)) 			//!< Returns the GUM_Widget Type UUID
 #define GUM_WIDGET(self)			(GBL_CAST		(GUM_Widget, self)) 	//!< Casts an instance of a compatible element to a GUM_Widget
-#define GUM_WIDGET_CLASS(klass)		(GBL_CLASS_CAST (GUM_Widget, klass))	//!< Casts an class of a compatible element to a GUM_WidgetClass
+#define GUM_WIDGET_CLASS(klass)		(GBL_CLASS_CAST (GUM_Widget, klass))	//!< Casts a  class    of a compatible element to a GUM_WidgetClass
 #define GUM_WIDGET_CLASSOF(self)	(GBL_CLASSOF	(GUM_Widget, self))		//!< Casts an instance of a compatible element to a GUM_WidgetClass
 //! @}
 

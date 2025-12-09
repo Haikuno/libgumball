@@ -24,9 +24,9 @@
  *  @{
 */
 #define GUM_FONT_TYPE 		    (GBL_TYPEID		(GUM_Font))		   //!< Returns the GUM_Font Type UUID
-#define GUM_FONT(self) 		    (GBL_CAST		(GUM_Font, self))  //!< Casts an instance of a compatible element to a GUM_Font
-#define GUM_FONT_CLASS(klass)   (GBL_CLASS_CAST	(GUM_Font, klass)) //!< Casts an class of a compatible element to a GUM_Font
-#define GUM_FONT_CLASSOF(self)  (GBL_CLASSOF	(GUM_Font, self))  //!< Casts an instance of a compatible element to a GUM_FontClass
+#define GUM_FONT(self) 		    (GBL_CAST		(GUM_Font, self))  //!< Casts an instance of a compatible resource to a GUM_Font
+#define GUM_FONT_CLASS(klass)   (GBL_CLASS_CAST	(GUM_Font, klass)) //!< Casts a  class    of a compatible resource to a GUM_FontClass
+#define GUM_FONT_CLASSOF(self)  (GBL_CLASSOF	(GUM_Font, self))  //!< Casts an instance of a compatible resource to a GUM_FontClass
 
 #define GUM_TEXT_ALIGNMENT_TYPE (GBL_TYPEID(GUM_TextAlignment))	   //!< Returns the GUM_TextAlignment Type UUID
 //! @}
@@ -52,7 +52,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Font, GblBox, GUM_IResource)
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Font, GblBox)
 
-typedef enum GUM_TextAlignment {
+typedef enum : uint8_t {
 	GUM_TEXT_ALIGN_CENTER,  //!< Align the text to the center of the widget
 	GUM_TEXT_ALIGN_TOP,		//!< Align the text to the top of the widget
 	GUM_TEXT_ALIGN_RIGHT,	//!< Align the text to the right of the widget

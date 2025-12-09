@@ -12,8 +12,8 @@
 		- Animations
 		- GUM_Property_set/get
 
-	\author    2025 Agustín Bellagamba
-	\copyright MIT License
+	\author		2025 Agustín Bellagamba
+	\copyright	MIT License
 */
 
 #include "elements/gumball_root.h"

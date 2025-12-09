@@ -8,8 +8,8 @@
 
     This header file includes the entierty of libGumball
 
-    \author    2025 Agustín Bellagamba
-    \copyright MIT License
+    \author     2025 Agustín Bellagamba
+    \copyright  MIT License
 
 */
 

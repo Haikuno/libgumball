@@ -14,10 +14,10 @@
  *  	- Add a way to override cursor movement to the desired GUM_Button pointer.
  *      - Button highlighting animations
  *      - Make variables private
- * 		- Document signals.
+ * 		- Document signals
  *
- * 	\author 2025 Agustín Bellagamba
- *	\copyright MIT License
+ * 	\author		2025 Agustín Bellagamba
+ *	\copyright	MIT License
 */
 
 #include "gumball_widget.h"
@@ -28,7 +28,7 @@
 */
 #define GUM_BUTTON_TYPE				(GBL_TYPEID		(GUM_Button)) 			//!< Returns the GUM_Button Type UUID
 #define GUM_BUTTON(self)			(GBL_CAST		(GUM_Button, self)) 	//!< Casts an instance of a compatible element to a GUM_Button
-#define GUM_BUTTON_CLASS(klass)		(GBL_CLASS_CAST	(GUM_Button, klass)) 	//!< Casts an class of a compatible element to a GUM_ButtonClass
+#define GUM_BUTTON_CLASS(klass)		(GBL_CLASS_CAST	(GUM_Button, klass)) 	//!< Casts a  class    of a compatible element to a GUM_ButtonClass
 #define GUM_BUTTON_CLASSOF(self)	(GBL_CLASSOF	(GUM_Button, self))		//!< Casts an instance of a compatible element to a GUM_ButtonClass
 //! @}
 
@@ -42,8 +42,7 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Button);
  *	\extends GUM_WidgetClass
  *	\brief   GUM_Button structure
  *
- *	GUM_ButtonClass derives from GUM_WidgetClass,
- *	adding nothing new.
+ *	GUM_ButtonClass derives from GUM_WidgetClass, adding nothing new.
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Button, GUM_Widget)
 

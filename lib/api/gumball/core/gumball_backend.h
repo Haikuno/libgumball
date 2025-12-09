@@ -8,7 +8,7 @@
  *  \ingroup core
  *
  *  \todo
- *      - Add support for audio and fonts
+ *      - Add support for audio
  * 		- Texture rotation
  *
  *  \author 	2025 Agustín Bellagamba
@@ -31,6 +31,10 @@ GBL_RESULT GUM_Backend_rectangleLinesDraw				(GUM_Renderer   *pRenderer, GUM_Rec
 void 	   GUM_Backend_setLogger						(void);
 //! Resets the library's logger back to the default
 void 	   GUM_Backend_resetLogger						(void);
+//! Begins scissor mode
+GBL_RESULT GUM_Backend_beginScissor(GUM_Renderer *pRenderer, GUM_Rectangle clipRect);
+//! Ends scissor mode
+GBL_RESULT GUM_Backend_endScissor(GUM_Renderer *pRenderer);
 
 //! Loads a texture
 GBL_RESULT GUM_Backend_Texture_load						(GUM_IResource  *pResource, GblStringRef *pPath);
@@ -50,6 +54,8 @@ GBL_RESULT GUM_Backend_Font_measureText					(GUM_Font *pFont, GblStringRef *pTex
 //! Returns a pointer to the default font
 GUM_Font  *GUM_Backend_Font_default						(void);
 
+//! Returns the current timestamp in miliseconds since the program started
+uint32_t   GUM_Backend_timestamp						(void);
 
 GBL_DECLS_END
 

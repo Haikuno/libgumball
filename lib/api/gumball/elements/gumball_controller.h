@@ -18,8 +18,8 @@
  * 	   - Make variables private
  *     - Deprecate GUM_Controller_setSelectedButton once GUM_Property is implemented
  *
- * 	\author 2025 Agustín Bellagamba
- *	\copyright MIT License
+ * 	\author		2025 Agustín Bellagamba
+ *	\copyright	MIT License
 */
 
 #include "gumball_button.h"
@@ -28,10 +28,10 @@
  *  \brief Type UUID and cast operators
  *  @{
  */
-#define GUM_CONTROLLER_TYPE				(GBL_TYPEID		(GUM_Controller))
-#define GUM_CONTROLLER(self)			(GBL_CAST		(GUM_Controller, self))
-#define GUM_CONTROLLER_CLASS(klass)		(GBL_CLASS_CAST	(GUM_Controller, klass))
-#define GUM_CONTROLLER_CLASSOF(self)	(GBL_CLASSOF	(GUM_Controller, self))
+#define GUM_CONTROLLER_TYPE				(GBL_TYPEID		(GUM_Controller))			//!< Returns the GUM_Controller Type UUID
+#define GUM_CONTROLLER(self)			(GBL_CAST		(GUM_Controller, self))		//!< Casts an instance of a compatible element to a GUM_Controller
+#define GUM_CONTROLLER_CLASS(klass)		(GBL_CLASS_CAST	(GUM_Controller, klass))	//!< Casts a  class    of a compatible element to a GUM_ControllerClass
+#define GUM_CONTROLLER_CLASSOF(self)	(GBL_CLASSOF	(GUM_Controller, self))		//!< Casts an instance of a compatible element to a GUM_ControllerClass
 //! @}
 
 #define GBL_SELF_TYPE 					 GUM_Controller
@@ -39,12 +39,12 @@
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Controller);
 
-typedef enum {
+typedef enum : uint8_t {
     GUM_CONTROLLER_BUTTON_PRESS,
     GUM_CONTROLLER_BUTTON_RELEASE
 } GUM_CONTROLLER_BUTTON_STATE;
 
-typedef enum {
+typedef enum : uint8_t {
 	GUM_CONTROLLER_UP,
 	GUM_CONTROLLER_RIGHT,
 	GUM_CONTROLLER_DOWN,
@@ -59,8 +59,7 @@ typedef enum {
  *	\extends GUM_WidgetClass
  *	\brief 	 GUM_Controller structure
  *
- *	GUM_ControllerClass derives from GUM_WidgetClass,
- *	adding nothing new.
+ *	GUM_ControllerClass derives from GUM_WidgetClass, adding nothing new.
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Controller, GUM_Widget)
 

@@ -9,11 +9,10 @@
  *
  *  Custom types used by libGumball
  *
- * 	\author    2025 Agustín Bellagamba
- * 	\copyright MIT License
+ * 	\author		2025 Agustín Bellagamba
+ * 	\copyright	MIT License
 */
 
-#include "types/gumball_event.h"
 #include "types/gumball_font.h"
 #include "types/gumball_texture.h"
 #include "types/gumball_color.h"
