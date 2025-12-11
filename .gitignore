@@ -6,3 +6,4 @@ docs/*.txt
 docs/*.tag
 docs/*/
 lib/libgimbal/doc/html/
+.clangd
