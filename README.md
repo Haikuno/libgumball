@@ -22,13 +22,18 @@ git submodule update --init --recursive
 
 To build the project from the command-line, you can do the following:
 ```
-mkdir build
-cd build
-cmake ..
-cmake --build .
+mkdir -P build
+cmake -S . -B build
+cmake --build build --parallel
 ```
 
-You can also pass `-DGUM_ENABLE_EXAMPLES=ON` and/or `-DGUM_ENABLE_TESTS=ON` if you wish to build the examples / unit tests.
+You can optionally pass `-DGUM_BUILD_EXAMPLES=ON` if you wish to build the examples, like so:
+```
+mkdir -P build
+cmake -S . -B build -DGUM_BUILD_EXAMPLES=ON
+cmake --build build --parallel
+```
+The resulting example programs will be under `build/examples/`
 
 # Using #
 This library is meant to be included as a submodule of your own project.
@@ -41,7 +46,7 @@ git submodule update --init --recursive
 Then, in your CMakeLists.txt file, add the following:
 ```
 add_subdirectory(libgumball)
-taget_link_libraries(yourproject libGumball)
+target_link_libraries(yourproject libGumball)
 ```
 
 # Credits #
