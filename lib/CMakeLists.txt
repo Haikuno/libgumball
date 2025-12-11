@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 3.10)
-project(LibGumball)
-
-set(CMAKE_C_STANDARD 23)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-
 add_subdirectory(libgimbal)
 
 file(GLOB_RECURSE SRCS    CONFIGURE_DEPENDS	  src/*.c)
@@ -20,7 +14,7 @@ if (GUM_BUILD_BACKEND_RAYLIB)
 endif()
 
 if (PLATFORM_DREAMCAST)
-	include_directories(${KOS_PORTS}/include/raylib)
+	include_directories(${KOS_PORTS}/include/raylib) # To use <raylib.h> like in PC, instead of <raylib/raylib.h>
 endif()
 
 add_library(libGumball STATIC ${SRCS} ${HEADERS})

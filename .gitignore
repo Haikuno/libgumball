@@ -1,9 +1,11 @@
 build/
+
 .vscode/
 .zed/
+
 .cache/
+.clangd
+
 docs/*.txt
 docs/*.tag
 docs/*/
-lib/libgimbal/doc/html/
-.clangd

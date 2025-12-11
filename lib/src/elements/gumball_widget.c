@@ -106,7 +106,7 @@ static GBL_RESULT GUM_Widget_deactivate_(GUM_Widget *pSelf) {
 	if (pSelf->texture)
 		GUM_IResource_unref(GUM_IRESOURCE(pSelf->texture));
 
-	if (pSelf->label)
+	if (pSelf->label && pSelf->font != GUM_Backend_Font_default())
 		GUM_IResource_unref(GUM_IRESOURCE(pSelf->font));
 
 	return GBL_RESULT_SUCCESS;
