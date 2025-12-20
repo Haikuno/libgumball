@@ -8,27 +8,27 @@
 
 // TODO: make these private variables!
 static GblHashSet GUM_Manager_hashSet_;
-static char GUM_Manager_currentPath_[1024];
+static char       GUM_Manager_currentPath_[1024];
 
 typedef struct GUM_HashSetEntry {
-    GUM_IResource *pResource;
-    GblQuark quark;
+    GUM_IResource* pResource;
+    GblQuark       quark;
 } GUM_HashSetEntry;
 
-static GblHash resourceHasher_(const GblHashSet *pSet, const void *pItem) {
+static GblHash resourceHasher_(const GblHashSet* pSet, const void* pItem) {
     GBL_UNUSED(pSet);
-    GUM_HashSetEntry *pEntry = (GUM_HashSetEntry*)pItem;
+    GUM_HashSetEntry* pEntry = (GUM_HashSetEntry*)pItem;
     return gblHash(&pEntry->quark, sizeof(GblQuark));
 }
 
-static GblBool resourceComparator_(const GblHashSet *pSelf, const void *pEntry1, const void *pEntry2) {
+static GblBool resourceComparator_(const GblHashSet* pSelf, const void* pEntry1, const void* pEntry2) {
     GBL_UNUSED(pSelf);
-    const GUM_HashSetEntry *pResEntry1 = (const GUM_HashSetEntry*)pEntry1;
-    const GUM_HashSetEntry *pResEntry2 = (const GUM_HashSetEntry*)pEntry2;
+    const GUM_HashSetEntry* pResEntry1 = (const GUM_HashSetEntry*)pEntry1;
+    const GUM_HashSetEntry* pResEntry2 = (const GUM_HashSetEntry*)pEntry2;
     return pResEntry1->quark == pResEntry2->quark;
 }
 
-static bool isExtension(const GblStringView path, GblStringRef **extensions, GblStringRef **outExt) {
+static bool isExtension(const GblStringView path, GblStringRef** extensions, GblStringRef** outExt) {
     for (size_t i = 0; extensions[i]; i++) {
         if (GblStringView_endsWith(path, extensions[i])) {
             *outExt = extensions[i];
@@ -39,7 +39,7 @@ static bool isExtension(const GblStringView path, GblStringRef **extensions, Gbl
     return false;
 }
 
-GBL_EXPORT GUM_IResource *GUM_Manager_load(GblStringRef *path) {
+GBL_EXPORT GUM_IResource* GUM_Manager_load(GblStringRef* path) {
     GUM_LOG_DEBUG_PUSH("GUM_Manager_load() called...");
 
     if (!path) {
@@ -49,7 +49,7 @@ GBL_EXPORT GUM_IResource *GUM_Manager_load(GblStringRef *path) {
 
     GUM_LOG_DEBUG("Path is %s", path);
 
-    GblClass *managerClass = GblClass_refDefault(GUM_MANAGER_TYPE);
+    GblClass*       managerClass = GblClass_refDefault(GUM_MANAGER_TYPE);
     GblStringBuffer stringBuffer;
 
     GUM_LOG_DEBUG_SCOPE("Creating string buffer...") {
@@ -62,13 +62,10 @@ GBL_EXPORT GUM_IResource *GUM_Manager_load(GblStringRef *path) {
     GblStringBuffer_prepend(&stringBuffer, "/");
     GblStringBuffer_prepend(&stringBuffer, GUM_Manager_currentPath_);
 
-    GblStringRef *fullPath = GblStringBuffer_cString(&stringBuffer);
+    GblStringRef* fullPath = GblStringBuffer_cString(&stringBuffer);
     GUM_LOG_DEBUG("Full path is %s", fullPath);
 
-    GUM_HashSetEntry entry = {
-        .pResource = nullptr,
-        .quark = GblQuark_fromString(fullPath)
-    };
+    GUM_HashSetEntry entry = { .pResource = nullptr, .quark = GblQuark_fromString(fullPath) };
 
     // Check if the resource is already loaded
     if (GblHashSet_contains(&GUM_Manager_hashSet_, (const void*)&entry)) {
@@ -80,7 +77,7 @@ GBL_EXPORT GUM_IResource *GUM_Manager_load(GblStringRef *path) {
     GUM_LOG_DEBUG_SCOPE("Resource was not loaded before! Loading...") {
         GUM_LOG_DEBUG_PUSH("Checking if file exists");
 
-        FILE *file = fopen(fullPath, "rb");
+        FILE* file = fopen(fullPath, "rb");
 
         if (!file) {
             GUM_LOG_ERROR("File does not exist!");
@@ -93,18 +90,14 @@ GBL_EXPORT GUM_IResource *GUM_Manager_load(GblStringRef *path) {
         fclose(file);
 
         GblStringView stringView = GblStringView_fromString(fullPath);
-        GblStringRef *extension = nullptr;
+        GblStringRef* extension  = nullptr;
 
         // TODO: supported extensions should be backend specific
 
-        static GblStringRef *texture_extensions[] = {
-            ".png", ".bmp", ".tga", ".jpg", ".gif", ".hdr", ".pic",
-            ".psd", ".dds", ".ktx", ".ktx2", ".pkm", ".pvr", ".astc", nullptr
-        };
+        static GblStringRef* texture_extensions[] = { ".png", ".bmp", ".tga",  ".jpg", ".gif", ".hdr",  ".pic", ".psd",
+                                                      ".dds", ".ktx", ".ktx2", ".pkm", ".pvr", ".astc", nullptr };
 
-        static GblStringRef *font_extensions[] = {
-            ".ttf", ".otf", ".fnt", ".bdf", nullptr
-        };
+        static GblStringRef* font_extensions[] = { ".ttf", ".otf", ".fnt", ".bdf", nullptr };
 
         GblType resourceType = 0;
         GUM_LOG_DEBUG_SCOPE("Checking for resource type...") {
@@ -120,7 +113,6 @@ GBL_EXPORT GUM_IResource *GUM_Manager_load(GblStringRef *path) {
                 resourceType = GUM_FONT_TYPE;
                 GBL_SCOPE_EXIT;
             }
-
         }
 
         if (!resourceType) {
@@ -137,7 +129,7 @@ GBL_EXPORT GUM_IResource *GUM_Manager_load(GblStringRef *path) {
         GUM_LOG_DEBUG("Resource loaded successfuly!");
     }
 
-    end:
+end:
     GUM_LOG_POP(1);
     GblClass_unrefDefault(managerClass);
     GblStringBuffer_destruct(&stringBuffer);
@@ -146,7 +138,7 @@ GBL_EXPORT GUM_IResource *GUM_Manager_load(GblStringRef *path) {
     return nullptr;
 }
 
-GBL_EXPORT void GUM_Manager_unload(GUM_IResource *pResource) {
+GBL_EXPORT void GUM_Manager_unload(GUM_IResource* pResource) {
     GUM_LOG_DEBUG_SCOPE("GUM_Manager_unload() called...") {
         if (!pResource) {
             GUM_LOG_ERROR("Resource passed to GUM_Manager_unload() is null");
@@ -156,10 +148,7 @@ GBL_EXPORT void GUM_Manager_unload(GUM_IResource *pResource) {
         GblQuark quark;
         GUM_IRESOURCE_CLASSOF(pResource)->pFnQuark(pResource, &quark);
 
-        GUM_HashSetEntry entry = {
-            .pResource = pResource,
-            .quark = quark
-        };
+        GUM_HashSetEntry entry = { .pResource = pResource, .quark = quark };
 
         GUM_LOG_DEBUG_SCOPE("Checking if the resource is loaded...") {
             if (!GblHashSet_contains(&GUM_Manager_hashSet_, (const void*)&entry)) {
@@ -172,7 +161,7 @@ GBL_EXPORT void GUM_Manager_unload(GUM_IResource *pResource) {
                 GUM_IResource_unref(pResource);
 
                 GUM_LOG_DEBUG_SCOPE("Checking if the resource is still being used...") {
-                    if(GblBox_refCount(GBL_BOX(pResource)) > 1) {
+                    if (GblBox_refCount(GBL_BOX(pResource)) > 1) {
                         GUM_LOG_ERROR("Attempted to unload a resource that is still being used!");
                         GBL_SCOPE_EXIT;
                     }
@@ -185,18 +174,15 @@ GBL_EXPORT void GUM_Manager_unload(GUM_IResource *pResource) {
     }
 }
 
-GBL_RESULT GUM_ManagerClass_init_(GblClass *pClass, const void *pData) {
-	GBL_UNUSED(pData);
+GBL_RESULT GUM_ManagerClass_init_(GblClass* pClass, const void* pData) {
+    GBL_UNUSED(pData);
 
     if (!GblType_classRefCount(GUM_MANAGER_TYPE)) {
-        GblHashSet_construct(&GUM_Manager_hashSet_,
-                             sizeof(GUM_HashSetEntry),
-                             resourceHasher_,
-                             resourceComparator_);
+        GblHashSet_construct(&GUM_Manager_hashSet_, sizeof(GUM_HashSetEntry), resourceHasher_, resourceComparator_);
         getcwd(GUM_Manager_currentPath_, 1024);
     }
 
-	return GBL_RESULT_SUCCESS;
+    return GBL_RESULT_SUCCESS;
 }
 
 GblType GUM_Manager_type(void) {
@@ -205,8 +191,8 @@ GblType GUM_Manager_type(void) {
     if (type == GBL_INVALID_TYPE) {
         type = GblType_register(GblQuark_internStatic("GUM_Manager"),
                                 GBL_STATIC_CLASS_TYPE,
-                                &(static GblTypeInfo){.classSize = sizeof(GUM_ManagerClass),
-                                                      .pFnClassInit = GUM_ManagerClass_init_},
+                                &(static GblTypeInfo){ .classSize    = sizeof(GUM_ManagerClass),
+                                                       .pFnClassInit = GUM_ManagerClass_init_ },
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC | GBL_TYPE_FLAG_CLASS_PINNED);
     }
 

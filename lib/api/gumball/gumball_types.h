@@ -3,14 +3,12 @@
 
 // View this file's documentation online: https://libgumball.psyops.studio/gumball__types_8h.html
 
-/*! \file
- *  \brief Types module-wide include
- *  \ingroup types
+/*!  \file
+ *   \brief      Types module-wide include
+ *   \ingroup    types
  *
- *  Custom types used by libGumball
- *
- * 	\author		2025 Agustín Bellagamba
- * 	\copyright	MIT License
+ *   \author     2025 Agustín Bellagamba
+ *   \copyright  MIT License
 */
 
 #include "types/gumball_font.h"
@@ -20,8 +18,10 @@
 #include "types/gumball_vector2.h"
 #include "types/gumball_renderer.h"
 
-/*! \defgroup types Types
-	\brief	  Types
+/*!  \defgroup types Types
+ *   \brief    Types
+ *
+ *   Custom types used by libGumball
 */
 
 #endif // GUM_TYPES_H

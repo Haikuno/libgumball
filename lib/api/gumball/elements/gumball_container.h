@@ -3,34 +3,34 @@
 
 // View this file's documentation online: https://libgumball.psyops.studio/gumball__container_8h.html
 
-/*! \file
- *  \ref     GUM_Container "GUM_Container data structure and hierarchy graph"
- *  \ingroup elements
+/*!  \file
+ *   \ref     GUM_Container "GUM_Container data structure and hierarchy graph"
+ *   \ingroup elements
  *
- * 	GUM_Container is a container element that can hold other widgets.
- *  It can be used to group widgets together, and to optionally automatically resize / align them as needed.
+ *   GUM_Container is a container element that can hold other widgets.
+ *   It can be used to group widgets together, and to optionally automatically resize / align them as needed.
  *
- *  \todo
- *  	- Make variables private
- *      - Make orientation an enum
- *      - Add scrolling
+ *   \todo
+ *       - Make variables private
+ *       - Make orientation an enum
+ *       - Add scrolling
  *
- *  \author     2025 Agustín Bellagamba
- *  \copyright  MIT License
+ *   \author     2025 Agustín Bellagamba
+ *   \copyright  MIT License
 */
 
 #include "gimbal/meta/classes/gimbal_primitives.h"
 #include "gumball_widget.h"
 #include <stdint.h>
 
-/*! \name  Type System
- *  \brief Type UUID and cast operators
- *  @{
+/*!  \name  Type System
+ *   \brief Type UUID and cast operators
+ *   @{
 */
-#define GUM_CONTAINER_TYPE				(GBL_TYPEID     (GUM_Container))            //!< Returns the GUM_Container Type UUID
-#define GUM_CONTAINER(self)				(GBL_CAST       (GUM_Container, self))      //!< Casts an instance of a compatible element to a GUM_Container
-#define GUM_CONTAINER_CLASS(klass)		(GBL_CLASS_CAST (GUM_Container, klass))     //!< Casts a  class    of a compatible element to a GUM_ContainerClass
-#define GUM_CONTAINER_CLASSOF(self)	    (GBL_CLASSOF    (GUM_Container, self))      //!< Casts an instance of a compatible element to a GUM_ContainerClass
+#define GUM_CONTAINER_TYPE                (GBL_TYPEID     (GUM_Container))            //!< Returns the GUM_Container Type UUID
+#define GUM_CONTAINER(self)               (GBL_CAST       (GUM_Container, self))      //!< Casts an instance of a compatible element to a GUM_Container
+#define GUM_CONTAINER_CLASS(klass)        (GBL_CLASS_CAST (GUM_Container, klass))     //!< Casts a  class    of a compatible element to a GUM_ContainerClass
+#define GUM_CONTAINER_CLASSOF(self)       (GBL_CLASSOF    (GUM_Container, self))      //!< Casts an instance of a compatible element to a GUM_ContainerClass
 //! @}
 
 #define GBL_SELF_TYPE                    GUM_Container
@@ -38,36 +38,32 @@
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Container);
 
-/*!
-    \struct  GUM_ContainerClass
-    \extends GUM_WidgetClass
-    \brief   GUM_Container structure
-
-    GUM_ContainerClass derives from GUM_WidgetClass,
-    adding a virtual function to update the content of the container.
+/*!  \struct  GUM_ContainerClass
+ *   \extends GUM_WidgetClass
+ *   \brief   GUM_Container structure
+ *
+ *   GUM_ContainerClass derives from GUM_WidgetClass,
+ *   adding a virtual function to update the content of the container.
 */
 GBL_CLASS_DERIVE(GUM_Container, GUM_Widget)
     GBL_RESULT (*pFnUpdateContent)(GBL_SELF); //!< Updates the content of the container, resizing and realigning child widgets as needed.
 GBL_CLASS_END
 
-/*!
- *	\class   GUM_Container
- *	\extends GUM_Widget
- *	\brief   Container element
- *
+/*!  \class   GUM_Container
+ *   \extends GUM_Widget
+ *   \brief   Container element
 */
 
-/*!
-	\name  Properties
-	\brief Properties you can set/get at or after creation.
-    \note  You can also set/get properties from parent classes (see \ref GUM_Container).
-	@{
+/*  \name  Properties
+ *  \brief Properties you can set/get at or after creation.
+ *  \note  You can also set/get properties from parent classes (see \ref GUM_Container).
+ *  @{
 */
 GBL_INSTANCE_DERIVE(GUM_Container, GUM_Widget)
     float padding;          //!< The space between the container's border and its child widgets.                        Default value is 5
     float margin;           //!< The space between child widgets.                                                       Default value is 5
-    float minChildSize;     /*! The minimum amount of space a child widget should take,
-                                in percentage of the container's size.                                                  Default value is 0.15 (15%) */
+    float minChildSize;     /*!  The minimum amount of space a child widget should take,
+                                 in percentage of the container's size.                                                 Default value is 0.15 (15%) */
     char orientation;       //!< 'h' for horizontal, 'v' for vertical layout of child widgets.                          Default value is 'v'    \warning This is planned to be replaced by an enum.
     bool resizeWidgets;     //!< If child widgets should be resized to take an equal amount of space.                   Default value is true
     bool alignWidgets;      //!< If child widgets should be aligned.                                                    Default value is true
