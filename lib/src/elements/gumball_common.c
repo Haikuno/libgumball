@@ -51,19 +51,21 @@ GBL_EXPORT GBL_RESULT (GUM_update_enable)(GblObject *pSelf) {
 }
 
 GBL_EXPORT GBL_RESULT (GUM_update_disableAll)(GblObject *pSelf) {
+    GUM_update_disable(pSelf);
     size_t childCount = GblObject_childCount(pSelf);
     for (size_t i = 0; i < childCount; i++) {
         GblObject *childObj = GblObject_findChildByIndex(pSelf, i);
-        (GUM_update_disable)(childObj);
+        (GUM_update_disableAll)(childObj);
     }
     return GBL_RESULT_SUCCESS;
 }
 
 GBL_EXPORT GBL_RESULT (GUM_update_enableAll)(GblObject *pSelf) {
+    GUM_update_enable(pSelf);
     size_t childCount = GblObject_childCount(pSelf);
     for (size_t i = 0; i < childCount; i++) {
         GblObject *childObj = GblObject_findChildByIndex(pSelf, i);
-        (GUM_update_enable)(childObj);
+        (GUM_update_enableAll)(childObj);
     }
     return GBL_RESULT_SUCCESS;
 }
@@ -92,12 +94,12 @@ GBL_EXPORT void (GUM_draw_enable)(GblObject *pSelf) {
 }
 
 GBL_EXPORT void (GUM_draw_disableAll)(GblObject *pSelf) {
+    GUM_draw_disable(pSelf);
     size_t childCount = GblObject_childCount(pSelf);
     for (size_t i = 0; i < childCount; i++) {
         GblObject *childObj = GblObject_findChildByIndex(pSelf, i);
         GUM_draw_disableAll(childObj);
     }
-    GUM_draw_disable(pSelf);
 }
 
 GBL_EXPORT void (GUM_draw_enableAll)(GblObject *pSelf) {
