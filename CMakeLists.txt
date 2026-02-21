@@ -1,13 +1,13 @@
+cmake_minimum_required(VERSION 3.10)
 project(LibGumball)
 
-cmake_minimum_required(VERSION 3.10)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 option(GUM_BUILD_DOCS             "Build docs"            OFF)
 option(GUM_BUILD_EXAMPLES         "Build examples"        OFF)
 option(GUM_BUILD_TESTS            "Build unit tests"      OFF) # Not yet implemented
-option(GUM_BUILD_BACKEND_RAYLIB   "Enable raylib backend"  ON)
+option(GUM_BUILD_BACKEND_RAYLIB   "Enable raylib backend" ON )
 option(GUM_BUILD_BACKEND_SDL3     "Enable SDL3 backend"   OFF) # Not yet implemented
 
 add_subdirectory(lib)
