@@ -5,7 +5,10 @@ build/
 
 .cache/
 .clangd
+.ignore
 
 docs/*.txt
 docs/*.tag
 docs/*/
+
+compile_commands.json

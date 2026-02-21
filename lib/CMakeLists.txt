@@ -1,7 +1,7 @@
 add_subdirectory(libgimbal)
 
-file(GLOB_RECURSE SRCS    CONFIGURE_DEPENDS	  src/*.c)
-file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS   api/gumball/*.h)
+file(GLOB_RECURSE SRCS    CONFIGURE_DEPENDS	src/*.c)
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS api/gumball/*.h)
 list(FILTER SRCS EXCLUDE REGEX ".*/backends/.*")
 
 if (GUM_BUILD_BACKEND_SDL3)

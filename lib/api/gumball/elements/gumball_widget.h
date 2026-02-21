@@ -40,7 +40,7 @@
 #define GUM_WIDGET_CLASSOF(self)    (GBL_CLASSOF    (GUM_Widget, self))     //!< Casts an instance of a compatible element to a GUM_WidgetClass
 //! @}
 
-#define GBL_SELF_TYPE                  GUM_Widget
+#define GBL_SELF_TYPE                GUM_Widget
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Widget);

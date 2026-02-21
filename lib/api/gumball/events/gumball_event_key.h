@@ -6,7 +6,7 @@
 /*!  \file
  *   \ingroup events
  *
- *   Event type for key events
+ *   Event type used to represent keyboard key presses and releases.
  *
  *   \author     2025 Agustín Bellagamba
  *   \copyright  MIT License
