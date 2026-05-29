@@ -77,27 +77,25 @@ static GUM_Button* findSelectableInContainer_(GblObject* pContainer, size_t pref
         if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate) return pButton;
     }
 
+    // forwards
     if (next) {
-        GblObject* pChild = GblObject_childFirst(pContainer);
-
-        while (pChild) {
+        GblObject_foreachChild(pContainer, pChild) {
             GUM_Button* pButton = GBL_AS(GUM_Button, pChild);
             if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate) return pButton;
-            pChild = GblObject_siblingNext(pChild);
         }
-
-        // GblObject_foreachChild(pContainer, pChild) {
-        //     GUM_Button *pButton = GBL_AS(GUM_Button, pChild);
-        //     if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate) return pButton;
-        // }
     }
 
-    GblObject* pChildLast = GblObject_findChildByIndex(pContainer, GblObject_childCount(pContainer) - 1);
+    // backwards
+    else {
+        GblObject* pChildLast = GblObject_findChildByIndex(pContainer, GblObject_childCount(pContainer) - 1);
 
-    while (pChildLast) {
-        GUM_Button* pButton = GBL_AS(GUM_Button, pChildLast);
-        if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate) return pButton;
-        pChildLast = GblObject_siblingPreviousByType(pChildLast, GUM_BUTTON_TYPE);
+        while (pChildLast) {
+            GUM_Button* pButton = GBL_AS(GUM_Button, pChildLast);
+            if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate)
+                return pButton;
+            pChildLast = GblObject_siblingPreviousByType(pChildLast, GUM_BUTTON_TYPE);
+        }
+
     }
 
     return nullptr;
@@ -256,17 +254,16 @@ static GUM_Button* findSelectableDescendant(GblObject* pSelf, bool filterByDefau
     while (GblArrayList_size(&stackArray.array)) {
         GblObject* pObject;
         GblArrayList_popFront(&stackArray.array, &pObject);
-        GblObject* pChild = GblObject_childFirst(pObject);
 
-        while (pChild) {
+        GblObject_foreachChild(pObject, pChild) {
             GUM_Button* pChildButton = GBL_AS(GUM_Button, pChild);
-            if (pChildButton && pChildButton->isSelectable && GUM_WIDGET(pChildButton)->shouldUpdate
+            if (pChildButton && pChildButton->isSelectable
+                && GUM_WIDGET(pChildButton)->shouldUpdate
                 && (filterByDefault ? pChildButton->isSelectedByDefault : 1)) {
-                pResultButton = pChildButton;
-                goto done;
-            }
+                    pResultButton = pChildButton;
+                    goto done;
+                }
             GblArrayList_pushBack(&stackArray.array, &pChild);
-            pChild = GblObject_siblingNext(pChild);
         }
     }
 
@@ -274,6 +271,7 @@ done:
     GblArrayList_destruct(&stackArray.array);
     return pResultButton;
 }
+
 static GBL_RESULT GUM_Controller_handleButton_(GUM_Controller* pSelf, GUM_CONTROLLER_BUTTON_STATE eventState,
                                                GUM_CONTROLLER_BUTTON_ID eventButton) {
     GUM_Button**     ppButton = &pSelf->pSelectedButton;

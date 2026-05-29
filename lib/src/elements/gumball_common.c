@@ -13,14 +13,12 @@ static void GUM_update_recursive_(GblObject* pObject) {
         GUM_WIDGET_CLASSOF(pWidget)->pFnUpdate(pWidget);
     }
 
-    GblObject* pChild = GblObject_childFirst(pObject);
-    while (pChild) {
+    GblObject_foreachChild(pObject, pChild) {
         GUM_update_recursive_(pChild);
-        pChild = GblObject_siblingNext(pChild);
     }
 }
 
-GBL_EXPORT GBL_RESULT(GUM_update)(void) {
+GBL_EXPORT GBL_RESULT (GUM_update)(void) {
     static GUM_Root* pRoot = nullptr;
 
     GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
@@ -34,7 +32,7 @@ GBL_EXPORT GBL_RESULT(GUM_update)(void) {
     return GBL_RESULT_SUCCESS;
 }
 
-GBL_EXPORT GBL_RESULT(GUM_update_disable)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_update_disable)(GblObject* pSelf) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
     if GBL_UNLIKELY (!pWidget) return GBL_RESULT_ERROR_INVALID_TYPE;
 
@@ -42,7 +40,7 @@ GBL_EXPORT GBL_RESULT(GUM_update_disable)(GblObject* pSelf) {
     return GBL_RESULT_SUCCESS;
 }
 
-GBL_EXPORT GBL_RESULT(GUM_update_enable)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_update_enable)(GblObject* pSelf) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
     if GBL_UNLIKELY (!pWidget) return GBL_RESULT_ERROR_INVALID_TYPE;
 
@@ -50,7 +48,7 @@ GBL_EXPORT GBL_RESULT(GUM_update_enable)(GblObject* pSelf) {
     return GBL_RESULT_SUCCESS;
 }
 
-GBL_EXPORT GBL_RESULT(GUM_update_disableAll)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_update_disableAll)(GblObject* pSelf) {
     GUM_update_disable(pSelf);
     size_t childCount = GblObject_childCount(pSelf);
     for (size_t i = 0; i < childCount; i++) {
@@ -60,7 +58,7 @@ GBL_EXPORT GBL_RESULT(GUM_update_disableAll)(GblObject* pSelf) {
     return GBL_RESULT_SUCCESS;
 }
 
-GBL_EXPORT GBL_RESULT(GUM_update_enableAll)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_update_enableAll)(GblObject* pSelf) {
     GUM_update_enable(pSelf);
     size_t childCount = GblObject_childCount(pSelf);
     for (size_t i = 0; i < childCount; i++) {
@@ -110,7 +108,7 @@ GBL_EXPORT void(GUM_draw_enableAll)(GblObject* pSelf) {
     }
 }
 
-GBL_EXPORT GBL_RESULT(GUM_unref)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
     GUM_draw_disableAll(pSelf);
 
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);

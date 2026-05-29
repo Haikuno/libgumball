@@ -87,13 +87,9 @@ static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject* pSelf) {
     }
 
     // bump z-index of children (if any)
-    GblObject* pChild = GblObject_childFirst(pSelf);
-    if (!pChild) return GBL_RESULT_SUCCESS;
-
-    while (pChild) {
+    GblObject_foreachChild(pSelf, pChild) {
         GUM_Widget* pWidget = GBL_AS(GUM_Widget, pChild);
         if (pWidget) pWidget->z_index++;
-        pChild = GblObject_siblingNext(pChild);
     }
 
     GUM_drawQueue_sort();
