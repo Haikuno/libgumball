@@ -110,7 +110,7 @@ GBL_EXPORT GBL_RESULT (GUM_draw_enable)(GblObject* pSelf) {
 
 GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)(GblObject* pSelf) {
     GBL_RESULT result = GUM_draw_disable(pSelf);
-    if GBL_UNLIKELY ( result != GBL_RESULT_SUCCESS)
+    if GBL_UNLIKELY (result != GBL_RESULT_SUCCESS)
         return result;
 
     GblObject_foreachChild(pSelf, pChild)
@@ -121,7 +121,7 @@ GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)(GblObject* pSelf) {
 
 GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)(GblObject* pSelf) {
     GBL_RESULT result = GUM_draw_enable(pSelf);
-    if GBL_UNLIKELY ( result != GBL_RESULT_SUCCESS)
+    if GBL_UNLIKELY (result != GBL_RESULT_SUCCESS)
         return result;
 
     GblObject_foreachChild(pSelf, pChild)

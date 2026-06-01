@@ -143,7 +143,15 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject, const Gb
             pSelf->border_r = (border_color_ >> 24) & 0xFF;
             pSelf->border_g = (border_color_ >> 16) & 0xFF;
             pSelf->border_b = (border_color_ >> 8)  & 0xFF;
-            pSelf->border_a = border_color_         & 0xFF;
+            pSelf->border_a =  border_color_        & 0xFF;
+            break;
+        case GUM_Widget_Property_Id_font_color:
+            uint32_t font_color_;
+            GblVariant_valueCopy(pValue, &font_color_);
+            pSelf->font_r = (font_color_ >> 24) & 0XFF;
+            pSelf->font_g = (font_color_ >> 16) & 0XFF;
+            pSelf->font_b = (font_color_ >>  8) & 0XFF;
+            pSelf->font_a =  font_color_        & 0XFF;
             break;
         case GUM_Widget_Property_Id_font_border_color:
             uint32_t font_border_color_;
@@ -151,7 +159,7 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject, const Gb
             pSelf->font_border_r = (font_border_color_ >> 24) & 0xFF;
             pSelf->font_border_g = (font_border_color_ >> 16) & 0xFF;
             pSelf->font_border_b = (font_border_color_ >> 8)  & 0xFF;
-            pSelf->font_border_a = font_border_color_         & 0xFF;
+            pSelf->font_border_a =  font_border_color_        & 0xFF;
             break;
         case GUM_Widget_Property_Id_r:
             GblVariant_valueCopy(pValue, &pSelf->r);
@@ -273,6 +281,12 @@ static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject* pObject, const
                                          pSelf->border_g << 16 |
                                          pSelf->border_b << 8  |
                                          pSelf->border_a);
+            break;
+        case GUM_Widget_Property_Id_font_color:
+            GblVariant_setUint32(pValue, pSelf->font_r << 24 |
+                                         pSelf->font_g << 16 |
+                                         pSelf->font_b << 8  |
+                                         pSelf->font_a);
             break;
         case GUM_Widget_Property_Id_font_border_color:
             GblVariant_setUint32(pValue, pSelf->font_border_r << 24 |
