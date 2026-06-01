@@ -74,28 +74,20 @@ static GUM_Button* findSelectableInContainer_(GblObject* pContainer, size_t pref
     if (preferredIndex != GBL_INDEX_INVALID) {
         GUM_Button* pButton = GBL_AS(GUM_Button, GblObject_findChildByIndex(pContainer, preferredIndex));
 
-        if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate) return pButton;
+        if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate)
+            return pButton;
     }
 
-    // forwards
     if (next) {
         GblObject_foreachChild(pContainer, pChild) {
             GUM_Button* pButton = GBL_AS(GUM_Button, pChild);
             if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate) return pButton;
         }
-    }
-
-    // backwards
-    else {
-        GblObject* pChildLast = GblObject_findChildByIndex(pContainer, GblObject_childCount(pContainer) - 1);
-
-        while (pChildLast) {
-            GUM_Button* pButton = GBL_AS(GUM_Button, pChildLast);
-            if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate)
-                return pButton;
-            pChildLast = GblObject_siblingPreviousByType(pChildLast, GUM_BUTTON_TYPE);
+    } else {
+        GblObject_foreachChildReverse(pContainer, pChild) {
+            GUM_Button* pButton = GBL_AS(GUM_Button, pChild);
+            if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate) return pButton;
         }
-
     }
 
     return nullptr;
@@ -343,7 +335,7 @@ static GBL_RESULT GUM_Controller_update_(GUM_Widget* pSelf) {
 
         GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
 
-            if (!pRoot) {
+            if GBL_UNLIKELY(!pRoot) {
                 GUM_LOG_ERROR("No root element found! Create one first.");
                 GBL_SCOPE_EXIT;
             }

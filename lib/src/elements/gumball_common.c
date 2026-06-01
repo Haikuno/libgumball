@@ -9,32 +9,33 @@
 
 static void GUM_update_recursive_(GblObject* pObject) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
-    if (pWidget && pWidget->shouldUpdate) {
+    if (pWidget && pWidget->shouldUpdate)
         GUM_WIDGET_CLASSOF(pWidget)->pFnUpdate(pWidget);
-    }
 
-    GblObject_foreachChild(pObject, pChild) {
+    GblObject_foreachChild(pObject, pChild)
         GUM_update_recursive_(pChild);
-    }
 }
 
 GBL_EXPORT GBL_RESULT (GUM_update)(void) {
+    GBL_RESULT result      = GBL_RESULT_SUCCESS;
     static GUM_Root* pRoot = nullptr;
 
     GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
-        if (!pRoot) {
+        if GBL_UNLIKELY (!pRoot) {
             GUM_LOG_ERROR("No root element found! Create one first.");
+            result = GBL_RESULT_NOT_FOUND;
             GBL_SCOPE_EXIT;
         }
         GUM_update_recursive_(GBL_OBJECT(pRoot));
     }
 
-    return GBL_RESULT_SUCCESS;
+    return result;
 }
 
 GBL_EXPORT GBL_RESULT (GUM_update_disable)(GblObject* pSelf) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
-    if GBL_UNLIKELY (!pWidget) return GBL_RESULT_ERROR_INVALID_TYPE;
+    if GBL_UNLIKELY (!pWidget)
+        return GBL_RESULT_ERROR_INVALID_TYPE;
 
     pWidget->shouldUpdate = false;
     return GBL_RESULT_SUCCESS;
@@ -42,36 +43,43 @@ GBL_EXPORT GBL_RESULT (GUM_update_disable)(GblObject* pSelf) {
 
 GBL_EXPORT GBL_RESULT (GUM_update_enable)(GblObject* pSelf) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
-    if GBL_UNLIKELY (!pWidget) return GBL_RESULT_ERROR_INVALID_TYPE;
+    if GBL_UNLIKELY (!pWidget)
+        return GBL_RESULT_ERROR_INVALID_TYPE;
 
     pWidget->shouldUpdate = true;
     return GBL_RESULT_SUCCESS;
 }
 
 GBL_EXPORT GBL_RESULT (GUM_update_disableAll)(GblObject* pSelf) {
+    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
+    if GBL_UNLIKELY (!pWidget)
+        return GBL_RESULT_ERROR_INVALID_TYPE;
+
     GUM_update_disable(pSelf);
-    size_t childCount = GblObject_childCount(pSelf);
-    for (size_t i = 0; i < childCount; i++) {
-        GblObject* childObj = GblObject_findChildByIndex(pSelf, i);
-        (GUM_update_disableAll)(childObj);
-    }
+    GblObject_foreachChild(pSelf, pChild)
+        (GUM_update_disableAll)(pChild);
     return GBL_RESULT_SUCCESS;
 }
 
 GBL_EXPORT GBL_RESULT (GUM_update_enableAll)(GblObject* pSelf) {
+    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
+    if GBL_UNLIKELY (!pWidget)
+        return GBL_RESULT_ERROR_INVALID_TYPE;
+
     GUM_update_enable(pSelf);
-    size_t childCount = GblObject_childCount(pSelf);
-    for (size_t i = 0; i < childCount; i++) {
-        GblObject* childObj = GblObject_findChildByIndex(pSelf, i);
-        (GUM_update_enableAll)(childObj);
-    }
+    GblObject_foreachChild(pSelf, pChild)
+        (GUM_update_enableAll)(pChild);
     return GBL_RESULT_SUCCESS;
 }
 
 GBL_EXPORT GBL_RESULT GUM_draw(GUM_Renderer* pRenderer) {
     const GblArrayList* pDrawQueue = GUM_drawQueue_get();
     const size_t        queueSize  = GblArrayList_size(pDrawQueue);
-    GblObject**         ppObjects  = (GblObject**)GblArrayList_data(pDrawQueue);
+
+    if GBL_UNLIKELY (queueSize <= 0)
+        return GBL_RESULT_PARTIAL;
+
+    GblObject** ppObjects  = (GblObject**)GblArrayList_data(pDrawQueue);
 
     for (size_t i = 0; i < queueSize; i++) {
         GUM_WidgetClass* pWidgetClass = GUM_WIDGET_CLASSOF(ppObjects[i]);
@@ -82,30 +90,44 @@ GBL_EXPORT GBL_RESULT GUM_draw(GUM_Renderer* pRenderer) {
     return GBL_RESULT_SUCCESS;
 }
 
-GBL_EXPORT void(GUM_draw_disable)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_draw_disable)(GblObject* pSelf) {
+    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
+    if GBL_UNLIKELY (!pWidget)
+        return GBL_RESULT_ERROR_INVALID_TYPE;
+
     GUM_drawQueue_remove(pSelf);
+    return GBL_RESULT_SUCCESS;
 }
 
-GBL_EXPORT void(GUM_draw_enable)(GblObject* pSelf) {
+GBL_EXPORT GBL_RESULT (GUM_draw_enable)(GblObject* pSelf) {
+    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
+    if GBL_UNLIKELY (!pWidget)
+        return GBL_RESULT_ERROR_INVALID_TYPE;
+
     GUM_drawQueue_push(pSelf);
+    return GBL_RESULT_SUCCESS;
 }
 
-GBL_EXPORT void(GUM_draw_disableAll)(GblObject* pSelf) {
-    GUM_draw_disable(pSelf);
-    size_t childCount = GblObject_childCount(pSelf);
-    for (size_t i = 0; i < childCount; i++) {
-        GblObject* childObj = GblObject_findChildByIndex(pSelf, i);
-        GUM_draw_disableAll(childObj);
-    }
+GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)(GblObject* pSelf) {
+    GBL_RESULT result = GUM_draw_disable(pSelf);
+    if GBL_UNLIKELY ( result != GBL_RESULT_SUCCESS)
+        return result;
+
+    GblObject_foreachChild(pSelf, pChild)
+        (GUM_draw_disableAll)(pChild);
+
+    return GBL_RESULT_SUCCESS;
 }
 
-GBL_EXPORT void(GUM_draw_enableAll)(GblObject* pSelf) {
-    GUM_draw_enable(pSelf);
-    size_t childCount = GblObject_childCount(pSelf);
-    for (size_t i = childCount; i-- > 0;) {
-        GblObject* childObj = GblObject_findChildByIndex(pSelf, i);
-        GUM_draw_enableAll(childObj);
-    }
+GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)(GblObject* pSelf) {
+    GBL_RESULT result = GUM_draw_enable(pSelf);
+    if GBL_UNLIKELY ( result != GBL_RESULT_SUCCESS)
+        return result;
+
+    GblObject_foreachChild(pSelf, pChild)
+        GUM_draw_enableAll(pChild);
+
+    return GBL_RESULT_SUCCESS;
 }
 
 GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
@@ -116,11 +138,8 @@ GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
         GUM_WIDGET_CLASSOF(pSelf)->pFnDeactivate(pWidget);
     }
 
-    size_t childCount = GblObject_childCount(pSelf);
-    for (size_t i = childCount; i-- > 0;) {
-        GblObject* childObj = GblObject_findChildByIndex(pSelf, i);
-        if (childObj) GUM_unref(childObj);
-    }
+    GblObject_foreachChildReverse(pSelf, pChild)
+        GUM_unref(pChild);
 
     if GBL_UNLIKELY (GBL_TYPEOF(pSelf) == GUM_ROOT_TYPE) {
         GblModule_unregister(GBL_MODULE(pSelf));

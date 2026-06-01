@@ -110,11 +110,11 @@ GBL_EXPORT GBL_RESULT    (GUM_update_disable)   (GblObject* pSelf)          GBL_
 GBL_EXPORT GBL_RESULT    (GUM_update_enable)    (GblObject* pSelf)          GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT    (GUM_update_disableAll)(GblObject* pSelf)          GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT    (GUM_update_enableAll) (GblObject* pSelf)          GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT    (GUM_draw_enable)      (GblObject* pSelf)          GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT    (GUM_draw_disable)     (GblObject* pSelf)          GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT    (GUM_draw_enableAll)   (GblObject* pSelf)          GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT    (GUM_draw_disableAll)  (GblObject* pSelf)          GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT    (GUM_unref)            (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT void          (GUM_draw_enable)      (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT void          (GUM_draw_disable)     (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT void          (GUM_draw_enableAll)   (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT void          (GUM_draw_disableAll)  (GblObject* pSelf)          GBL_NOEXCEPT;
 //!\endcond
 
 #endif

@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
 
     // Create a basic widget
     GUM_Widget* pWidget = GUM_Widget_create(); // No parameters pased in -- uses default values
-                                               // We'll see how to set properties in chapter 2
+                                               // We'll see how to set properties in the next example
 
     // Main loop
     while (!WindowShouldClose()) {
