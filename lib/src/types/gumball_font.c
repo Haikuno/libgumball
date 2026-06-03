@@ -43,9 +43,10 @@ GblType GUM_TextAlignment_type(void) {
             GBL_ENUM_ENTRY(GUM_TEXT_ALIGN_RIGHT,  "Right" ),
             GBL_ENUM_ENTRY(GUM_TEXT_ALIGN_BOTTOM, "Bottom"),
             GBL_ENUM_ENTRY(GUM_TEXT_ALIGN_LEFT,   "Left"  ),
-            GBL_ENUM_ENTRY(GUM_TEXT_ALIGN_CENTER, "Center")};
+            GBL_ENUM_ENTRY(GUM_TEXT_ALIGN_CENTER, "Center"),
+            GBL_ENUM_ENTRY_LAST()};
 
-        type = GblEnum_register("TextAlignment", enumEntries);
+        type = GblEnum_register("GUM_TextAlignment", enumEntries);
     }
 
     return type;

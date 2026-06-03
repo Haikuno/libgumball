@@ -88,22 +88,22 @@ void GUM_drawQueue_free(void) {
     GblArrayList_destruct(&GUM_drawQueue_);
 }
 
-void GUM_drawQueue_push(GblObject* pObj) {
-    if (!pObj) return;
-    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObj);
+void GUM_drawQueue_push(GblObject* pObject) {
+    if (!pObject) return;
+    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
     if (!pWidget) return;
 
-    GblArrayList_pushBack(&GUM_drawQueue_, &pObj);
+    GblArrayList_pushBack(&GUM_drawQueue_, &pObject);
     GUM_drawQueue_sort();
 }
 
-void GUM_drawQueue_remove(GblObject* pObj) {
-    if (!pObj) return;
-    if (!GBL_AS(GUM_Widget, pObj)) return;
+void GUM_drawQueue_remove(GblObject* pObject) {
+    if (!pObject) return;
+    if (!GBL_AS(GUM_Widget, pObject)) return;
 
     for (size_t i = 0; i < GblArrayList_size(&GUM_drawQueue_); i++) {
         GblObject* pObjQueue = *(GblObject**)GblArrayList_at(&GUM_drawQueue_, i);
-        if (pObjQueue == pObj) {
+        if (pObjQueue == pObject) {
             GblArrayList_erase(&GUM_drawQueue_, i, 1);
             GUM_drawQueue_sort();
             return;

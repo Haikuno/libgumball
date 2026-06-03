@@ -54,8 +54,8 @@ GblType GUM_Root_type(void);
 
 void             GUM_drawQueue_init      (void);
 void             GUM_drawQueue_free      (void);
-void             GUM_drawQueue_push      (GblObject* pObj);
-void             GUM_drawQueue_remove    (GblObject* pObj);
+void             GUM_drawQueue_push      (GblObject* pObject);
+void             GUM_drawQueue_remove    (GblObject* pObject);
 void             GUM_drawQueue_sort      (void);
 GblArrayList*    GUM_drawQueue_get       (void);
 //!\endcond

@@ -104,17 +104,17 @@
 //!\cond
 #define GUM_draw_(renderer, ...) (GUM_draw)(renderer)
 
-GBL_EXPORT GBL_RESULT    (GUM_draw)             (GUM_Renderer* pRenderer)   GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update)           (void)                      GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update_disable)   (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update_enable)    (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update_disableAll)(GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update_enableAll) (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_draw_enable)      (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_draw_disable)     (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_draw_enableAll)   (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_draw_disableAll)  (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_unref)            (GblObject* pSelf)          GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw)              (GUM_Renderer* pRenderer) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update)            (void)                    GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_disable)    (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_enable)     (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_disableAll) (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_enableAll)  (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_enable)       (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_disable)      (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)    (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)   (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_unref)             (GblObject* pSelf)        GBL_NOEXCEPT;
 //!\endcond
 
 #endif

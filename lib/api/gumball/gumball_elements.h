@@ -22,6 +22,7 @@
 #include "elements/gumball_container.h"
 #include "elements/gumball_controller.h"
 #include "elements/gumball_common.h"
+#include "elements/gumball_objectviewer.h"
 
 /*!  \defgroup elements Elements
  *   \brief    Element types

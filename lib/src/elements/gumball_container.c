@@ -1,7 +1,6 @@
 #include <gumball/core/gumball_backend.h>
 #include <gumball/elements/gumball_container.h>
-
-// TODO: only resize and realign widgets on signal firing instead of every frame
+#include <gumball/core/gumball_logger.h>
 
 static GBL_RESULT GUM_Container_init_(GblInstance* pInstance) {
     GUM_CONTAINER(pInstance)->padding       = 5.0f;
@@ -122,7 +121,7 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
 
         if (pSelf->resizeWidgets) {
             *widget_mainDim      = (container_mainDim - totalMargin - totalPaddingWithRoundness) / (float)childCount;
-            *widget_mainDim      = GBL_MAX(container_mainDim * 0.15, *widget_mainDim);
+            // *widget_mainDim      = GBL_MAX(container_mainDim * pSelf->minChildSize, *widget_mainDim);
             *widget_secondaryDim = container_secondaryDim - totalPaddingWithRoundness;
         }
 

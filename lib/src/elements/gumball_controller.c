@@ -58,9 +58,9 @@ static GBL_RESULT GUM_Controller_GblObject_property_(const GblObject* pObject, c
     return GBL_RESULT_SUCCESS;
 }
 
-static GUM_Button* findSelectableSibling_(GblObject* pObj, bool next) {
-    GblObject* pSibling = next ? GblObject_siblingNextByType(pObj, GUM_BUTTON_TYPE)
-                               : GblObject_siblingPreviousByType(pObj, GUM_BUTTON_TYPE);
+static GUM_Button* findSelectableSibling_(GblObject* pObject, bool next) {
+    GblObject* pSibling = next ? GblObject_siblingNextByType(pObject, GUM_BUTTON_TYPE)
+                               : GblObject_siblingPreviousByType(pObject, GUM_BUTTON_TYPE);
     while (pSibling) {
         GUM_Button* pButton = GBL_AS(GUM_Button, pSibling);
         if (pButton && pButton->isSelectable && GUM_WIDGET(pButton)->shouldUpdate) return pButton;
