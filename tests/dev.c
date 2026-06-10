@@ -6,7 +6,6 @@ int main(int argc, char* argv[]) {
 
     InitWindow(1000, 1080, "Containers - Basic");
     SetTargetFPS(60);
-
     GUM_Container* pContainer = GUM_Container_create("name", "Container", "x", 0.0f, "y", 0.0f,
                                                      "w", 1000.0f, "h", 1080.0f, "minChildSize", 0.01f,
                                                      "scrollable", false, "color", 0x0A0A0AFF);

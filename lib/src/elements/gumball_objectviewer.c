@@ -2,13 +2,13 @@
 #include <gumball/elements/gumball_common.h>
 #include <gumball/elements/gumball_button.h>
 #include <gumball/core/gumball_logger.h>
+#include <gimbal/utils/gimbal_ref.h>
 
 static GBL_RESULT GUM_ObjectViewer_init_(GblInstance* pInstance) {
     GUM_OBJECTVIEWER(pInstance)->pObject = nullptr;
 
     GUM_WIDGET(pInstance)->a = 0;
 
-    GUM_LOG_DEBUG("sup from init ");
     return GBL_RESULT_SUCCESS;
 }
 
@@ -18,6 +18,8 @@ static GBL_RESULT GUM_ObjectViewer_GblObject_setProperty_(GblObject* pObject, co
 
     switch (pProp->id) {
         case GUM_ObjectViewer_Property_Id_object:
+            if (pSelf->pObject)
+                GBL_UNREF(pSelf->pObject);
             GblVariant_valueCopy(pValue, &pSelf->pObject);
             break;
         default:
@@ -50,7 +52,16 @@ static GBL_RESULT GUM_ObjectViewer_update_(GUM_Widget* pSelf) {
         return GBL_RESULT_INCOMPLETE;
 
     GblObject_foreachChild(GBL_OBJECT(pSelf), pChild)
-        GUM_unref((GBL_OBJECT(pChild)));
+        GUM_unref(pChild);
+
+    GUM_Container_create("color", 255,   "parent", pSelf, "orientation", 'h',
+                         "margin", 2.0f, "padding", 0.0f, "children",
+        GblRingList_create(
+            GUM_Widget_create("font_size", 15, "color", 0xB0B0B0FF, "label", "Type"),
+            GUM_Widget_create("font_size", 15, "color", 0x909090FF, "label", "Key"),
+            GUM_Widget_create("font_size", 15, "color", 0x707070FF, "label", "Value")
+        )
+    );
 
     GBL_VARIANT(table);
     GBL_VARIANT(key);
@@ -61,19 +72,17 @@ static GBL_RESULT GUM_ObjectViewer_update_(GUM_Widget* pSelf) {
     GblVariant_construct(&value);
 
     while (GblVariant_next(&table, &key, &value)) {
-        GUM_Container_create("minChildSize", 0.01f, "scrollable", false, "color", 255,
-                             "parent", pSelf, "orientation", 'h', "margin", 2.0f, "padding", 0.0f,
-                             "children", GblRingList_create(
-            GUM_Widget_create("font_size", 15, "color", 0xC0C0C0FF, "label", GblVariant_typeName(&value)),
-            GUM_Widget_create("font_size", 15, "color", 0xC0C0C0FF, "label", GblVariant_string(&key)),
-            GUM_Widget_create("font_size", 15, "color", 0xC0C0C0FF, "label", GblVariant_toString(&value)) // apparently replaces the type in-place, so
-                                                                                                          // the type shows up as a string later.
-                                                                                                          // a solution to this is to use a separate variant
-                                                                                                          // you copy to, but that creates a leak when not destructing it
-                                                                                                          // IF YOU DO destruct it, it tries to destruct the PROP ITSELF
-                                                                                                          // for example, if the prop is "parent", it'll
-                                                                                                          // UNREF THE FUCKING PARENT. lol.
-        ));
+        if (!GblVariant_canConvert(GblVariant_typeOf(&value), GBL_STRING_TYPE))
+            continue;
+
+        GUM_Container_create("color", 255,   "parent", pSelf, "orientation", 'h',
+                             "margin", 2.0f, "padding", 0.0f, "children",
+            GblRingList_create(
+                GUM_Button_create("font_size", 15, "color", 0xB0B0B0FF, "label",        GblVariant_typeName(&value)),
+                GUM_Button_create("font_size", 15, "color", 0x909090FF, "label",        GblVariant_string(&key)),
+                GUM_Button_create("font_size", 15, "color", 0x707070FF, "labelAcquire", GblVariant_asString(&value))
+            )
+        );
     }
 
     GblVariant_destruct(&value);
@@ -81,7 +90,9 @@ static GBL_RESULT GUM_ObjectViewer_update_(GUM_Widget* pSelf) {
     GblVariant_destruct(&table);
 
     GUM_CONTAINER_CLASSOF(pSelf)->pFnUpdateContent(GUM_CONTAINER(pSelf));
-    pSelf->shouldUpdate = false; // if this is true, this shit will CRASH. need to inspect soon.
+
+    // pSelf->shouldUpdate = false;
+
     return GBL_RESULT_SUCCESS;
 }
 
@@ -90,11 +101,16 @@ static GBL_RESULT GUM_ObjectViewer_Object_instantiated_(GblObject* pObject) {
     GBL_VCALL_DEFAULT(GUM_Widget, base.pFnInstantiated, pObject);
     GBL_CTX_END();
 
-    GUM_LOG_DEBUG("sup from instantiated");
     return GBL_RESULT_SUCCESS;
 }
 
 static GBL_RESULT GUM_ObjectViewer_Widget_deactivate_(GUM_Widget* pSelf) {
+    GUM_ObjectViewer* pViewer = GUM_OBJECTVIEWER(pSelf);
+    if (pViewer->pObject) {
+        GBL_UNREF(pViewer->pObject);
+        pViewer->pObject = nullptr;
+    }
+
     GBL_CTX_BEGIN(nullptr);
     GBL_VCALL_DEFAULT(GUM_Widget, pFnDeactivate, pSelf);
     GBL_CTX_END();
@@ -118,11 +134,6 @@ static GBL_RESULT GUM_ObjectViewerClass_init_(GblClass* pClass, const void* pDat
     return GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_ObjectViewerClass_final_(GblClass* pClass, const void* pClassData) {
-    GBL_UNUSED(pClassData);
-    return GBL_RESULT_SUCCESS;
-}
-
 GBL_RESULT GUM_ObjectViewer_setObject(GUM_ObjectViewer* pSelf, GblObject* pObject) {
     if GBL_UNLIKELY (!pObject)
         return GBL_RESULT_ERROR_INVALID_POINTER;
@@ -140,8 +151,7 @@ GblType GUM_ObjectViewer_type(void) {
                                 &(static GblTypeInfo){ .classSize       = sizeof(GUM_ObjectViewerClass),
                                                        .pFnClassInit    = GUM_ObjectViewerClass_init_,
                                                        .instanceSize    = sizeof(GUM_ObjectViewer),
-                                                       .pFnInstanceInit = GUM_ObjectViewer_init_,
-                                                       .pFnClassFinal   = GUM_ObjectViewerClass_final_ },
+                                                       .pFnInstanceInit = GUM_ObjectViewer_init_},
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC);
     }
 

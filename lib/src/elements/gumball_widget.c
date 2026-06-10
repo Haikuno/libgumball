@@ -197,7 +197,11 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject, const Gb
             break;
         case GUM_Widget_Property_Id_label:
             GblStringRef_unref(pSelf->label);
-            pSelf->label = GblStringRef_create(GblVariant_string(pValue));
+            pSelf->label = GblVariant_asString(pValue);
+            break;
+        case GUM_Widget_Property_Id_labelAcquire:
+            GblStringRef_unref(pSelf->label);
+            pSelf->label = GblVariant_asString(pValue);
             break;
         case GUM_Widget_Property_Id_textAlignment:
             GblVariant_valueCopy(pValue, &pSelf->textAlignment);

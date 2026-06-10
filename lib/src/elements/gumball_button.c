@@ -60,9 +60,7 @@ static GBL_RESULT GUM_ButtonClass_init_(GblClass* pClass, const void* pData) {
         GBL_PROPERTIES_REGISTER(GUM_Button);
 
         GblSignal_install(GUM_BUTTON_TYPE, "onPressPrimary", GblMarshal_CClosure_VOID__INSTANCE, 0);
-
         GblSignal_install(GUM_BUTTON_TYPE, "onPressSecondary", GblMarshal_CClosure_VOID__INSTANCE, 0);
-
         GblSignal_install(GUM_BUTTON_TYPE, "onPressTertiary", GblMarshal_CClosure_VOID__INSTANCE, 0);
     }
 
@@ -76,6 +74,8 @@ static GBL_RESULT GUM_ButtonClass_final_(GblClass* pClass, const void* pClassDat
     GBL_UNUSED(pClassData);
 
     if (!GblType_classRefCount(GUM_BUTTON_TYPE)) {
+        GblProperty_uninstallAll(GUM_BUTTON_TYPE);
+
         GblSignal_uninstall(GUM_BUTTON_TYPE, "onPressPrimary");
         GblSignal_uninstall(GUM_BUTTON_TYPE, "onPressSecondary");
         GblSignal_uninstall(GUM_BUTTON_TYPE, "onPressTertiary");

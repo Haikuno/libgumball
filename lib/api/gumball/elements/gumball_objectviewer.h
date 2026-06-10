@@ -50,7 +50,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_ObjectViewer, GUM_Container)
  *    @{
 */
 GBL_INSTANCE_DERIVE(GUM_ObjectViewer, GUM_Container)
-    GblObject*     pObject; //!< The object displayed by the Object Viewer. Default value is nullptr
+    GblObject* pObject; //!< A pointer to the object to be displayed. Default value is nullptr
 GBL_INSTANCE_END
 //! @}
 

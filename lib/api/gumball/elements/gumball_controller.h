@@ -76,7 +76,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Controller, GUM_Widget)
 GBL_INSTANCE_DERIVE(GUM_Controller, GUM_Widget)
 //!  \endcond
     GUM_Button* pSelectedButton; // The currently selected button
-    uint8_t        controllerId; //!< Which id is this controller associated with. Default value is 0
+    uint8_t     controllerId;    //!< Which id is this controller associated with. Default value is 0
     bool        isKeyboard;      //!< If the controller is a keyboard.             Default value is false
 GBL_INSTANCE_END
 
