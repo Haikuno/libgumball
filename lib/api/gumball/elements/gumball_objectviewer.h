@@ -9,8 +9,8 @@
  *
  *   TODO: document
 
- *   \author       2026 Agustín Bellagamba
- *   \copyright    MIT License
+ *   \author    2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include "gumball_container.h"

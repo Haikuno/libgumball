@@ -10,8 +10,8 @@
  *   Simple wrappers around GBL_LOG_* for convenience
  *   All logs are prefixed with "gumball" as their domain.
  *
- *   \author     2025 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gimbal/core/gimbal_logger.h>

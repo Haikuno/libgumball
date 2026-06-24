@@ -15,7 +15,7 @@
  *       - Make orientation an enum
  *       - Add scrolling
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 

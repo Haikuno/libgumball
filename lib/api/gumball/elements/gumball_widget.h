@@ -18,8 +18,8 @@
  *       - Add GUM_Vector2 position and size as properties
  *       - Make border highlight configurable (color, thickness)
  *
- *   \author       2025 Agustín Bellagamba
- *   \copyright    MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>

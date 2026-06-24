@@ -16,8 +16,8 @@
  *       - Make variables private
  *       - Document signals
  *
- *   \author       2025 Agustín Bellagamba
- *   \copyright    MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include "gumball_widget.h"

@@ -8,7 +8,7 @@
  *
  *   GUM_Event is the base event type used in libGumball.
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 

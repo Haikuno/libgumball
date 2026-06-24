@@ -8,7 +8,7 @@
  *
  *   Base event type for input
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
@@ -28,21 +28,6 @@
 
 GBL_DECLS_BEGIN
 
-typedef enum : uint8_t {
-    GUM_INPUT_PRESS,
-    GUM_INPUT_RELEASE
-} GUM_INPUT_STATE;
-
-typedef enum : uint8_t {
-    GUM_INPUT_PRIMARY,
-    GUM_INPUT_SECONDARY,
-    GUM_INPUT_TERTIARY,
-    GUM_INPUT_LEFT,
-    GUM_INPUT_UP,
-    GUM_INPUT_RIGHT,
-    GUM_INPUT_DOWN
-} GUM_INPUT_ID;
-
 GBL_FORWARD_DECLARE_STRUCT(GUM_Event_Input);
 
 /*!  \struct  GUM_Event_InputClass
@@ -61,8 +46,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Event_Input, GUM_Event);
  *
 */
 GBL_INSTANCE_DERIVE(GUM_Event_Input, GUM_Event)
-    GUM_INPUT_STATE state;    //!< State of the input event
-    GUM_INPUT_ID    id;       //!< ID of the input event
+    //
 GBL_INSTANCE_END
 
 GBL_DECLS_END

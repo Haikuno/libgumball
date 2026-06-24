@@ -8,7 +8,7 @@
  *
  *   Event type used to represent keyboard key presses and releases.
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
