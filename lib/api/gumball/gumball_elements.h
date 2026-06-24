@@ -20,7 +20,6 @@
 #include "elements/gumball_widget.h"
 #include "elements/gumball_button.h"
 #include "elements/gumball_container.h"
-#include "elements/gumball_controller.h"
 #include "elements/gumball_common.h"
 #include "elements/gumball_objectviewer.h"
 

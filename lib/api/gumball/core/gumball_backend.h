@@ -16,7 +16,6 @@
 */
 
 #include <gimbal/gimbal_strings.h>
-#include <gumball/elements/gumball_controller.h>
 #include <gumball/gumball_types.h>
 
 GBL_DECLS_BEGIN
@@ -28,9 +27,6 @@ void       GUM_Backend_resetLogger                      (void);
 
 //! Returns the current timestamp in miliseconds since the program started
 uint32_t   GUM_Backend_timestamp                        (void);
-
-//! Polls input
-GBL_RESULT GUM_Backend_pollInput                        (GUM_Controller* pController);
 
 //! Draws a rectangle, can optionally berounded
 GBL_RESULT GUM_Backend_rectangleDraw                    (GUM_Renderer* pRenderer, GUM_Rectangle rectangle, float roundness, GUM_Color color);

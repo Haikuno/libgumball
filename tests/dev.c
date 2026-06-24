@@ -19,8 +19,6 @@ int main(int argc, char* argv[]) {
     InitWindow(640, 480, "Test");
     SetTargetFPS(60);
 
-    auto controller = GUM_Controller_create("isKeyboard", true, "color", 0xFFFFFFFFF);
-
     GUM_Container* pParentContainer = GUM_Container_create(
         "x", 70.0f,  "y", 40.0f,
         "w", 500.0f, "h", 400.0f,
