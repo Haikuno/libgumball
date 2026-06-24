@@ -424,7 +424,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
     const float margin   = 3.0f;
 
     if (GblStringRef_length(pSelf->label)) {
-        textSize = GUM_Font_measureText(pSelf->font, pSelf->label, pSelf->font_size);
+        textSize = GUM_Backend_Font_measureText(pSelf->font, pSelf->label, pSelf->font_size);
 
         switch (pSelf->textAlignment) {
             case GUM_TEXT_ALIGN_CENTER:

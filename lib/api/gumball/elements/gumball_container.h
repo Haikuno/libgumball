@@ -85,7 +85,7 @@ GBL_PROPERTIES(GUM_Container,
     (scrollable,        GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE )
 )
 
-GblType GUM_Container_type(void);
+GblType GUM_Container_type(void) GBL_NOEXCEPT;
 
 //! Returns a new GUM_Container. Optionally takes in a list of Name/Value pairs for properties
 #define GUM_Container_create(/* propertyName, propertyValue */ ...) GBL_NEW(GUM_Container __VA_OPT__(,) __VA_ARGS__)

@@ -59,12 +59,9 @@ typedef enum : uint8_t {
 } GUM_TextAlignment;
 
 //! \cond
-GblType GUM_Font_type(void);
-GblType GUM_TextAlignment_type(void);
+GblType GUM_Font_type(void) GBL_NOEXCEPT;
+GblType GUM_TextAlignment_type(void) GBL_NOEXCEPT;
 //! \endcond
-
-//! Returns the size of the passed text, given the font and font size
-GBL_EXPORT GUM_Vector2 GUM_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) GBL_NOEXCEPT;
 
 GBL_DECLS_END
 

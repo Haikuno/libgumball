@@ -12,3 +12,4 @@ docs/*.tag
 docs/*/
 
 compile_commands.json
+*-lock

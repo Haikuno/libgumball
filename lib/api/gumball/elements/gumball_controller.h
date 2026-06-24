@@ -88,7 +88,7 @@ GBL_PROPERTIES(GUM_Controller,
 )
 
 
-GblType GUM_Controller_type(void);
+GblType GUM_Controller_type(void) GBL_NOEXCEPT;
 
 // Takes a list of Name/Value pairs
 #define GUM_Controller_create(...) GBL_NEW(GUM_Controller __VA_OPT__(,) __VA_ARGS__)

@@ -50,7 +50,7 @@ GBL_INSTANCE_DERIVE(GUM_Event, GblEvent)
 GBL_INSTANCE_END
 
 //! \cond
-GblType GUM_Event_type(void);
+GblType GUM_Event_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 GBL_DECLS_END

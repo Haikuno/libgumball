@@ -28,7 +28,7 @@ GUM_Renderer* GUM_Renderer_create(void* pRenderer);
 #define GUM_RENDERER_TYPE (GBL_TYPEID(GUM_Renderer)) //!< Returns the GUM_Renderer Type UUID
 
 //! \cond
-GblType GUM_Renderer_type(void);
+GblType GUM_Renderer_type(void) GBL_NOEXCEPT;
 //! \endcond
 GBL_DECLS_END
 

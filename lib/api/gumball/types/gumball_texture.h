@@ -49,7 +49,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Texture, GblBox, GUM_IResource)
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Texture, GblBox)
 
 //! \cond
-GblType GUM_Texture_type(void);
+GblType GUM_Texture_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 //! Returns the size of the texture as a GUM_Vector2

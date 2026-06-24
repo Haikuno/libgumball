@@ -1,6 +1,7 @@
 #include <gumball/elements/gumball_button.h>
 #include <gumball/elements/gumball_controller.h>
 #include <gumball/elements/gumball_root.h>
+#include <gumball/elements/gumball_common.h>
 
 static GBL_RESULT GUM_Button_init_(GblInstance* pInstance) {
     GUM_Button* pButton = GUM_BUTTON(pInstance);
@@ -16,6 +17,15 @@ static GBL_RESULT GUM_Button_init_(GblInstance* pInstance) {
 static GBL_RESULT GUM_Button_GblObject_setProperty_(GblObject* pObject, const GblProperty* pProp, GblVariant* pValue) {
     GUM_Button* pSelf = GUM_BUTTON(pObject);
     switch (pProp->id) {
+        case GUM_Button_Property_Id_onPressPrimary:
+            GUM_connect(pObject, "onPressPrimary", GblVariant_asPointer(pValue));
+            break;
+        case GUM_Button_Property_Id_onPressSecondary:
+            GUM_connect(pObject, "onPressSecondary", GblVariant_asPointer(pValue));
+            break;
+        case GUM_Button_Property_Id_onPressTertiary:
+            GUM_connect(pObject, "onPressTertiary", GblVariant_asPointer(pValue));
+            break;
         case GUM_Button_Property_Id_isActive:
             GblVariant_valueCopy(pValue, &pSelf->isActive);
             break;

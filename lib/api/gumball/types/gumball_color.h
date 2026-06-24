@@ -29,7 +29,7 @@ typedef struct {
 #define GUM_COLOR_TYPE (GBL_TYPEID(GUM_Color)) //!< Returns the GUM_Color Type UUID
 
 //!  \cond
-GblType GUM_Color_type(void);
+GblType GUM_Color_type(void) GBL_NOEXCEPT;
 //!  \endcond
 
 GBL_DECLS_END

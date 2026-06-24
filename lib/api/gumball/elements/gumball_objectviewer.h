@@ -63,7 +63,7 @@ GBL_PROPERTIES(GUM_ObjectViewer,
 //     // TODO: signals?
 // )
 
-GblType GUM_ObjectViewer_type(void);
+GblType GUM_ObjectViewer_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 //! Returns a new GUM_ObjectViewer. Optionally takes in a list of Name/Value pairs for properties

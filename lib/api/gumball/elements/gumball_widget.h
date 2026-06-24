@@ -150,7 +150,7 @@ GBL_PROPERTIES(GUM_Widget,
     (z_index,               GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         )
 )
 
-GblType GUM_Widget_type(void);
+GblType GUM_Widget_type(void) GBL_NOEXCEPT;
 
 //! \cond
 GUM_Vector2 GUM_get_absolute_position_(GBL_SELF);

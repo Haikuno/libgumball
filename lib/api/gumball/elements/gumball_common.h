@@ -68,6 +68,9 @@
 */
 #define GUM_get_child_at(self, index) (GblObject_findChildByIndex(GBL_OBJECT(self), index))
 
+//! Incerements the reference count of a UI element, returning a pointer to it.
+#define GUM_ref(obj)                  ((GUM_ref)(GBL_OBJECT(obj)))
+
 //! Decrements the reference count of a UI element, freeing it if it reaches zero.
 //! Also recursively unrefs all of its children.
 #define GUM_unref(obj)                ((GUM_unref)(GBL_OBJECT(obj)))
@@ -114,6 +117,7 @@ GBL_EXPORT GBL_RESULT (GUM_draw_enable)       (GblObject* pSelf)        GBL_NOEX
 GBL_EXPORT GBL_RESULT (GUM_draw_disable)      (GblObject* pSelf)        GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)    (GblObject* pSelf)        GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)   (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GblObject* (GUM_ref)               (GblObject* pSelf)        GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT (GUM_unref)             (GblObject* pSelf)        GBL_NOEXCEPT;
 //!\endcond
 

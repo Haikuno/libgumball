@@ -130,6 +130,10 @@ GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)(GblObject* pSelf) {
     return GBL_RESULT_SUCCESS;
 }
 
+GBL_EXPORT GblObject* (GUM_ref)(GblObject* pSelf) {
+    return GBL_OBJECT(GBL_REF(pSelf));
+}
+
 GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
     GUM_draw_disableAll(pSelf);
 
