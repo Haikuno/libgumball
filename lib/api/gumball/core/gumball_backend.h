@@ -17,6 +17,7 @@
 
 #include <gimbal/gimbal_strings.h>
 #include <gumball/gumball_types.h>
+#include <gumball/gumball_devices.h>
 
 GBL_DECLS_BEGIN
 
@@ -55,6 +56,8 @@ GUM_Vector2 GUM_Backend_Font_measureText                (GUM_Font* pFont, GblStr
 //! Returns a pointer to the default font
 GUM_Font*   GUM_Backend_Font_default                    (void);
 
-GBL_DECLS_END
+//! Updates the mouse state, sending events when needed
+void        GUM_Backend_Mouse_update                    (GUM_Mouse* pMouse);
 
+GBL_DECLS_END
 #endif // GUM_BACKEND_H

@@ -13,6 +13,7 @@
 */
 
 #include "gumball_event.h"
+#include <gumball/devices/gumball_inputdevice.h>
 
 /*!  \name  Type System
  *   \brief Type UUID and Cast Operators
@@ -46,11 +47,13 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Event_Input, GUM_Event);
  *
 */
 GBL_INSTANCE_DERIVE(GUM_Event_Input, GUM_Event)
-    //
+    GUM_InputDevice* pInputDevice;
+    GblFlags         flags;
 GBL_INSTANCE_END
 
-GBL_DECLS_END
+GblType GUM_Event_Input_type(void);
 
+GBL_DECLS_END
 #undef GBL_SELF_TYPE
 
 #endif

@@ -56,7 +56,7 @@ static GBL_RESULT GUM_ObjectViewer_update_(GUM_Widget* pSelf) {
 
     GUM_Container_create("color", 255,   "parent", pSelf, "orientation", 'h',
                          "margin", 2.0f, "padding", 0.0f, "children",
-        GblRingList_create(
+        GUM_childrenList(
             GUM_Widget_create("font_size", 15, "color", 0xB0B0B0FF, "label", "Type"),
             GUM_Widget_create("font_size", 15, "color", 0x909090FF, "label", "Key"),
             GUM_Widget_create("font_size", 15, "color", 0x707070FF, "label", "Value")
@@ -77,7 +77,7 @@ static GBL_RESULT GUM_ObjectViewer_update_(GUM_Widget* pSelf) {
 
         GUM_Container_create("color", 255,   "parent", pSelf, "orientation", 'h',
                              "margin", 2.0f, "padding", 0.0f, "children",
-            GblRingList_create(
+            GUM_childrenList(
                 GUM_Button_create("font_size", 15, "color", 0xB0B0B0FF, "label",        GblVariant_typeName(&value)),
                 GUM_Button_create("font_size", 15, "color", 0x909090FF, "label",        GblVariant_string(&key)),
                 GUM_Button_create("font_size", 15, "color", 0x707070FF, "labelAcquire", GblVariant_asString(&value))

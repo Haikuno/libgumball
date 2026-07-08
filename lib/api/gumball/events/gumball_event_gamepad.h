@@ -46,4 +46,7 @@ GBL_INSTANCE_DERIVE(GUM_Event_Gamepad, GUM_Event_Input)
     //
 GBL_INSTANCE_END
 
+GBL_DECLS_END
+#undef GBL_SELF_TYPE
+
 #endif

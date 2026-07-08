@@ -11,10 +11,10 @@ endif()
 if (GUM_BUILD_BACKEND_RAYLIB)
     file(GLOB RAYLIB_SRCS src/backends/raylib/*.c)
     list(APPEND SRCS ${RAYLIB_SRCS})
-endif()
 
-if (PLATFORM_DREAMCAST)
-	include_directories(${KOS_PORTS}/include/raylib) # To use <raylib.h> like in PC, instead of <raylib/raylib.h>
+	if (PLATFORM_DREAMCAST)
+		include_directories(${KOS_PORTS}/include/raylib) # To use <raylib.h> like in PC, instead of <raylib/raylib.h>
+	endif()
 endif()
 
 add_library(libGumball STATIC ${SRCS} ${HEADERS})

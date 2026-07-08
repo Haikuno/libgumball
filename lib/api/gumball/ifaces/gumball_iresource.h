@@ -57,7 +57,6 @@ GBL_EXPORT void*           GUM_IResource_data        (GBL_CSELF)                
 GBL_EXPORT void            GUM_IResource_setData     (GBL_SELF, void* pValue)    GBL_NOEXCEPT;
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_IRESOURCE_H

@@ -59,7 +59,6 @@ GUM_Vector2 GUM_Texture_size(GBL_SELF);
 void* GUM_Texture_getTexture(GBL_SELF);
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_TEXTURE_H

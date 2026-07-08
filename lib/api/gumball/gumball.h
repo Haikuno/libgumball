@@ -14,6 +14,7 @@
 */
 
 #include "gumball_elements.h"
+#include "gumball_devices.h"
 #include "gumball_events.h"
 #include "gumball_types.h"
 #include "gumball_ifaces.h"

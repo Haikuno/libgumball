@@ -65,7 +65,7 @@ static GBL_RESULT GUM_Button_GblObject_property_(const GblObject* pObject, const
 static GBL_RESULT GUM_ButtonClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
-    if (!GblType_classRefCount(GBL_CLASS_TYPEOF(pClass))) {
+    if (!GblType_classRefCount(GUM_BUTTON_TYPE)) {
         GBL_PROPERTIES_REGISTER(GUM_Button);
 
         GblSignal_install(GUM_BUTTON_TYPE, "onPressPrimary", GblMarshal_CClosure_VOID__INSTANCE, 0);

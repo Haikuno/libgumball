@@ -48,4 +48,7 @@ GBL_INSTANCE_DERIVE(GUM_Event_Key, GUM_Event_Input)
     // TODO: add flag modifier here (such as holding shift)
 GBL_INSTANCE_END
 
+GBL_DECLS_END
+#undef GBL_SELF_TYPE
+
 #endif

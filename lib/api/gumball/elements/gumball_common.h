@@ -14,6 +14,7 @@
 */
 
 #include <gimbal/gimbal_meta.h>
+#include <gimbal/containers/gimbal_ring_list.h>
 #include <gumball/types/gumball_renderer.h>
 
 //! Updates all the UI elements
@@ -102,6 +103,9 @@
 
 //! Sets the property with the given name to the value given by the pointer passed through the variadic argument list
 #define GUM_setProperty(obj, name, /*value*/...) (GblObject_setProperty(GBL_OBJECT(obj), name, __VA_ARGS__))
+
+//! Creates a list that you can pass to the \p children property, takes in any number of comma-separated elements.
+#define GUM_childrenList(child1, /*child2, child3, */ ...) (GblRingList_create(child1 __VA_OPT__(,) __VA_ARGS__))
 
 ////////// Implementation details, Grugs please ignore
 //!\cond

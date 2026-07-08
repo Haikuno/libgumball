@@ -94,7 +94,7 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     bool               isRelative;               //!< If the widget's position and size should be relative to its parent.            Default value is false
     GblStringRef*      label;                    //!< Optional text label of the widget.                                             Default value is nullptr
     GUM_Font*          font;                     //!< Optional font for the widget's label. If not set, the default font is used.    Default value is nullptr
-    GUM_TextAlignment  textAlignment;            //!< Alignment of the widget's label.                                               Default value is GUM_TEXT_ALIGN_CENTER \bug This is not working at the moment.
+    GUM_TextAlignment  textAlignment;            //!< Alignment of the widget's label.                                               Default value is GUM_TEXT_ALIGN_CENTER
     GUM_Texture*       texture;                  //!< Optional texture for rendering inside the widget.                              Default value is nullptr
     uint8_t            font_size;                //!< Font size of the widget's label.                                               Default value is 22
     uint8_t            font_r;                   //!< Red component of the font color.                                               Default value is 255

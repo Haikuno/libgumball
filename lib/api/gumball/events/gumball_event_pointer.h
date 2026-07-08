@@ -5,7 +5,7 @@
 
 /*!  \file
  *   \ref     GUM_Event_Pointer "GUM_Event_Pointer data structure and hierarchy graph"
- *   \ingroup elements
+ *   \ingroup events
  *
  *   Brief description
  *
@@ -22,10 +22,10 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_EVENT_POINTER_TYPE            (GBL_TYPEID(GUM_Event_Pointer))
-#define GUM_EVENT_POINTER(self)           (GBL_CAST(GUM_Event_Pointer, self))
-#define GUM_EVENT_POINTER_CLASS(klass)    (GBL_CLASS_CAST(GUM_Event_Pointer, klass))
-#define GUM_EVENT_POINTER_CLASSOF(self)   (GBL_CLASSOF(GUM_Event_Pointer, self))
+#define GUM_EVENT_POINTER_TYPE            (GBL_TYPEID     (GUM_Event_Pointer))
+#define GUM_EVENT_POINTER(self)           (GBL_CAST       (GUM_Event_Pointer, self))
+#define GUM_EVENT_POINTER_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event_Pointer, klass))
+#define GUM_EVENT_POINTER_CLASSOF(self)   (GBL_CLASSOF    (GUM_Event_Pointer, self))
 //! @}
 
 #define GBL_SELF_TYPE GUM_Event_Pointer
@@ -57,11 +57,11 @@ GBL_INSTANCE_DERIVE(GUM_Event_Pointer, GUM_Event_Input)
     //
 GBL_INSTANCE_END
 
+//! \cond
 GblType GUM_Event_Pointer_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_EVENT_POINTER_H

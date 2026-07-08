@@ -1,5 +1,6 @@
 #include <gumball/elements/gumball_widget.h>
 #include <gumball/elements/gumball_root.h>
+#include <gumball/elements/gumball_common.h>
 #include <gumball/types/gumball_renderer.h>
 #include <gumball/core/gumball_backend.h>
 
@@ -7,6 +8,9 @@
 
 static GblArrayList GUM_drawQueue_;
 static GblLogger*   pLogger_ = nullptr;
+
+//TODO: make device list later maybe
+GUM_Mouse* pMouse_ = nullptr;
 
 static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
     GblObject_setName(GBL_OBJECT(pInstance), "GUM_Root");
@@ -25,6 +29,8 @@ static GBL_RESULT GUM_RootClass_init_(GblClass* pClass, const void* pData) {
         GUM_drawQueue_init();
         GblLogger_register(pLogger_);
         GUM_Backend_setLogger();
+
+        pMouse_ = GUM_Mouse_create();
     }
 
     return GBL_RESULT_SUCCESS;
@@ -37,6 +43,7 @@ static GBL_RESULT GUM_RootClass_final_(GblClass* pClass, const void* pData) {
         GUM_drawQueue_free();
         GblLogger_unregister(pLogger_);
         GUM_Backend_resetLogger();
+        GUM_unref(pMouse_);
     }
 
     return GBL_RESULT_SUCCESS;
@@ -109,4 +116,12 @@ void GUM_drawQueue_remove(GblObject* pObject) {
             return;
         }
     }
+}
+
+static void GUM_InputSystem_pollDevices_(void) {
+    GUM_Backend_Mouse_update(pMouse_);
+}
+
+void GUM_Root_update(void) {
+    GUM_InputSystem_pollDevices_();
 }

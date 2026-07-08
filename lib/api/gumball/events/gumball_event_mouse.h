@@ -5,7 +5,7 @@
 
 /*!  \file
  *   \ref     GUM_Event_Mouse "GUM_Event_Mouse data structure and hierarchy graph"
- *   \ingroup elements
+ *   \ingroup events
  *
  *   Brief description
  *
@@ -22,10 +22,10 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_EVENT_MOUSE_TYPE            (GBL_TYPEID(GUM_Event_Mouse))
-#define GUM_EVENT_MOUSE(self)           (GBL_CAST(GUM_Event_Mouse, self))
-#define GUM_EVENT_MOUSE_CLASS(klass)    (GBL_CLASS_CAST(GUM_Event_Mouse, klass))
-#define GUM_EVENT_MOUSE_CLASSOF(self)   (GBL_CLASSOF(GUM_Event_Mouse, self))
+#define GUM_EVENT_MOUSE_TYPE            (GBL_TYPEID     (GUM_Event_Mouse))
+#define GUM_EVENT_MOUSE(self)           (GBL_CAST       (GUM_Event_Mouse, self))
+#define GUM_EVENT_MOUSE_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event_Mouse, klass))
+#define GUM_EVENT_MOUSE_CLASSOF(self)   (GBL_CLASSOF    (GUM_Event_Mouse, self))
 //! @}
 
 #define GBL_SELF_TYPE GUM_Event_Mouse
@@ -67,7 +67,6 @@ GblType GUM_Event_Mouse_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_EVENT_MOUSE_H

@@ -11,8 +11,8 @@ static GBL_RESULT GUM_Container_init_(GblInstance* pInstance) {
     GUM_CONTAINER(pInstance)->alignWidgets  = true;
     GUM_CONTAINER(pInstance)->scrollable    = true;
 
-    GUM_CONTAINER(pInstance)->scrollOffsetX = 0;
-    GUM_CONTAINER(pInstance)->scrollOffsetY = 0;
+    GUM_CONTAINER(pInstance)->scrollOffsetX = 0.0f;
+    GUM_CONTAINER(pInstance)->scrollOffsetY = 0.0f;
     return GBL_RESULT_SUCCESS;
 }
 
@@ -162,7 +162,8 @@ static GBL_RESULT GUM_Container_Object_instantiated_(GblObject* pObject) {
 static GBL_RESULT GUM_ContainerClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
-    if (!GblType_classRefCount(GUM_CONTAINER_TYPE)) GBL_PROPERTIES_REGISTER(GUM_Container);
+    if (!GblType_classRefCount(GUM_CONTAINER_TYPE))
+        GBL_PROPERTIES_REGISTER(GUM_Container);
 
     GBL_OBJECT_CLASS(pClass)->pFnSetProperty  = GUM_Container_GblObject_setProperty_;
     GBL_OBJECT_CLASS(pClass)->pFnProperty     = GUM_Container_GblObject_property_;

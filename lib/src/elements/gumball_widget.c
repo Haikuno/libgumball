@@ -27,10 +27,10 @@ static GBL_RESULT GUM_Widget_init_(GblInstance* pInstance) {
     pSelf->z_index      = 50;
     pSelf->shouldUpdate = true;
 
-    pSelf->x          = 0;
-    pSelf->y          = 0;
-    pSelf->w          = 200;
-    pSelf->h          = 200;
+    pSelf->x          = 0.0f;
+    pSelf->y          = 0.0f;
+    pSelf->w          = 200.0f;
+    pSelf->h          = 200.0f;
     pSelf->isRelative = false;
 
     pSelf->r = 0;
@@ -523,7 +523,8 @@ static GBL_RESULT GUM_Widget_postDraw_(GUM_Widget* pSelf, GUM_Renderer* pRendere
 static GBL_RESULT GUM_WidgetClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
-    if (!GblType_classRefCount(GUM_WIDGET_TYPE)) GBL_PROPERTIES_REGISTER(GUM_Widget);
+    if (!GblType_classRefCount(GUM_WIDGET_TYPE))
+        GBL_PROPERTIES_REGISTER(GUM_Widget);
 
     GBL_OBJECT_CLASS(pClass)->pFnSetProperty  = GUM_Widget_GblObject_setProperty_;
     GBL_OBJECT_CLASS(pClass)->pFnProperty     = GUM_Widget_GblObject_property_;

@@ -1,16 +1,16 @@
-(A) New input|event system +libGumball @input @events
-(B) Scissoring, nested containers +libGumball @widgets @rendering
-(B) Object Viewer widget +libGumball @widgets
-(C) Tree widget +libGumball @widgets
-(C) Table widget +libGumball @widgets
-(D) Tidy header files up +libGumball @documentation @formatting
-(D) Tidy source files up +libGumball @formatting
-(C) Widget lifecycle events +libGumball @widgets @events
-(D) Controller/Keyboard button movement override +libGumball @controls
-(D) Make variables private where needed +libGumball @widgets
-2026-06-14 Animations +libGumball @rendering @animations
-2026-06-14 SDL3 backend +libGumball @rendering @backend @sdl3
-2026-06-14 GUM_ProgressBar +libGumball @widgets
-2026-06-14 GUM_Separator +libGumball @widgets
-2026-06-14 GUM_Dialogue +libGumball @widgets
-2026-06-14 GUM_Checkbox +libGumball @widgets
+(A) New input|event system @input @events
+(B) Scissoring, nested containers @widgets @rendering
+(B) Tree widget @widgets
+(B) Table widget @widgets
+(B) Object Viewer widget @widgets
+(D) Tidy header files up @documentation @formatting
+(D) Tidy source files up @formatting
+(C) Widget lifecycle events @widgets @events
+(D) Controller/Keyboard button movement override @controls
+(D) Make variables private where needed @widgets
+2026-06-14 Animations @rendering @animations
+2026-06-14 SDL3 backend @rendering @backend @sdl3
+2026-06-14 GUM_ProgressBar @widgets
+2026-06-14 GUM_Separator @widgets
+2026-06-14 GUM_Dialogue @widgets
+2026-06-14 GUM_Checkbox @widgets
