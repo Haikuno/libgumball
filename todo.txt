@@ -1,4 +1,6 @@
 (A) New input|event system @input @events
+(B) On focus gained/lost events and signals @widgets @events @signals
+(B) Finish documenting all TODOs left in header files @documentation
 (B) Scissoring, nested containers @widgets @rendering
 (B) Tree widget @widgets
 (B) Table widget @widgets

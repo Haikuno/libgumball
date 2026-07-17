@@ -162,7 +162,7 @@ static void GUM_InputSystem_Gamepad_dispatchEvent_(GUM_Gamepad* pGamepad, GblFla
     GUM_EVENT_INPUT(pEvent)->action       = GUM_InputSystem_actionFor_(GUM_GAMEPAD_TYPE, button);
     GUM_EVENT_INPUT(pEvent)->pInputDevice = GUM_INPUTDEVICE(pGamepad);
 
-    // GUM_Widget* pTarget = GUM_InputSystem_focusedWidget_(); // TODO: placeholder
+    // GUM_Widget* pTarget = GUM_INPUTDEVICE(pGamepad)->pFocusedWidget; // TODO: placeholder
 
     // if (pTarget)
     //     GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
