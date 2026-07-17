@@ -57,7 +57,6 @@ GBL_INSTANCE_DERIVE(GUM_Event_Mouse, GUM_Event_Input)
 GBL_INSTANCE_END
 
 GblType GUM_Event_Mouse_type(void) GBL_NOEXCEPT;
-//! \
 
 //! Returns a new GUM_Event_Mouse.
 #define GUM_Event_Mouse_create() GUM_EVENT_MOUSE(GblEvent_create(GUM_EVENT_MOUSE_TYPE))

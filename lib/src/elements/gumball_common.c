@@ -145,6 +145,11 @@ GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
         GUM_WIDGET_CLASSOF(pSelf)->pFnDeactivate(pWidget);
     }
 
+    GUM_InputDevice* pInputDevice = GBL_AS(GUM_InputDevice, pSelf);
+    if (pInputDevice) {
+        GblStringRef_unref(pInputDevice->deviceName);
+    }
+
     GblObject_foreachChildReverse(pSelf, pChild)
         GUM_unref(pChild);
 

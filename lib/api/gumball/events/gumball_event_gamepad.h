@@ -8,7 +8,7 @@
  *
  *   Event type for gamepad events
  *
- *   \author     2025, 2026 Agustín Bellagamba
+ *   \author     2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
@@ -42,9 +42,12 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Event_Gamepad, GUM_Event_Input);
  *
  *   GUM_Event_Gamepad represents any gamepad event, such as pressing or releasing a controller button.
 */
-GBL_INSTANCE_DERIVE(GUM_Event_Gamepad, GUM_Event_Input)
-    //
-GBL_INSTANCE_END
+GBL_INSTANCE_DERIVE_EMPTY(GUM_Event_Gamepad, GUM_Event_Input)
+
+GblType GUM_Event_Gamepad_type(void) GBL_NOEXCEPT;
+
+//! Returns a new GUM_Event_Gamepad
+#define GUM_Event_Gamepad_create() GUM_EVENT_GAMEPAD(GblEvent_create(GUM_EVENT_GAMEPAD_TYPE))
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

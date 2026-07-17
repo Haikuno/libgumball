@@ -1,7 +1,53 @@
 #include <gumball/devices/gumball_gamepad.h>
+#include <gumball/core/gumball_backend.h>
 
 static GBL_RESULT GUM_Gamepad_init_(GblInstance* pInstance) {
-    GBL_UNUSED(pInstance);
+    GUM_GAMEPAD(pInstance)->index    = 0;
+    GUM_GAMEPAD(pInstance)->rawIndex = 0;
+    return GBL_RESULT_SUCCESS;
+}
+
+static GBL_RESULT GUM_Gamepad_GblObject_setProperty_(GblObject* pObject, const GblProperty* pProp, GblVariant* pValue) {
+    GUM_Gamepad* pSelf = GUM_GAMEPAD(pObject);
+    switch (pProp->id) {
+        case GUM_Gamepad_Property_Id_index:
+            GblVariant_valueCopy(pValue, &pSelf->index);
+            break;
+        case GUM_Gamepad_Property_Id_rawIndex:
+            GblVariant_valueCopy(pValue, &pSelf->rawIndex);
+            GblStringRef_unref(GUM_INPUTDEVICE(pSelf)->deviceName);
+            GUM_INPUTDEVICE(pSelf)->deviceName = GblStringRef_create(GUM_Backend_Gamepad_name(pSelf->rawIndex));
+            break;
+        default:
+            return GBL_RESULT_ERROR_INVALID_PROPERTY;
+    }
+    return GBL_RESULT_SUCCESS;
+}
+
+static GBL_RESULT GUM_Gamepad_GblObject_property_(const GblObject* pObject, const GblProperty* pProp, GblVariant* pValue) {
+    GUM_Gamepad* pSelf = GUM_GAMEPAD(pObject);
+    switch (pProp->id) {
+        case GUM_Gamepad_Property_Id_index:
+            GblVariant_setUint8(pValue, pSelf->index);
+            break;
+        case GUM_Gamepad_Property_Id_rawIndex:
+            GblVariant_setUint8(pValue, pSelf->rawIndex);
+            break;
+        default:
+            return GBL_RESULT_ERROR_INVALID_PROPERTY;
+    }
+
+    return GBL_RESULT_SUCCESS;
+}
+
+static GBL_RESULT GUM_GamepadClass_init_(GblClass* pClass, const void* pData) {
+    GBL_UNUSED(pData);
+
+    if (!GblType_classRefCount(GUM_GAMEPAD_TYPE))
+        GBL_PROPERTIES_REGISTER(GUM_Gamepad);
+
+    GBL_OBJECT_CLASS(pClass)->pFnSetProperty = GUM_Gamepad_GblObject_setProperty_;
+    GBL_OBJECT_CLASS(pClass)->pFnProperty    = GUM_Gamepad_GblObject_property_;
     return GBL_RESULT_SUCCESS;
 }
 
@@ -12,6 +58,7 @@ GblType GUM_Gamepad_type(void) {
         type = GblType_register(GblQuark_internStatic("GUM_Gamepad"),
                                 GUM_INPUTDEVICE_TYPE,
                                 &(static GblTypeInfo){ .classSize       = sizeof(GUM_GamepadClass),
+                                                       .pFnClassInit    = GUM_GamepadClass_init_,
                                                        .instanceSize    = sizeof(GUM_Gamepad),
                                                        .pFnInstanceInit = GUM_Gamepad_init_ },
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC);

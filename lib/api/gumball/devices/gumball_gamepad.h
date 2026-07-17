@@ -16,8 +16,7 @@
  *   \copyright    MIT License
 */
 
-#include <gimbal/gimbal.h>
-#include <gumball/gumball.h>
+#include <gumball/devices/gumball_inputdevice.h>
 
 /*! \name  Type System
  *  \brief Type UUID and cast operators
@@ -46,12 +45,35 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Gamepad);
 GBL_CLASS_DERIVE_EMPTY(GUM_Gamepad, GUM_InputDevice)
 //! \endcond
 
+GBL_FLAGS(GUM_GAMEPAD_FLAGS,
+    (GUM_GAMEPAD_BUTTON_A,      "GUM_gamepad_a",      0x0001),
+    (GUM_GAMEPAD_BUTTON_B,      "GUM_gamepad_b",      0x0002),
+    (GUM_GAMEPAD_BUTTON_X,      "GUM_gamepad_x",      0x0004),
+    (GUM_GAMEPAD_BUTTON_Y,      "GUM_gamepad_y",      0x0008),
+    (GUM_GAMEPAD_BUTTON_LB,     "GUM_gamepad_lb",     0x0010),
+    (GUM_GAMEPAD_BUTTON_RB,     "GUM_gamepad_rb",     0x0020),
+    (GUM_GAMEPAD_BUTTON_START,  "GUM_gamepad_start",  0x0040),
+    (GUM_GAMEPAD_BUTTON_SELECT, "GUM_gamepad_select", 0x0080),
+    (GUM_GAMEPAD_DPAD_UP,       "GUM_gamepad_up",     0x0100),
+    (GUM_GAMEPAD_DPAD_DOWN,     "GUM_gamepad_down",   0x0200),
+    (GUM_GAMEPAD_DPAD_LEFT,     "GUM_gamepad_left",   0x0400),
+    (GUM_GAMEPAD_DPAD_RIGHT,    "GUM_gamepad_right",  0x0800)
+)
+
 /*!
  *    \class   GUM_Gamepad
  *    \extends GUM_InputDevice
  *    \brief   TODO: brief description
 */
-GBL_INSTANCE_DERIVE_EMPTY(GUM_Gamepad, GUM_InputDevice)
+GBL_INSTANCE_DERIVE(GUM_Gamepad, GUM_InputDevice)
+    uint8_t index;    //!> User-facing controller index.                             Default value is 0
+    uint8_t rawIndex; //!> Physical slot this gamepad occupies, used in the backend. Default value is 0
+GBL_INSTANCE_END
+
+GBL_PROPERTIES(GUM_Gamepad,
+    (index,    GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE),
+    (rawIndex, GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE)
+)
 
 GblType GUM_Gamepad_type(void) GBL_NOEXCEPT;
 

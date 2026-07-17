@@ -5,6 +5,7 @@ static GBL_RESULT GUM_InputDevice_init_(GblInstance* pInstance) {
 
     pSelf->buttons     = 0;
     pSelf->buttonsPrev = 0;
+    pSelf->deviceName  = GblStringRef_create("UNKNOWN");
 
     return GBL_RESULT_SUCCESS;
 }

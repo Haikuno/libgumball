@@ -51,11 +51,15 @@ GBL_ENUM(GUM_InputState,
 )
 
 GBL_ENUM(GUM_InputAction,
-    (GUM_INPUTACTION_NULL,    "GUM_IA_null",     0), // buttonaction not initialized
-    (GUM_INPUTACTION_CONFIRM, "GUM_IA_confirm",  1),
-    (GUM_INPUTACTION_CANCEL,  "GUM_IA_cancel",   2),
-    (GUM_INPUTACTION_COUNT,   "GUM_IA_count",    3),
-    (GUM_INPUTACTION_UNBOUND, "GUM_IA_unbound",  4)  // button not bound to an action
+    (GUM_INPUTACTION_NULL,       "GUM_IA_null",       0), // buttonaction not initialized
+    (GUM_INPUTACTION_CONFIRM,    "GUM_IA_confirm",    1),
+    (GUM_INPUTACTION_CANCEL,     "GUM_IA_cancel",     2),
+    (GUM_INPUTACTION_MOVE_UP,    "GUM_IA_move_up",    3),
+    (GUM_INPUTACTION_MOVE_DOWN,  "GUM_IA_move_down",  4),
+    (GUM_INPUTACTION_MOVE_LEFT,  "GUM_IA_move_left",  5),
+    (GUM_INPUTACTION_MOVE_RIGHT, "GUM_IA_move_right", 6),
+    (GUM_INPUTACTION_COUNT,      "GUM_IA_count",      7),
+    (GUM_INPUTACTION_UNBOUND,    "GUM_IA_unbound",    8)  // button not bound to an action
 )
 
 /*!  \class   GUM_Event_Input
