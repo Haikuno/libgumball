@@ -17,6 +17,7 @@
  *       - Separate isRelative into position and size
  *       - Add GUM_Vector2 position and size as properties
  *       - Make border highlight configurable (color, thickness)
+ *       - Document signals
  *
  *   \author    2025, 2026 Agustín Bellagamba
  *   \copyright MIT License
@@ -29,6 +30,8 @@
 #include <gumball/types/gumball_font.h>
 #include <gumball/types/gumball_texture.h>
 #include <gumball/types/gumball_renderer.h>
+#include <gumball/gumball_events.h>
+
 
 /*! \name  Type System
  *  \brief Type UUID and cast operators
@@ -58,7 +61,8 @@ GBL_CLASS_DERIVE(GUM_Widget, GblObject)
     GBL_RESULT (*pFnActivate)    (GBL_SELF);
     GBL_RESULT (*pFnDeactivate)  (GBL_SELF);
     GBL_RESULT (*pFnUpdate)      (GBL_SELF);
-    GBL_RESULT (*pFnDraw)        (GBL_SELF, GUM_Renderer* pRenderer);
+    GBL_RESULT (*pFnDraw)        (GBL_SELF, GUM_Renderer*    pRenderer);
+    GBL_RESULT (*pFnInputEvent)  (GBL_SELF, GUM_Event_Input* pEvent);
 GBL_CLASS_END
 //! \endcond
 
@@ -148,6 +152,17 @@ GBL_PROPERTIES(GUM_Widget,
     (font_border_a,         GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
     (font_border_thickness, GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
     (z_index,               GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         )
+)
+
+GBL_SIGNALS(GUM_Widget,
+    (onPress,           (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
+    (onRelease,         (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
+    (onPressConfirm,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressCancel,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressUnbound,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseConfirm,  (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseCancel,   (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseUnbound,  (GBL_INSTANCE_TYPE, pReceiver))
 )
 
 GblType GUM_Widget_type(void) GBL_NOEXCEPT;

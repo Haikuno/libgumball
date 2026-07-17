@@ -14,7 +14,6 @@
  *       - Add a way to override cursor movement to the desired GUM_Button pointer.
  *       - Button highlighting animations
  *       - Make variables private
- *       - Document signals
  *
  *   \author    2025, 2026 Agustín Bellagamba
  *   \copyright MIT License
@@ -67,23 +66,12 @@ GBL_INSTANCE_END
 //! @}
 
 GBL_PROPERTIES(GUM_Button,
-    (onPressPrimary,         GBL_GENERIC, (      WRITE), GBL_FUNCTION_TYPE),
-    (onPressSecondary,       GBL_GENERIC, (      WRITE), GBL_FUNCTION_TYPE),
-    (onPressTertiary,        GBL_GENERIC, (      WRITE), GBL_FUNCTION_TYPE),
     (isActive,               GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE),
     (isSelectable,           GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE),
     (isSelectedByDefault,    GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE)
 )
 
-//! \cond
-GBL_SIGNALS(GUM_Button,
-    (onPressPrimary,   (GBL_INSTANCE_TYPE, uData)), //!< For primary actions   (e.g., left-click  )
-    (onPressSecondary, (GBL_INSTANCE_TYPE, uData)), //!< For secondary actions (e.g., right-click )
-    (onPressTertiary,  (GBL_INSTANCE_TYPE, uData))  //!< For tertiary actions  (e.g., middle-click)
-)
-
 GblType GUM_Button_type(void) GBL_NOEXCEPT;
-//! \endcond
 
 //! Returns a new GUM_Button. Optionally takes in a list of Name/Value pairs for properties
 #define GUM_Button_create(/* propertyName, propertyValue */ ...) GBL_NEW(GUM_Button __VA_OPT__(,) __VA_ARGS__)

@@ -46,6 +46,13 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Mouse);
 GBL_CLASS_DERIVE_EMPTY(GUM_Mouse, GUM_InputDevice)
 //! \endcond
 
+GBL_FLAGS(GUM_MOUSE_FLAGS,
+    (GUM_MOUSE_BUTTON_LEFT,   "GUM_mouse_left",   0x1),
+    (GUM_MOUSE_BUTTON_RIGHT,  "GUM_mouse_right",  0x2),
+    (GUM_MOUSE_BUTTON_MIDDLE, "GUM_mouse_middle", 0x4)
+)
+
+
 /*!
  *    \class   GUM_Mouse
  *    \extends GUM_InputDevice
@@ -53,8 +60,8 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Mouse, GUM_InputDevice)
 */
 
 GBL_INSTANCE_DERIVE(GUM_Mouse, GUM_InputDevice)
-    GUM_Vector2 position; //!< Current mouse position
-    GUM_Vector2 delta;    //!< Delta bewteen last frame's position and the current frame's position
+    GUM_Vector2 position;    //!< Current mouse position
+    GUM_Vector2 delta;       //!< Delta bewteen last frame's position and the current frame's position
 GBL_INSTANCE_END
 
 GblType GUM_Mouse_type(void) GBL_NOEXCEPT;

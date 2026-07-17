@@ -46,9 +46,12 @@ GBL_CLASS_DERIVE_EMPTY(GUM_InputDevice, GblObject)
 /*!
  *    \class   GUM_InputDevice
  *    \extends GblObject
- *    \brief   GUM_InputDevice derives from GblObject, adding nothing new.
+ *    \brief   GUM_InputDevice derives from GblObject, adding TODO: doc
 */
-GBL_INSTANCE_DERIVE_EMPTY(GUM_InputDevice, GblObject)
+GBL_INSTANCE_DERIVE(GUM_InputDevice, GblObject)
+    GblFlags buttons;     //!< Current device buttons state
+    GblFlags buttonsPrev; //!< Previous frame's device buttons state
+GBL_INSTANCE_END
 
 GblType GUM_InputDevice_type(void) GBL_NOEXCEPT;
 

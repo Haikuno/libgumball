@@ -14,6 +14,7 @@
 #include "core/gumball_backend.h"
 #include "core/gumball_logger.h"
 #include "core/gumball_manager.h"
+#include "core/gumball_inputsystem.h"
 
 /*!  \defgroup core Core
  *   \brief Core functionality

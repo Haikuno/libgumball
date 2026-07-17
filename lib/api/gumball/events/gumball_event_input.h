@@ -14,6 +14,8 @@
 
 #include "gumball_event.h"
 #include <gumball/devices/gumball_inputdevice.h>
+#include <gimbal/meta/classes/gimbal_enum.h>
+#include <gimbal/containers/gimbal_array_list.h>
 
 /*!  \name  Type System
  *   \brief Type UUID and Cast Operators
@@ -35,9 +37,26 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Event_Input);
  *   \extends GUM_EventClass
  *   \brief   GUM_Event_Input structure
  *
+ *   \todo
+ *      - Add more actions.
+ *
  *   GUM_Event_InputClass derives from GUM_EventClass, adding nothing new.
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Event_Input, GUM_Event);
+
+GBL_ENUM(GUM_InputState,
+    (GUM_INPUTSTATE_NULL,    "GUM_IS_null",    0),
+    (GUM_INPUTSTATE_PRESS,   "GUM_IS_press",   1),
+    (GUM_INPUTSTATE_RELEASE, "GUM_IS_release", 2)
+)
+
+GBL_ENUM(GUM_InputAction,
+    (GUM_INPUTACTION_NULL,    "GUM_IA_null",     0), // buttonaction not initialized
+    (GUM_INPUTACTION_CONFIRM, "GUM_IA_confirm",  1),
+    (GUM_INPUTACTION_CANCEL,  "GUM_IA_cancel",   2),
+    (GUM_INPUTACTION_COUNT,   "GUM_IA_count",    3),
+    (GUM_INPUTACTION_UNBOUND, "GUM_IA_unbound",  4)  // button not bound to an action
+)
 
 /*!  \class   GUM_Event_Input
  *   \extends GUM_Event
@@ -47,8 +66,10 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Event_Input, GUM_Event);
  *
 */
 GBL_INSTANCE_DERIVE(GUM_Event_Input, GUM_Event)
-    GUM_InputDevice* pInputDevice;
-    GblFlags         flags;
+    GUM_InputDevice* pInputDevice; //!< Pointer to the input device that emitted the event
+    GblFlags button;               //!< Bitmask of the button involved
+    GUM_InputState state;          //!< Input state (pressed / released)
+    GUM_InputAction action;        //!< Semantic action
 GBL_INSTANCE_END
 
 GblType GUM_Event_Input_type(void);

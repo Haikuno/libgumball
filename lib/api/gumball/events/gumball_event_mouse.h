@@ -52,19 +52,15 @@ GBL_CLASS_END
  *    \extends GUM_Event_Input
  *    \brief   TODO: brief description
 */
-
-/*!  \name  Properties
- *   \brief Properties you can set/get at or after creation.
- *   \note  You can also set/get properties from parent classes (see \ref GUM_Event_Mouse).
- *    @{
-*/
 GBL_INSTANCE_DERIVE(GUM_Event_Mouse, GUM_Event_Input)
     //
 GBL_INSTANCE_END
-//! @}
 
 GblType GUM_Event_Mouse_type(void) GBL_NOEXCEPT;
-//! \endcond
+//! \
+
+//! Returns a new GUM_Event_Mouse.
+#define GUM_Event_Mouse_create() GUM_EVENT_MOUSE(GblEvent_create(GUM_EVENT_MOUSE_TYPE))
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

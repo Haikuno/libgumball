@@ -1,4 +1,4 @@
-#include "gumball/ifaces/gumball_iresource.h"
+#include <gumball/ifaces/gumball_iresource.h>
 #include <gumball/elements/gumball_widget.h>
 #include <gumball/elements/gumball_button.h>
 #include <gumball/elements/gumball_container.h>
@@ -19,6 +19,11 @@ static void GUM_Widget_GblObject_onPropertyChange_(GblObject* pSelf, GblProperty
         default:
             break;
     }
+}
+
+static GBL_RESULT GUM_Widget_handleInputEvent_(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
+    GBL_UNUSED(pSelf, pEvent);
+    return GBL_RESULT_SUCCESS;
 }
 
 static GBL_RESULT GUM_Widget_init_(GblInstance* pInstance) {
@@ -520,19 +525,65 @@ static GBL_RESULT GUM_Widget_postDraw_(GUM_Widget* pSelf, GUM_Renderer* pRendere
     return GBL_RESULT_SUCCESS;
 }
 
+static GBL_RESULT GUM_Widget_receiveEvent_(GblIEventReceiver* pSelf,
+                                           GblIEventReceiver* pDest,
+                                           GblEvent*          pEvent) {
+    GUM_Widget*      pWidget = GUM_WIDGET(pSelf);
+    GUM_WidgetClass* pClass  = GUM_WIDGET_CLASSOF(pWidget);
+
+    if (GblType_check(GBL_TYPEOF(pEvent), GUM_EVENT_INPUT_TYPE))
+        return pClass->pFnInputEvent(pWidget, GUM_EVENT_INPUT(pEvent));
+
+    return GBL_RESULT_SUCCESS;
+}
+
 static GBL_RESULT GUM_WidgetClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
-    if (!GblType_classRefCount(GUM_WIDGET_TYPE))
+    if (!GblType_classRefCount(GUM_WIDGET_TYPE)) {
         GBL_PROPERTIES_REGISTER(GUM_Widget);
+
+        GblSignal_install(GUM_WIDGET_TYPE, "onPress",          GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_EVENT_INPUT_TYPE);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressConfirm",   GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressCancel",    GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressUnbound",   GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onRelease",        GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_EVENT_INPUT_TYPE);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseConfirm", GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseCancel",  GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseUnbound", GblMarshal_CClosure_VOID__INSTANCE, 0);
+    }
+
+    GBL_IEVENT_RECEIVER_CLASS(pClass)->pFnReceiveEvent = GUM_Widget_receiveEvent_;
 
     GBL_OBJECT_CLASS(pClass)->pFnSetProperty  = GUM_Widget_GblObject_setProperty_;
     GBL_OBJECT_CLASS(pClass)->pFnProperty     = GUM_Widget_GblObject_property_;
     GBL_OBJECT_CLASS(pClass)->pFnInstantiated = GUM_Widget_Object_instantiated_;
+
     GUM_WIDGET_CLASS(pClass)->pFnActivate     = nullptr;
     GUM_WIDGET_CLASS(pClass)->pFnDeactivate   = GUM_Widget_deactivate_;
     GUM_WIDGET_CLASS(pClass)->pFnUpdate       = GUM_Widget_update_;
     GUM_WIDGET_CLASS(pClass)->pFnDraw         = GUM_Widget_draw_;
+    GUM_WIDGET_CLASS(pClass)->pFnInputEvent   = GUM_Widget_handleInputEvent_;
+
+
+    return GBL_RESULT_SUCCESS;
+}
+
+static GBL_RESULT GUM_WidgetClass_final_(GblClass* pClass, const void* pClassData) {
+    GBL_UNUSED(pClassData);
+
+    if (!GblType_classRefCount(GUM_WIDGET_TYPE)) {
+        GblProperty_uninstallAll(GUM_WIDGET_TYPE);
+
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPress"         );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressConfirm"  );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressCancel"   );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressUnbound"  );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onRelease"       );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseConfirm");
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseCancel" );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseUnbound");
+    }
 
     return GBL_RESULT_SUCCESS;
 }
@@ -546,7 +597,8 @@ GblType GUM_Widget_type(void) {
                                 &(static GblTypeInfo){ .classSize       = sizeof(GUM_WidgetClass),
                                                        .pFnClassInit    = GUM_WidgetClass_init_,
                                                        .instanceSize    = sizeof(GUM_Widget),
-                                                       .pFnInstanceInit = GUM_Widget_init_ },
+                                                       .pFnInstanceInit = GUM_Widget_init_,
+                                                       .pFnClassFinal   = GUM_WidgetClass_final_},
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC);
     }
 

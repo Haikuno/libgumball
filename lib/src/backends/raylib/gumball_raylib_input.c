@@ -12,4 +12,9 @@ void GUM_Backend_Mouse_update(GUM_Mouse* pMouse) {
     pMouse->position.y = position_.y;
     pMouse->delta.x    = delta_.x;
     pMouse->delta.y    = delta_.y;
+
+    GUM_INPUTDEVICE(pMouse)->buttons = 0;
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))   GUM_INPUTDEVICE(pMouse)->buttons |= GUM_MOUSE_BUTTON_LEFT;
+    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))  GUM_INPUTDEVICE(pMouse)->buttons |= GUM_MOUSE_BUTTON_RIGHT;
+    if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) GUM_INPUTDEVICE(pMouse)->buttons |= GUM_MOUSE_BUTTON_MIDDLE;
 }

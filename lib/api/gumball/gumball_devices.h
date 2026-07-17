@@ -13,6 +13,7 @@
 
 #include "devices/gumball_inputdevice.h"
 #include "devices/gumball_mouse.h"
+#include "devices/gumball_gamepad.h"
 
 /*!  \defgroup devices Devices
  *   \brief Input devices

@@ -28,7 +28,7 @@ GBL_EXPORT GBL_RESULT (GUM_update)(void) {
             result = GBL_RESULT_NOT_FOUND;
             GBL_SCOPE_EXIT;
         }
-        GUM_Root_update();
+        GUM_Root_update(pRoot);
         GUM_update_recursive_(GBL_OBJECT(pRoot));
     }
 

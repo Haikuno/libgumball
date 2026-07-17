@@ -60,8 +60,8 @@ void             GUM_drawQueue_sort      (void);
 GblArrayList*    GUM_drawQueue_get       (void);
 //!\endcond
 
-//! Updates the root element. Currently used for polling input, might change later
-void GUM_Root_update(void);
+//! Updates the root element.
+void GUM_Root_update(GBL_SELF);
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE
