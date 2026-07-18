@@ -44,7 +44,7 @@ GBL_INTERFACE_DERIVE(GUM_IResource)
     GBL_RESULT        (*pFnSetQuark)      (GBL_SELF,  GblQuark      pQuark);
 GBL_INTERFACE_END
 
-GblType GUM_IResource_type(void);
+GblType GUM_IResource_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 //! Returns a new reference to a GUM_IResource, increasing the reference count.
@@ -57,7 +57,6 @@ GBL_EXPORT void*           GUM_IResource_data        (GBL_CSELF)                
 GBL_EXPORT void            GUM_IResource_setData     (GBL_SELF, void* pValue)    GBL_NOEXCEPT;
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_IRESOURCE_H

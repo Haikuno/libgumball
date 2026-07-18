@@ -8,7 +8,7 @@
  *
  *   GUM_Event is the base event type used in libGumball.
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
@@ -18,10 +18,10 @@
  *   \brief Type UUID and Cast Operators
  *   @{
 */
-#define GUM_EVENT_TYPE            (GBL_TYPEID      (GUM_Event))         //!< Returns the GUM_Event Type UUID
-#define GUM_EVENT(self)           (GBL_CAST        (GUM_Event, self))   //!< Casts an instance of a compatible event to a GUM_Event
-#define GUM_EVENT_CLASS(klass)    (GBL_CLASS_CAST  (GUM_Event, klass))  //!< Casts a  class    of a compatible event to a GUM_EventClass
-#define GUM_EVENT_CLASSOF(self)   (GBL_CLASSOF     (GUM_Event, self))   //!< Casts an instance of a compatible event to a GUM_EventClass
+#define GUM_EVENT_TYPE            (GBL_TYPEID     (GUM_Event))         //!< Returns the GUM_Event Type UUID
+#define GUM_EVENT(self)           (GBL_CAST       (GUM_Event, self))   //!< Casts an instance of a compatible event to a GUM_Event
+#define GUM_EVENT_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event, klass))  //!< Casts a  class    of a compatible event to a GUM_EventClass
+#define GUM_EVENT_CLASSOF(self)   (GBL_CLASSOF    (GUM_Event, self))   //!< Casts an instance of a compatible event to a GUM_EventClass
 //! @}
 
 #define GBL_SELF_TYPE GUM_Event
@@ -50,7 +50,7 @@ GBL_INSTANCE_DERIVE(GUM_Event, GblEvent)
 GBL_INSTANCE_END
 
 //! \cond
-GblType GUM_Event_type(void);
+GblType GUM_Event_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 GBL_DECLS_END

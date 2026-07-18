@@ -12,16 +12,16 @@
          - Animations
          - GUM_Property_set/get
 
-     \author       2025 Agustín Bellagamba
-     \copyright    MIT License
+     \author    2025, 2026 Agustín Bellagamba
+     \copyright MIT License
 */
 
 #include "elements/gumball_root.h"
 #include "elements/gumball_widget.h"
 #include "elements/gumball_button.h"
 #include "elements/gumball_container.h"
-#include "elements/gumball_controller.h"
 #include "elements/gumball_common.h"
+#include "elements/gumball_objectviewer.h"
 
 /*!  \defgroup elements Elements
  *   \brief    Element types

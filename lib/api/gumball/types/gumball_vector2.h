@@ -27,7 +27,7 @@ typedef struct {
 #define GUM_VECTOR2_TYPE (GBL_TYPEID(GUM_Vector2)) //!< Returns the GUM_Vector2 Type UUID
 
 //! \cond
-GblType GUM_Vector2_type(void);
+GblType GUM_Vector2_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 GBL_EXPORT GUM_Vector2 GUM_Vector2_add          (GUM_Vector2 a, GUM_Vector2 b)                      GBL_NOEXCEPT; //!< Returns the sum of two vectors

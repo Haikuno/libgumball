@@ -14,10 +14,9 @@
  *       - Add a way to override cursor movement to the desired GUM_Button pointer.
  *       - Button highlighting animations
  *       - Make variables private
- *       - Document signals
  *
- *   \author       2025 Agustín Bellagamba
- *   \copyright    MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include "gumball_widget.h"
@@ -59,9 +58,6 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Button, GUM_Widget)
 GBL_INSTANCE_DERIVE(GUM_Button, GUM_Widget)
     bool             isActive;            //!< If this button can be pressed.                                                                 Default value is true
     bool             isSelectable;        //!< If this button can be selected.                                                                Default value is true
-    //! \cond
-    bool             isSelected;          // If this button is currently selected
-    //! \endcond
     bool             isSelectedByDefault; //!< If this button should be selected by default when the cursor doesn't have a button selected.   Default value is false
 GBL_INSTANCE_END
 //! @}
@@ -72,15 +68,7 @@ GBL_PROPERTIES(GUM_Button,
     (isSelectedByDefault,    GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE)
 )
 
-//! \cond
-GBL_SIGNALS(GUM_Button,
-    (onPressPrimary,   (GBL_INSTANCE_TYPE, pReceiver)),    //!< For primary actions   (e.g., left-click  )
-    (onPressSecondary, (GBL_INSTANCE_TYPE, pReceiver)),    //!< For secondary actions (e.g., right-click )
-    (onPressTertiary,  (GBL_INSTANCE_TYPE, pReceiver))     //!< For tertiary actions  (e.g., middle-click)
-)
-
-GblType GUM_Button_type(void);
-//! \endcond
+GblType GUM_Button_type(void) GBL_NOEXCEPT;
 
 //! Returns a new GUM_Button. Optionally takes in a list of Name/Value pairs for properties
 #define GUM_Button_create(/* propertyName, propertyValue */ ...) GBL_NEW(GUM_Button __VA_OPT__(,) __VA_ARGS__)

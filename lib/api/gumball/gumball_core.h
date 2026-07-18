@@ -7,13 +7,15 @@
  *   \brief      Core module-wide include
  *   \ingroup    core
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
 #include "core/gumball_backend.h"
 #include "core/gumball_logger.h"
 #include "core/gumball_manager.h"
+#include "core/gumball_inputsystem.h"
+#include "core/gumball_navigation.h"
 
 /*!  \defgroup core Core
  *   \brief Core functionality

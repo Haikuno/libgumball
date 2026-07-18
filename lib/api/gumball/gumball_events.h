@@ -7,11 +7,14 @@
  *   \brief      Events module-wide include
  *   \ingroup    events
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
 #include "events/gumball_event.h"
+#include "events/gumball_event_key.h"
+#include "events/gumball_event_gamepad.h"
+#include "events/gumball_event_mouse.h"
 
 /*!  \defgroup events Events
  *   \brief    Element types

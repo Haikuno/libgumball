@@ -1,6 +1,10 @@
 #include <gumball/core/gumball_backend.h>
 #include <raylib.h>
 
+GBL_EXPORT GUM_Vector2 GUM_Backend_screenSize(void) {
+    return (GUM_Vector2){GetScreenWidth(), GetScreenHeight()};
+}
+
 GBL_EXPORT GBL_RESULT GUM_Backend_rectangleDraw(GUM_Renderer* pRenderer, GUM_Rectangle rectangle,
                                                 float roundness, GUM_Color color) {
     DrawRectangleRounded((Rectangle){ rectangle.x, rectangle.y, rectangle.width, rectangle.height },

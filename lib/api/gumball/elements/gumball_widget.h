@@ -17,9 +17,10 @@
  *       - Separate isRelative into position and size
  *       - Add GUM_Vector2 position and size as properties
  *       - Make border highlight configurable (color, thickness)
+ *       - Document signals
  *
- *   \author       2025 Agustín Bellagamba
- *   \copyright    MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
@@ -29,6 +30,8 @@
 #include <gumball/types/gumball_font.h>
 #include <gumball/types/gumball_texture.h>
 #include <gumball/types/gumball_renderer.h>
+#include <gumball/gumball_events.h>
+
 
 /*! \name  Type System
  *  \brief Type UUID and cast operators
@@ -51,14 +54,15 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Widget);
  *    \brief   GUM_Widget structure
  *
  *    GUM_WidgetClass derives from GblObjectClass,
- *    adding additional virtual functions to handle activating, deactivating, updating, and drawing elements.
+ *    adding additional virtual functions to handle activating, deactivating, updating, drawing elements, and handling input events.
 */
 //! \cond
 GBL_CLASS_DERIVE(GUM_Widget, GblObject)
     GBL_RESULT (*pFnActivate)    (GBL_SELF);
     GBL_RESULT (*pFnDeactivate)  (GBL_SELF);
     GBL_RESULT (*pFnUpdate)      (GBL_SELF);
-    GBL_RESULT (*pFnDraw)        (GBL_SELF, GUM_Renderer* pRenderer);
+    GBL_RESULT (*pFnDraw)        (GBL_SELF, GUM_Renderer*    pRenderer);
+    GBL_RESULT (*pFnInputEvent)  (GBL_SELF, GUM_Event_Input* pEvent);
 GBL_CLASS_END
 //! \endcond
 
@@ -94,7 +98,7 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     bool               isRelative;               //!< If the widget's position and size should be relative to its parent.            Default value is false
     GblStringRef*      label;                    //!< Optional text label of the widget.                                             Default value is nullptr
     GUM_Font*          font;                     //!< Optional font for the widget's label. If not set, the default font is used.    Default value is nullptr
-    GUM_TextAlignment  textAlignment;            //!< Alignment of the widget's label.                                               Default value is GUM_TEXT_ALIGN_CENTER \bug This is not working at the moment.
+    GUM_TextAlignment  textAlignment;            //!< Alignment of the widget's label.                                               Default value is GUM_TEXT_ALIGN_CENTER
     GUM_Texture*       texture;                  //!< Optional texture for rendering inside the widget.                              Default value is nullptr
     uint8_t            font_size;                //!< Font size of the widget's label.                                               Default value is 22
     uint8_t            font_r;                   //!< Red component of the font color.                                               Default value is 255
@@ -108,48 +112,66 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     uint8_t            font_border_thickness;    //!< Width of the font border, in pixels.                                           Default value is 1
     uint8_t            z_index;                  //!< Z-index of the widget. The higher the value, the higher the priority.          Default value is 50
     bool               shouldUpdate;             //!< If the widget should be updated.                                               Default value is true
+    uint8_t            focusCount;               //!< Number of input devices currently focusing this widget                         Default value is 0
 GBL_INSTANCE_END
 //! @}
 
+//! True if at least one input device currently has navigation focus on this widget.
+#define GUM_Widget_isFocused(self) (GUM_WIDGET(self)->focusCount > 0)
+
 GBL_PROPERTIES(GUM_Widget,
-    (x,                     GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE         ),
-    (y,                     GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE         ),
-    (w,                     GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE         ),
-    (h,                     GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE         ),
-    (isRelative,            GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE          ),
-    (color,                 GBL_GENERIC, (READ, WRITE), GBL_UINT32_TYPE        ),
-    (border_color,          GBL_GENERIC, (READ, WRITE), GBL_UINT32_TYPE        ),
-    (font_color,            GBL_GENERIC, (READ, WRITE), GBL_UINT32_TYPE        ),
-    (font_border_color,     GBL_GENERIC, (READ, WRITE), GBL_UINT32_TYPE        ),
-    (r,                     GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (g,                     GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (b,                     GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (a,                     GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (border_r,              GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (border_g,              GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (border_b,              GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (border_a,              GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (border_width,          GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (border_radius,         GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE         ),
-    (border_highlight,      GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE          ),
-    (label,                 GBL_GENERIC, (READ, WRITE), GBL_STRING_TYPE        ),
-    (texture,               GBL_GENERIC, (READ, WRITE), GUM_TEXTURE_TYPE       ),
-    (textAlignment,         GBL_GENERIC, (READ, WRITE), GUM_TEXT_ALIGNMENT_TYPE),
-    (font,                  GBL_GENERIC, (READ, WRITE), GUM_FONT_TYPE          ),
-    (font_size,             GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (font_r,                GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (font_g,                GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (font_b,                GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (font_a,                GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (font_border_r,         GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (font_border_g,         GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (font_border_b,         GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (font_border_a,         GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (font_border_thickness, GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         ),
-    (z_index,               GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE         )
+    (x,                     GBL_GENERIC, (READ, WRITE),          GBL_FLOAT_TYPE         ),
+    (y,                     GBL_GENERIC, (READ, WRITE),          GBL_FLOAT_TYPE         ),
+    (w,                     GBL_GENERIC, (READ, WRITE),          GBL_FLOAT_TYPE         ),
+    (h,                     GBL_GENERIC, (READ, WRITE),          GBL_FLOAT_TYPE         ),
+    (isRelative,            GBL_GENERIC, (READ, WRITE),          GBL_BOOL_TYPE          ),
+    (color,                 GBL_GENERIC, (READ, WRITE),          GBL_UINT32_TYPE        ),
+    (border_color,          GBL_GENERIC, (READ, WRITE),          GBL_UINT32_TYPE        ),
+    (font_color,            GBL_GENERIC, (READ, WRITE),          GBL_UINT32_TYPE        ),
+    (font_border_color,     GBL_GENERIC, (READ, WRITE),          GBL_UINT32_TYPE        ),
+    (r,                     GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (g,                     GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (b,                     GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (a,                     GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (border_r,              GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (border_g,              GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (border_b,              GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (border_a,              GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (border_width,          GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (border_radius,         GBL_GENERIC, (READ, WRITE),          GBL_FLOAT_TYPE         ),
+    (border_highlight,      GBL_GENERIC, (READ, WRITE),          GBL_BOOL_TYPE          ),
+    (label,                 GBL_GENERIC, (READ, WRITE),          GBL_STRING_TYPE        ),
+    (labelAcquire,          GBL_GENERIC, (      WRITE, ACQUIRE), GBL_STRING_TYPE        ), // Write-only, takes ownership of the given GblStringRef* and stores it as its label.
+    (texture,               GBL_GENERIC, (READ, WRITE),          GUM_TEXTURE_TYPE       ),
+    (textAlignment,         GBL_GENERIC, (READ, WRITE),          GUM_TEXT_ALIGNMENT_TYPE),
+    (font,                  GBL_GENERIC, (READ, WRITE),          GUM_FONT_TYPE          ),
+    (font_size,             GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (font_r,                GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (font_g,                GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (font_b,                GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (font_a,                GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (font_border_r,         GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (font_border_g,         GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (font_border_b,         GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (font_border_a,         GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (font_border_thickness, GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         ),
+    (z_index,               GBL_GENERIC, (READ, WRITE),          GBL_UINT8_TYPE         )
 )
 
-GblType GUM_Widget_type(void);
+GBL_SIGNALS(GUM_Widget,
+    (onPress,           (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
+    (onRelease,         (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
+    (onPressConfirm,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressCancel,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressUnbound,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseConfirm,  (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseCancel,   (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseUnbound,  (GBL_INSTANCE_TYPE, pReceiver)),
+    (onFocusGained,     (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice)), //!< Emitted when a device navigates focus onto this widget
+    (onFocusLost,       (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice))  //!< Emitted when a device navigates focus away from this widget
+)
+
+GblType GUM_Widget_type(void) GBL_NOEXCEPT;
 
 //! \cond
 GUM_Vector2 GUM_get_absolute_position_(GBL_SELF);

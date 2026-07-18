@@ -1,7 +1,6 @@
 #include <gumball/core/gumball_backend.h>
 #include <gumball/elements/gumball_container.h>
-
-// TODO: only resize and realign widgets on signal firing instead of every frame
+#include <gumball/core/gumball_logger.h>
 
 static GBL_RESULT GUM_Container_init_(GblInstance* pInstance) {
     GUM_CONTAINER(pInstance)->padding       = 5.0f;
@@ -12,8 +11,8 @@ static GBL_RESULT GUM_Container_init_(GblInstance* pInstance) {
     GUM_CONTAINER(pInstance)->alignWidgets  = true;
     GUM_CONTAINER(pInstance)->scrollable    = true;
 
-    GUM_CONTAINER(pInstance)->scrollOffsetX = 0;
-    GUM_CONTAINER(pInstance)->scrollOffsetY = 0;
+    GUM_CONTAINER(pInstance)->scrollOffsetX = 0.0f;
+    GUM_CONTAINER(pInstance)->scrollOffsetY = 0.0f;
     return GBL_RESULT_SUCCESS;
 }
 
@@ -104,50 +103,32 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     const float totalPaddingWithRoundness = totalPadding + roundnessInset * 2.0f;
     float       offset                    = container_mainPos + pSelf->padding + pSelf->margin + roundnessInset;
 
-    for (size_t i = 0; i < childCount; ++i) {
-        GblObject*  child_obj    = GblObject_findChildByIndex(GBL_OBJECT(pSelf), i);
-        GUM_Widget* child_widget = GBL_AS(GUM_Widget, child_obj);
+    GblObject_foreachChild(GBL_OBJECT(pSelf), pChild) {
+        GUM_Widget* pChildWidget = GBL_AS(GUM_Widget, pChild);
 
-        if GBL_UNLIKELY (!child_widget) continue;
+        if GBL_UNLIKELY(!pChildWidget) continue;
 
-        if (pSelf->scrollable) {
-            child_widget->x += pSelf->scrollOffsetX;
-            child_widget->y += pSelf->scrollOffsetY;
-        }
-
-        float* widget_mainPos      = isHorizontal ? &child_widget->x : &child_widget->y;
-        float* widget_secondaryPos = isHorizontal ? &child_widget->y : &child_widget->x;
-        float* widget_mainDim      = isHorizontal ? &child_widget->w : &child_widget->h;
-        float* widget_secondaryDim = isHorizontal ? &child_widget->h : &child_widget->w;
+        float* widget_mainPos      = isHorizontal ? &pChildWidget->x : &pChildWidget->y;
+        float* widget_secondaryPos = isHorizontal ? &pChildWidget->y : &pChildWidget->x;
+        float* widget_mainDim      = isHorizontal ? &pChildWidget->w : &pChildWidget->h;
+        float* widget_secondaryDim = isHorizontal ? &pChildWidget->h : &pChildWidget->w;
 
         if (pSelf->resizeWidgets) {
             *widget_mainDim      = (container_mainDim - totalMargin - totalPaddingWithRoundness) / (float)childCount;
-            *widget_mainDim      = GBL_MAX(container_mainDim * 0.15, *widget_mainDim);
             *widget_secondaryDim = container_secondaryDim - totalPaddingWithRoundness;
         }
 
         if (pSelf->alignWidgets) {
             *widget_mainPos = offset;
-            if (offset + *widget_mainDim > container_mainPos + container_mainDim) {
-                child_widget->r = 50;
-                child_widget->g = 50;
-                child_widget->b = 50;
-            }
             const float availableSecDim = container_secondaryDim - totalPaddingWithRoundness;
             *widget_secondaryPos        = container_secondaryPos + pSelf->padding + roundnessInset
-                                   + (availableSecDim - *widget_secondaryDim) / 2.0f;
+                                        + (availableSecDim - *widget_secondaryDim) / 2.0f;
             offset += *widget_mainDim + pSelf->margin * 2.0f;
         }
-    }
 
-    // second pass to notify child containers
-
-    for (size_t i = 0; i < childCount; ++i) {
-        GblObject*     child_obj       = GblObject_findChildByIndex(GBL_OBJECT(pSelf), i);
-        GUM_Container* child_container = GBL_AS(GUM_Container, child_obj);
-        if (child_container) {
-            GUM_Container_updateContent_(child_container);
-        }
+        GUM_Container* pChildContainer = GBL_AS(GUM_Container, pChild);
+        if (pChildContainer)
+            GUM_CONTAINER_CLASSOF(pChildContainer)->pFnUpdateContent(pChildContainer);
     }
 
     return GBL_RESULT_SUCCESS;
@@ -163,7 +144,8 @@ static GBL_RESULT GUM_Container_Object_instantiated_(GblObject* pObject) {
 static GBL_RESULT GUM_ContainerClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
-    if (!GblType_classRefCount(GUM_CONTAINER_TYPE)) GBL_PROPERTIES_REGISTER(GUM_Container);
+    if (!GblType_classRefCount(GUM_CONTAINER_TYPE))
+        GBL_PROPERTIES_REGISTER(GUM_Container);
 
     GBL_OBJECT_CLASS(pClass)->pFnSetProperty  = GUM_Container_GblObject_setProperty_;
     GBL_OBJECT_CLASS(pClass)->pFnProperty     = GUM_Container_GblObject_property_;

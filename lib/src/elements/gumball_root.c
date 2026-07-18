@@ -1,12 +1,18 @@
 #include <gumball/elements/gumball_widget.h>
+#include <gumball/elements/gumball_container.h>
 #include <gumball/elements/gumball_root.h>
+#include <gumball/elements/gumball_common.h>
 #include <gumball/types/gumball_renderer.h>
+#include <gumball/core/gumball_logger.h>
 #include <gumball/core/gumball_backend.h>
+#include <gumball/core/gumball_inputsystem.h>
+#include <gumball/gumball_events.h>
 
 #include <gimbal/gimbal_algorithms.h>
 
-static GblArrayList GUM_drawQueue_;
-static GblLogger*   pLogger_ = nullptr;
+static GblLogger*   pLogger_        = nullptr;
+static GblArrayList GUM_drawQueue_  = {0};
+static GUM_Vector2  lastScreenSize_ = {0};
 
 static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
     GblObject_setName(GBL_OBJECT(pInstance), "GUM_Root");
@@ -25,6 +31,7 @@ static GBL_RESULT GUM_RootClass_init_(GblClass* pClass, const void* pData) {
         GUM_drawQueue_init();
         GblLogger_register(pLogger_);
         GUM_Backend_setLogger();
+        GUM_InputSystem_init();
     }
 
     return GBL_RESULT_SUCCESS;
@@ -37,6 +44,7 @@ static GBL_RESULT GUM_RootClass_final_(GblClass* pClass, const void* pData) {
         GUM_drawQueue_free();
         GblLogger_unregister(pLogger_);
         GUM_Backend_resetLogger();
+        GUM_InputSystem_deinit();
     }
 
     return GBL_RESULT_SUCCESS;
@@ -88,25 +96,40 @@ void GUM_drawQueue_free(void) {
     GblArrayList_destruct(&GUM_drawQueue_);
 }
 
-void GUM_drawQueue_push(GblObject* pObj) {
-    if (!pObj) return;
-    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObj);
+void GUM_drawQueue_push(GblObject* pObject) {
+    if (!pObject) return;
+    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
     if (!pWidget) return;
 
-    GblArrayList_pushBack(&GUM_drawQueue_, &pObj);
+    GblArrayList_pushBack(&GUM_drawQueue_, &pObject);
     GUM_drawQueue_sort();
 }
 
-void GUM_drawQueue_remove(GblObject* pObj) {
-    if (!pObj) return;
-    if (!GBL_AS(GUM_Widget, pObj)) return;
+void GUM_drawQueue_remove(GblObject* pObject) {
+    if (!pObject) return;
+    if (!GBL_AS(GUM_Widget, pObject)) return;
 
     for (size_t i = 0; i < GblArrayList_size(&GUM_drawQueue_); i++) {
         GblObject* pObjQueue = *(GblObject**)GblArrayList_at(&GUM_drawQueue_, i);
-        if (pObjQueue == pObj) {
+        if (pObjQueue == pObject) {
             GblArrayList_erase(&GUM_drawQueue_, i, 1);
             GUM_drawQueue_sort();
             return;
         }
     }
+}
+
+void GUM_Root_update(GUM_Root* pRoot) {
+    GUM_Vector2 screenSize = GUM_Backend_screenSize();
+
+    if (screenSize.x != lastScreenSize_.x ||
+        screenSize.y != lastScreenSize_.y) {
+        GblObject_foreachChild(GBL_OBJECT(pRoot), pContainer, GUM_Container*) {
+            GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
+        }
+    }
+
+    lastScreenSize_ = screenSize;
+
+    GUM_InputSystem_update();
 }

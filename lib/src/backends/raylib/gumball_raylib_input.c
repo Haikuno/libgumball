@@ -1,56 +1,63 @@
 #include <gumball/core/gumball_backend.h>
+#include <gumball/gumball_events.h>
+#include <gumball/core/gumball_logger.h>
 #include <raylib.h>
 
-GBL_EXPORT GBL_RESULT GUM_Backend_pollInput(GUM_Controller* pController) {
-    typedef struct {
-        KeyboardKey              key;
-        GUM_CONTROLLER_BUTTON_ID button_ui;
-    } KeyBinding;
+// ---------------------------------- Mouse ---------------------------------- //
 
-    typedef struct {
-        GamepadButton            button_gamepad;
-        GUM_CONTROLLER_BUTTON_ID button_ui;
-    } ButtonBinding;
+void GUM_Backend_Mouse_update(GUM_Mouse* pMouse) {
+    Vector2 position_ = GetMousePosition();
+    Vector2 delta_    = GetMouseDelta();
 
-    static KeyBinding constexpr key_bindings[] = {
-        { KEY_UP,    GUM_CONTROLLER_UP        },
-        { KEY_RIGHT, GUM_CONTROLLER_RIGHT     },
-        { KEY_DOWN,  GUM_CONTROLLER_DOWN      },
-        { KEY_LEFT,  GUM_CONTROLLER_LEFT      },
-        { KEY_A,     GUM_CONTROLLER_PRIMARY   },
-        { KEY_S,     GUM_CONTROLLER_SECONDARY },
-        { KEY_D,     GUM_CONTROLLER_TERTIARY  },
-    };
-    static size_t constexpr n_key_bindings = sizeof(key_bindings) / sizeof(key_bindings[0]);
+    pMouse->position.x = position_.x;
+    pMouse->position.y = position_.y;
+    pMouse->delta.x    = delta_.x;
+    pMouse->delta.y    = delta_.y;
 
-    static ButtonBinding constexpr button_bindings[] = {
-        { GAMEPAD_BUTTON_LEFT_FACE_UP,     GUM_CONTROLLER_UP        },
-        { GAMEPAD_BUTTON_LEFT_FACE_RIGHT,  GUM_CONTROLLER_RIGHT     },
-        { GAMEPAD_BUTTON_LEFT_FACE_DOWN,   GUM_CONTROLLER_DOWN      },
-        { GAMEPAD_BUTTON_LEFT_FACE_LEFT,   GUM_CONTROLLER_LEFT      },
-        { GAMEPAD_BUTTON_RIGHT_FACE_DOWN,  GUM_CONTROLLER_PRIMARY   },
-        { GAMEPAD_BUTTON_RIGHT_FACE_RIGHT, GUM_CONTROLLER_SECONDARY },
-        { GAMEPAD_BUTTON_RIGHT_FACE_UP,    GUM_CONTROLLER_TERTIARY  },
-    };
-    static size_t constexpr n_button_bindings = sizeof(button_bindings) / sizeof(button_bindings[0]);
+    GUM_INPUTDEVICE(pMouse)->buttons = 0;
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))   GUM_INPUTDEVICE(pMouse)->buttons |= GUM_MOUSE_BUTTON_LEFT;
+    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))  GUM_INPUTDEVICE(pMouse)->buttons |= GUM_MOUSE_BUTTON_RIGHT;
+    if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) GUM_INPUTDEVICE(pMouse)->buttons |= GUM_MOUSE_BUTTON_MIDDLE;
+}
 
-    if (pController->isKeyboard) {
-        for (size_t i = 0; i < n_key_bindings; ++i) {
-            if (IsKeyPressed(key_bindings[i].key))
-                GUM_Controller_sendButton(pController, GUM_CONTROLLER_BUTTON_PRESS, key_bindings[i].button_ui);
-            if (IsKeyReleased(key_bindings[i].key))
-                GUM_Controller_sendButton(pController, GUM_CONTROLLER_BUTTON_RELEASE, key_bindings[i].button_ui);
-        }
+bool GUM_Backend_Gamepad_isConnected(int index) {
+    return IsGamepadAvailable(index);
+}
 
-        return GBL_RESULT_SUCCESS;
-    }
+void GUM_Backend_Gamepad_update(GUM_Gamepad* pGamepad) {
+    int index = pGamepad->rawIndex;
 
-    for (size_t i = 0; i < n_button_bindings; ++i) {
-        if (IsGamepadButtonPressed(pController->controllerId, button_bindings[i].button_gamepad))
-            GUM_Controller_sendButton(pController, GUM_CONTROLLER_BUTTON_PRESS, button_bindings[i].button_ui);
-        if (IsGamepadButtonReleased(pController->controllerId, button_bindings[i].button_gamepad))
-            GUM_Controller_sendButton(pController, GUM_CONTROLLER_BUTTON_RELEASE, button_bindings[i].button_ui);
-    }
+    GUM_INPUTDEVICE(pGamepad)->buttons = 0;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))  GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_BUTTON_A;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_BUTTON_B;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_RIGHT_FACE_LEFT))  GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_BUTTON_X;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_RIGHT_FACE_UP))    GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_BUTTON_Y;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_LEFT_TRIGGER_1))   GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_BUTTON_LB;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_RIGHT_TRIGGER_1))  GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_BUTTON_RB;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_MIDDLE_RIGHT))     GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_BUTTON_START;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_MIDDLE_LEFT))      GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_BUTTON_SELECT;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_LEFT_FACE_UP))     GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_DPAD_UP;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_LEFT_FACE_DOWN))   GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_DPAD_DOWN;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_LEFT_FACE_LEFT))   GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_DPAD_LEFT;
+    if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_LEFT_FACE_RIGHT))  GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_DPAD_RIGHT;
+}
 
-    return GBL_RESULT_SUCCESS;
+const char* GUM_Backend_Gamepad_name(int index) {
+    return GetGamepadName(index);
+}
+
+// ---------------------------------- Keyboard ---------------------------------- //
+
+void GUM_Backend_Keyboard_update(GUM_Keyboard* pKeyboard) {
+    GUM_INPUTDEVICE(pKeyboard)->buttons = 0;
+    if (IsKeyDown(KEY_UP))     GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_UP;
+    if (IsKeyDown(KEY_DOWN))   GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_DOWN;
+    if (IsKeyDown(KEY_LEFT))   GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_LEFT;
+    if (IsKeyDown(KEY_RIGHT))  GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_RIGHT;
+    if (IsKeyDown(KEY_W))      GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_W;
+    if (IsKeyDown(KEY_A))      GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_A;
+    if (IsKeyDown(KEY_S))      GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_S;
+    if (IsKeyDown(KEY_D))      GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_D;
+    if (IsKeyDown(KEY_ENTER))  GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_ENTER;
+    if (IsKeyDown(KEY_ESCAPE)) GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_ESCAPE;
 }

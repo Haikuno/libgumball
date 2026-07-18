@@ -9,11 +9,12 @@
  *   gumball_common is a collection of functions and macros that are
  *   common to all elements in libGumball.
  *
- *   \author       2025 Agustín Bellagamba
- *   \copyright    MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
+#include <gimbal/containers/gimbal_ring_list.h>
 #include <gumball/types/gumball_renderer.h>
 
 //! Updates all the UI elements
@@ -68,6 +69,9 @@
 */
 #define GUM_get_child_at(self, index) (GblObject_findChildByIndex(GBL_OBJECT(self), index))
 
+//! Incerements the reference count of a UI element, returning a pointer to it.
+#define GUM_ref(obj)                  ((GUM_ref)(GBL_OBJECT(obj)))
+
 //! Decrements the reference count of a UI element, freeing it if it reaches zero.
 //! Also recursively unrefs all of its children.
 #define GUM_unref(obj)                ((GUM_unref)(GBL_OBJECT(obj)))
@@ -100,21 +104,25 @@
 //! Sets the property with the given name to the value given by the pointer passed through the variadic argument list
 #define GUM_setProperty(obj, name, /*value*/...) (GblObject_setProperty(GBL_OBJECT(obj), name, __VA_ARGS__))
 
+//! Creates a list that you can pass to the \p children property, takes in any number of comma-separated elements.
+#define GUM_childrenList(child1, /*child2, child3, */ ...) (GblRingList_create(child1 __VA_OPT__(,) __VA_ARGS__))
+
 ////////// Implementation details, Grugs please ignore
 //!\cond
 #define GUM_draw_(renderer, ...) (GUM_draw)(renderer)
 
-GBL_EXPORT GBL_RESULT    (GUM_draw)             (GUM_Renderer* pRenderer)   GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update)           (void)                      GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update_disable)   (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update_enable)    (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update_disableAll)(GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_update_enableAll) (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_draw_enable)      (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_draw_disable)     (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_draw_enableAll)   (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_draw_disableAll)  (GblObject* pSelf)          GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT    (GUM_unref)            (GblObject* pSelf)          GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw)              (GUM_Renderer* pRenderer) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update)            (void)                    GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_disable)    (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_enable)     (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_disableAll) (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_enableAll)  (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_enable)       (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_disable)      (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)    (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)   (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GblObject* (GUM_ref)               (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_unref)             (GblObject* pSelf)        GBL_NOEXCEPT;
 //!\endcond
 
 #endif

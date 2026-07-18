@@ -1,14 +1,54 @@
 #include <gumball/elements/gumball_button.h>
-#include <gumball/elements/gumball_controller.h>
 #include <gumball/elements/gumball_root.h>
+#include <gumball/elements/gumball_common.h>
 
 static GBL_RESULT GUM_Button_init_(GblInstance* pInstance) {
     GUM_Button* pButton = GUM_BUTTON(pInstance);
 
     pButton->isActive            = true;
     pButton->isSelectable        = true;
-    pButton->isSelected          = false;
     pButton->isSelectedByDefault = false;
+
+    return GBL_RESULT_SUCCESS;
+}
+
+static GBL_RESULT GUM_Button_Widget_handleInputEvent_(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
+    GUM_Button* pButton = GUM_BUTTON(pSelf);
+
+    if (!pButton->isActive || !pEvent->state || !pEvent->action)
+        return GBL_RESULT_SUCCESS;
+
+
+    static const char* pressActionSignals_[] = {
+        [GUM_INPUTACTION_CONFIRM]    = "onPressConfirm",
+        [GUM_INPUTACTION_CANCEL]     = "onPressCancel",
+        [GUM_INPUTACTION_MOVE_UP]    = "onPressMoveUp",
+        [GUM_INPUTACTION_MOVE_DOWN]  = "onPressMoveDown",
+        [GUM_INPUTACTION_MOVE_LEFT]  = "onPressMoveLeft",
+        [GUM_INPUTACTION_MOVE_RIGHT] = "onPressMoveRight"
+    };
+
+    static const char* releaseActionSignals_[] = {
+        [GUM_INPUTACTION_CONFIRM]    = "onReleaseConfirm",
+        [GUM_INPUTACTION_CANCEL]     = "onReleaseCancel",
+        [GUM_INPUTACTION_MOVE_UP]    = "onReleaseMoveUp",
+        [GUM_INPUTACTION_MOVE_DOWN]  = "onReleaseMoveDown",
+        [GUM_INPUTACTION_MOVE_LEFT]  = "onReleaseMoveLeft",
+        [GUM_INPUTACTION_MOVE_RIGHT] = "onReleaseMoveRight"
+    };
+
+    const char* signal;
+
+    if (pEvent->state == GUM_INPUTSTATE_PRESS) {
+        GBL_EMIT(pButton, "onPress", pEvent);
+        signal = pEvent->action == GUM_INPUTACTION_UNBOUND ? "onPressUnbound" : pressActionSignals_[pEvent->action];
+    } else if (pEvent->state == GUM_INPUTSTATE_RELEASE) {
+        GBL_EMIT(pButton, "onRelease", pEvent);
+        signal = pEvent->action == GUM_INPUTACTION_UNBOUND ? "onReleaseUnbound" : releaseActionSignals_[pEvent->action];
+    }
+
+    GBL_EMIT(pButton, signal);
+    GblEvent_accept(GBL_EVENT(pEvent));
 
     return GBL_RESULT_SUCCESS;
 }
@@ -56,18 +96,13 @@ static GBL_RESULT GUM_Button_GblObject_property_(const GblObject* pObject, const
 static GBL_RESULT GUM_ButtonClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
-    if (!GblType_classRefCount(GBL_CLASS_TYPEOF(pClass))) {
+    if (!GblType_classRefCount(GUM_BUTTON_TYPE))
         GBL_PROPERTIES_REGISTER(GUM_Button);
-
-        GblSignal_install(GUM_BUTTON_TYPE, "onPressPrimary", GblMarshal_CClosure_VOID__INSTANCE, 0);
-
-        GblSignal_install(GUM_BUTTON_TYPE, "onPressSecondary", GblMarshal_CClosure_VOID__INSTANCE, 0);
-
-        GblSignal_install(GUM_BUTTON_TYPE, "onPressTertiary", GblMarshal_CClosure_VOID__INSTANCE, 0);
-    }
 
     GBL_OBJECT_CLASS(pClass)->pFnSetProperty = GUM_Button_GblObject_setProperty_;
     GBL_OBJECT_CLASS(pClass)->pFnProperty    = GUM_Button_GblObject_property_;
+
+    GUM_WIDGET_CLASS(pClass)->pFnInputEvent = GUM_Button_Widget_handleInputEvent_;
 
     return GBL_RESULT_SUCCESS;
 }
@@ -75,11 +110,8 @@ static GBL_RESULT GUM_ButtonClass_init_(GblClass* pClass, const void* pData) {
 static GBL_RESULT GUM_ButtonClass_final_(GblClass* pClass, const void* pClassData) {
     GBL_UNUSED(pClassData);
 
-    if (!GblType_classRefCount(GUM_BUTTON_TYPE)) {
-        GblSignal_uninstall(GUM_BUTTON_TYPE, "onPressPrimary");
-        GblSignal_uninstall(GUM_BUTTON_TYPE, "onPressSecondary");
-        GblSignal_uninstall(GUM_BUTTON_TYPE, "onPressTertiary");
-    }
+    if (!GblType_classRefCount(GUM_BUTTON_TYPE))
+        GblProperty_uninstallAll(GUM_BUTTON_TYPE);
 
     return GBL_RESULT_SUCCESS;
 }

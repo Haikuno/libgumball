@@ -8,12 +8,13 @@
  *
  *   This header file includes the entierty of libGumball
  *
- *   \author     2025 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
  *
 */
 
 #include "gumball_elements.h"
+#include "gumball_devices.h"
 #include "gumball_events.h"
 #include "gumball_types.h"
 #include "gumball_ifaces.h"

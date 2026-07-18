@@ -7,6 +7,9 @@
 #include <gimbal/gimbal_containers.h>
 #include <gimbal/gimbal_algorithms.h>
 
+#include <gumball/core/gumball_backend.h>
+#include <gumball/core/gumball_inputsystem.h>
+
 static void GUM_update_recursive_(GblObject* pObject) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
     if (pWidget && pWidget->shouldUpdate)
@@ -26,6 +29,7 @@ GBL_EXPORT GBL_RESULT (GUM_update)(void) {
             result = GBL_RESULT_NOT_FOUND;
             GBL_SCOPE_EXIT;
         }
+        GUM_Root_update(pRoot);
         GUM_update_recursive_(GBL_OBJECT(pRoot));
     }
 
@@ -87,6 +91,8 @@ GBL_EXPORT GBL_RESULT GUM_draw(GUM_Renderer* pRenderer) {
         pWidgetClass->pFnDraw(pWidget, pRenderer);
     }
 
+    GUM_InputSystem_drawFocusRings(pRenderer);
+
     return GBL_RESULT_SUCCESS;
 }
 
@@ -130,13 +136,12 @@ GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)(GblObject* pSelf) {
     return GBL_RESULT_SUCCESS;
 }
 
+GBL_EXPORT GblObject* (GUM_ref)(GblObject* pSelf) {
+    return GBL_OBJECT(GBL_REF(pSelf));
+}
+
 GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
     GUM_draw_disableAll(pSelf);
-
-    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
-    if (pWidget) {
-        GUM_WIDGET_CLASSOF(pSelf)->pFnDeactivate(pWidget);
-    }
 
     GblObject_foreachChildReverse(pSelf, pChild)
         GUM_unref(pChild);

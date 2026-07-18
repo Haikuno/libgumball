@@ -50,21 +50,17 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Font, GblBox, GUM_IResource)
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Font, GblBox)
 
-typedef enum : uint8_t {
-    GUM_TEXT_ALIGN_CENTER,  //!< Align the text to the center of the widget
-    GUM_TEXT_ALIGN_TOP,     //!< Align the text to the top of the widget
-    GUM_TEXT_ALIGN_RIGHT,   //!< Align the text to the right of the widget
-    GUM_TEXT_ALIGN_BOTTOM,  //!< Align the text to the bottom of the widget
-    GUM_TEXT_ALIGN_LEFT     //!< Align the text to the left of the widget
-} GUM_TextAlignment;
+GBL_ENUM(GUM_TextAlignment,
+    (GUM_TEXT_ALIGN_CENTER, "Center", 0),
+    (GUM_TEXT_ALIGN_TOP,    "Top",    1),
+    (GUM_TEXT_ALIGN_RIGHT,  "Right",  2),
+    (GUM_TEXT_ALIGN_BOTTOM, "Bottom", 3),
+    (GUM_TEXT_ALIGN_LEFT,   "Left",   4)
+)
 
 //! \cond
-GblType GUM_Font_type(void);
-GblType GUM_TextAlignment_type(void);
+GblType GUM_Font_type(void) GBL_NOEXCEPT;
 //! \endcond
-
-//! Returns the size of the passed text, given the font and font size
-GBL_EXPORT GUM_Vector2 GUM_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) GBL_NOEXCEPT;
 
 GBL_DECLS_END
 

@@ -29,7 +29,7 @@ typedef struct {
 #define GUM_RECTANGLE_TYPE (GBL_TYPEID(GUM_Rectangle)) //!< Returns the GUM_Rectangle Type UUID
 
 //! \cond
-GblType GUM_Rectangle_type(void);
+GblType GUM_Rectangle_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 GBL_DECLS_END

@@ -8,11 +8,14 @@
  *
  *   Base event type for input
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
 #include "gumball_event.h"
+#include <gumball/devices/gumball_inputdevice.h>
+#include <gimbal/meta/classes/gimbal_enum.h>
+#include <gimbal/containers/gimbal_array_list.h>
 
 /*!  \name  Type System
  *   \brief Type UUID and Cast Operators
@@ -28,30 +31,36 @@
 
 GBL_DECLS_BEGIN
 
-typedef enum : uint8_t {
-    GUM_INPUT_PRESS,
-    GUM_INPUT_RELEASE
-} GUM_INPUT_STATE;
-
-typedef enum : uint8_t {
-    GUM_INPUT_PRIMARY,
-    GUM_INPUT_SECONDARY,
-    GUM_INPUT_TERTIARY,
-    GUM_INPUT_LEFT,
-    GUM_INPUT_UP,
-    GUM_INPUT_RIGHT,
-    GUM_INPUT_DOWN
-} GUM_INPUT_ID;
-
 GBL_FORWARD_DECLARE_STRUCT(GUM_Event_Input);
 
 /*!  \struct  GUM_Event_InputClass
  *   \extends GUM_EventClass
  *   \brief   GUM_Event_Input structure
  *
+ *   \todo
+ *      - Add more actions.
+ *
  *   GUM_Event_InputClass derives from GUM_EventClass, adding nothing new.
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Event_Input, GUM_Event);
+
+GBL_ENUM(GUM_InputState,
+    (GUM_INPUTSTATE_NULL,    "GUM_IS_null",    0),
+    (GUM_INPUTSTATE_PRESS,   "GUM_IS_press",   1),
+    (GUM_INPUTSTATE_RELEASE, "GUM_IS_release", 2)
+)
+
+GBL_ENUM(GUM_InputAction,
+    (GUM_INPUTACTION_NULL,       "GUM_IA_null",       0), // buttonaction not initialized
+    (GUM_INPUTACTION_CONFIRM,    "GUM_IA_confirm",    1),
+    (GUM_INPUTACTION_CANCEL,     "GUM_IA_cancel",     2),
+    (GUM_INPUTACTION_MOVE_UP,    "GUM_IA_move_up",    3),
+    (GUM_INPUTACTION_MOVE_DOWN,  "GUM_IA_move_down",  4),
+    (GUM_INPUTACTION_MOVE_LEFT,  "GUM_IA_move_left",  5),
+    (GUM_INPUTACTION_MOVE_RIGHT, "GUM_IA_move_right", 6),
+    (GUM_INPUTACTION_COUNT,      "GUM_IA_count",      7),
+    (GUM_INPUTACTION_UNBOUND,    "GUM_IA_unbound",    8)  // button not bound to an action
+)
 
 /*!  \class   GUM_Event_Input
  *   \extends GUM_Event
@@ -61,12 +70,15 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Event_Input, GUM_Event);
  *
 */
 GBL_INSTANCE_DERIVE(GUM_Event_Input, GUM_Event)
-    GUM_INPUT_STATE state;    //!< State of the input event
-    GUM_INPUT_ID    id;       //!< ID of the input event
+    GUM_InputDevice* pInputDevice; //!< Pointer to the input device that emitted the event
+    GblFlags button;               //!< Bitmask of the button involved
+    GUM_InputState state;          //!< Input state (pressed / released)
+    GUM_InputAction action;        //!< Semantic action
 GBL_INSTANCE_END
 
-GBL_DECLS_END
+GblType GUM_Event_Input_type(void);
 
+GBL_DECLS_END
 #undef GBL_SELF_TYPE
 
 #endif

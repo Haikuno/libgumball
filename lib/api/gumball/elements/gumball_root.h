@@ -50,15 +50,18 @@ GBL_INSTANCE_DERIVE_EMPTY(GUM_Root, GblModule)
 
 #define GUM_Root_create() GBL_NEW(GUM_Root) //!< Returns a new GUM_Root. \note Currently there is no support for having multiple roots at once.
 //! \cond
-GblType GUM_Root_type(void);
+GblType GUM_Root_type(void) GBL_NOEXCEPT;
 
 void             GUM_drawQueue_init      (void);
 void             GUM_drawQueue_free      (void);
-void             GUM_drawQueue_push      (GblObject* pObj);
-void             GUM_drawQueue_remove    (GblObject* pObj);
+void             GUM_drawQueue_push      (GblObject* pObject);
+void             GUM_drawQueue_remove    (GblObject* pObject);
 void             GUM_drawQueue_sort      (void);
 GblArrayList*    GUM_drawQueue_get       (void);
 //!\endcond
+
+//! Updates the root element.
+void GUM_Root_update(GBL_SELF);
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

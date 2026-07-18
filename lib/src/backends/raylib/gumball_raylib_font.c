@@ -3,7 +3,7 @@
 
 static GUM_Font* defaultFont_ = nullptr;
 
-GBL_EXPORT GUM_Vector2 GUM_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) {
+GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) {
     GUM_Vector2 size    = { 0, 0 };
     Font        font    = *(Font*)GUM_IResource_data(GUM_IRESOURCE(pFont));
     Vector2     raySize = MeasureTextEx(font, pText, fontSize, 1.0f);
@@ -34,6 +34,8 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
 
     memcpy(pFont, &font, sizeof(Font));
     GUM_IResource_setData(pSelf, pFont);
+
+    return GBL_RESULT_SUCCESS;
 }
 
 GBL_RESULT GUM_Backend_Font_unload(GUM_IResource* pSelf) {
