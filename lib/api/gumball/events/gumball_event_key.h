@@ -44,9 +44,12 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Event_Key, GUM_Event_Input);
  *   GUM_Event_Key represents any key event, such as pressing or releasing a key.
  *
 */
-GBL_INSTANCE_DERIVE(GUM_Event_Key, GUM_Event_Input)
-    // TODO: add flag modifier here (such as holding shift)
-GBL_INSTANCE_END
+GBL_INSTANCE_DERIVE_EMPTY(GUM_Event_Key, GUM_Event_Input)
+
+GblType GUM_Event_Key_type(void) GBL_NOEXCEPT;
+
+//! Returns a new GUM_Event_Key
+#define GUM_Event_Key_create() GUM_EVENT_KEY(GblEvent_create(GUM_EVENT_KEY_TYPE))
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

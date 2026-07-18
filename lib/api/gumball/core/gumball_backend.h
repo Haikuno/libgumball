@@ -61,6 +61,9 @@ GUM_Font*    GUM_Backend_Font_default                    (void);
 //! Updates the mouse state, sending events when needed
 void         GUM_Backend_Mouse_update                    (GUM_Mouse* pMouse);
 
+//! Updates the keyboard's state, sending events when needed
+void         GUM_Backend_Keyboard_update                 (GUM_Keyboard* pKeyboard);
+
 //! Checks if the Nth gamepad is connected
 bool         GUM_Backend_Gamepad_isConnected             (int index);
 //! Gets the Nth gamepad name

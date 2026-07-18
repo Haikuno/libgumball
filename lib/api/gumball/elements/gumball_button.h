@@ -58,9 +58,6 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Button, GUM_Widget)
 GBL_INSTANCE_DERIVE(GUM_Button, GUM_Widget)
     bool             isActive;            //!< If this button can be pressed.                                                                 Default value is true
     bool             isSelectable;        //!< If this button can be selected.                                                                Default value is true
-    //! \cond
-    bool             isSelected;          // If this button is currently selected
-    //! \endcond
     bool             isSelectedByDefault; //!< If this button should be selected by default when the cursor doesn't have a button selected.   Default value is false
 GBL_INSTANCE_END
 //! @}

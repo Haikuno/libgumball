@@ -54,7 +54,7 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Widget);
  *    \brief   GUM_Widget structure
  *
  *    GUM_WidgetClass derives from GblObjectClass,
- *    adding additional virtual functions to handle activating, deactivating, updating, and drawing elements.
+ *    adding additional virtual functions to handle activating, deactivating, updating, drawing elements, and handling input events.
 */
 //! \cond
 GBL_CLASS_DERIVE(GUM_Widget, GblObject)
@@ -112,6 +112,7 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     uint8_t            font_border_thickness;    //!< Width of the font border, in pixels.                                           Default value is 1
     uint8_t            z_index;                  //!< Z-index of the widget. The higher the value, the higher the priority.          Default value is 50
     bool               shouldUpdate;             //!< If the widget should be updated.                                               Default value is true
+    bool               isFocused;                // If any input device currently has navigation focus on this widget                Default value is false
 GBL_INSTANCE_END
 //! @}
 
@@ -162,7 +163,9 @@ GBL_SIGNALS(GUM_Widget,
     (onPressUnbound,    (GBL_INSTANCE_TYPE, pReceiver)),
     (onReleaseConfirm,  (GBL_INSTANCE_TYPE, pReceiver)),
     (onReleaseCancel,   (GBL_INSTANCE_TYPE, pReceiver)),
-    (onReleaseUnbound,  (GBL_INSTANCE_TYPE, pReceiver))
+    (onReleaseUnbound,  (GBL_INSTANCE_TYPE, pReceiver)),
+    (onFocusGained,     (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice)), //!< Emitted when a device navigates focus onto this widget
+    (onFocusLost,       (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice))  //!< Emitted when a device navigates focus away from this widget
 )
 
 GblType GUM_Widget_type(void) GBL_NOEXCEPT;

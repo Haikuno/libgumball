@@ -1,20 +1,22 @@
 #include <gumball/core/gumball_inputsystem.h>
 #include <gumball/core/gumball_backend.h>
+#include <gumball/core/gumball_navigation.h>
 #include <gumball/core/gumball_logger.h>
 #include <gumball/gumball_elements.h>
 #include <gumball/gumball_devices.h>
 #include <gumball/gumball_events.h>
 
-
 // TODO: this is REEST, fuck raylib
 #define GUM_MAX_GAMEPADS 16
 
-static GUM_Mouse*   pMouse_                       = nullptr;
-static GUM_Gamepad* pGamepads_[GUM_MAX_GAMEPADS]  = { nullptr };
-static GblArrayList bindings_[GUM_INPUTACTION_COUNT];
+static GUM_Mouse*    pMouse_                       = nullptr;
+static GUM_Gamepad*  pGamepads_[GUM_MAX_GAMEPADS]  = { nullptr };
+static GUM_Keyboard* pKeyboard_                    = nullptr;
+static GblArrayList  bindings_[GUM_INPUTACTION_COUNT];
 
 void GUM_InputSystem_init(void) {
     pMouse_    = GUM_Mouse_create();
+    pKeyboard_ = GUM_Keyboard_create();
 
     for (size_t i = 0; i < GBL_COUNT_OF(bindings_); i++)
         GblArrayList_construct(&bindings_[i], sizeof(GUM_InputBinding));
@@ -30,10 +32,21 @@ void GUM_InputSystem_init(void) {
     GUM_InputSystem_bind(GUM_GAMEPAD_TYPE, GUM_INPUTACTION_MOVE_LEFT,  GUM_GAMEPAD_DPAD_LEFT);
     GUM_InputSystem_bind(GUM_GAMEPAD_TYPE, GUM_INPUTACTION_MOVE_RIGHT, GUM_GAMEPAD_DPAD_RIGHT);
 
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_CONFIRM,    GUM_KEYBOARD_KEY_ENTER);
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_CANCEL,     GUM_KEYBOARD_KEY_ESCAPE);
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_MOVE_UP,    GUM_KEYBOARD_KEY_UP);
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_MOVE_DOWN,  GUM_KEYBOARD_KEY_DOWN);
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_MOVE_LEFT,  GUM_KEYBOARD_KEY_LEFT);
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_MOVE_RIGHT, GUM_KEYBOARD_KEY_RIGHT);
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_MOVE_UP,    GUM_KEYBOARD_KEY_W);
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_MOVE_DOWN,  GUM_KEYBOARD_KEY_S);
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_MOVE_LEFT,  GUM_KEYBOARD_KEY_A);
+    GUM_InputSystem_bind(GUM_KEYBOARD_TYPE, GUM_INPUTACTION_MOVE_RIGHT, GUM_KEYBOARD_KEY_D);
 }
 
 void GUM_InputSystem_deinit(void) {
     GUM_unref(pMouse_);
+    GUM_unref(pKeyboard_);
 
     for (int i = 0; i < GUM_MAX_GAMEPADS; i++)
         if (pGamepads_[i]) GUM_unref(pGamepads_[i]);
@@ -76,15 +89,27 @@ static GUM_InputAction GUM_InputSystem_actionFor_(GblType deviceType, GblFlags b
     return GUM_INPUTACTION_UNBOUND;
 }
 
-static GUM_Widget* GUM_InputSystem_focusedWidget_(void) {
-    return nullptr;
+void GUM_InputSystem_widgetDestroyed(GUM_Widget* pWidget) {
+    if (!pWidget) return;
+
+    if (pMouse_ && GUM_INPUTDEVICE(pMouse_)->pFocusedWidget == pWidget)
+        GUM_INPUTDEVICE(pMouse_)->pFocusedWidget = nullptr;
+
+    if (pKeyboard_ && GUM_INPUTDEVICE(pKeyboard_)->pFocusedWidget == pWidget)
+        GUM_INPUTDEVICE(pKeyboard_)->pFocusedWidget = nullptr;
+
+    for (int i = 0; i < GUM_MAX_GAMEPADS; i++)
+        if (pGamepads_[i] && GUM_INPUTDEVICE(pGamepads_[i])->pFocusedWidget == pWidget)
+            GUM_INPUTDEVICE(pGamepads_[i])->pFocusedWidget = nullptr;
 }
 
 ///////// MOUSE /////////
 
-static GUM_Widget* GUM_InputSystem_Mouse_hitTest_(GUM_Vector2 mousePos) {
+static void GUM_InputSystem_Mouse_hitTest_(void) {
     // using drawQueue because it's already Z-sorted
     GblArrayList* drawQueue = GUM_drawQueue_get();
+
+    GUM_Vector2 mousePos = pMouse_->position;
 
     for (size_t i = GblArrayList_size(drawQueue); i-- > 0;) {
         GblObject*  pObj       = *(GblObject**)GblArrayList_at(drawQueue, i);
@@ -96,11 +121,10 @@ static GUM_Widget* GUM_InputSystem_Mouse_hitTest_(GUM_Vector2 mousePos) {
             mousePos.x <  widgetPos.x + widgetSize.x &&
             mousePos.y >= widgetPos.y &&
             mousePos.y <  widgetPos.y + widgetSize.y) {
-            return pWidget;
+            GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), pWidget);
+            break;
         }
     }
-
-    return nullptr;
 }
 
 static void GUM_InputSystem_Mouse_dispatchEvent_(GblFlags button, GUM_InputState state) {
@@ -110,9 +134,8 @@ static void GUM_InputSystem_Mouse_dispatchEvent_(GblFlags button, GUM_InputState
     GUM_EVENT_INPUT(pEvent)->action       = GUM_InputSystem_actionFor_(GUM_MOUSE_TYPE, button);
     GUM_EVENT_INPUT(pEvent)->pInputDevice = GUM_INPUTDEVICE(pMouse_);
 
-    GUM_Widget* pTarget = GUM_InputSystem_Mouse_hitTest_(pMouse_->position);
-    if (pTarget)
-        GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
+    if (GUM_INPUTDEVICE(pMouse_)->pFocusedWidget)
+        GblObject_notifyEvent(GBL_OBJECT(GUM_INPUTDEVICE(pMouse_)->pFocusedWidget), GBL_EVENT(pEvent));
 
     GBL_UNREF(pEvent);
 }
@@ -122,6 +145,7 @@ static void GUM_InputSystem_Mouse_update_(void) {
     GblFlags pressed  = GUM_INPUTDEVICE(pMouse_)->buttons     & ~GUM_INPUTDEVICE(pMouse_)->buttonsPrev;
     GblFlags released = GUM_INPUTDEVICE(pMouse_)->buttonsPrev & ~GUM_INPUTDEVICE(pMouse_)->buttons;
     GblFlags changed  = pressed | released;
+    GUM_InputSystem_Mouse_hitTest_();
 
     while (changed) {
         GblFlags bit = changed & (~changed + 1); // isolate lowest set bit
@@ -162,15 +186,19 @@ static void GUM_InputSystem_Gamepad_dispatchEvent_(GUM_Gamepad* pGamepad, GblFla
     GUM_EVENT_INPUT(pEvent)->action       = GUM_InputSystem_actionFor_(GUM_GAMEPAD_TYPE, button);
     GUM_EVENT_INPUT(pEvent)->pInputDevice = GUM_INPUTDEVICE(pGamepad);
 
-    // GUM_Widget* pTarget = GUM_INPUTDEVICE(pGamepad)->pFocusedWidget; // TODO: placeholder
+    GUM_InputAction action = GUM_EVENT_INPUT(pEvent)->action;
 
-    // if (pTarget)
-    //     GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
+    if (state == GUM_INPUTSTATE_PRESS &&
+        action >= GUM_INPUTACTION_MOVE_UP && action <= GUM_INPUTACTION_MOVE_RIGHT) {
+        // Directional presses drive navigation directly rather than being
+        // dispatched to a widget -- there's no focused widget to send them
+        // to until navigation itself picks one.
+        GUM_Nav_move(GUM_INPUTDEVICE(pGamepad), action);
+    } else {
+        GUM_Widget* pTarget = GUM_INPUTDEVICE(pGamepad)->pFocusedWidget;
 
-    GUM_LOG_DEBUG_SCOPE("GAMEPAD EVENT!!") {
-        GUM_LOG_DEBUG("Device name is : %s", GUM_INPUTDEVICE(pGamepad)->deviceName);
-        GUM_LOG_DEBUG("Action is : %s"     , GblEnum_nick(GUM_EVENT_INPUT(pEvent)->action,  GBL_TYPEID(GUM_InputAction)));
-        GUM_LOG_DEBUG("Button is : %s"     , GblFlags_nick(GUM_EVENT_INPUT(pEvent)->button, GBL_TYPEID(GUM_GAMEPAD_FLAGS)));
+        if (pTarget)
+            GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
     }
 
     GBL_UNREF(pEvent);
@@ -203,7 +231,7 @@ static void GUM_InputSystem_Gamepad_update_(void) {
     // any player slots left over are no longer backed by a real device
     for (uint8_t i = gamepadCount_; i < GUM_MAX_GAMEPADS; i++) {
         if (pGamepads_[i]) {
-            GUM_LOG_DEBUG("Gamepad with name %s at index %i disconnected", GUM_INPUTDEVICE(pGamepads_[gamepadCount_])->deviceName, gamepadCount_);
+            GUM_LOG_DEBUG("Gamepad with name %s at index %i disconnected", GUM_INPUTDEVICE(pGamepads_[i])->deviceName, i);
             GUM_unref(pGamepads_[i]);
             pGamepads_[i] = nullptr;
         }
@@ -233,8 +261,50 @@ static void GUM_InputSystem_Gamepad_update_(void) {
     }
 }
 
+///////// KEYBOARD /////////
+
+static void GUM_InputSystem_Keyboard_dispatchEvent_(GblFlags button, GUM_InputState state) {
+    GUM_Event_Key* pEvent = GUM_Event_Key_create();
+    GUM_EVENT_INPUT(pEvent)->button       = button;
+    GUM_EVENT_INPUT(pEvent)->state        = state;
+    GUM_EVENT_INPUT(pEvent)->action       = GUM_InputSystem_actionFor_(GUM_KEYBOARD_TYPE, button);
+    GUM_EVENT_INPUT(pEvent)->pInputDevice = GUM_INPUTDEVICE(pKeyboard_);
+
+    GUM_InputAction action = GUM_EVENT_INPUT(pEvent)->action;
+
+    if (state == GUM_INPUTSTATE_PRESS &&
+        action >= GUM_INPUTACTION_MOVE_UP && action <= GUM_INPUTACTION_MOVE_RIGHT) {
+        GUM_Nav_move(GUM_INPUTDEVICE(pKeyboard_), action);
+    } else {
+        GUM_Widget* pTarget = GUM_INPUTDEVICE(pKeyboard_)->pFocusedWidget;
+
+        if (pTarget)
+            GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
+    }
+
+    GBL_UNREF(pEvent);
+}
+
+static void GUM_InputSystem_Keyboard_update_(void) {
+    GUM_Backend_Keyboard_update(pKeyboard_);
+
+    GblFlags pressed  = GUM_INPUTDEVICE(pKeyboard_)->buttons     & ~GUM_INPUTDEVICE(pKeyboard_)->buttonsPrev;
+    GblFlags released = GUM_INPUTDEVICE(pKeyboard_)->buttonsPrev & ~GUM_INPUTDEVICE(pKeyboard_)->buttons;
+    GblFlags changed  = pressed | released;
+
+    while (changed) {
+        GblFlags bit = changed & (~changed + 1);
+        changed &= ~bit;
+
+        GUM_InputSystem_Keyboard_dispatchEvent_(bit, (pressed & bit) ? GUM_INPUTSTATE_PRESS : GUM_INPUTSTATE_RELEASE);
+    }
+
+    GUM_INPUTDEVICE(pKeyboard_)->buttonsPrev = GUM_INPUTDEVICE(pKeyboard_)->buttons;
+}
+
 
 void GUM_InputSystem_update(void) {
     GUM_InputSystem_Mouse_update_();
     GUM_InputSystem_Gamepad_update_();
+    GUM_InputSystem_Keyboard_update_();
 }

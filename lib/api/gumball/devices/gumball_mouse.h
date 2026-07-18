@@ -47,9 +47,9 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Mouse, GUM_InputDevice)
 //! \endcond
 
 GBL_FLAGS(GUM_MOUSE_FLAGS,
-    (GUM_MOUSE_BUTTON_LEFT,   "GUM_mouse_left",   0x1),
-    (GUM_MOUSE_BUTTON_RIGHT,  "GUM_mouse_right",  0x2),
-    (GUM_MOUSE_BUTTON_MIDDLE, "GUM_mouse_middle", 0x4)
+    (GUM_MOUSE_BUTTON_LEFT,   "GUM_mouse_left",   0b00000001),
+    (GUM_MOUSE_BUTTON_RIGHT,  "GUM_mouse_right",  0b00000010),
+    (GUM_MOUSE_BUTTON_MIDDLE, "GUM_mouse_middle", 0b00000100)
 )
 
 /*!

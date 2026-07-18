@@ -45,3 +45,19 @@ void GUM_Backend_Gamepad_update(GUM_Gamepad* pGamepad) {
 const char* GUM_Backend_Gamepad_name(int index) {
     return GetGamepadName(index);
 }
+
+// ---------------------------------- Keyboard ---------------------------------- //
+
+void GUM_Backend_Keyboard_update(GUM_Keyboard* pKeyboard) {
+    GUM_INPUTDEVICE(pKeyboard)->buttons = 0;
+    if (IsKeyDown(KEY_UP))     GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_UP;
+    if (IsKeyDown(KEY_DOWN))   GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_DOWN;
+    if (IsKeyDown(KEY_LEFT))   GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_LEFT;
+    if (IsKeyDown(KEY_RIGHT))  GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_RIGHT;
+    if (IsKeyDown(KEY_W))      GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_W;
+    if (IsKeyDown(KEY_A))      GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_A;
+    if (IsKeyDown(KEY_S))      GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_S;
+    if (IsKeyDown(KEY_D))      GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_D;
+    if (IsKeyDown(KEY_ENTER))  GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_ENTER;
+    if (IsKeyDown(KEY_ESCAPE)) GUM_INPUTDEVICE(pKeyboard)->buttons |= GUM_KEYBOARD_KEY_ESCAPE;
+}

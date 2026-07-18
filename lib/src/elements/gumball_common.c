@@ -140,16 +140,6 @@ GBL_EXPORT GblObject* (GUM_ref)(GblObject* pSelf) {
 GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
     GUM_draw_disableAll(pSelf);
 
-    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pSelf);
-    if (pWidget) {
-        GUM_WIDGET_CLASSOF(pSelf)->pFnDeactivate(pWidget);
-    }
-
-    GUM_InputDevice* pInputDevice = GBL_AS(GUM_InputDevice, pSelf);
-    if (pInputDevice) {
-        GblStringRef_unref(pInputDevice->deviceName);
-    }
-
     GblObject_foreachChildReverse(pSelf, pChild)
         GUM_unref(pChild);
 

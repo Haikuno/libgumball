@@ -32,6 +32,7 @@
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_InputDevice);
+GBL_FORWARD_DECLARE_STRUCT(GUM_Widget);
 
 /*!
  *    \struct  GUM_InputDeviceClass
@@ -49,9 +50,14 @@ GBL_CLASS_DERIVE_EMPTY(GUM_InputDevice, GblObject)
  *    \brief   GUM_InputDevice derives from GblObject, adding TODO: doc
 */
 GBL_INSTANCE_DERIVE(GUM_InputDevice, GblObject)
-    GblFlags      buttons;     //!< Current device buttons state
-    GblFlags      buttonsPrev; //!< Previous frame's device buttons state
-    GblStringRef* deviceName;  //!< The name of the device, if it can be detected.
+    GblFlags      buttons;        //!< Current device buttons state
+    GblFlags      buttonsPrev;    //!< Previous frame's device buttons state
+    GblStringRef* deviceName;     //!< The name of the device, if it can be detected.
+    GUM_Widget*   pFocusedWidget; //!< The widget this device currently has navigation focus on, or nullptr.
+    uint8_t       highlight_r;    //!< Red   component of this device's focus-ring color. Default value is 255
+    uint8_t       highlight_g;    //!< Green component of this device's focus-ring color. Default value is 255
+    uint8_t       highlight_b;    //!< Blue  component of this device's focus-ring color. Default value is 255
+    uint8_t       highlight_a;    //!< Alpha component of this device's focus-ring color. Default value is 255
 GBL_INSTANCE_END
 
 GblType GUM_InputDevice_type(void) GBL_NOEXCEPT;

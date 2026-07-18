@@ -6,6 +6,7 @@
 #include <gumball/elements/gumball_common.h>
 #include <gumball/core/gumball_logger.h>
 #include <gumball/core/gumball_backend.h>
+#include <gumball/core/gumball_inputsystem.h>
 
 static void GUM_Widget_GblObject_onPropertyChange_(GblObject* pSelf, GblProperty* pProp) {
     switch (pProp->id) {
@@ -31,6 +32,7 @@ static GBL_RESULT GUM_Widget_init_(GblInstance* pInstance) {
 
     pSelf->z_index      = 50;
     pSelf->shouldUpdate = true;
+    pSelf->isFocused    = false;
 
     pSelf->x          = 0.0f;
     pSelf->y          = 0.0f;
@@ -101,15 +103,11 @@ static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject* pSelf) {
     return GBL_RESULT_SUCCESS;
 }
 
+static GBL_RESULT GUM_Widget_activate_(GUM_Widget* pSelf) {
+    return GBL_RESULT_SUCCESS;
+}
+
 static GBL_RESULT GUM_Widget_deactivate_(GUM_Widget* pSelf) {
-    GblStringRef_unref(pSelf->label);
-
-    if (pSelf->texture)
-        GUM_IResource_unref(GUM_IRESOURCE(pSelf->texture));
-
-    if (pSelf->label && pSelf->font != GUM_Backend_Font_default())
-        GUM_IResource_unref(GUM_IRESOURCE(pSelf->font));
-
     return GBL_RESULT_SUCCESS;
 }
 
@@ -405,9 +403,8 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
     }
 
     GUM_Button* pButton    = GBL_AS(GUM_Button, pSelf);
-    bool        isSelected = pButton && pButton->isSelected;
 
-    if (pSelf->border_a && !isSelected) {
+    if (pSelf->border_a) {
         GUM_Backend_rectangleLinesDraw(
             pRenderer, rec, pSelf->border_radius, pSelf->border_width,
             (GUM_Color){ pSelf->border_r, pSelf->border_g, pSelf->border_b, pSelf->border_a });
@@ -525,6 +522,22 @@ static GBL_RESULT GUM_Widget_postDraw_(GUM_Widget* pSelf, GUM_Renderer* pRendere
     return GBL_RESULT_SUCCESS;
 }
 
+static GBL_RESULT GUM_Widget_GblBox_destructor_(GblBox* pBox) {
+    GUM_Widget* pSelf = GUM_WIDGET(pBox);
+
+    GUM_InputSystem_widgetDestroyed(pSelf);
+    GblStringRef_unref(pSelf->label);
+
+    if (pSelf->texture)
+        GUM_IResource_unref(GUM_IRESOURCE(pSelf->texture));
+
+    if (pSelf->label && pSelf->font != GUM_Backend_Font_default())
+        GUM_IResource_unref(GUM_IRESOURCE(pSelf->font));
+
+    GblObjectClass* pObjClass = GBL_OBJECT_CLASS(GblClass_weakRefDefault(GBL_OBJECT_TYPE));
+    return pObjClass->base.pFnDestructor(pBox);
+}
+
 static GBL_RESULT GUM_Widget_receiveEvent_(GblIEventReceiver* pSelf,
                                            GblIEventReceiver* pDest,
                                            GblEvent*          pEvent) {
@@ -551,6 +564,8 @@ static GBL_RESULT GUM_WidgetClass_init_(GblClass* pClass, const void* pData) {
         GblSignal_install(GUM_WIDGET_TYPE, "onReleaseConfirm", GblMarshal_CClosure_VOID__INSTANCE, 0);
         GblSignal_install(GUM_WIDGET_TYPE, "onReleaseCancel",  GblMarshal_CClosure_VOID__INSTANCE, 0);
         GblSignal_install(GUM_WIDGET_TYPE, "onReleaseUnbound", GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onFocusGained",    GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
+        GblSignal_install(GUM_WIDGET_TYPE, "onFocusLost",      GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
     }
 
     GBL_IEVENT_RECEIVER_CLASS(pClass)->pFnReceiveEvent = GUM_Widget_receiveEvent_;
@@ -559,7 +574,9 @@ static GBL_RESULT GUM_WidgetClass_init_(GblClass* pClass, const void* pData) {
     GBL_OBJECT_CLASS(pClass)->pFnProperty     = GUM_Widget_GblObject_property_;
     GBL_OBJECT_CLASS(pClass)->pFnInstantiated = GUM_Widget_Object_instantiated_;
 
-    GUM_WIDGET_CLASS(pClass)->pFnActivate     = nullptr;
+    GBL_BOX_CLASS(pClass)->pFnDestructor      = GUM_Widget_GblBox_destructor_;
+
+    GUM_WIDGET_CLASS(pClass)->pFnActivate     = GUM_Widget_activate_;
     GUM_WIDGET_CLASS(pClass)->pFnDeactivate   = GUM_Widget_deactivate_;
     GUM_WIDGET_CLASS(pClass)->pFnUpdate       = GUM_Widget_update_;
     GUM_WIDGET_CLASS(pClass)->pFnDraw         = GUM_Widget_draw_;
@@ -583,6 +600,8 @@ static GBL_RESULT GUM_WidgetClass_final_(GblClass* pClass, const void* pClassDat
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseConfirm");
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseCancel" );
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseUnbound");
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onFocusGained");
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onFocusLost");
     }
 
     return GBL_RESULT_SUCCESS;

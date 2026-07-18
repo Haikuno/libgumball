@@ -1,16 +1,32 @@
 #include <gumball/gumball.h>
 #include <raylib.h>
 
-void buttonCallbackPress(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
-    pSelf->a *= 0.6;
-    printf("%s was pressed\n", GblFlags_nick(pEvent->button, GBL_TYPEID(GUM_MOUSE_FLAGS)));
-    printf("action is %s\n", GblEnum_nick(pEvent->action, GBL_TYPEID(GUM_InputAction)));
+void buttonOnPress(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
+    pSelf->r -= 10;
+    pSelf->g -= 10;
+    pSelf->b -= 10;
 }
 
-void buttonCallbackRelease(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
-    pSelf->a *= 1.6666667;
-    printf("Event timestamp: %.2f seconds since startup\n", GUM_EVENT(pEvent)->timestamp / 1000.0);
+void buttonOnRelease(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
+    pSelf->r += 10;
+    pSelf->g += 10;
+    pSelf->b += 10;
 }
+
+void widgetOnFocusGained(GUM_Widget* pSelf, GUM_InputDevice* pInputDevice) {
+    pSelf->border_r = 255;
+    pSelf->border_g = 255;
+    pSelf->border_b = 255;
+    pSelf->border_a = 255;
+}
+
+void widgetOnFocusLost(GUM_Widget* pSelf, GUM_InputDevice* pInputDevice) {
+    pSelf->border_r  = 0;
+    pSelf->border_g  = 0;
+    pSelf->border_b  = 0;
+    pSelf->border_a  = 50;
+}
+
 
 int main(int argc, char* argv[]) {
     GUM_Root* pRoot = GUM_Root_create();
@@ -49,10 +65,21 @@ int main(int argc, char* argv[]) {
         )
     );
 
-    GblObject_foreachChild(GblObject_childFirst(GBL_OBJECT(pParentContainer)), pButton, GUM_Button*) {
-        if(GblType_check(GBL_TYPEOF(pButton), GUM_BUTTON_TYPE)) {
-            GUM_connect(pButton, "onPress",   buttonCallbackPress);
-            GUM_connect(pButton, "onRelease", buttonCallbackRelease);
+    GblObject_foreachChild(GblObject_childFirst(GBL_OBJECT(pParentContainer)), pChild) {
+        if (GBL_TYPECHECK(GUM_Widget, pChild)) {
+            GUM_connect(pChild, "onFocusGained",    widgetOnFocusGained);
+            GUM_connect(pChild, "onFocusLost",      widgetOnFocusLost);
+            GUM_connect(pChild, "onPressConfirm",   buttonOnPress);
+            GUM_connect(pChild, "onReleaseConfirm", buttonOnRelease);
+        }
+    }
+
+    GblObject_foreachChild(GblObject_siblingNext(GblObject_childFirst(GBL_OBJECT(pParentContainer))), pChild) {
+        if (GBL_TYPECHECK(GUM_Widget, pChild)) {
+            GUM_connect(pChild, "onFocusGained",    widgetOnFocusGained);
+            GUM_connect(pChild, "onFocusLost",      widgetOnFocusLost);
+            GUM_connect(pChild, "onPressConfirm",   buttonOnPress);
+            GUM_connect(pChild, "onReleaseConfirm", buttonOnRelease);
         }
     }
 

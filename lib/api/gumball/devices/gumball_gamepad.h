@@ -46,18 +46,18 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Gamepad, GUM_InputDevice)
 //! \endcond
 
 GBL_FLAGS(GUM_GAMEPAD_FLAGS,
-    (GUM_GAMEPAD_BUTTON_A,      "GUM_gamepad_a",      0x0001),
-    (GUM_GAMEPAD_BUTTON_B,      "GUM_gamepad_b",      0x0002),
-    (GUM_GAMEPAD_BUTTON_X,      "GUM_gamepad_x",      0x0004),
-    (GUM_GAMEPAD_BUTTON_Y,      "GUM_gamepad_y",      0x0008),
-    (GUM_GAMEPAD_BUTTON_LB,     "GUM_gamepad_lb",     0x0010),
-    (GUM_GAMEPAD_BUTTON_RB,     "GUM_gamepad_rb",     0x0020),
-    (GUM_GAMEPAD_BUTTON_START,  "GUM_gamepad_start",  0x0040),
-    (GUM_GAMEPAD_BUTTON_SELECT, "GUM_gamepad_select", 0x0080),
-    (GUM_GAMEPAD_DPAD_UP,       "GUM_gamepad_up",     0x0100),
-    (GUM_GAMEPAD_DPAD_DOWN,     "GUM_gamepad_down",   0x0200),
-    (GUM_GAMEPAD_DPAD_LEFT,     "GUM_gamepad_left",   0x0400),
-    (GUM_GAMEPAD_DPAD_RIGHT,    "GUM_gamepad_right",  0x0800)
+    (GUM_GAMEPAD_BUTTON_A,      "GUM_gamepad_a",      0b00000000'00000001),
+    (GUM_GAMEPAD_BUTTON_B,      "GUM_gamepad_b",      0b00000000'00000010),
+    (GUM_GAMEPAD_BUTTON_X,      "GUM_gamepad_x",      0b00000000'00000100),
+    (GUM_GAMEPAD_BUTTON_Y,      "GUM_gamepad_y",      0b00000000'00001000),
+    (GUM_GAMEPAD_BUTTON_LB,     "GUM_gamepad_lb",     0b00000000'00010000),
+    (GUM_GAMEPAD_BUTTON_RB,     "GUM_gamepad_rb",     0b00000000'00100000),
+    (GUM_GAMEPAD_BUTTON_START,  "GUM_gamepad_start",  0b00000000'01000000),
+    (GUM_GAMEPAD_BUTTON_SELECT, "GUM_gamepad_select", 0b00000000'10000000),
+    (GUM_GAMEPAD_DPAD_UP,       "GUM_gamepad_up",     0b00000001'00000000),
+    (GUM_GAMEPAD_DPAD_DOWN,     "GUM_gamepad_down",   0b00000010'00000000),
+    (GUM_GAMEPAD_DPAD_LEFT,     "GUM_gamepad_left",   0b00000100'00000000),
+    (GUM_GAMEPAD_DPAD_RIGHT,    "GUM_gamepad_right",  0b00001000'00000000)
 )
 
 /*!

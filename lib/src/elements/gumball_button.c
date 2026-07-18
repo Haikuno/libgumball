@@ -7,7 +7,6 @@ static GBL_RESULT GUM_Button_init_(GblInstance* pInstance) {
 
     pButton->isActive            = true;
     pButton->isSelectable        = true;
-    pButton->isSelected          = false;
     pButton->isSelectedByDefault = false;
 
     return GBL_RESULT_SUCCESS;
@@ -21,13 +20,21 @@ static GBL_RESULT GUM_Button_Widget_handleInputEvent_(GUM_Widget* pSelf, GUM_Eve
 
 
     static const char* pressActionSignals_[] = {
-        [GUM_INPUTACTION_CONFIRM] = "onPressConfirm",
-        [GUM_INPUTACTION_CANCEL]  = "onPressCancel"
+        [GUM_INPUTACTION_CONFIRM]    = "onPressConfirm",
+        [GUM_INPUTACTION_CANCEL]     = "onPressCancel",
+        [GUM_INPUTACTION_MOVE_UP]    = "onPressMoveUp",
+        [GUM_INPUTACTION_MOVE_DOWN]  = "onPressMoveDown",
+        [GUM_INPUTACTION_MOVE_LEFT]  = "onPressMoveLeft",
+        [GUM_INPUTACTION_MOVE_RIGHT] = "onPressMoveRight"
     };
 
     static const char* releaseActionSignals_[] = {
-        [GUM_INPUTACTION_CONFIRM] = "onReleaseConfirm",
-        [GUM_INPUTACTION_CANCEL]  = "onReleaseCancel"
+        [GUM_INPUTACTION_CONFIRM]    = "onReleaseConfirm",
+        [GUM_INPUTACTION_CANCEL]     = "onReleaseCancel",
+        [GUM_INPUTACTION_MOVE_UP]    = "onReleaseMoveUp",
+        [GUM_INPUTACTION_MOVE_DOWN]  = "onReleaseMoveDown",
+        [GUM_INPUTACTION_MOVE_LEFT]  = "onReleaseMoveLeft",
+        [GUM_INPUTACTION_MOVE_RIGHT] = "onReleaseMoveRight"
     };
 
     const char* signal;
