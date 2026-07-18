@@ -60,6 +60,14 @@ GBL_INSTANCE_DERIVE(GUM_InputDevice, GblObject)
     uint8_t       highlight_a;    //!< Alpha component of this device's focus-ring color. Default value is 255
 GBL_INSTANCE_END
 
+GBL_PROPERTIES(GUM_InputDevice,
+    (highlight_color, GBL_GENERIC, (READ, WRITE), GBL_UINT32_TYPE),
+    (highlight_r,     GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE ),
+    (highlight_g,     GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE ),
+    (highlight_b,     GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE ),
+    (highlight_a,     GBL_GENERIC, (READ, WRITE), GBL_UINT8_TYPE )
+)
+
 GblType GUM_InputDevice_type(void) GBL_NOEXCEPT;
 
 GBL_DECLS_END

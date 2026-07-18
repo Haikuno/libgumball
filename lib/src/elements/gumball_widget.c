@@ -32,7 +32,7 @@ static GBL_RESULT GUM_Widget_init_(GblInstance* pInstance) {
 
     pSelf->z_index      = 50;
     pSelf->shouldUpdate = true;
-    pSelf->isFocused    = false;
+    pSelf->focusCount   = 0;
 
     pSelf->x          = 0.0f;
     pSelf->y          = 0.0f;

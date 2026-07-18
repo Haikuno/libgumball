@@ -1,9 +1,28 @@
 #include <gumball/devices/gumball_gamepad.h>
 #include <gumball/core/gumball_backend.h>
 
+// Default focus-ring colors, keyed by player index. Wraps around for index >= count.
+static const uint8_t GUM_Gamepad_playerColors_[][4] = {
+    { 255,  90,  90, 255 }, // red
+    {  80, 160, 255, 255 }, // blue
+    { 255, 210,  60, 255 }, // yellow
+    {  90, 220, 120, 255 }, // green
+};
+#define GUM_GAMEPAD_PLAYER_COLOR_COUNT (sizeof(GUM_Gamepad_playerColors_) / sizeof(GUM_Gamepad_playerColors_[0]))
+
+static void GUM_Gamepad_applyPlayerColor_(GUM_Gamepad* pSelf) {
+    const uint8_t* pColor = GUM_Gamepad_playerColors_[pSelf->index % GUM_GAMEPAD_PLAYER_COLOR_COUNT];
+
+    GUM_INPUTDEVICE(pSelf)->highlight_r = pColor[0];
+    GUM_INPUTDEVICE(pSelf)->highlight_g = pColor[1];
+    GUM_INPUTDEVICE(pSelf)->highlight_b = pColor[2];
+    GUM_INPUTDEVICE(pSelf)->highlight_a = pColor[3];
+}
+
 static GBL_RESULT GUM_Gamepad_init_(GblInstance* pInstance) {
     GUM_GAMEPAD(pInstance)->index    = 0;
     GUM_GAMEPAD(pInstance)->rawIndex = 0;
+    GUM_Gamepad_applyPlayerColor_(GUM_GAMEPAD(pInstance));
     return GBL_RESULT_SUCCESS;
 }
 
@@ -12,6 +31,7 @@ static GBL_RESULT GUM_Gamepad_GblObject_setProperty_(GblObject* pObject, const G
     switch (pProp->id) {
         case GUM_Gamepad_Property_Id_index:
             GblVariant_valueCopy(pValue, &pSelf->index);
+            GUM_Gamepad_applyPlayerColor_(pSelf);
             break;
         case GUM_Gamepad_Property_Id_rawIndex:
             GblVariant_valueCopy(pValue, &pSelf->rawIndex);

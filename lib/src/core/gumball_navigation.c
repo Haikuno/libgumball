@@ -218,13 +218,13 @@ void GUM_Nav_focus(GUM_InputDevice* pDevice, GUM_Widget* pWidget) {
 
     if (pDevice->pFocusedWidget) {
         GBL_EMIT(pDevice->pFocusedWidget, "onFocusLost", pDevice);
-        pDevice->pFocusedWidget->isFocused = false;
+        pDevice->pFocusedWidget->focusCount--;
     }
 
     pDevice->pFocusedWidget = pWidget;
 
     if (pWidget) {
-        pWidget->isFocused = true;
+        pWidget->focusCount++;
         GBL_EMIT(pWidget, "onFocusGained", pDevice);
     }
 }

@@ -8,6 +8,7 @@
 #include <gimbal/gimbal_algorithms.h>
 
 #include <gumball/core/gumball_backend.h>
+#include <gumball/core/gumball_inputsystem.h>
 
 static void GUM_update_recursive_(GblObject* pObject) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
@@ -89,6 +90,8 @@ GBL_EXPORT GBL_RESULT GUM_draw(GUM_Renderer* pRenderer) {
         GUM_Widget*      pWidget      = GUM_WIDGET(ppObjects[i]);
         pWidgetClass->pFnDraw(pWidget, pRenderer);
     }
+
+    GUM_InputSystem_drawFocusRings(pRenderer);
 
     return GBL_RESULT_SUCCESS;
 }

@@ -25,10 +25,71 @@ static GBL_RESULT GUM_InputDevice_GblBox_destructor_(GblBox* pBox) {
     return pObjClass->base.pFnDestructor(pBox);
 }
 
+static GBL_RESULT GUM_InputDevice_GblObject_setProperty_(GblObject* pObject, const GblProperty* pProp, GblVariant* pValue) {
+    GUM_InputDevice* pSelf = GUM_INPUTDEVICE(pObject);
+    switch (pProp->id) {
+        case GUM_InputDevice_Property_Id_highlight_color:
+            uint32_t highlight_color_;
+            GblVariant_valueCopy(pValue, &highlight_color_);
+            pSelf->highlight_r = (highlight_color_ >> 24) & 0xFF;
+            pSelf->highlight_g = (highlight_color_ >> 16) & 0xFF;
+            pSelf->highlight_b = (highlight_color_ >> 8)  & 0xFF;
+            pSelf->highlight_a =  highlight_color_        & 0xFF;
+            break;
+        case GUM_InputDevice_Property_Id_highlight_r:
+            GblVariant_valueCopy(pValue, &pSelf->highlight_r);
+            break;
+        case GUM_InputDevice_Property_Id_highlight_g:
+            GblVariant_valueCopy(pValue, &pSelf->highlight_g);
+            break;
+        case GUM_InputDevice_Property_Id_highlight_b:
+            GblVariant_valueCopy(pValue, &pSelf->highlight_b);
+            break;
+        case GUM_InputDevice_Property_Id_highlight_a:
+            GblVariant_valueCopy(pValue, &pSelf->highlight_a);
+            break;
+        default:
+            return GBL_RESULT_ERROR_INVALID_PROPERTY;
+    }
+    return GBL_RESULT_SUCCESS;
+}
+
+static GBL_RESULT GUM_InputDevice_GblObject_property_(const GblObject* pObject, const GblProperty* pProp, GblVariant* pValue) {
+    GUM_InputDevice* pSelf = GUM_INPUTDEVICE(pObject);
+    switch (pProp->id) {
+        case GUM_InputDevice_Property_Id_highlight_color:
+            GblVariant_setUint32(pValue, pSelf->highlight_r << 24 |
+                                         pSelf->highlight_g << 16 |
+                                         pSelf->highlight_b << 8  |
+                                         pSelf->highlight_a);
+            break;
+        case GUM_InputDevice_Property_Id_highlight_r:
+            GblVariant_setUint8(pValue, pSelf->highlight_r);
+            break;
+        case GUM_InputDevice_Property_Id_highlight_g:
+            GblVariant_setUint8(pValue, pSelf->highlight_g);
+            break;
+        case GUM_InputDevice_Property_Id_highlight_b:
+            GblVariant_setUint8(pValue, pSelf->highlight_b);
+            break;
+        case GUM_InputDevice_Property_Id_highlight_a:
+            GblVariant_setUint8(pValue, pSelf->highlight_a);
+            break;
+        default:
+            return GBL_RESULT_ERROR_INVALID_PROPERTY;
+    }
+    return GBL_RESULT_SUCCESS;
+}
+
 static GBL_RESULT GUM_InputDeviceClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
-    GBL_BOX_CLASS(pClass)->pFnDestructor = GUM_InputDevice_GblBox_destructor_;
+    if (!GblType_classRefCount(GUM_INPUTDEVICE_TYPE))
+        GBL_PROPERTIES_REGISTER(GUM_InputDevice);
+
+    GBL_BOX_CLASS(pClass)->pFnDestructor     = GUM_InputDevice_GblBox_destructor_;
+    GBL_OBJECT_CLASS(pClass)->pFnSetProperty = GUM_InputDevice_GblObject_setProperty_;
+    GBL_OBJECT_CLASS(pClass)->pFnProperty    = GUM_InputDevice_GblObject_property_;
 
     return GBL_RESULT_SUCCESS;
 }

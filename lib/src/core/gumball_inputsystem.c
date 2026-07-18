@@ -5,6 +5,7 @@
 #include <gumball/gumball_elements.h>
 #include <gumball/gumball_devices.h>
 #include <gumball/gumball_events.h>
+#include <gumball/gumball_types.h>
 
 // TODO: this is REEST, fuck raylib
 #define GUM_MAX_GAMEPADS 16
@@ -103,6 +104,45 @@ void GUM_InputSystem_widgetDestroyed(GUM_Widget* pWidget) {
             GUM_INPUTDEVICE(pGamepads_[i])->pFocusedWidget = nullptr;
 }
 
+static size_t GUM_InputSystem_liveDevices_(GUM_InputDevice* pOut[], size_t maxOut) {
+    size_t n = 0;
+
+    if (pMouse_    && n < maxOut) pOut[n++] = GUM_INPUTDEVICE(pMouse_);
+    if (pKeyboard_ && n < maxOut) pOut[n++] = GUM_INPUTDEVICE(pKeyboard_);
+
+    for (int i = 0; i < GUM_MAX_GAMEPADS && n < maxOut; i++)
+        if (pGamepads_[i]) pOut[n++] = GUM_INPUTDEVICE(pGamepads_[i]);
+
+    return n;
+}
+
+void GUM_InputSystem_drawFocusRings(GUM_Renderer* pRenderer) {
+    GUM_InputDevice* devices[2 + GUM_MAX_GAMEPADS]; // Mouse, keyboard and all gamepads.
+    size_t           deviceCount = GUM_InputSystem_liveDevices_(devices, GBL_COUNT_OF(devices));
+
+    const float thickness = 3.0f;
+    const float gap       = 1.0f;
+
+    for (size_t i = 0; i < deviceCount; i++) {
+        GUM_Widget* pWidget = devices[i]->pFocusedWidget;
+        if (!pWidget || !devices[i]->highlight_a) continue;
+
+        size_t rank = 0;
+        for (size_t j = 0; j < i; j++)
+            if (devices[j]->pFocusedWidget == pWidget) rank++;
+
+        GUM_Vector2 pos    = GUM_get_absolute_position_(pWidget);
+        float       outset = (float)(rank + 1) * (thickness + gap);
+
+        GUM_Rectangle ring = { pos.x - outset, pos.y - outset,
+                               pWidget->w + outset * 2, pWidget->h + outset * 2 };
+
+        GUM_Backend_rectangleLinesDraw(pRenderer, ring, pWidget->border_radius, thickness,
+            (GUM_Color){ devices[i]->highlight_r, devices[i]->highlight_g,
+                         devices[i]->highlight_b, devices[i]->highlight_a });
+    }
+}
+
 ///////// MOUSE /////////
 
 static void GUM_InputSystem_Mouse_hitTest_(void) {
@@ -121,8 +161,10 @@ static void GUM_InputSystem_Mouse_hitTest_(void) {
             mousePos.x <  widgetPos.x + widgetSize.x &&
             mousePos.y >= widgetPos.y &&
             mousePos.y <  widgetPos.y + widgetSize.y) {
-            GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), pWidget);
-            break;
+            if (GBL_TYPECHECK(GUM_Button, pWidget) && GUM_BUTTON(pWidget)->isSelectable) {
+                GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), pWidget);
+                break;
+            }
         }
     }
 }
@@ -190,9 +232,6 @@ static void GUM_InputSystem_Gamepad_dispatchEvent_(GUM_Gamepad* pGamepad, GblFla
 
     if (state == GUM_INPUTSTATE_PRESS &&
         action >= GUM_INPUTACTION_MOVE_UP && action <= GUM_INPUTACTION_MOVE_RIGHT) {
-        // Directional presses drive navigation directly rather than being
-        // dispatched to a widget -- there's no focused widget to send them
-        // to until navigation itself picks one.
         GUM_Nav_move(GUM_INPUTDEVICE(pGamepad), action);
     } else {
         GUM_Widget* pTarget = GUM_INPUTDEVICE(pGamepad)->pFocusedWidget;

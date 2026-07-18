@@ -112,9 +112,12 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     uint8_t            font_border_thickness;    //!< Width of the font border, in pixels.                                           Default value is 1
     uint8_t            z_index;                  //!< Z-index of the widget. The higher the value, the higher the priority.          Default value is 50
     bool               shouldUpdate;             //!< If the widget should be updated.                                               Default value is true
-    bool               isFocused;                // If any input device currently has navigation focus on this widget                Default value is false
+    uint8_t            focusCount;               //!< Number of input devices currently focusing this widget                         Default value is 0
 GBL_INSTANCE_END
 //! @}
+
+//! True if at least one input device currently has navigation focus on this widget.
+#define GUM_Widget_isFocused(self) (GUM_WIDGET(self)->focusCount > 0)
 
 GBL_PROPERTIES(GUM_Widget,
     (x,                     GBL_GENERIC, (READ, WRITE),          GBL_FLOAT_TYPE         ),
