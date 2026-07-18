@@ -1,13 +1,13 @@
 #include <gumball/gumball.h>
 #include <raylib.h>
 
-void buttonOnPress(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
+void onPressCallback(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
     pSelf->r -= 10;
     pSelf->g -= 10;
     pSelf->b -= 10;
 }
 
-void buttonOnRelease(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
+void onReleaseCallback(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
     pSelf->r += 10;
     pSelf->g += 10;
     pSelf->b += 10;
@@ -20,7 +20,8 @@ int main(int argc, char* argv[]) {
     SetTargetFPS(60);
 
     GUM_Container* pParentContainer = GUM_Container_create(
-        "x", 0.0f,  "y", 0.0f,
+        "x", 0.0f,   "y", 0.0f,
+        "w", 640.0f, "h", 480.0f,
         "color", 0x0F0F0FFF, "border_color", 0x000000AF,
         "margin", 10.0f, "children",
         GblRingList_create(
@@ -50,24 +51,16 @@ int main(int argc, char* argv[]) {
     );
 
     GblObject_foreachChild(GblObject_childFirst(GBL_OBJECT(pParentContainer)), pChild) {
-        if (GBL_TYPECHECK(GUM_Widget, pChild)) {
-            GUM_connect(pChild, "onPressConfirm",   buttonOnPress);
-            GUM_connect(pChild, "onReleaseConfirm", buttonOnRelease);
-        }
+        GUM_connect(pChild, "onPressConfirm",   onPressCallback);
+        GUM_connect(pChild, "onReleaseConfirm", onReleaseCallback);
     }
 
     GblObject_foreachChild(GblObject_siblingNext(GblObject_childFirst(GBL_OBJECT(pParentContainer))), pChild) {
-        if (GBL_TYPECHECK(GUM_Widget, pChild)) {
-            GUM_connect(pChild, "onPressConfirm",   buttonOnPress);
-            GUM_connect(pChild, "onReleaseConfirm", buttonOnRelease);
-        }
+        GUM_connect(pChild, "onPressConfirm",   onPressCallback);
+        GUM_connect(pChild, "onReleaseConfirm", onReleaseCallback);
     }
 
-    GUM_InputSystem_bind(GUM_MOUSE_TYPE, GUM_INPUTACTION_CONFIRM, GUM_MOUSE_BUTTON_MIDDLE);
-
     while (!WindowShouldClose()) {
-        pParentContainer->base.w = GetScreenWidth();
-        pParentContainer->base.h = GetScreenHeight();
         GUM_update();
 
         BeginDrawing();
