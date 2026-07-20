@@ -8,7 +8,7 @@
  *
  *   GUM_Rectangle is a simple rectangle structure
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
@@ -31,6 +31,11 @@ typedef struct {
 //! \cond
 GblType GUM_Rectangle_type(void) GBL_NOEXCEPT;
 //! \endcond
+
+//! Returns the intersection of two rectangles.
+GUM_Rectangle GUM_Rectangle_intersect(GUM_Rectangle a, GUM_Rectangle b) GBL_NOEXCEPT;
+
+constexpr GUM_Rectangle GUM_CLIP_RECT_NONE_ = ((GUM_Rectangle){ -1e30f, -1e30f, 2e30f, 2e30f });
 
 GBL_DECLS_END
 

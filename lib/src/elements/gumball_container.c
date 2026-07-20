@@ -89,7 +89,7 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     if GBL_UNLIKELY (childCount == 0) return GBL_RESULT_SUCCESS;
 
     const bool  isHorizontal = pSelf->orientation == 'h' || pSelf->orientation == 'H';
-    const float totalMargin  = pSelf->margin * 2.0f * (float)childCount;
+    const float totalMargin  = pSelf->margin  * 2.0f * (float)childCount;
     const float totalPadding = pSelf->padding * 2.0f;
 
     const float container_mainPos      = isHorizontal ? pSelfWidget->x : pSelfWidget->y;
@@ -98,20 +98,21 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     const float container_secondaryDim = isHorizontal ? pSelfWidget->h : pSelfWidget->w;
 
     const float cornerRadius   = pSelfWidget->border_radius * GBL_MIN(container_mainDim, container_secondaryDim) * 0.5f;
-    const float roundnessInset = cornerRadius * 0.293f; // 0.293f = 1 - 1/sqrt(2)
+    const float roundnessInset = cornerRadius * (1 - 1/sqrt(2));
 
     const float totalPaddingWithRoundness = totalPadding + roundnessInset * 2.0f;
     float       offset                    = container_mainPos + pSelf->padding + pSelf->margin + roundnessInset;
+    float       contentExtent             = container_mainPos; // will hold the farthest edge reached by any child
 
     GblObject_foreachChild(GBL_OBJECT(pSelf), pChild) {
         GUM_Widget* pChildWidget = GBL_AS(GUM_Widget, pChild);
-
         if GBL_UNLIKELY(!pChildWidget) continue;
 
         float* widget_mainPos      = isHorizontal ? &pChildWidget->x : &pChildWidget->y;
         float* widget_secondaryPos = isHorizontal ? &pChildWidget->y : &pChildWidget->x;
         float* widget_mainDim      = isHorizontal ? &pChildWidget->w : &pChildWidget->h;
         float* widget_secondaryDim = isHorizontal ? &pChildWidget->h : &pChildWidget->w;
+        contentExtent              = GBL_MAX(contentExtent, *widget_mainPos + *widget_mainDim);
 
         if (pSelf->resizeWidgets) {
             *widget_mainDim      = (container_mainDim - totalMargin - totalPaddingWithRoundness) / (float)childCount;
@@ -125,6 +126,21 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
                                         + (availableSecDim - *widget_secondaryDim) / 2.0f;
             offset += *widget_mainDim + pSelf->margin * 2.0f;
         }
+    }
+
+    const bool contentOverflows = contentExtent > (container_mainPos + container_mainDim);
+    GUM_Rectangle outgoingClip  = pSelfWidget->clipRect;
+
+    if (pSelf->scrollable && contentOverflows) {
+        GUM_Vector2   absPos   = GUM_get_absolute_position_(pSelfWidget);
+        GUM_Rectangle selfRect = { absPos.x, absPos.y, pSelfWidget->w, pSelfWidget->h };
+        outgoingClip = GUM_Rectangle_intersect(pSelfWidget->clipRect, selfRect);
+    }
+
+    GblObject_foreachChild(GBL_OBJECT(pSelf), pChild) {
+        GUM_Widget* pChildWidget = GBL_AS(GUM_Widget, pChild);
+        if GBL_UNLIKELY(!pChildWidget) continue;
+        pChildWidget->clipRect = outgoingClip;
 
         GUM_Container* pChildContainer = GBL_AS(GUM_Container, pChild);
         if (pChildContainer)

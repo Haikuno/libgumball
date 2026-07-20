@@ -1,71 +1,44 @@
 #include <gumball/gumball.h>
 #include <raylib.h>
 
-void onPressCallback(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
-    pSelf->r -= 10;
-    pSelf->g -= 10;
-    pSelf->b -= 10;
-}
-
-void onReleaseCallback(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
-    pSelf->r += 10;
-    pSelf->g += 10;
-    pSelf->b += 10;
-}
-
 int main(int argc, char* argv[]) {
     GUM_Root* pRoot = GUM_Root_create();
 
-    InitWindow(640, 480, "Test");
+    InitWindow(640, 480, "Clipping test");
     SetTargetFPS(60);
 
-    GUM_Container* pParentContainer = GUM_Container_create(
-        "x", 0.0f,   "y", 0.0f,
-        "w", 640.0f, "h", 480.0f,
-        "color", 0x0F0F0FFF, "border_color", 0x000000AF,
-        "margin", 10.0f, "children",
-        GblRingList_create(
 
-            GUM_Container_create(
-                "border_color", 0x000000FF, "orientation", 'h',
-                "color", 0x0F0F0FFF,
-                "margin", 10.0f, "padding", 10.0f, "children",
-                GblRingList_create(
-                    GUM_Button_create("color", 0x0A0A0AFF, "label", "Click me!"),
-                    GUM_Button_create("color", 0x0A0A0AFF, "label", "Click me!"),
-                    GUM_Button_create("color", 0x0A0A0AFF, "label", "Click me!")
-                )
-            ),
+    GUM_Container* pOuter = GUM_Container_create("x", 70.0f, "y", 40.0f,
+                                                 "w", 800.0f, "h", 600.0f,
+                                                 "border_color",   0x000000FF,
+                                                 "resizeWidgets",  false,
+                                                 "alignWidgets",   false,
+                                                 "scrollable",     true);
 
-            GUM_Container_create(
-                "border_color", 0x000000FF, "orientation", 'v',
-                "color", 0x0F0F0FFF,
-                "margin", 10.0f, "children",
-                GblRingList_create(
-                    GUM_Button_create("color", 0x0A0A0AFF, "label", "Click me!"),
-                    GUM_Button_create("color", 0x0A0A0AFF, "label", "Click me!"),
-                    GUM_Button_create("color", 0x0A0A0AFF, "label", "Click me!")
-                )
-            )
-        )
-    );
+    GUM_Container* pInner = GUM_Container_create("parent", pOuter,
+                                                 "x", 100.0f, "y", 60.0f,
+                                                 "w", 600.0f, "h", 600.0f,
+                                                 "border_color",  0x0000FFFF,
+                                                 "resizeWidgets", false,
+                                                 "alignWidgets",  true,
+                                                 "scrollable",    true);
 
-    GblObject_foreachChild(GblObject_childFirst(GBL_OBJECT(pParentContainer)), pChild) {
-        GUM_connect(pChild, "onPressConfirm",   onPressCallback);
-        GUM_connect(pChild, "onReleaseConfirm", onReleaseCallback);
-    }
+    const unsigned colors[] = { 0xFF0000FF, 0x00A000FF, 0xFF00FFFF };
+    const char*    labels[] = { "Inner A", "Inner B", "Inner C" };
 
-    GblObject_foreachChild(GblObject_siblingNext(GblObject_childFirst(GBL_OBJECT(pParentContainer))), pChild) {
-        GUM_connect(pChild, "onPressConfirm",   onPressCallback);
-        GUM_connect(pChild, "onReleaseConfirm", onReleaseCallback);
+    for (int i = 0; i < 3; ++i) {
+        GUM_Widget_create("parent", pInner,
+                          "h",     300.0f,
+                          "color", colors[i],
+                          "label", labels[i]);
     }
 
     while (!WindowShouldClose()) {
-        GUM_update();
-
         BeginDrawing();
         ClearBackground(RAYWHITE);
+
         GUM_draw();
+
         EndDrawing();
     }
 

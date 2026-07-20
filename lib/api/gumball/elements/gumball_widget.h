@@ -30,6 +30,7 @@
 #include <gumball/types/gumball_font.h>
 #include <gumball/types/gumball_texture.h>
 #include <gumball/types/gumball_renderer.h>
+#include <gumball/types/gumball_rectangle.h>
 #include <gumball/gumball_events.h>
 
 
@@ -113,6 +114,7 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     uint8_t            z_index;                  //!< Z-index of the widget. The higher the value, the higher the priority.          Default value is 50
     bool               shouldUpdate;             //!< If the widget should be updated.                                               Default value is true
     uint8_t            focusCount;               //!< Number of input devices currently focusing this widget                         Default value is 0
+    GUM_Rectangle      clipRect;                 // TODO: this should be a private variable
 GBL_INSTANCE_END
 //! @}
 

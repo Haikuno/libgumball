@@ -39,6 +39,7 @@ static GBL_RESULT GUM_Widget_init_(GblInstance* pInstance) {
     pSelf->w          = 200.0f;
     pSelf->h          = 200.0f;
     pSelf->isRelative = false;
+    pSelf->clipRect   = GUM_CLIP_RECT_NONE_;
 
     pSelf->r = 0;
     pSelf->g = 255;
@@ -397,122 +398,130 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
         rec.y                  += parent_pos.y;
     }
 
-    if (pSelf->a) {
-        GUM_Backend_rectangleDraw(pRenderer, rec, pSelf->border_radius,
-                                  (GUM_Color){ pSelf->r, pSelf->g, pSelf->b, pSelf->a });
-    }
+    const bool needsClip = pSelf->clipRect.x     != GUM_CLIP_RECT_NONE_.x ||
+                           pSelf->clipRect.width != GUM_CLIP_RECT_NONE_.width;
 
-    GUM_Button* pButton    = GBL_AS(GUM_Button, pSelf);
+    // Draw scope. Clips when needed
+    GBL_SCOPE(needsClip ? GUM_Backend_beginScissor(pRenderer, pSelf->clipRect) : 0,
+              needsClip ? GUM_Backend_endScissor(pRenderer) : 0) {
 
-    if (pSelf->border_a) {
-        GUM_Backend_rectangleLinesDraw(
-            pRenderer, rec, pSelf->border_radius, pSelf->border_width,
-            (GUM_Color){ pSelf->border_r, pSelf->border_g, pSelf->border_b, pSelf->border_a });
-
-        if (pSelf->border_highlight) {
-            float         inner_thickness = 1;
-            float         inset           = (pSelf->border_width - inner_thickness) / 2.0f;
-            GUM_Rectangle inner           = { rec.x - inset / 2, rec.y - inset / 2,
-                                              rec.width + inset, rec.height + inset };
-
-            GUM_Backend_rectangleLinesDraw(pRenderer, inner, pSelf->border_radius, inner_thickness,
-                                           (GUM_Color){ 255, 255, 255, 255 });
-        }
-    }
-
-    // text and texture rendering
-    GUM_Vector2 textSize = { 0, 0 };
-    GUM_Vector2 textPos  = { 0, 0 };
-    const float margin   = 3.0f;
-
-    if (GblStringRef_length(pSelf->label)) {
-        textSize = GUM_Backend_Font_measureText(pSelf->font, pSelf->label, pSelf->font_size);
-
-        switch (pSelf->textAlignment) {
-            case GUM_TEXT_ALIGN_CENTER:
-                textPos
-                    = (GUM_Vector2){ rec.x + (rec.width - textSize.x) / 2, rec.y + rec.height / 2 - textSize.y / 2 };
-
-                // can't align to the center if there's a texture, so default to bottom
-                if (pSelf->texture) {
-                    textPos = (GUM_Vector2){ rec.x + (rec.width - textSize.x) / 2,
-                                             rec.y + rec.height - textSize.y - margin };
-                }
-
-                break;
-            case GUM_TEXT_ALIGN_TOP:
-                textPos = (GUM_Vector2){ rec.x + (rec.width - textSize.x) / 2, rec.y + textSize.y / 2 + margin };
-                break;
-            case GUM_TEXT_ALIGN_RIGHT:
-                textPos
-                    = (GUM_Vector2){ rec.x + rec.width - textSize.x - margin, rec.y + (rec.height - textSize.y) / 2 };
-                break;
-            case GUM_TEXT_ALIGN_BOTTOM:
-                textPos
-                    = (GUM_Vector2){ rec.x + (rec.width - textSize.x) / 2, rec.y + rec.height - textSize.y - margin };
-                break;
-            case GUM_TEXT_ALIGN_LEFT:
-                textPos = (GUM_Vector2){ rec.x + margin, rec.y + (rec.height - pSelf->font_size) / 2 };
-                break;
+        if (pSelf->a) {
+            GUM_Backend_rectangleDraw(pRenderer, rec, pSelf->border_radius,
+                                    (GUM_Color){ pSelf->r, pSelf->g, pSelf->b, pSelf->a });
         }
 
-        // text border
-        if (pSelf->font_border_a && pSelf->font_border_thickness) {
-            for (int dx = -pSelf->font_border_thickness; dx <= pSelf->font_border_thickness; dx++) {
-                for (int dy = -pSelf->font_border_thickness; dy <= pSelf->font_border_thickness; dy++) {
-                    if (dx == 0 && dy == 0) continue;
-                    GUM_Backend_Font_draw(pRenderer, pSelf->font, pSelf->label,
-                                          (GUM_Vector2){ .x = textPos.x + dx, .y = textPos.y + dy },
-                                          (GUM_Color){ pSelf->font_border_r, pSelf->font_border_g, pSelf->font_border_b,
-                                                       pSelf->font_border_a },
-                                          pSelf->font_size, 1.2f);
-                }
+        GUM_Button* pButton    = GBL_AS(GUM_Button, pSelf);
+
+        if (pSelf->border_a) {
+            GUM_Backend_rectangleLinesDraw(
+                pRenderer, rec, pSelf->border_radius, pSelf->border_width,
+                (GUM_Color){ pSelf->border_r, pSelf->border_g, pSelf->border_b, pSelf->border_a });
+
+            if (pSelf->border_highlight) {
+                float         inner_thickness = 1;
+                float         inset           = (pSelf->border_width - inner_thickness) / 2.0f;
+                GUM_Rectangle inner           = { rec.x - inset / 2, rec.y - inset / 2,
+                                                rec.width + inset, rec.height + inset };
+
+                GUM_Backend_rectangleLinesDraw(pRenderer, inner, pSelf->border_radius, inner_thickness,
+                                            (GUM_Color){ 255, 255, 255, 255 });
             }
         }
 
-        GUM_Backend_Font_draw(pRenderer, pSelf->font, pSelf->label, (GUM_Vector2){ .x = textPos.x, .y = textPos.y },
-                              (GUM_Color){ pSelf->font_r, pSelf->font_g, pSelf->font_b, pSelf->font_a },
-                              pSelf->font_size, 1.2f);
-    }
+        // text and texture rendering
+        GUM_Vector2 textSize = { 0, 0 };
+        GUM_Vector2 textPos  = { 0, 0 };
+        const float margin   = 3.0f;
 
-    if (pSelf->texture) {
-        GUM_Vector2 textureSize;
-        GUM_Vector2 texturePos = { rec.x, rec.y };
-
-        // adjust texture size based on pSelf size
-        textureSize.x = rec.width;
-        textureSize.y = rec.height;
-
-        // if there is text, shrink it
         if (GblStringRef_length(pSelf->label)) {
-            textureSize.y *= 0.6f;
-            textureSize.x *= 0.6f;
+            textSize = GUM_Backend_Font_measureText(pSelf->font, pSelf->label, pSelf->font_size);
+
+            switch (pSelf->textAlignment) {
+                case GUM_TEXT_ALIGN_CENTER:
+                    textPos
+                        = (GUM_Vector2){ rec.x + (rec.width - textSize.x) / 2, rec.y + rec.height / 2 - textSize.y / 2 };
+
+                    // can't align to the center if there's a texture, so default to bottom
+                    if (pSelf->texture) {
+                        textPos = (GUM_Vector2){ rec.x + (rec.width - textSize.x) / 2,
+                                                rec.y + rec.height - textSize.y - margin };
+                    }
+
+                    break;
+                case GUM_TEXT_ALIGN_TOP:
+                    textPos = (GUM_Vector2){ rec.x + (rec.width - textSize.x) / 2, rec.y + textSize.y / 2 + margin };
+                    break;
+                case GUM_TEXT_ALIGN_RIGHT:
+                    textPos
+                        = (GUM_Vector2){ rec.x + rec.width - textSize.x - margin, rec.y + (rec.height - textSize.y) / 2 };
+                    break;
+                case GUM_TEXT_ALIGN_BOTTOM:
+                    textPos
+                        = (GUM_Vector2){ rec.x + (rec.width - textSize.x) / 2, rec.y + rec.height - textSize.y - margin };
+                    break;
+                case GUM_TEXT_ALIGN_LEFT:
+                    textPos = (GUM_Vector2){ rec.x + margin, rec.y + (rec.height - pSelf->font_size) / 2 };
+                    break;
+            }
+
+            // text border
+            if (pSelf->font_border_a && pSelf->font_border_thickness) {
+                for (int dx = -pSelf->font_border_thickness; dx <= pSelf->font_border_thickness; dx++) {
+                    for (int dy = -pSelf->font_border_thickness; dy <= pSelf->font_border_thickness; dy++) {
+                        if (dx == 0 && dy == 0) continue;
+                        GUM_Backend_Font_draw(pRenderer, pSelf->font, pSelf->label,
+                                            (GUM_Vector2){ .x = textPos.x + dx, .y = textPos.y + dy },
+                                            (GUM_Color){ pSelf->font_border_r, pSelf->font_border_g, pSelf->font_border_b,
+                                                        pSelf->font_border_a },
+                                            pSelf->font_size, 1.2f);
+                    }
+                }
+            }
+
+            GUM_Backend_Font_draw(pRenderer, pSelf->font, pSelf->label, (GUM_Vector2){ .x = textPos.x, .y = textPos.y },
+                                (GUM_Color){ pSelf->font_r, pSelf->font_g, pSelf->font_b, pSelf->font_a },
+                                pSelf->font_size, 1.2f);
         }
 
-        // adjust texture position based on text size, position and alignment
-        switch (pSelf->textAlignment) {
-            case GUM_TEXT_ALIGN_CENTER:
-            case GUM_TEXT_ALIGN_BOTTOM:
-                texturePos = (GUM_Vector2){ rec.x + (rec.width - textureSize.x) / 2,
-                                            rec.y + (rec.height - textureSize.y) / 2 - margin - textSize.y / 2 };
-                break;
-            case GUM_TEXT_ALIGN_TOP:
-                texturePos = (GUM_Vector2){ rec.x + (rec.width - textureSize.x) / 2,
-                                            rec.y + (rec.height - textureSize.y) / 2 + margin + textSize.y / 2 };
-                break;
-            case GUM_TEXT_ALIGN_LEFT:
-                texturePos = (GUM_Vector2){ rec.x + (rec.width - textureSize.x) / 2 + margin + textSize.x / 2,
-                                            rec.y + (rec.height - textureSize.y) / 2 };
-                break;
-            case GUM_TEXT_ALIGN_RIGHT:
-                texturePos = (GUM_Vector2){ rec.x + (rec.width - textureSize.x) / 2 - margin - textSize.x / 2,
-                                            rec.y + (rec.height - textureSize.y) / 2 };
-                break;
+        if (pSelf->texture) {
+            GUM_Vector2 textureSize;
+            GUM_Vector2 texturePos = { rec.x, rec.y };
+
+            // adjust texture size based on pSelf size
+            textureSize.x = rec.width;
+            textureSize.y = rec.height;
+
+            // if there is text, shrink it
+            if (GblStringRef_length(pSelf->label)) {
+                textureSize.y *= 0.6f;
+                textureSize.x *= 0.6f;
+            }
+
+            // adjust texture position based on text size, position and alignment
+            switch (pSelf->textAlignment) {
+                case GUM_TEXT_ALIGN_CENTER:
+                case GUM_TEXT_ALIGN_BOTTOM:
+                    texturePos = (GUM_Vector2){ rec.x + (rec.width - textureSize.x) / 2,
+                                                rec.y + (rec.height - textureSize.y) / 2 - margin - textSize.y / 2 };
+                    break;
+                case GUM_TEXT_ALIGN_TOP:
+                    texturePos = (GUM_Vector2){ rec.x + (rec.width - textureSize.x) / 2,
+                                                rec.y + (rec.height - textureSize.y) / 2 + margin + textSize.y / 2 };
+                    break;
+                case GUM_TEXT_ALIGN_LEFT:
+                    texturePos = (GUM_Vector2){ rec.x + (rec.width - textureSize.x) / 2 + margin + textSize.x / 2,
+                                                rec.y + (rec.height - textureSize.y) / 2 };
+                    break;
+                case GUM_TEXT_ALIGN_RIGHT:
+                    texturePos = (GUM_Vector2){ rec.x + (rec.width - textureSize.x) / 2 - margin - textSize.x / 2,
+                                                rec.y + (rec.height - textureSize.y) / 2 };
+                    break;
+            }
+
+            GUM_Rectangle rec = { texturePos.x, texturePos.y, textureSize.x, textureSize.y };
+
+            GUM_Backend_Texture_draw(pRenderer, pSelf->texture, rec, (GUM_Color){ 255, 255, 255, 255 });
         }
-
-        GUM_Rectangle rec = { texturePos.x, texturePos.y, textureSize.x, textureSize.y };
-
-        GUM_Backend_Texture_draw(pRenderer, pSelf->texture, rec, (GUM_Color){ 255, 255, 255, 255 });
     }
 
     return GBL_RESULT_SUCCESS;
