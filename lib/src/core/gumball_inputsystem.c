@@ -233,12 +233,11 @@ static void GUM_InputSystem_Gamepad_dispatchEvent_(GUM_Gamepad* pGamepad, GblFla
     if (state == GUM_INPUTSTATE_PRESS &&
         action >= GUM_INPUTACTION_MOVE_UP && action <= GUM_INPUTACTION_MOVE_RIGHT) {
         GUM_Nav_move(GUM_INPUTDEVICE(pGamepad), action);
-    } else {
-        GUM_Widget* pTarget = GUM_INPUTDEVICE(pGamepad)->pFocusedWidget;
-
-        if (pTarget)
-            GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
     }
+
+    GUM_Widget* pTarget = GUM_INPUTDEVICE(pGamepad)->pFocusedWidget;
+    if (pTarget)
+        GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
 
     GBL_UNREF(pEvent);
 }
@@ -314,12 +313,12 @@ static void GUM_InputSystem_Keyboard_dispatchEvent_(GblFlags button, GUM_InputSt
     if (state == GUM_INPUTSTATE_PRESS &&
         action >= GUM_INPUTACTION_MOVE_UP && action <= GUM_INPUTACTION_MOVE_RIGHT) {
         GUM_Nav_move(GUM_INPUTDEVICE(pKeyboard_), action);
-    } else {
-        GUM_Widget* pTarget = GUM_INPUTDEVICE(pKeyboard_)->pFocusedWidget;
-
-        if (pTarget)
-            GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
     }
+
+    GUM_Widget* pTarget = GUM_INPUTDEVICE(pKeyboard_)->pFocusedWidget;
+    if (pTarget)
+        GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
+
 
     GBL_UNREF(pEvent);
 }
