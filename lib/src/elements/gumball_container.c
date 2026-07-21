@@ -156,6 +156,23 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     return GBL_RESULT_SUCCESS;
 }
 
+static GBL_RESULT GUM_Container_update_(GUM_Widget* pSelf) {
+    GUM_Container* pContainer = GUM_CONTAINER(pSelf);
+    const float speed = 12.0f; // TODO: tune speed
+    const float dt     = GUM_Backend_frametime();
+
+    const bool changedX = fabsf(pContainer->scrollOffsetTargetX - pContainer->scrollOffsetX) > 0.5f;
+    const bool changedY = fabsf(pContainer->scrollOffsetTargetY - pContainer->scrollOffsetY) > 0.5f;
+
+    if (changedX || changedY) {
+        pContainer->scrollOffsetX += (pContainer->scrollOffsetTargetX - pContainer->scrollOffsetX) * speed * dt;
+        pContainer->scrollOffsetY += (pContainer->scrollOffsetTargetY - pContainer->scrollOffsetY) * speed * dt;
+        GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
+    }
+
+    return GBL_RESULT_SUCCESS;
+}
+
 static GBL_RESULT GUM_Container_Object_instantiated_(GblObject* pObject) {
     GBL_CTX_BEGIN(nullptr);
     GBL_VCALL_DEFAULT(GUM_Widget, base.pFnInstantiated, pObject);
@@ -172,6 +189,8 @@ static GBL_RESULT GUM_ContainerClass_init_(GblClass* pClass, const void* pData) 
     GBL_OBJECT_CLASS(pClass)->pFnSetProperty  = GUM_Container_GblObject_setProperty_;
     GBL_OBJECT_CLASS(pClass)->pFnProperty     = GUM_Container_GblObject_property_;
     GBL_OBJECT_CLASS(pClass)->pFnInstantiated = GUM_Container_Object_instantiated_;
+
+    GUM_WIDGET_CLASS(pClass)->pFnUpdate = GUM_Container_update_;
 
     GUM_CONTAINER_CLASS(pClass)->pFnUpdateContent = GUM_Container_updateContent_;
 

@@ -4,3 +4,7 @@
 uint32_t GUM_Backend_timestamp(void) {
 	return (uint32_t)(GetTime() * 1000);
 }
+
+float GUM_Backend_frametime(void) {
+	return GetFrameTime();
+}

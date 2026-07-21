@@ -70,8 +70,10 @@ GBL_INSTANCE_DERIVE(GUM_Container, GUM_Widget)
     bool scrollable;        //!< If the container should become scrollable when its content is bigger than itself       Default value is true
 
     // TODO: private!
-    float scrollOffsetX;  // Horizontal scroll offset
-    float scrollOffsetY;  // Vertical scroll offset
+    float scrollOffsetX;        // Current horizontal scroll offset
+    float scrollOffsetY;        // Current vertical scroll offset
+    float scrollOffsetTargetX;  // Target horizontal scroll offset
+    float scrollOffsetTargetY;  // Target vertical scroll offset
 GBL_INSTANCE_END
 //! @}
 

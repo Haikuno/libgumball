@@ -28,6 +28,8 @@ void        GUM_Backend_resetLogger                      (void);
 
 //! Returns the current timestamp in miliseconds since the program started
 uint32_t    GUM_Backend_timestamp                        (void);
+//! Returns the last frame's draw time in seconds
+float       GUM_Backend_frametime                        (void);
 
 //! Returns the current screen size
 GUM_Vector2 GUM_Backend_screenSize                       (void);
