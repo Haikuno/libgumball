@@ -5,12 +5,13 @@ int main(int argc, char* argv[]) {
     GUM_Root* pRoot = GUM_Root_create();
 
     InitWindow(800, 1000, "Clipping test");
-    SetTargetFPS(60);
+    SetTargetFPS(144);
 
 
     GUM_Container* pOuter = GUM_Container_create("x", 0.0f, "y", 0.0f,
                                                  "w", 800.0f, "h", 1000.0f,
                                                  "border_color",   0x000000FF,
+                                                 "color",          0xF0F0F0FF,
                                                  "resizeWidgets",  false,
                                                  "alignWidgets",   true,
                                                  "scrollable",     true);

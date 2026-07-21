@@ -297,7 +297,7 @@ void GUM_Nav_move(GUM_InputDevice* pDevice, GUM_InputAction direction) {
                     const float clippedBottom     = (pNextRec.y + pNextRec.height) - (overlap.y + overlap.height);
                     const float clippedLeft       = overlap.x - pNextRec.x;
                     const float clippedRight      = (pNextRec.x + pNextRec.width) - (overlap.x + overlap.width);
-                    const bool isFirstInContainer = !GblObject_siblingPreviousByType(pChildOnPath, GUM_WIDGET_TYPE);
+                    const bool isFirstInContainer = !GblObject_siblingPreviousByCmpFn(pChildOnPath, GUM_Nav_isWidgetType_, nullptr);
 
                     const float margin = pContainer->margin * 2;
 

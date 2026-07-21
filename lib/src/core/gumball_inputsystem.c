@@ -138,9 +138,15 @@ void GUM_InputSystem_drawFocusRings(GUM_Renderer* pRenderer) {
         GUM_Rectangle ring = { pos.x - outset, pos.y - outset,
                                pWidget->w + outset * 2, pWidget->h + outset * 2 };
 
-        GUM_Backend_rectangleLinesDraw(pRenderer, ring, pWidget->border_radius, thickness,
-            (GUM_Color){ devices[i]->highlight_r, devices[i]->highlight_g,
-                         devices[i]->highlight_b, devices[i]->highlight_a });
+        const bool needsClip = pWidget->clipRect.x     != GUM_CLIP_RECT_NONE_.x ||
+                               pWidget->clipRect.width != GUM_CLIP_RECT_NONE_.width;
+
+        GBL_SCOPE(needsClip ? GUM_Backend_beginScissor(pRenderer, pWidget->clipRect) : 0,
+                  needsClip ? GUM_Backend_endScissor(pRenderer) : 0) {
+            GUM_Backend_rectangleLinesDraw(pRenderer, ring, pWidget->border_radius, thickness,
+                (GUM_Color){ devices[i]->highlight_r, devices[i]->highlight_g,
+                             devices[i]->highlight_b, devices[i]->highlight_a });
+        }
     }
 }
 
@@ -206,7 +212,7 @@ static void GUM_InputSystem_Mouse_update_(void) {
             if (!pContainer->scrollable) continue;
 
             const bool isHorizontal = pContainer->orientation == 'h' || pContainer->orientation == 'H';
-            float delta = (isHorizontal ? pMouse_->wheel.x : pMouse_->wheel.y) * -35.0f; // TODO: tune scroll speed
+            float delta = (isHorizontal ? pMouse_->wheel.x : pMouse_->wheel.y) * -70.0f; // TODO: tune scroll speed
             if (isHorizontal) pContainer->scrollOffsetTargetX = GBL_MAX(pContainer->scrollOffsetTargetX + delta, 0);
             else              pContainer->scrollOffsetTargetY = GBL_MAX(pContainer->scrollOffsetTargetY + delta, 0);
 

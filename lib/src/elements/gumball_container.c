@@ -101,10 +101,11 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     const float roundnessInset = cornerRadius * (1 - 1/sqrt(2));
 
     const float totalPaddingWithRoundness = totalPadding + roundnessInset * 2.0f;
-    float       offset                    = container_mainPos + pSelf->padding + pSelf->margin + roundnessInset;
-    float       contentExtent             = container_mainPos; // will hold the farthest edge reached by any child
 
     float* scrollOffsetMain = isHorizontal ? &pSelf->scrollOffsetX : &pSelf->scrollOffsetY;
+
+    float contentExtent = container_mainPos;
+    float offset        = container_mainPos + pSelf->padding + pSelf->margin + roundnessInset;
 
     GblObject_foreachChild(GBL_OBJECT(pSelf), pChild) {
         GUM_Widget* pChildWidget = GBL_AS(GUM_Widget, pChild);
@@ -121,18 +122,23 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
         }
 
         if (pSelf->alignWidgets) {
-            *widget_mainPos = offset - *scrollOffsetMain;
+            *widget_mainPos = offset; // unscrolled for now -- pass 2 subtracts the clamped offset
             const float availableSecDim = container_secondaryDim - totalPaddingWithRoundness;
             *widget_secondaryPos        = container_secondaryPos + pSelf->padding + roundnessInset
                                         + (availableSecDim - *widget_secondaryDim) / 2.0f;
             offset += *widget_mainDim + pSelf->margin * 2.0f;
+            contentExtent = GBL_MAX(contentExtent, *widget_mainPos + *widget_mainDim);
+        } else {
+            contentExtent = GBL_MAX(contentExtent, *widget_mainPos + *scrollOffsetMain + *widget_mainDim);
         }
-
-        contentExtent = GBL_MAX(contentExtent, *widget_mainPos + *scrollOffsetMain + *widget_mainDim);
     }
 
-    const bool contentOverflows = contentExtent > (container_mainPos + container_mainDim);
-    GUM_Rectangle outgoingClip  = pSelfWidget->clipRect;
+    const bool  contentOverflows = contentExtent > (container_mainPos + container_mainDim);
+    const float maxScroll        = contentOverflows ? (contentExtent - container_mainPos - container_mainDim) : 0.0f;
+
+    *scrollOffsetMain = pSelf->scrollable ? GBL_CLAMP(*scrollOffsetMain, 0.0f, maxScroll) : 0.0f;
+
+    GUM_Rectangle outgoingClip = pSelfWidget->clipRect;
 
     if (pSelf->scrollable && contentOverflows) {
         GUM_Vector2   absPos   = GUM_get_absolute_position_(pSelfWidget);
@@ -140,12 +146,15 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
         outgoingClip = GUM_Rectangle_intersect(pSelfWidget->clipRect, selfRect);
     }
 
-    const float maxScroll = contentOverflows ? (contentExtent - container_mainPos - container_mainDim) : 0.0f;
-    *scrollOffsetMain = pSelf->scrollable ? GBL_CLAMP(*scrollOffsetMain, 0.0f, maxScroll) : 0.0f;
-
     GblObject_foreachChild(GBL_OBJECT(pSelf), pChild) {
         GUM_Widget* pChildWidget = GBL_AS(GUM_Widget, pChild);
         if GBL_UNLIKELY(!pChildWidget) continue;
+
+        if (pSelf->alignWidgets) {
+            float* widget_mainPos = isHorizontal ? &pChildWidget->x : &pChildWidget->y;
+            *widget_mainPos -= *scrollOffsetMain;
+        }
+
         pChildWidget->clipRect = outgoingClip;
 
         GUM_Container* pChildContainer = GBL_AS(GUM_Container, pChild);
@@ -158,7 +167,7 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
 
 static GBL_RESULT GUM_Container_update_(GUM_Widget* pSelf) {
     GUM_Container* pContainer = GUM_CONTAINER(pSelf);
-    const float speed = 12.0f; // TODO: tune speed
+    const float speed = 9.0f; // TODO: tune speed
     const float dt     = GUM_Backend_frametime();
 
     const bool changedX = fabsf(pContainer->scrollOffsetTargetX - pContainer->scrollOffsetX) > 0.5f;
