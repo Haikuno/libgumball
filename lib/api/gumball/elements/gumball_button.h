@@ -10,11 +10,6 @@
  *   GUM_Button is a basic button element that can be selected and pressed,
  *   firing a signal you can connect a callback to.
  *
- *   \todo
- *       - Add a way to override cursor movement to the desired GUM_Button pointer.
- *       - Button highlighting animations
- *       - Make variables private
- *
  *   \author    2025, 2026 Agustín Bellagamba
  *   \copyright MIT License
 */
@@ -49,24 +44,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Button, GUM_Widget)
  *   \brief   Basic button element
  *
 */
-
-/*!  \name  Properties
- *   \brief Button properties you can set/get at or after creation.
- *   \note  You can also set/get properties from parent classes (see \ref GUM_Button).
- *    @{
-*/
-GBL_INSTANCE_DERIVE(GUM_Button, GUM_Widget)
-    bool             isActive;            //!< If this button can be pressed.                                                                 Default value is true
-    bool             isSelectable;        //!< If this button can be selected.                                                                Default value is true
-    bool             isSelectedByDefault; //!< If this button should be selected by default when the cursor doesn't have a button selected.   Default value is false
-GBL_INSTANCE_END
-//! @}
-
-GBL_PROPERTIES(GUM_Button,
-    (isActive,               GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE),
-    (isSelectable,           GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE),
-    (isSelectedByDefault,    GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE)
-)
+GBL_INSTANCE_DERIVE_EMPTY(GUM_Button, GUM_Widget)
 
 GblType GUM_Button_type(void) GBL_NOEXCEPT;
 

@@ -11,6 +11,7 @@
 #define GUM_MAX_GAMEPADS 16
 
 static GUM_Mouse*    pMouse_                       = nullptr;
+static GUM_Widget*   pHoveredWidget_               = nullptr; // different to pMouse_'s pFocusedWidget, this doesn't need to be selectable.
 static GUM_Gamepad*  pGamepads_[GUM_MAX_GAMEPADS]  = { nullptr };
 static GUM_Keyboard* pKeyboard_                    = nullptr;
 static GblArrayList  bindings_[GUM_INPUTACTION_COUNT];
@@ -157,14 +158,22 @@ static void GUM_InputSystem_Mouse_hitTest_(void) {
         GUM_Vector2 widgetPos  = GUM_get_absolute_position_(pWidget);
         GUM_Vector2 widgetSize = (GUM_Vector2){pWidget->w, pWidget->h};
 
-        if (mousePos.x >= widgetPos.x &&
+        const GUM_Rectangle clip = pWidget->clipRect;
+        const bool inClip = mousePos.x >= clip.x && mousePos.x < clip.x + clip.width &&
+                            mousePos.y >= clip.y && mousePos.y < clip.y + clip.height;
+
+        if (inClip &&
+            mousePos.x >= widgetPos.x &&
             mousePos.x <  widgetPos.x + widgetSize.x &&
             mousePos.y >= widgetPos.y &&
             mousePos.y <  widgetPos.y + widgetSize.y) {
-            if (GBL_TYPECHECK(GUM_Button, pWidget) && GUM_BUTTON(pWidget)->isSelectable) {
+            if (pWidget->isSelectable) {
                 GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), pWidget);
                 break;
             }
+            pHoveredWidget_ = pWidget;
+            GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), nullptr);
+            break;
         }
     }
 }
@@ -184,10 +193,29 @@ static void GUM_InputSystem_Mouse_dispatchEvent_(GblFlags button, GUM_InputState
 
 static void GUM_InputSystem_Mouse_update_(void) {
     GUM_Backend_Mouse_update(pMouse_);
-    GblFlags pressed  = GUM_INPUTDEVICE(pMouse_)->buttons     & ~GUM_INPUTDEVICE(pMouse_)->buttonsPrev;
-    GblFlags released = GUM_INPUTDEVICE(pMouse_)->buttonsPrev & ~GUM_INPUTDEVICE(pMouse_)->buttons;
-    GblFlags changed  = pressed | released;
+    GblFlags    pressed        = GUM_INPUTDEVICE(pMouse_)->buttons     & ~GUM_INPUTDEVICE(pMouse_)->buttonsPrev;
+    GblFlags    released       = GUM_INPUTDEVICE(pMouse_)->buttonsPrev & ~GUM_INPUTDEVICE(pMouse_)->buttons;
+    GblFlags    changed        = pressed | released;
     GUM_InputSystem_Mouse_hitTest_();
+
+    // scrolling
+    if (pHoveredWidget_) {
+        for (GblObject* pAncestor = GBL_OBJECT(pHoveredWidget_); pAncestor; pAncestor = GblObject_parent(pAncestor)) {
+            if (!GBL_TYPECHECK(GUM_Container, pAncestor)) continue;
+            GUM_Container* pContainer = GUM_CONTAINER(pAncestor);
+            if (!pContainer->scrollable) continue;
+
+            const bool isHorizontal = pContainer->orientation == 'h' || pContainer->orientation == 'H';
+            float delta = (isHorizontal ? pMouse_->wheel.x : pMouse_->wheel.y) * -35.0f; // TODO: tune scroll speed
+            if (isHorizontal) pContainer->scrollOffsetX = GBL_MAX(pContainer->scrollOffsetX + delta, 0);
+            else              pContainer->scrollOffsetY = GBL_MAX(pContainer->scrollOffsetY + delta, 0);
+
+            if (delta) {
+                GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer); // re-layout + re-clamp
+                break;
+            }
+        }
+    }
 
     while (changed) {
         GblFlags bit = changed & (~changed + 1); // isolate lowest set bit

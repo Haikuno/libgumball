@@ -23,7 +23,40 @@ static void GUM_Widget_GblObject_onPropertyChange_(GblObject* pSelf, GblProperty
 }
 
 static GBL_RESULT GUM_Widget_handleInputEvent_(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
-    GBL_UNUSED(pSelf, pEvent);
+    if (!pSelf->isActive || !pEvent->state || !pEvent->action)
+        return GBL_RESULT_SUCCESS;
+
+    static const char* pressActionSignals_[] = {
+        [GUM_INPUTACTION_CONFIRM]    = "onPressConfirm",
+        [GUM_INPUTACTION_CANCEL]     = "onPressCancel",
+        [GUM_INPUTACTION_MOVE_UP]    = "onPressMoveUp",
+        [GUM_INPUTACTION_MOVE_DOWN]  = "onPressMoveDown",
+        [GUM_INPUTACTION_MOVE_LEFT]  = "onPressMoveLeft",
+        [GUM_INPUTACTION_MOVE_RIGHT] = "onPressMoveRight"
+    };
+
+    static const char* releaseActionSignals_[] = {
+        [GUM_INPUTACTION_CONFIRM]    = "onReleaseConfirm",
+        [GUM_INPUTACTION_CANCEL]     = "onReleaseCancel",
+        [GUM_INPUTACTION_MOVE_UP]    = "onReleaseMoveUp",
+        [GUM_INPUTACTION_MOVE_DOWN]  = "onReleaseMoveDown",
+        [GUM_INPUTACTION_MOVE_LEFT]  = "onReleaseMoveLeft",
+        [GUM_INPUTACTION_MOVE_RIGHT] = "onReleaseMoveRight"
+    };
+
+    const char* signal;
+
+    if (pEvent->state == GUM_INPUTSTATE_PRESS) {
+        GBL_EMIT(pSelf, "onPress", pEvent);
+        signal = pEvent->action == GUM_INPUTACTION_UNBOUND ? "onPressUnbound" : pressActionSignals_[pEvent->action];
+    } else if (pEvent->state == GUM_INPUTSTATE_RELEASE) {
+        GBL_EMIT(pSelf, "onRelease", pEvent);
+        signal = pEvent->action == GUM_INPUTACTION_UNBOUND ? "onReleaseUnbound" : releaseActionSignals_[pEvent->action];
+    }
+
+    GBL_EMIT(pSelf, signal);
+    GblEvent_accept(GBL_EVENT(pEvent));
+
     return GBL_RESULT_SUCCESS;
 }
 
@@ -33,6 +66,11 @@ static GBL_RESULT GUM_Widget_init_(GblInstance* pInstance) {
     pSelf->z_index      = 50;
     pSelf->shouldUpdate = true;
     pSelf->focusCount   = 0;
+
+    pSelf->isInteractive       = true;
+    pSelf->isActive            = false;
+    pSelf->isSelectable        = false;
+    pSelf->isSelectedByDefault = false;
 
     pSelf->x          = 0.0f;
     pSelf->y          = 0.0f;
@@ -132,6 +170,15 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject, const Gb
             break;
         case GUM_Widget_Property_Id_isRelative:
             GblVariant_valueCopy(pValue, &pSelf->isRelative);
+            break;
+        case GUM_Widget_Property_Id_isInteractive:
+            GblVariant_valueCopy(pValue, &pSelf->isInteractive);
+            break;
+        case GUM_Widget_Property_Id_isSelectable:
+            GblVariant_valueCopy(pValue, &pSelf->isSelectable);
+            break;
+        case GUM_Widget_Property_Id_isSelectedByDefault:
+            GblVariant_valueCopy(pValue, &pSelf->isSelectedByDefault);
             break;
         case GUM_Widget_Property_Id_color:
             uint32_t color_;
@@ -277,6 +324,18 @@ static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject* pObject, const
             break;
         case GUM_Widget_Property_Id_isRelative:
             GblVariant_setBool(pValue, pSelf->isRelative);
+            break;
+        case GUM_Widget_Property_Id_isInteractive:
+            GblVariant_setBool(pValue, pSelf->isInteractive);
+            break;
+        case GUM_Widget_Property_Id_isActive:
+            GblVariant_setBool(pValue, pSelf->isActive);
+            break;
+        case GUM_Widget_Property_Id_isSelectable:
+            GblVariant_setBool(pValue, pSelf->isSelectable);
+            break;
+        case GUM_Widget_Property_Id_isSelectedByDefault:
+            GblVariant_setBool(pValue, pSelf->isSelectedByDefault);
             break;
         case GUM_Widget_Property_Id_color:
             GblVariant_setUint32(pValue, pSelf->r << 24 |

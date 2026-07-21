@@ -61,6 +61,7 @@ GBL_FLAGS(GUM_MOUSE_FLAGS,
 GBL_INSTANCE_DERIVE(GUM_Mouse, GUM_InputDevice)
     GUM_Vector2 position; //!< Current mouse position
     GUM_Vector2 delta;    //!< Delta bewteen last frame's position and the current frame's position
+    GUM_Vector2 wheel;    //!< Scroll wheel delta
 GBL_INSTANCE_END
 
 GblType GUM_Mouse_type(void) GBL_NOEXCEPT;

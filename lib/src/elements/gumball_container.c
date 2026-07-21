@@ -104,6 +104,8 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     float       offset                    = container_mainPos + pSelf->padding + pSelf->margin + roundnessInset;
     float       contentExtent             = container_mainPos; // will hold the farthest edge reached by any child
 
+    float* scrollOffsetMain = isHorizontal ? &pSelf->scrollOffsetX : &pSelf->scrollOffsetY;
+
     GblObject_foreachChild(GBL_OBJECT(pSelf), pChild) {
         GUM_Widget* pChildWidget = GBL_AS(GUM_Widget, pChild);
         if GBL_UNLIKELY(!pChildWidget) continue;
@@ -112,7 +114,6 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
         float* widget_secondaryPos = isHorizontal ? &pChildWidget->y : &pChildWidget->x;
         float* widget_mainDim      = isHorizontal ? &pChildWidget->w : &pChildWidget->h;
         float* widget_secondaryDim = isHorizontal ? &pChildWidget->h : &pChildWidget->w;
-        contentExtent              = GBL_MAX(contentExtent, *widget_mainPos + *widget_mainDim);
 
         if (pSelf->resizeWidgets) {
             *widget_mainDim      = (container_mainDim - totalMargin - totalPaddingWithRoundness) / (float)childCount;
@@ -120,12 +121,14 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
         }
 
         if (pSelf->alignWidgets) {
-            *widget_mainPos = offset;
+            *widget_mainPos = offset - *scrollOffsetMain;
             const float availableSecDim = container_secondaryDim - totalPaddingWithRoundness;
             *widget_secondaryPos        = container_secondaryPos + pSelf->padding + roundnessInset
                                         + (availableSecDim - *widget_secondaryDim) / 2.0f;
             offset += *widget_mainDim + pSelf->margin * 2.0f;
         }
+
+        contentExtent = GBL_MAX(contentExtent, *widget_mainPos + *scrollOffsetMain + *widget_mainDim);
     }
 
     const bool contentOverflows = contentExtent > (container_mainPos + container_mainDim);
@@ -136,6 +139,9 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
         GUM_Rectangle selfRect = { absPos.x, absPos.y, pSelfWidget->w, pSelfWidget->h };
         outgoingClip = GUM_Rectangle_intersect(pSelfWidget->clipRect, selfRect);
     }
+
+    const float maxScroll = contentOverflows ? (contentExtent - container_mainPos - container_mainDim) : 0.0f;
+    *scrollOffsetMain = pSelf->scrollable ? GBL_CLAMP(*scrollOffsetMain, 0.0f, maxScroll) : 0.0f;
 
     GblObject_foreachChild(GBL_OBJECT(pSelf), pChild) {
         GUM_Widget* pChildWidget = GBL_AS(GUM_Widget, pChild);

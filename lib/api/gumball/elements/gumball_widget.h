@@ -97,6 +97,11 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     float              border_radius;            //!< Radius of the border. Range is from 0.0f to 1.0f.                              Default value is 0
     bool               border_highlight;         //!< If the border should be highlighted.                                           Default value is false
     bool               isRelative;               //!< If the widget's position and size should be relative to its parent.            Default value is false
+    bool               isSelectable;             //!< If the widget is visible to the navigation system.                             Default value is false
+    bool               isSelectedByDefault;      //!< If the widget should be selected by default when no other is focused.          Default value is false
+    bool               isInteractive;            //!< If the widget is eligible for input events.                                    Default value is true
+    bool               isActive;                 //!< If the widget can accept input events, and fire signals accordingly.           Default value is false
+    bool               shouldUpdate;             //!< If the widget should be updated.                                               Default value is true
     GblStringRef*      label;                    //!< Optional text label of the widget.                                             Default value is nullptr
     GUM_Font*          font;                     //!< Optional font for the widget's label. If not set, the default font is used.    Default value is nullptr
     GUM_TextAlignment  textAlignment;            //!< Alignment of the widget's label.                                               Default value is GUM_TEXT_ALIGN_CENTER
@@ -112,7 +117,6 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     uint8_t            font_border_a;            //!< Alpha component of the font border color.                                      Default value is 0
     uint8_t            font_border_thickness;    //!< Width of the font border, in pixels.                                           Default value is 1
     uint8_t            z_index;                  //!< Z-index of the widget. The higher the value, the higher the priority.          Default value is 50
-    bool               shouldUpdate;             //!< If the widget should be updated.                                               Default value is true
     uint8_t            focusCount;               //!< Number of input devices currently focusing this widget                         Default value is 0
     GUM_Rectangle      clipRect;                 // TODO: this should be a private variable
 GBL_INSTANCE_END
@@ -127,6 +131,10 @@ GBL_PROPERTIES(GUM_Widget,
     (w,                     GBL_GENERIC, (READ, WRITE),          GBL_FLOAT_TYPE         ),
     (h,                     GBL_GENERIC, (READ, WRITE),          GBL_FLOAT_TYPE         ),
     (isRelative,            GBL_GENERIC, (READ, WRITE),          GBL_BOOL_TYPE          ),
+    (isInteractive,         GBL_GENERIC, (READ, WRITE),          GBL_BOOL_TYPE          ),
+    (isActive,              GBL_GENERIC, (READ, WRITE),          GBL_BOOL_TYPE          ),
+    (isSelectable,          GBL_GENERIC, (READ, WRITE),          GBL_BOOL_TYPE          ),
+    (isSelectedByDefault,   GBL_GENERIC, (READ, WRITE),          GBL_BOOL_TYPE          ),
     (color,                 GBL_GENERIC, (READ, WRITE),          GBL_UINT32_TYPE        ),
     (border_color,          GBL_GENERIC, (READ, WRITE),          GBL_UINT32_TYPE        ),
     (font_color,            GBL_GENERIC, (READ, WRITE),          GBL_UINT32_TYPE        ),
