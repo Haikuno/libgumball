@@ -76,27 +76,24 @@
 //! Also recursively unrefs all of its children.
 #define GUM_unref(obj)                ((GUM_unref)(GBL_OBJECT(obj)))
 
-/*!  Connects an element's (typically a GUM_Button) signal to a callback.
- *   The callback should take in a pointer to the UI element type that emitted the signal, and return void.
- *   Optionally takes in userdata (a void* of whatever you want to pass in).
- *   See GUM_Button for signal names
+/*!  Connects an element's signal to a callback.
+ *   The callback should take in a pointer to the element that emits the signal, and return void.
+ *   Some signals also include a pointer to the emitting input device. (e.g. onPress, onRelease)
+ *   See GUM_Widget for signal names
  *
  *   \code {.c}
- *       void buttonCallback(GUM_Button* pButton) {
- *           void* ud = GUM_userData();
+ *       void buttonCallback(GUM_Widget* pSelf) {
  *           printf("Button pressed!\n");
  *           printf("UserData: %i\n", *(int*)ud);
  *       }
  *
  *       auto pButton = GUM_Button_create();
- *       int data = 42;
- *       GUM_connect(pButton, "onPressPrimary", buttonCallback, &data);
+ *       GUM_connect(pButton, "onPressConfirm", buttonCallback, &data);
  *   \endcode
+ *
+ *   \note You can also pass multiple signals at once, with the pattern: "signalName", callbackFn
 */
-#define GUM_connect(emitter, signal, callback, /* userdata=nullptr */...) (GBL_CONNECT(emitter, signal, emitter, callback __VA_OPT__(,) __VA_ARGS__))
-
-//! Inside a callback connected to a signal, returns the userdata that was passed in
-#define GUM_userData() GblClosure_currentUserdata()
+#define GUM_connect(...) GUM_connect_(__VA_ARGS__)
 
 //! Looks up the property of an element by name, storing its value in the pointer passed as a variadic argument
 #define GUM_property(obj, name, /*value*/ ...) (GblObject_property(GBL_OBJECT(obj), name, __VA_ARGS__))
@@ -108,8 +105,46 @@
 #define GUM_childrenList(child1, /*child2, child3, */ ...) (GblRingList_create(child1 __VA_OPT__(,) __VA_ARGS__))
 
 ////////// Implementation details, Grugs please ignore
-//!\cond
+//!\cond GRUGLESS
 #define GUM_draw_(renderer, ...) (GUM_draw)(renderer)
+
+#define GUM_connect_(emitter, ...) \
+    ({ \
+        typeof(emitter) _gum_emitter_ = (emitter); \
+        GUM_CONNECT_PAIRS_(_gum_emitter_, __VA_ARGS__) \
+        _gum_emitter_; \
+    })
+#define GUM_CONNECT_PAIRS_(emitter, ...) \
+    GBL_GLUE(GUM_CONNECT_PAIRS__, GBL_NARG(__VA_ARGS__))(emitter, __VA_ARGS__)
+#define GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GBL_CONNECT(emitter, signal, callback);
+#define GUM_CONNECT_PAIRS__4(emitter, signal, callback, ...) \
+    GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GUM_CONNECT_PAIRS__2(emitter, __VA_ARGS__)
+#define GUM_CONNECT_PAIRS__6(emitter, signal, callback, ...) \
+    GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GUM_CONNECT_PAIRS__4(emitter, __VA_ARGS__)
+#define GUM_CONNECT_PAIRS__8(emitter, signal, callback, ...) \
+    GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GUM_CONNECT_PAIRS__6(emitter, __VA_ARGS__)
+#define GUM_CONNECT_PAIRS__10(emitter, signal, callback, ...) \
+    GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GUM_CONNECT_PAIRS__8(emitter, __VA_ARGS__)
+#define GUM_CONNECT_PAIRS__12(emitter, signal, callback, ...) \
+    GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GUM_CONNECT_PAIRS__10(emitter, __VA_ARGS__)
+#define GUM_CONNECT_PAIRS__14(emitter, signal, callback, ...) \
+    GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GUM_CONNECT_PAIRS__12(emitter, __VA_ARGS__)
+#define GUM_CONNECT_PAIRS__16(emitter, signal, callback, ...) \
+    GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GUM_CONNECT_PAIRS__14(emitter, __VA_ARGS__)
+#define GUM_CONNECT_PAIRS__18(emitter, signal, callback, ...) \
+    GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GUM_CONNECT_PAIRS__16(emitter, __VA_ARGS__)
+#define GUM_CONNECT_PAIRS__20(emitter, signal, callback, ...) \
+    GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
+    GUM_CONNECT_PAIRS__18(emitter, __VA_ARGS__)
 
 GBL_EXPORT GBL_RESULT (GUM_draw)              (GUM_Renderer* pRenderer) GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT (GUM_update)            (void)                    GBL_NOEXCEPT;

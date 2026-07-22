@@ -23,55 +23,68 @@ static GblBool GUM_Nav_isContainerType_(const GblObject* pObj, void* pClosure) {
     return GBL_TYPECHECK(GUM_Container, pObj);
 }
 
-///////// hierarchy-aware search /////////
+static GblBool GUM_Nav_isSelectable_(const GblObject* pObj, void* pClosure) {
+    GBL_UNUSED(pClosure);
+    return GBL_TYPECHECK(GUM_Widget, pObj) && GUM_WIDGET(pObj)->isSelectable;
+}
 
-static GUM_Widget* GUM_Nav_findSelectableSibling_(GblObject* pObj, bool next) {
-    GblObject* pSibling = next ? GblObject_siblingNextByCmpFn(pObj, GUM_Nav_isWidgetType_, nullptr)
-                               : GblObject_siblingPreviousByCmpFn(pObj, GUM_Nav_isWidgetType_, nullptr);
+///////// hierarchy-aware search /////////
+static GblObject* GUM_Nav_siblingStep_(GblObject* pObj, GblObjectCmpFn cmpFn, bool isForwards) {
+    return isForwards ? GblObject_siblingNextByCmpFn(pObj, cmpFn, nullptr)
+                      : GblObject_siblingPreviousByCmpFn(pObj, cmpFn, nullptr);
+}
+
+static GUM_Widget* GUM_Nav_findSelectableSibling_(GblObject* pObj, bool isForwards) {
+    GblObject* pSibling = GUM_Nav_siblingStep_(pObj, GUM_Nav_isWidgetType_, isForwards);
+
     while (pSibling) {
         GUM_Widget* pWidget = GUM_Nav_asSelectable_(pSibling);
         if (pWidget) return pWidget;
 
-        pSibling = next ? GblObject_siblingNextByCmpFn(pSibling, GUM_Nav_isWidgetType_, nullptr)
-                        : GblObject_siblingPreviousByCmpFn(pSibling, GUM_Nav_isWidgetType_, nullptr);
+        pSibling = GUM_Nav_siblingStep_(pSibling, GUM_Nav_isWidgetType_, isForwards);
     }
     return nullptr;
 }
 
-static GUM_Widget* GUM_Nav_findSelectableInContainer_(GblObject* pContainer, size_t preferredIndex, bool next) {
+static GUM_Widget* GUM_Nav_findSelectableInContainer_(GblObject* pContainer, size_t preferredIndex, bool isForwards) {
+    GUM_Widget* pWidget = nullptr;
     if (preferredIndex != GBL_INDEX_INVALID) {
-        GUM_Widget* pWidget = GUM_Nav_asSelectable_(GblObject_findChildByIndex(pContainer, preferredIndex));
+        pWidget = GUM_Nav_asSelectable_(GblObject_findChildByIndex(pContainer, preferredIndex));
         if (pWidget) return pWidget;
     }
 
-    if (next) {
+    if (isForwards) {
         GblObject_foreachChild(pContainer, pChild) {
-            GUM_Widget* pWidget = GUM_Nav_asSelectable_(pChild);
+            pWidget = GUM_Nav_asSelectable_(pChild);
             if (pWidget) return pWidget;
         }
     } else {
         GblObject_foreachChildReverse(pContainer, pChild) {
-            GUM_Widget* pWidget = GUM_Nav_asSelectable_(pChild);
+            pWidget = GUM_Nav_asSelectable_(pChild);
             if (pWidget) return pWidget;
         }
     }
 
-    return nullptr;
+    // descendant fallback
+    if(!pWidget) {
+        GblObject* pObj = GblObject_findDescendantByCmpFn(pContainer, GUM_Nav_isSelectable_, nullptr);
+        if (pObj) pWidget = GUM_WIDGET(pObj);
+    }
+
+    return pWidget;
 }
 
-static GblObject* GUM_Nav_findSiblingContainerWithSelectable_(GblObject* pContainer, bool next) {
-    GblObject* pSiblingContainer = next ? GblObject_siblingNextByCmpFn(pContainer, GUM_Nav_isContainerType_, nullptr)
-                                        : GblObject_siblingPreviousByCmpFn(pContainer, GUM_Nav_isContainerType_, nullptr);
+static GblObject* GUM_Nav_findSiblingContainerWithSelectable_(GblObject* pContainer, bool isForwards) {
+    GblObject* pSiblingContainer = GUM_Nav_siblingStep_(pContainer, GUM_Nav_isContainerType_, isForwards);
 
     while (pSiblingContainer) {
-        GblObject* pWidgetObj = GblObject_findChildByCmpFn(pSiblingContainer, GUM_Nav_isWidgetType_, nullptr);
-
-        if (pWidgetObj && GUM_Nav_asSelectable_(pWidgetObj))
+        GUM_Widget* pWidget = GUM_Nav_findSelectableInContainer_(pSiblingContainer, GBL_INDEX_INVALID, isForwards);
+        if (pWidget)
             return pSiblingContainer;
 
-        pSiblingContainer = next ? GblObject_siblingNextByCmpFn(pContainer, GUM_Nav_isContainerType_, nullptr)
-                                 : GblObject_siblingPreviousByCmpFn(pContainer, GUM_Nav_isContainerType_, nullptr);
+        pSiblingContainer = GUM_Nav_siblingStep_(pSiblingContainer, GUM_Nav_isContainerType_, isForwards);
     }
+
     return nullptr;
 }
 
@@ -84,7 +97,7 @@ static GUM_Vector2 GUM_Nav_closestPointInRect_(GUM_Vector2 startCenter, GUM_Rect
     float max_y = targetRect.y + targetRect.height;
 
     return (GUM_Vector2){ .x = GBL_CLAMP(startCenter.x, min_x, max_x),
-                           .y = GBL_CLAMP(startCenter.y, min_y, max_y) };
+                          .y = GBL_CLAMP(startCenter.y, min_y, max_y) };
 }
 
 static GUM_Widget* GUM_Nav_findSelectableByPosition_(GUM_Widget* pCurrent, GUM_InputAction direction) {
@@ -152,45 +165,44 @@ static GUM_Widget* GUM_Nav_moveCursor_(GblObject* pSelf, GUM_InputAction directi
     if (!pParent || !GBL_TYPECHECK(GUM_Container, pParent))
         return nullptr;
 
-    const char parent_orientation       = tolower(GUM_CONTAINER(pParent)->orientation);
-    GblObject* pGrandParent             = GblObject_parent(pParent);
-    const char grand_parent_orientation = (pGrandParent && GBL_TYPECHECK(GUM_Container, pGrandParent))
-                                              ? tolower(GUM_CONTAINER(pGrandParent)->orientation)
-                                              : 'N';
+    GUM_Direction parent_direction           = GUM_CONTAINER(pParent)->direction;
+    GblObject* pGrandParent                  = GblObject_parent(pParent);
+    GUM_Direction grand_parent_direction     = (pGrandParent && GBL_TYPECHECK(GUM_Container, pGrandParent)) ?
+                                                GUM_CONTAINER(pGrandParent)->direction : GUM_DIRECTION_NULL;
 
-    const char axis  = (direction == GUM_INPUTACTION_MOVE_LEFT  ||
-                        direction == GUM_INPUTACTION_MOVE_RIGHT) ? 'h' : 'v';
-    const bool next  = (direction == GUM_INPUTACTION_MOVE_RIGHT ||
-                        direction == GUM_INPUTACTION_MOVE_DOWN);
+    GUM_Direction axis    = (direction == GUM_INPUTACTION_MOVE_LEFT  || direction == GUM_INPUTACTION_MOVE_RIGHT) ?
+                             GUM_DIRECTION_HORIZONTAL : GUM_DIRECTION_VERTICAL;
+    const bool isForwards = (direction == GUM_INPUTACTION_MOVE_RIGHT ||
+                            direction == GUM_INPUTACTION_MOVE_DOWN);
 
-    if (axis != parent_orientation && axis != grand_parent_orientation)
+    if (axis != parent_direction && axis != grand_parent_direction)
         return nullptr;
 
     size_t childIndex = GblObject_childIndex(pSelf);
 
     // Intra-container movement, if the axis matches this container's orientation
-    if (axis == parent_orientation) {
-        GUM_Widget* pSibling = GUM_Nav_findSelectableSibling_(pSelf, next);
+    if (axis == parent_direction) {
+        GUM_Widget* pSibling = GUM_Nav_findSelectableSibling_(pSelf, isForwards);
         if (pSibling) return pSibling;
     }
 
     // Inter-container movement
-    GblObject* pNewContainer = nullptr;
+    GblObject* pNewContainerObj = nullptr;
 
-    if (axis == grand_parent_orientation)
-        pNewContainer = GUM_Nav_findSiblingContainerWithSelectable_(pParent, next);
+    if (axis == grand_parent_direction)
+        pNewContainerObj = GUM_Nav_findSiblingContainerWithSelectable_(pParent, isForwards);
 
-    if (!pNewContainer)
+    // Spatial search fallback
+    if (!pNewContainerObj)
         return GUM_Nav_findSelectableByPosition_(GUM_WIDGET(pSelf), direction);
 
-    char   new_orientation = tolower(GUM_CONTAINER(pNewContainer)->orientation);
-    size_t preferredIndex  = (new_orientation == parent_orientation &&
-                              parent_orientation != grand_parent_orientation &&
-                              GblObject_childCount(pNewContainer) > childIndex)
-                                 ? childIndex
-                                 : GBL_INDEX_INVALID;
+    GUM_Direction new_direction = GUM_CONTAINER(pNewContainerObj)->direction;
+    size_t preferredIndex       = (new_direction    == parent_direction       &&
+                                   parent_direction != grand_parent_direction &&
+                                   GblObject_childCount(pNewContainerObj) > childIndex) ?
+                                   childIndex : GBL_INDEX_INVALID;
 
-    return GUM_Nav_findSelectableInContainer_(pNewContainer, preferredIndex, next);
+    return GUM_Nav_findSelectableInContainer_(pNewContainerObj, preferredIndex, isForwards);
 }
 
 static GUM_Widget* GUM_Nav_findSelectableDescendant_(GblObject* pSelf, bool filterByDefault) {
@@ -267,63 +279,63 @@ void GUM_Nav_move(GUM_InputDevice* pDevice, GUM_InputAction direction) {
     }
 
     GUM_Widget* pNext = GUM_Nav_moveCursor_(GBL_OBJECT(pDevice->pFocusedWidget), direction);
-    if (pNext) {
-        GUM_Nav_focus(pDevice, GUM_WIDGET(pNext));
+    if (!pNext) return;
 
-        GblObject* pChildOnPath = GBL_OBJECT(pNext);
-        GblObject* pAncestor    = GblObject_parent(pChildOnPath);
+    GUM_Nav_focus(pDevice, GUM_WIDGET(pNext));
 
-        while (pAncestor && GBL_TYPEOF(pAncestor) != GUM_ROOT_TYPE) {
-            GUM_Container* pContainer = GUM_CONTAINER(pAncestor);
+    GblObject* pChildOnPath = GBL_OBJECT(pNext);
+    GblObject* pAncestor    = GblObject_parent(pChildOnPath);
 
-            if (pContainer->scrollable) {
-                const GUM_Vector2 nextAbsPos = GUM_get_absolute_position_(pNext);
-                const GUM_Rectangle pNextRec = (GUM_Rectangle){ nextAbsPos.x, nextAbsPos.y,
-                                                                    pNext->w, pNext->h };
+    while (pAncestor && GBL_TYPEOF(pAncestor) != GUM_ROOT_TYPE) {
+        GUM_Container* pContainer = GUM_CONTAINER(pAncestor);
 
-                const GUM_Vector2 contAbsPos = GUM_get_absolute_position_(GUM_WIDGET(pContainer));
-                const GUM_Rectangle contRec  = (GUM_Rectangle){ contAbsPos.x, contAbsPos.y,
-                                                                    GUM_WIDGET(pContainer)->w,
-                                                                    GUM_WIDGET(pContainer)->h };
+        if (pContainer->scrollable) {
+            const GUM_Vector2 nextAbsPos = GUM_get_absolute_position_(pNext);
+            const GUM_Rectangle pNextRec = (GUM_Rectangle){ nextAbsPos.x, nextAbsPos.y,
+                                                                pNext->w, pNext->h };
 
-                const GUM_Rectangle overlap = GUM_Rectangle_intersect(contRec, pNextRec);
-                const bool isFullyVisible   =   overlap.x      == pNextRec.x     &&
-                                                overlap.y      == pNextRec.y     &&
-                                                overlap.width  == pNextRec.width &&
-                                                overlap.height == pNextRec.height;
+            const GUM_Vector2 contAbsPos = GUM_get_absolute_position_(GUM_WIDGET(pContainer));
+            const GUM_Rectangle contRec  = (GUM_Rectangle){ contAbsPos.x, contAbsPos.y,
+                                                                GUM_WIDGET(pContainer)->w,
+                                                                GUM_WIDGET(pContainer)->h };
 
-                if (!isFullyVisible) {
-                    const float clippedTop        = overlap.y - pNextRec.y;
-                    const float clippedBottom     = (pNextRec.y + pNextRec.height) - (overlap.y + overlap.height);
-                    const float clippedLeft       = overlap.x - pNextRec.x;
-                    const float clippedRight      = (pNextRec.x + pNextRec.width) - (overlap.x + overlap.width);
-                    const bool isFirstInContainer = !GblObject_siblingPreviousByCmpFn(pChildOnPath, GUM_Nav_isWidgetType_, nullptr);
+            const GUM_Rectangle overlap = GUM_Rectangle_intersect(contRec, pNextRec);
+            const bool isFullyVisible   =   overlap.x      == pNextRec.x     &&
+                                            overlap.y      == pNextRec.y     &&
+                                            overlap.width  == pNextRec.width &&
+                                            overlap.height == pNextRec.height;
 
-                    const float margin = pContainer->margin * 2;
+            if (!isFullyVisible) {
+                const float clippedTop        = overlap.y - pNextRec.y;
+                const float clippedBottom     = (pNextRec.y + pNextRec.height) - (overlap.y + overlap.height);
+                const float clippedLeft       = overlap.x - pNextRec.x;
+                const float clippedRight      = (pNextRec.x + pNextRec.width) - (overlap.x + overlap.width);
+                const bool isFirstInContainer = !GblObject_siblingPreviousByCmpFn(pChildOnPath, GUM_Nav_isWidgetType_, nullptr);
 
-                    switch (direction) {
-                    case GUM_INPUTACTION_MOVE_UP:
-                        pContainer->scrollOffsetTargetY = isFirstInContainer ? 0 :
-                                                          pContainer->scrollOffsetTargetY - (clippedTop + margin);
-                        break;
-                    case GUM_INPUTACTION_MOVE_DOWN:
-                        pContainer->scrollOffsetTargetY += clippedBottom + margin;
-                        break;
-                    case GUM_INPUTACTION_MOVE_LEFT:
-                        pContainer->scrollOffsetTargetX = isFirstInContainer ? 0 :
-                                                          pContainer->scrollOffsetTargetX - (clippedLeft + margin);
-                        break;
-                    case GUM_INPUTACTION_MOVE_RIGHT:
-                        pContainer->scrollOffsetTargetX += clippedRight + margin;
-                        break;
-                    }
+                const float margin = pContainer->margin * 2;
 
-                    GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
+                switch (direction) {
+                case GUM_INPUTACTION_MOVE_UP:
+                    pContainer->scrollOffsetTargetY = isFirstInContainer ? 0 :
+                                                      pContainer->scrollOffsetTargetY - (clippedTop + margin);
+                    break;
+                case GUM_INPUTACTION_MOVE_DOWN:
+                    pContainer->scrollOffsetTargetY += clippedBottom + margin;
+                    break;
+                case GUM_INPUTACTION_MOVE_LEFT:
+                    pContainer->scrollOffsetTargetX = isFirstInContainer ? 0 :
+                                                      pContainer->scrollOffsetTargetX - (clippedLeft + margin);
+                    break;
+                case GUM_INPUTACTION_MOVE_RIGHT:
+                    pContainer->scrollOffsetTargetX += clippedRight + margin;
+                    break;
                 }
-            }
 
-            pChildOnPath = pAncestor;
-            pAncestor    = GblObject_parent(pAncestor);
+                GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
+            }
         }
+
+        pChildOnPath = pAncestor;
+        pAncestor    = GblObject_parent(pAncestor);
     }
 }

@@ -7,8 +7,7 @@
 #include <gumball/gumball_events.h>
 #include <gumball/gumball_types.h>
 
-// TODO: this is REEST, fuck raylib
-#define GUM_MAX_GAMEPADS 16
+constexpr int GUM_MAX_GAMEPADS = 16;
 
 static GUM_Mouse*    pMouse_                       = nullptr;
 static GUM_Widget*   pHoveredWidget_               = nullptr; // different to pMouse_'s pFocusedWidget, this doesn't need to be selectable.
@@ -121,6 +120,7 @@ void GUM_InputSystem_drawFocusRings(GUM_Renderer* pRenderer) {
     GUM_InputDevice* devices[2 + GUM_MAX_GAMEPADS]; // Mouse, keyboard and all gamepads.
     size_t           deviceCount = GUM_InputSystem_liveDevices_(devices, GBL_COUNT_OF(devices));
 
+    // TODO: a way to set these
     const float thickness = 3.0f;
     const float gap       = 1.0f;
 
@@ -150,7 +150,45 @@ void GUM_InputSystem_drawFocusRings(GUM_Renderer* pRenderer) {
     }
 }
 
-///////// MOUSE /////////
+typedef void (*GUM_InputSystem_ButtonDispatchFn_)(void* pContext, GblFlags button, GUM_InputState state);
+
+static void GUM_InputSystem_dispatchButton_(GUM_InputDevice* pDevice, void* pContext,
+                                            GUM_InputSystem_ButtonDispatchFn_ pFnDispatch) {
+    GblFlags pressed  = pDevice->buttons     & ~pDevice->buttonsPrev;
+    GblFlags released = pDevice->buttonsPrev & ~pDevice->buttons;
+    GblFlags changed  = pressed | released;
+
+    while (changed) {
+        GblFlags bit = changed & (~changed + 1);
+        changed &= ~bit;
+
+        pFnDispatch(pContext, bit, (pressed & bit) ? GUM_INPUTSTATE_PRESS : GUM_INPUTSTATE_RELEASE);
+    }
+
+    pDevice->buttonsPrev = pDevice->buttons;
+}
+
+static void GUM_InputSystem_NavDevice_dispatchEvent_(GUM_InputDevice* pDevice, GblType deviceType,
+                                                     GblType eventType, GblFlags button, GUM_InputState state) {
+    GUM_Event_Input* pEvent = GUM_EVENT_INPUT(GblEvent_create(eventType));
+    pEvent->button       = button;
+    pEvent->state        = state;
+    pEvent->action       = GUM_InputSystem_actionFor_(deviceType, button);
+    pEvent->pInputDevice = pDevice;
+
+    if (pDevice->pFocusedWidget)
+        GblObject_notifyEvent(GBL_OBJECT(pDevice->pFocusedWidget), GBL_EVENT(pEvent));
+
+    if (state == GUM_INPUTSTATE_PRESS &&
+        pEvent->action >= GUM_INPUTACTION_MOVE_UP && pEvent->action <= GUM_INPUTACTION_MOVE_RIGHT) {
+        GUM_Nav_move(pDevice, pEvent->action);
+    }
+
+
+    GBL_UNREF(pEvent);
+}
+
+// ---------------------------------- Mouse ---------------------------------- //
 
 static void GUM_InputSystem_Mouse_hitTest_(void) {
     // using drawQueue because it's already Z-sorted
@@ -173,18 +211,19 @@ static void GUM_InputSystem_Mouse_hitTest_(void) {
             mousePos.x <  widgetPos.x + widgetSize.x &&
             mousePos.y >= widgetPos.y &&
             mousePos.y <  widgetPos.y + widgetSize.y) {
-            if (pWidget->isSelectable) {
-                GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), pWidget);
-                break;
-            }
             pHoveredWidget_ = pWidget;
-            GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), nullptr);
+            if (pWidget->isSelectable)
+                GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), pWidget);
+            else
+                GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), nullptr);
             break;
         }
     }
 }
 
-static void GUM_InputSystem_Mouse_dispatchEvent_(GblFlags button, GUM_InputState state) {
+static void GUM_InputSystem_Mouse_dispatchEvent_(void* pContext, GblFlags button, GUM_InputState state) {
+    GBL_UNUSED(pContext);
+
     GUM_Event_Mouse* pEvent = GUM_Event_Mouse_create();
     GUM_EVENT_INPUT(pEvent)->button       = button;
     GUM_EVENT_INPUT(pEvent)->state        = state;
@@ -199,9 +238,6 @@ static void GUM_InputSystem_Mouse_dispatchEvent_(GblFlags button, GUM_InputState
 
 static void GUM_InputSystem_Mouse_update_(void) {
     GUM_Backend_Mouse_update(pMouse_);
-    GblFlags    pressed        = GUM_INPUTDEVICE(pMouse_)->buttons     & ~GUM_INPUTDEVICE(pMouse_)->buttonsPrev;
-    GblFlags    released       = GUM_INPUTDEVICE(pMouse_)->buttonsPrev & ~GUM_INPUTDEVICE(pMouse_)->buttons;
-    GblFlags    changed        = pressed | released;
     GUM_InputSystem_Mouse_hitTest_();
 
     // scrolling
@@ -211,10 +247,10 @@ static void GUM_InputSystem_Mouse_update_(void) {
             GUM_Container* pContainer = GUM_CONTAINER(pAncestor);
             if (!pContainer->scrollable) continue;
 
-            const bool isHorizontal = pContainer->orientation == 'h' || pContainer->orientation == 'H';
+            const bool isHorizontal = pContainer->direction == GUM_DIRECTION_HORIZONTAL;
             float delta = (isHorizontal ? pMouse_->wheel.x : pMouse_->wheel.y) * -70.0f; // TODO: tune scroll speed
-            if (isHorizontal) pContainer->scrollOffsetTargetX = GBL_MAX(pContainer->scrollOffsetTargetX + delta, 0);
-            else              pContainer->scrollOffsetTargetY = GBL_MAX(pContainer->scrollOffsetTargetY + delta, 0);
+            if (isHorizontal) pContainer->scrollOffsetTargetX = GBL_CLAMP(pContainer->scrollOffsetTargetX + delta, 0, GUM_WIDGET(pContainer)->w);
+            else              pContainer->scrollOffsetTargetY = GBL_CLAMP(pContainer->scrollOffsetTargetY + delta, 0, GUM_WIDGET(pContainer)->h);
 
             if (delta) {
                 GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer); // re-layout + re-clamp
@@ -223,17 +259,10 @@ static void GUM_InputSystem_Mouse_update_(void) {
         }
     }
 
-    while (changed) {
-        GblFlags bit = changed & (~changed + 1); // isolate lowest set bit
-        changed &= ~bit;                         // clear it for next iteration
-
-        GUM_InputSystem_Mouse_dispatchEvent_(bit, (pressed & bit) ? GUM_INPUTSTATE_PRESS : GUM_INPUTSTATE_RELEASE);
-    }
-
-    GUM_INPUTDEVICE(pMouse_)->buttonsPrev = GUM_INPUTDEVICE(pMouse_)->buttons;
+    GUM_InputSystem_dispatchButton_(GUM_INPUTDEVICE(pMouse_), nullptr, GUM_InputSystem_Mouse_dispatchEvent_);
 }
 
-///////// GAMEPAD /////////
+// ---------------------------------- Gamepad ---------------------------------- //
 
 static bool GUM_InputSystem_Gamepad_isNameValid(const char* pName) {
     if (!pName || pName[0] == '\0' || strcmp(pName, "UNKNOWN") == 0)
@@ -255,25 +284,10 @@ static bool GUM_InputSystem_Gamepad_isNameValid(const char* pName) {
     return true;
 }
 
-static void GUM_InputSystem_Gamepad_dispatchEvent_(GUM_Gamepad* pGamepad, GblFlags button, GUM_InputState state) {
-    GUM_Event_Gamepad* pEvent = GUM_Event_Gamepad_create();
-    GUM_EVENT_INPUT(pEvent)->button       = button;
-    GUM_EVENT_INPUT(pEvent)->state        = state;
-    GUM_EVENT_INPUT(pEvent)->action       = GUM_InputSystem_actionFor_(GUM_GAMEPAD_TYPE, button);
-    GUM_EVENT_INPUT(pEvent)->pInputDevice = GUM_INPUTDEVICE(pGamepad);
-
-    GUM_InputAction action = GUM_EVENT_INPUT(pEvent)->action;
-
-    if (state == GUM_INPUTSTATE_PRESS &&
-        action >= GUM_INPUTACTION_MOVE_UP && action <= GUM_INPUTACTION_MOVE_RIGHT) {
-        GUM_Nav_move(GUM_INPUTDEVICE(pGamepad), action);
-    }
-
-    GUM_Widget* pTarget = GUM_INPUTDEVICE(pGamepad)->pFocusedWidget;
-    if (pTarget)
-        GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
-
-    GBL_UNREF(pEvent);
+static void GUM_InputSystem_Gamepad_dispatchEvent_(void* pContext, GblFlags button, GUM_InputState state) {
+    GUM_Gamepad* pGamepad = (GUM_Gamepad*)pContext;
+    GUM_InputSystem_NavDevice_dispatchEvent_(GUM_INPUTDEVICE(pGamepad), GUM_GAMEPAD_TYPE,
+                                              GUM_EVENT_GAMEPAD_TYPE, button, state);
 }
 
 static void GUM_InputSystem_Gamepad_update_(void) {
@@ -316,62 +330,21 @@ static void GUM_InputSystem_Gamepad_update_(void) {
 
 
         GUM_Backend_Gamepad_update(pGamepad);
-
-        GblFlags pressed  = GUM_INPUTDEVICE(pGamepad)->buttons     & ~GUM_INPUTDEVICE(pGamepad)->buttonsPrev;
-        GblFlags released = GUM_INPUTDEVICE(pGamepad)->buttonsPrev & ~GUM_INPUTDEVICE(pGamepad)->buttons;
-        GblFlags changed  = pressed | released;
-
-        while (changed) {
-            GblFlags bit = changed & (~changed + 1);
-            changed &= ~bit;
-
-            GUM_InputSystem_Gamepad_dispatchEvent_(pGamepad, bit,
-                (pressed & bit) ? GUM_INPUTSTATE_PRESS : GUM_INPUTSTATE_RELEASE);
-        }
-
-        GUM_INPUTDEVICE(pGamepad)->buttonsPrev = GUM_INPUTDEVICE(pGamepad)->buttons;
+        GUM_InputSystem_dispatchButton_(GUM_INPUTDEVICE(pGamepad), pGamepad, GUM_InputSystem_Gamepad_dispatchEvent_);
     }
 }
 
-///////// KEYBOARD /////////
+// ---------------------------------- Keyboard ---------------------------------- //
 
-static void GUM_InputSystem_Keyboard_dispatchEvent_(GblFlags button, GUM_InputState state) {
-    GUM_Event_Key* pEvent = GUM_Event_Key_create();
-    GUM_EVENT_INPUT(pEvent)->button       = button;
-    GUM_EVENT_INPUT(pEvent)->state        = state;
-    GUM_EVENT_INPUT(pEvent)->action       = GUM_InputSystem_actionFor_(GUM_KEYBOARD_TYPE, button);
-    GUM_EVENT_INPUT(pEvent)->pInputDevice = GUM_INPUTDEVICE(pKeyboard_);
-
-    GUM_InputAction action = GUM_EVENT_INPUT(pEvent)->action;
-
-    if (state == GUM_INPUTSTATE_PRESS &&
-        action >= GUM_INPUTACTION_MOVE_UP && action <= GUM_INPUTACTION_MOVE_RIGHT) {
-        GUM_Nav_move(GUM_INPUTDEVICE(pKeyboard_), action);
-    }
-
-    GUM_Widget* pTarget = GUM_INPUTDEVICE(pKeyboard_)->pFocusedWidget;
-    if (pTarget)
-        GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
-
-
-    GBL_UNREF(pEvent);
+static void GUM_InputSystem_Keyboard_dispatchEvent_(void* pContext, GblFlags button, GUM_InputState state) {
+    GBL_UNUSED(pContext);
+    GUM_InputSystem_NavDevice_dispatchEvent_(GUM_INPUTDEVICE(pKeyboard_), GUM_KEYBOARD_TYPE,
+                                              GUM_EVENT_KEY_TYPE, button, state);
 }
 
 static void GUM_InputSystem_Keyboard_update_(void) {
     GUM_Backend_Keyboard_update(pKeyboard_);
-
-    GblFlags pressed  = GUM_INPUTDEVICE(pKeyboard_)->buttons     & ~GUM_INPUTDEVICE(pKeyboard_)->buttonsPrev;
-    GblFlags released = GUM_INPUTDEVICE(pKeyboard_)->buttonsPrev & ~GUM_INPUTDEVICE(pKeyboard_)->buttons;
-    GblFlags changed  = pressed | released;
-
-    while (changed) {
-        GblFlags bit = changed & (~changed + 1);
-        changed &= ~bit;
-
-        GUM_InputSystem_Keyboard_dispatchEvent_(bit, (pressed & bit) ? GUM_INPUTSTATE_PRESS : GUM_INPUTSTATE_RELEASE);
-    }
-
-    GUM_INPUTDEVICE(pKeyboard_)->buttonsPrev = GUM_INPUTDEVICE(pKeyboard_)->buttons;
+    GUM_InputSystem_dispatchButton_(GUM_INPUTDEVICE(pKeyboard_), nullptr, GUM_InputSystem_Keyboard_dispatchEvent_);
 }
 
 

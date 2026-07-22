@@ -54,7 +54,7 @@ static GBL_RESULT GUM_ObjectViewer_update_(GUM_Widget* pSelf) {
     GblObject_foreachChild(GBL_OBJECT(pSelf), pChild)
         GUM_unref(pChild);
 
-    GUM_Container_create("color", 255,   "parent", pSelf, "orientation", 'h',
+    GUM_Container_create("color", 255,   "parent", pSelf, "direction", GUM_DIRECTION_HORIZONTAL,
                          "margin", 2.0f, "padding", 0.0f, "children",
         GUM_childrenList(
             GUM_Widget_create("font_size", 15, "color", 0xB0B0B0FF, "label", "Type"),
@@ -75,7 +75,7 @@ static GBL_RESULT GUM_ObjectViewer_update_(GUM_Widget* pSelf) {
         if (!GblVariant_canConvert(GblVariant_typeOf(&value), GBL_STRING_TYPE))
             continue;
 
-        GUM_Container_create("color", 255,   "parent", pSelf, "orientation", 'h',
+        GUM_Container_create("color", 255,   "parent", pSelf, "direction", GUM_DIRECTION_HORIZONTAL,
                              "margin", 2.0f, "padding", 0.0f, "children",
             GUM_childrenList(
                 GUM_Button_create("font_size", 15, "color", 0xB0B0B0FF, "label",        GblVariant_typeName(&value)),
@@ -91,7 +91,7 @@ static GBL_RESULT GUM_ObjectViewer_update_(GUM_Widget* pSelf) {
 
     GUM_CONTAINER_CLASSOF(pSelf)->pFnUpdateContent(GUM_CONTAINER(pSelf));
 
-    // pSelf->shouldUpdate = false;
+    pSelf->shouldUpdate = false;
 
     return GBL_RESULT_SUCCESS;
 }

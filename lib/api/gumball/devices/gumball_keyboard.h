@@ -58,7 +58,7 @@ GBL_FLAGS(GUM_KEYBOARD_FLAGS,
 /*!
  *    \class   GUM_Keyboard
  *    \extends GUM_InputDevice
- *    \brief   The system keyboard
+ *    \brief   The system keyboardG
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Keyboard, GUM_InputDevice)
 

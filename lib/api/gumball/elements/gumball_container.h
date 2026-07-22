@@ -12,8 +12,6 @@
  *
  *   \todo
  *       - Make variables private
- *       - Make orientation an enum
- *       - Add scrolling
  *
  *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
@@ -49,6 +47,12 @@ GBL_CLASS_DERIVE(GUM_Container, GUM_Widget)
     GBL_RESULT (*pFnUpdateContent)(GBL_SELF); //!< Updates the content of the container, resizing and realigning child widgets as needed.
 GBL_CLASS_END
 
+GBL_ENUM(GUM_Direction,
+    (GUM_DIRECTION_NULL,       "GUM_orient_n", 0),
+    (GUM_DIRECTION_VERTICAL,   "GUM_orient_v", 1),
+    (GUM_DIRECTION_HORIZONTAL, "GUM_orient_h", 2)
+)
+
 /*!  \class   GUM_Container
  *   \extends GUM_Widget
  *   \brief   Container element
@@ -60,14 +64,14 @@ GBL_CLASS_END
  *  @{
 */
 GBL_INSTANCE_DERIVE(GUM_Container, GUM_Widget)
-    float padding;          //!< The space between the container's border and its child widgets.                        Default value is 5
-    float margin;           //!< The space between child widgets.                                                       Default value is 5
-    float minChildSize;     /*!  The minimum amount of space a child widget should take,
-                                 in percentage of the container's size.                                                 Default value is 0.15 (15%) */
-    char orientation;       //!< 'h' for horizontal, 'v' for vertical layout of child widgets.                          Default value is 'v'    \warning This is planned to be replaced by an enum.
-    bool resizeWidgets;     //!< If child widgets should be resized to take an equal amount of space.                   Default value is true
-    bool alignWidgets;      //!< If child widgets should be aligned.                                                    Default value is true
-    bool scrollable;        //!< If the container should become scrollable when its content is bigger than itself       Default value is true
+    float padding;                //!< The space between the container's border and its child widgets.                        Default value is 5
+    float margin;                 //!< The space between child widgets.                                                       Default value is 5
+    float minChildSize;           /*!  The minimum amount of space a child widget should take,
+                                       in percentage of the container's size.                                                 Default value is 0.15 (15%) */
+    GUM_Direction direction;      //!< Direction in which child widgets are layed out.                                        Default value is vertical
+    bool resizeWidgets;           //!< If child widgets should be resized to take an equal amount of space.                   Default value is true
+    bool alignWidgets;            //!< If child widgets should be aligned.                                                    Default value is true
+    bool scrollable;              //!< If the container should become scrollable when its content is bigger than itself       Default value is true
 
     // TODO: private!
     float scrollOffsetX;        // Current horizontal scroll offset
@@ -78,13 +82,13 @@ GBL_INSTANCE_END
 //! @}
 
 GBL_PROPERTIES(GUM_Container,
-    (padding,           GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE),
-    (margin,            GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE),
-    (minChildSize,      GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE),
-    (orientation,       GBL_GENERIC, (READ, WRITE), GBL_CHAR_TYPE ),
-    (resizeWidgets,     GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE ),
-    (alignWidgets,      GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE ),
-    (scrollable,        GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE )
+    (padding,           GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE           ),
+    (margin,            GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE           ),
+    (minChildSize,      GBL_GENERIC, (READ, WRITE), GBL_FLOAT_TYPE           ),
+    (direction,         GBL_GENERIC, (READ, WRITE), GBL_TYPEID(GUM_Direction)),
+    (resizeWidgets,     GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE            ),
+    (alignWidgets,      GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE            ),
+    (scrollable,        GBL_GENERIC, (READ, WRITE), GBL_BOOL_TYPE            )
 )
 
 GblType GUM_Container_type(void) GBL_NOEXCEPT;

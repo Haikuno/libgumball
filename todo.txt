@@ -1,11 +1,11 @@
-(A) New input|event system @input @events
 (B) Finish documenting all TODOs left in header files @documentation
 (B) Tree widget @widgets
 (B) Table widget @widgets
 (B) Object Viewer widget @widgets
+(C) Widget lifecycle events @widgets @events
+(C) Holding shift to scroll horizontally with the mouse @controls
 (D) Tidy header files up @documentation @formatting
 (D) Tidy source files up @formatting
-(C) Widget lifecycle events @widgets @events
 (D) Controller/Keyboard button movement override @controls
 (D) Make variables private where needed @widgets
 2026-06-14 Animations @rendering @animations

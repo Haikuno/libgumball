@@ -6,7 +6,7 @@ static GBL_RESULT GUM_Container_init_(GblInstance* pInstance) {
     GUM_CONTAINER(pInstance)->padding       = 5.0f;
     GUM_CONTAINER(pInstance)->margin        = 2.0f;
     GUM_CONTAINER(pInstance)->minChildSize  = 0.15f;
-    GUM_CONTAINER(pInstance)->orientation   = 'v';
+    GUM_CONTAINER(pInstance)->direction     = GUM_DIRECTION_VERTICAL;
     GUM_CONTAINER(pInstance)->resizeWidgets = true;
     GUM_CONTAINER(pInstance)->alignWidgets  = true;
     GUM_CONTAINER(pInstance)->scrollable    = true;
@@ -30,8 +30,8 @@ static GBL_RESULT GUM_Container_GblObject_setProperty_(GblObject* pObject, const
         case GUM_Container_Property_Id_minChildSize:
             GblVariant_valueCopy(pValue, &pSelf->minChildSize);
             break;
-        case GUM_Container_Property_Id_orientation:
-            GblVariant_valueCopy(pValue, &pSelf->orientation);
+        case GUM_Container_Property_Id_direction:
+            GblVariant_valueCopy(pValue, &pSelf->direction);
             break;
         case GUM_Container_Property_Id_resizeWidgets:
             GblVariant_valueCopy(pValue, &pSelf->resizeWidgets);
@@ -63,8 +63,8 @@ static GBL_RESULT GUM_Container_GblObject_property_(const GblObject* pObject, co
         case GUM_Container_Property_Id_minChildSize:
             GblVariant_setFloat(pValue, pSelf->minChildSize);
             break;
-        case GUM_Container_Property_Id_orientation:
-            GblVariant_setChar(pValue, pSelf->orientation);
+        case GUM_Container_Property_Id_direction:
+            GblVariant_setEnum(pValue, GBL_TYPEID(GUM_Direction), pSelf->direction);
             break;
         case GUM_Container_Property_Id_resizeWidgets:
             GblVariant_setBool(pValue, pSelf->resizeWidgets);
@@ -88,8 +88,8 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
 
     if GBL_UNLIKELY (childCount == 0) return GBL_RESULT_SUCCESS;
 
-    const bool  isHorizontal = pSelf->orientation == 'h' || pSelf->orientation == 'H';
-    const float totalMargin  = pSelf->margin  * 2.0f * (float)childCount;
+    const bool  isHorizontal = pSelf->direction == GUM_DIRECTION_HORIZONTAL;
+    const float totalMargin  = pSelf->margin  * 2.0f * (float)(childCount - 1);
     const float totalPadding = pSelf->padding * 2.0f;
 
     const float container_mainPos      = isHorizontal ? pSelfWidget->x : pSelfWidget->y;
@@ -97,15 +97,14 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     const float container_mainDim      = isHorizontal ? pSelfWidget->w : pSelfWidget->h;
     const float container_secondaryDim = isHorizontal ? pSelfWidget->h : pSelfWidget->w;
 
-    const float cornerRadius   = pSelfWidget->border_radius * GBL_MIN(container_mainDim, container_secondaryDim) * 0.5f;
-    const float roundnessInset = cornerRadius * (1 - 1/sqrt(2));
-
+    const float cornerRadius              = pSelfWidget->border_radius * GBL_MIN(container_mainDim, container_secondaryDim) * 0.5f;
+    const float roundnessInset            = cornerRadius * (1 - 1/sqrt(2));
     const float totalPaddingWithRoundness = totalPadding + roundnessInset * 2.0f;
 
     float* scrollOffsetMain = isHorizontal ? &pSelf->scrollOffsetX : &pSelf->scrollOffsetY;
 
-    float contentExtent = container_mainPos;
-    float offset        = container_mainPos + pSelf->padding + pSelf->margin + roundnessInset;
+    float offset        = container_mainPos + pSelf->padding + roundnessInset;
+    float contentExtent = offset;
 
     GblObject_foreachChild(GBL_OBJECT(pSelf), pChild) {
         GUM_Widget* pChildWidget = GBL_AS(GUM_Widget, pChild);
@@ -122,12 +121,14 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
         }
 
         if (pSelf->alignWidgets) {
-            *widget_mainPos = offset; // unscrolled for now -- pass 2 subtracts the clamped offset
+            *widget_mainPos = offset;
             const float availableSecDim = container_secondaryDim - totalPaddingWithRoundness;
             *widget_secondaryPos        = container_secondaryPos + pSelf->padding + roundnessInset
                                         + (availableSecDim - *widget_secondaryDim) / 2.0f;
-            offset += *widget_mainDim + pSelf->margin * 2.0f;
-            contentExtent = GBL_MAX(contentExtent, *widget_mainPos + *widget_mainDim);
+            offset += *widget_mainDim;
+            if (pChild != GblObject_childLast(GBL_OBJECT(pSelf)))
+                offset += pSelf->margin * 2.0f;
+            contentExtent = GBL_MAX(contentExtent, *widget_mainPos + *widget_mainDim + pSelf->padding + roundnessInset);
         } else {
             contentExtent = GBL_MAX(contentExtent, *widget_mainPos + *scrollOffsetMain + *widget_mainDim);
         }
@@ -167,7 +168,7 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
 
 static GBL_RESULT GUM_Container_update_(GUM_Widget* pSelf) {
     GUM_Container* pContainer = GUM_CONTAINER(pSelf);
-    const float speed = 9.0f; // TODO: tune speed
+    const float speed  = 9.0f; // TODO: tune speed
     const float dt     = GUM_Backend_frametime();
 
     const bool changedX = fabsf(pContainer->scrollOffsetTargetX - pContainer->scrollOffsetX) > 0.5f;
