@@ -15,15 +15,15 @@ int main(int argc, char* argv[]) {
                                                            "margin", 10.0f); // Add some margin between child containers
 
     GUM_Container* pContainer1 = GUM_Container_create("parent", pParentContainer,
-                                                      "border_color", 0x000000FF, // Add a black border
-                                                      "orientation", 'h',         // We set the orientation to horizontal
-                                                      "padding", 10.0f);          // Add some padding between the container border
-                                                                                  // and its children
+                                                      "border_color", 0x000000FF,            // Add a black border
+                                                      "direction", GUM_DIRECTION_HORIZONTAL, // We set the direction to horizontal
+                                                      "padding", 10.0f);                     // Add some padding between the container border
+                                                                                             // and its children
 
     GUM_Container* pContainer2 = GUM_Container_create("parent", pParentContainer,
                                                       "border_color", 0x000000FF,
-                                                      "orientation", 'v'); // Vertical is already the default, but no harm in
-                                                                           // specifying it again for clarity
+                                                      "direction", GUM_DIRECTION_VERTICAL); // Vertical is already the default, but no harm in
+                                                                                            // specifying it again for clarity
     GUM_Widget* pWidget1 = GUM_Widget_create("parent", pContainer1,
                                              "color",  0xFF0000FF,
                                              "label",  "I'm red!");

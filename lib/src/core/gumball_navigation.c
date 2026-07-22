@@ -180,7 +180,7 @@ static GUM_Widget* GUM_Nav_moveCursor_(GblObject* pSelf, GUM_InputAction directi
 
     size_t childIndex = GblObject_childIndex(pSelf);
 
-    // Intra-container movement, if the axis matches this container's orientation
+    // Intra-container movement, if the axis matches this container's direction
     if (axis == parent_direction) {
         GUM_Widget* pSibling = GUM_Nav_findSelectableSibling_(pSelf, isForwards);
         if (pSibling) return pSibling;

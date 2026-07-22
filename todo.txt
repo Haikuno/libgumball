@@ -4,6 +4,7 @@
 (B) Object Viewer widget @widgets
 (C) Widget lifecycle events @widgets @events
 (C) Holding shift to scroll horizontally with the mouse @controls
+(C) Make new examples @examples
 (D) Tidy header files up @documentation @formatting
 (D) Tidy source files up @formatting
 (D) Controller/Keyboard button movement override @controls
