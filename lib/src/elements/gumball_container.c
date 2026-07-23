@@ -144,7 +144,13 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
 
     if (pSelf->scrollable && contentOverflows) {
         GUM_Vector2   absPos   = GUM_get_absolute_position_(pSelfWidget);
-        GUM_Rectangle selfRect = { absPos.x, absPos.y, pSelfWidget->w, pSelfWidget->h };
+        const float   bw       = pSelfWidget->border_width;
+        GUM_Rectangle selfRect = {
+            absPos.x + bw,
+            absPos.y + bw,
+            pSelfWidget->w - 2.0f * bw,
+            pSelfWidget->h - 2.0f * bw
+        };
         outgoingClip = GUM_Rectangle_intersect(pSelfWidget->clipRect, selfRect);
     }
 
