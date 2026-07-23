@@ -17,6 +17,7 @@
 #include "types/gumball_rectangle.h"
 #include "types/gumball_vector2.h"
 #include "types/gumball_renderer.h"
+#include "types/gumball_animator.h"
 
 /*!  \defgroup types Types
  *   \brief    Types

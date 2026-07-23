@@ -11,8 +11,9 @@ static GBL_RESULT GUM_Container_init_(GblInstance* pInstance) {
     GUM_CONTAINER(pInstance)->alignWidgets  = true;
     GUM_CONTAINER(pInstance)->scrollable    = true;
 
-    GUM_CONTAINER(pInstance)->scrollOffsetX = 0.0f;
-    GUM_CONTAINER(pInstance)->scrollOffsetY = 0.0f;
+    // TODO: expose them as properties
+    GUM_CONTAINER(pInstance)->scrollAnimatorX = GUM_Animator_make(0.0f, 0.2f, GUM_EASE_QUAD_OUT);
+    GUM_CONTAINER(pInstance)->scrollAnimatorY = GUM_Animator_make(0.0f, 0.2f, GUM_EASE_QUAD_OUT);
     return GBL_RESULT_SUCCESS;
 }
 
@@ -101,7 +102,7 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     const float roundnessInset            = cornerRadius * (1 - 1/sqrt(2));
     const float totalPaddingWithRoundness = totalPadding + roundnessInset * 2.0f;
 
-    float* scrollOffsetMain = isHorizontal ? &pSelf->scrollOffsetX : &pSelf->scrollOffsetY;
+    float* scrollOffsetMain = isHorizontal ? &pSelf->scrollAnimatorX.current : &pSelf->scrollAnimatorY.current;
 
     float offset        = container_mainPos + pSelf->padding + roundnessInset;
     float contentExtent = offset;
@@ -168,17 +169,13 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
 
 static GBL_RESULT GUM_Container_update_(GUM_Widget* pSelf) {
     GUM_Container* pContainer = GUM_CONTAINER(pSelf);
-    const float speed  = 9.0f; // TODO: tune speed
-    const float dt     = GUM_Backend_frametime();
+    const float dt = GUM_Backend_frametime();
 
-    const bool changedX = fabsf(pContainer->scrollOffsetTargetX - pContainer->scrollOffsetX) > 0.5f;
-    const bool changedY = fabsf(pContainer->scrollOffsetTargetY - pContainer->scrollOffsetY) > 0.5f;
+    const bool changedX = GUM_Animator_update(&pContainer->scrollAnimatorX, dt);
+    const bool changedY = GUM_Animator_update(&pContainer->scrollAnimatorY, dt);
 
-    if (changedX || changedY) {
-        pContainer->scrollOffsetX += (pContainer->scrollOffsetTargetX - pContainer->scrollOffsetX) * speed * dt;
-        pContainer->scrollOffsetY += (pContainer->scrollOffsetTargetY - pContainer->scrollOffsetY) * speed * dt;
+    if (changedX || changedY)
         GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
-    }
 
     return GBL_RESULT_SUCCESS;
 }

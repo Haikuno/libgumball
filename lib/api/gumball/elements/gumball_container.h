@@ -19,6 +19,7 @@
 
 #include "gimbal/meta/classes/gimbal_primitives.h"
 #include "gumball_widget.h"
+#include <gumball/types/gumball_animator.h>
 #include <stdint.h>
 
 /*!  \name  Type System
@@ -74,10 +75,8 @@ GBL_INSTANCE_DERIVE(GUM_Container, GUM_Widget)
     bool scrollable;              //!< If the container should become scrollable when its content is bigger than itself       Default value is true
 
     // TODO: private!
-    float scrollOffsetX;        // Current horizontal scroll offset
-    float scrollOffsetY;        // Current vertical scroll offset
-    float scrollOffsetTargetX;  // Target horizontal scroll offset
-    float scrollOffsetTargetY;  // Target vertical scroll offset
+    GUM_Animator scrollAnimatorX; // Eases the horizontal scroll offset toward its target
+    GUM_Animator scrollAnimatorY; // Eases the vertical scroll offset toward its target
 GBL_INSTANCE_END
 //! @}
 

@@ -249,8 +249,13 @@ static void GUM_InputSystem_Mouse_update_(void) {
 
             const bool isHorizontal = pContainer->direction == GUM_DIRECTION_HORIZONTAL;
             float delta = (isHorizontal ? pMouse_->wheel.x : pMouse_->wheel.y) * -70.0f; // TODO: tune scroll speed
-            if (isHorizontal) pContainer->scrollOffsetTargetX = GBL_CLAMP(pContainer->scrollOffsetTargetX + delta, 0, GUM_WIDGET(pContainer)->w);
-            else              pContainer->scrollOffsetTargetY = GBL_CLAMP(pContainer->scrollOffsetTargetY + delta, 0, GUM_WIDGET(pContainer)->h);
+
+            if (isHorizontal)
+                GUM_Animator_set(&pContainer->scrollAnimatorX,
+                                 GBL_CLAMP(pContainer->scrollAnimatorX.to + delta, 0, GUM_WIDGET(pContainer)->w));
+            else
+                GUM_Animator_set(&pContainer->scrollAnimatorY,
+                                 GBL_CLAMP(pContainer->scrollAnimatorY.to + delta, 0, GUM_WIDGET(pContainer)->h));
 
             if (delta) {
                 GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer); // re-layout + re-clamp

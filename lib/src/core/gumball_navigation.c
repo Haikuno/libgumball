@@ -316,18 +316,20 @@ void GUM_Nav_move(GUM_InputDevice* pDevice, GUM_InputAction direction) {
 
                 switch (direction) {
                 case GUM_INPUTACTION_MOVE_UP:
-                    pContainer->scrollOffsetTargetY = isFirstInContainer ? 0 :
-                                                      pContainer->scrollOffsetTargetY - (clippedTop + margin);
+                    GUM_Animator_set(&pContainer->scrollAnimatorY,
+                                     isFirstInContainer ? 0 : pContainer->scrollAnimatorY.to - (clippedTop + margin));
                     break;
                 case GUM_INPUTACTION_MOVE_DOWN:
-                    pContainer->scrollOffsetTargetY += clippedBottom + margin;
+                    GUM_Animator_set(&pContainer->scrollAnimatorY,
+                                     pContainer->scrollAnimatorY.to + clippedBottom + margin);
                     break;
                 case GUM_INPUTACTION_MOVE_LEFT:
-                    pContainer->scrollOffsetTargetX = isFirstInContainer ? 0 :
-                                                      pContainer->scrollOffsetTargetX - (clippedLeft + margin);
+                    GUM_Animator_set(&pContainer->scrollAnimatorX,
+                                     isFirstInContainer ? 0 : pContainer->scrollAnimatorX.to - (clippedLeft + margin));
                     break;
                 case GUM_INPUTACTION_MOVE_RIGHT:
-                    pContainer->scrollOffsetTargetX += clippedRight + margin;
+                    GUM_Animator_set(&pContainer->scrollAnimatorX,
+                                     pContainer->scrollAnimatorX.to + clippedRight + margin);
                     break;
                 }
 
