@@ -270,9 +270,6 @@ static void GUM_InputSystem_Mouse_update_(void) {
 // ---------------------------------- Gamepad ---------------------------------- //
 
 static bool GUM_InputSystem_Gamepad_isNameValid(const char* pName) {
-    if (!pName || pName[0] == '\0' || strcmp(pName, "UNKNOWN") == 0)
-        return false;
-
     static const char* pBlocklist_[] = {
         "Motion Sensors",
         "Consumer Control",
