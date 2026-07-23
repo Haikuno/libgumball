@@ -9,17 +9,27 @@ GBL_EXPORT GUM_Vector2 GUM_Backend_screenSize(void) {
 
 GBL_EXPORT GBL_RESULT GUM_Backend_rectangleDraw(GUM_Renderer* pRenderer, GUM_Rectangle rectangle,
                                                 float roundness, GUM_Color color) {
-    DrawRectangleRounded((Rectangle){ rectangle.x, rectangle.y, rectangle.width, rectangle.height },
-                         roundness, rounded_segments,
-                         (Color)    { color.r, color.g, color.b, color.a });
+    Rectangle rec = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
+    Color     col = { color.r, color.g, color.b, color.a };
+
+    if (roundness <= 0.0f)
+        DrawRectangle(rec.x, rec.y, rec.width, rec.height, col);
+    else
+        DrawRectangleRounded(rec, roundness, rounded_segments, col);
+
     return GBL_RESULT_SUCCESS;
 }
 
 GBL_EXPORT GBL_RESULT GUM_Backend_rectangleLinesDraw(GUM_Renderer* pRenderer, GUM_Rectangle rectangle, float roundness,
                                                      float border_width, GUM_Color color) {
-    DrawRectangleRoundedLinesEx((Rectangle){ rectangle.x, rectangle.y, rectangle.width, rectangle.height },
-                                roundness, rounded_segments, border_width,
-                                (Color)    { color.r, color.g, color.b, color.a });
+    Rectangle rec = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
+    Color     col = { color.r, color.g, color.b, color.a };
+
+    if (roundness <= 0.0f)
+        DrawRectangleLinesEx(rec, border_width, col);
+    else
+        DrawRectangleRoundedLinesEx(rec, roundness, rounded_segments, border_width, col);
+
     return GBL_RESULT_SUCCESS;
 }
 

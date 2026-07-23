@@ -42,21 +42,21 @@ void onFocusLostCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
 int main(int argc, char* argv[]) {
     GUM_Root* pRoot = GUM_Root_create();
 
-    InitWindow(800, 1000, "Clipping test");
-    SetTargetFPS(144);
+    InitWindow(800, 1000, "Animation and scrolling test");
+    // SetTargetFPS(144);
 
 
-    GUM_Container* pOuter = GUM_Container_create("x", 0.0f, "y", 0.0f,
+    GUM_Container* pOuter = GUM_Container_create("x", 20.0f, "y", 40.0f,
                                                  "w", 800.0f, "h", 1000.0f,
-                                                 "padding", 0.0f,
-                                                 "margin", 0.0f,
+                                                 "padding", 5.0f,
+                                                 "margin", 5.0f,
                                                  "border_color",   0x000000FF,
                                                  "color",          0xF0F0F0FF,
                                                  "resizeWidgets",  false);
 
     GUM_Container* pInner = GUM_Container_create("parent", pOuter,
                                                  "name", "Inner container 1",
-                                                 "w", 600.0f, "h", 1000.0f,
+                                                 "w", 600.0f, "h", 800.0f,
                                                  "border_color",  0x0000FFFF,
                                                  "margin", 10.0f,
                                                  "padding", 10.0f,
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 
     GUM_Container* pInner2 = GUM_Container_create("parent", pOuter,
                                                 "name", "Inner container 2",
-                                                "w", 600.0f, "h", 1000.0f,
+                                                "w", 600.0f, "h", 800.0f,
                                                 "border_color",  0x0000FFFF,
                                                 "margin", 10.0f,
                                                 "padding", 10.0f,
@@ -101,6 +101,8 @@ int main(int argc, char* argv[]) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
         GUM_draw();
+
+        DrawFPS(20,20);
         EndDrawing();
     }
 

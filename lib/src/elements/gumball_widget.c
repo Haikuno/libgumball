@@ -458,6 +458,12 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
         rec.y                  += parent_pos.y;
     }
 
+    if (pSelf->clipRect.x != GUM_CLIP_RECT_NONE_.x) {
+        GUM_Rectangle overlap = GUM_Rectangle_intersect(pSelf->clipRect, rec);
+        if (overlap.width <= 0.0f || overlap.height <= 0.0f)
+            return GBL_RESULT_SUCCESS;   // fully clipped, skip all draw work
+    }
+
     const bool needsClip = pSelf->clipRect.x     != GUM_CLIP_RECT_NONE_.x ||
                            pSelf->clipRect.width != GUM_CLIP_RECT_NONE_.width;
 
