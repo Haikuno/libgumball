@@ -9,7 +9,6 @@
 
 #include <gumball/core/gumball_backend.h>
 #include <gumball/core/gumball_inputsystem.h>
-#include <gumball/types/gumball_animator.h>
 
 static void GUM_update_recursive_(GblObject* pObject) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
@@ -32,7 +31,7 @@ GBL_EXPORT GBL_RESULT (GUM_update)(void) {
         }
         GUM_Root_update(pRoot);
         GUM_update_recursive_(GBL_OBJECT(pRoot));
-        GUM_animate_update_();
+        GUM_Widget_animate_update_();
     }
 
     return result;

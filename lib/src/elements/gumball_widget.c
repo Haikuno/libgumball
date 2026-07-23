@@ -7,6 +7,7 @@
 #include <gumball/core/gumball_logger.h>
 #include <gumball/core/gumball_backend.h>
 #include <gumball/core/gumball_inputsystem.h>
+#include <gimbal/meta/signals/gimbal_c_closure.h>
 
 static void GUM_Widget_GblObject_onPropertyChange_(GblObject* pSelf, GblProperty* pProp) {
     switch (pProp->id) {
@@ -586,6 +587,159 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
     return GBL_RESULT_SUCCESS;
 }
 
+// ===== Widget Animation =====
+
+constexpr int GUM_WIDGET_ANIMATE_MAX_ACTIVE_ = 64; // TODO: grow dynamically if this ever isn't enough
+
+typedef struct {
+    GUM_Widget*  pWidget;
+    GblQuark     property;
+    GUM_Animator animator;
+    bool         inUse;
+} GUM_WidgetTween_;
+
+static GUM_WidgetTween_ s_widgetTweens_[GUM_WIDGET_ANIMATE_MAX_ACTIVE_];
+
+static GUM_WidgetTween_* GUM_Widget_findTween_(GUM_Widget* pWidget, GblQuark property) {
+    for (size_t i = 0; i < GUM_WIDGET_ANIMATE_MAX_ACTIVE_; ++i) {
+        GUM_WidgetTween_* pTween = &s_widgetTweens_[i];
+
+        if (pTween->inUse && pTween->pWidget == pWidget && pTween->property == property)
+            return pTween;
+    }
+
+    return nullptr;
+}
+
+static GUM_WidgetTween_* GUM_Widget_allocTween_(void) {
+    for (size_t i = 0; i < GUM_WIDGET_ANIMATE_MAX_ACTIVE_; ++i) {
+        if (!s_widgetTweens_[i].inUse)
+            return &s_widgetTweens_[i];
+    }
+
+    GUM_LOG_ERROR("Ran out of widget tween slots! Bump GUM_WIDGET_ANIMATE_MAX_ACTIVE_.");
+    return nullptr;
+}
+
+static void GUM_Widget_freeTween_(GUM_WidgetTween_* pTween) {
+    GUM_Animator_setOnDone(&pTween->animator, nullptr); // releases any attached closure's ref
+    pTween->inUse = false;
+}
+
+static void GUM_Widget_animateStart_(GUM_Widget* pSelf, const char* pProperty, float target,
+                                     float duration, GUM_EasingType easing, GUM_EasingFn pFnEase) {
+    const GblQuark    quark  = GblQuark_fromString(pProperty);
+    GUM_WidgetTween_* pTween = GUM_Widget_findTween_(pSelf, quark);
+
+    if (!pTween) {
+        pTween = GUM_Widget_allocTween_();
+        if (!pTween) return;
+
+        GBL_VARIANT(value);
+        GblObject_propertyVariantByQuark(GBL_OBJECT(pSelf), quark, &value);
+        const float current = GblVariant_toFloat(&value); // converts byte properties (like alpha) via the registered converter table
+        GblVariant_destruct(&value);
+
+        pTween->pWidget  = pSelf;
+        pTween->property = quark;
+        pTween->inUse    = true;
+        pTween->animator = GUM_Animator_make(current, duration, easing);
+    } else {
+        GUM_Animator_setOnDone(&pTween->animator, nullptr);
+        pTween->animator.duration = duration;
+        pTween->animator.easing   = easing;
+    }
+
+    pTween->animator.pFnEase = pFnEase;
+    GUM_Animator_set(&pTween->animator, target);
+}
+
+GBL_EXPORT void GUM_Widget_animate(GUM_Widget* pSelf, const char* pProperty,
+                                   float target, float duration, GUM_EasingType easing) {
+    GUM_Widget_animateStart_(pSelf, pProperty, target, duration, easing, nullptr);
+}
+
+GBL_EXPORT void GUM_Widget_animateCustom(GUM_Widget* pSelf, const char* pProperty,
+                                         float target, float duration, GUM_EasingFn pFnEase) {
+    GUM_Widget_animateStart_(pSelf, pProperty, target, duration, GUM_EASE_CUSTOM, pFnEase);
+}
+
+static GBL_RESULT GUM_Widget_animateMarshal_(GblClosure* pClosure, GblVariant* pRetValue,
+                                             size_t argCount, GblVariant* pArgs, GblPtr pMarshalData) {
+    GBL_UNUSED(pRetValue, argCount, pArgs, pMarshalData);
+
+    const GUM_Widget_doneFn pFnDone = (GUM_Widget_doneFn)GblCClosure_callback(GBL_C_CLOSURE(pClosure));
+    pFnDone(GUM_WIDGET(GblBox_userdata(GBL_BOX(pClosure))));
+
+    return GBL_RESULT_SUCCESS;
+}
+
+GBL_EXPORT void GUM_Widget_animateOnDone(GUM_Widget* pSelf, const char* pProperty, GUM_Widget_doneFn pFnDone) {
+    GUM_WidgetTween_* pTween = GUM_Widget_findTween_(pSelf, GblQuark_fromString(pProperty));
+    if (!pTween) return;
+
+    if (!pFnDone) {
+        GUM_Animator_setOnDone(&pTween->animator, nullptr); // clears any existing callback
+        return;
+    }
+
+    GblClosure* pClosure = GBL_CLOSURE(GblCClosure_create((GblFnPtr)pFnDone, pSelf));
+    GblClosure_setMarshal(pClosure, GUM_Widget_animateMarshal_);
+    GUM_Animator_setOnDone(&pTween->animator, pClosure);
+    GblClosure_unref(pClosure); // the tween holds its own ref now
+}
+
+GBL_EXPORT void GUM_Widget_animateCancel(GUM_Widget* pSelf, const char* pProperty) {
+    GUM_WidgetTween_* pTween = GUM_Widget_findTween_(pSelf, GblQuark_fromString(pProperty));
+
+    if (pTween)
+        GUM_Widget_freeTween_(pTween);
+}
+
+void GUM_Widget_animate_update_(void) {
+    const float dt = GUM_Backend_frametime();
+
+    for (size_t i = 0; i < GUM_WIDGET_ANIMATE_MAX_ACTIVE_; ++i) {
+        GUM_WidgetTween_* pTween = &s_widgetTweens_[i];
+
+        if (!pTween->inUse)
+            continue;
+
+        if (GUM_Animator_update(&pTween->animator, dt)) {
+            GBL_VARIANT(value);
+            GblVariant_setFloat(&value, pTween->animator.current);
+            GblObject_setPropertyVariantByQuark(GBL_OBJECT(pTween->pWidget), pTween->property, &value);
+            GblVariant_destruct(&value);
+        }
+    }
+
+    // second pass to support callbacks destroying their own widgets
+    for (size_t i = 0; i < GUM_WIDGET_ANIMATE_MAX_ACTIVE_; ++i) {
+        GUM_WidgetTween_* pTween = &s_widgetTweens_[i];
+
+        if (!pTween->inUse)
+            continue;
+
+        if (GUM_Animator_settled(&pTween->animator)) {
+            if (pTween->animator.pOnDone)
+                GblClosure_invoke(pTween->animator.pOnDone, nullptr, 0, nullptr);
+
+            // check again to see if the callback started a new animation on the same property
+            if (GUM_Animator_settled(&pTween->animator))
+                GUM_Widget_freeTween_(pTween);
+        }
+    }
+}
+
+void GUM_Widget_animate_widgetDestroyed_(GUM_Widget* pSelf) {
+    for (size_t i = 0; i < GUM_WIDGET_ANIMATE_MAX_ACTIVE_; ++i) {
+        GUM_WidgetTween_* pTween = &s_widgetTweens_[i];
+
+        if (pTween->inUse && pTween->pWidget == pSelf)
+            GUM_Widget_freeTween_(pTween);
+    }
+}
+
 static GBL_RESULT GUM_Widget_postDraw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
     return GBL_RESULT_SUCCESS;
 }
@@ -594,6 +748,7 @@ static GBL_RESULT GUM_Widget_GblBox_destructor_(GblBox* pBox) {
     GUM_Widget* pSelf = GUM_WIDGET(pBox);
 
     GUM_InputSystem_widgetDestroyed(pSelf);
+    GUM_Widget_animate_widgetDestroyed_(pSelf);
     GblStringRef_unref(pSelf->label);
 
     if (pSelf->texture)

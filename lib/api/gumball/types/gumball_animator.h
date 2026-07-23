@@ -15,9 +15,8 @@
  *   \copyright  MIT License
 */
 
+#include <gimbal/gimbal_meta.h>
 #include <gimbal/meta/signals/gimbal_closure.h>
-#include <gimbal/meta/instances/gimbal_object.h>
-#include <gumball/elements/gumball_widget.h>
 
 GBL_DECLS_BEGIN
 
@@ -41,7 +40,6 @@ GBL_ENUM(GUM_EasingType,
 
 //! Maps a normalized progress value in [0, 1] to an eased progress value
 typedef float (*GUM_EasingFn)(float t);
-typedef void  (*GUM_DoneFn)  (GUM_Widget* pSelf);
 
 /*!  \struct GUM_Animator
  *   \brief  GUM_Animator structure
@@ -59,22 +57,6 @@ typedef struct {
 
 #define GUM_ANIMATOR_TYPE (GBL_TYPEID(GUM_Animator)) //!< Returns the GUM_Animator Type UUID
 
-//! Eases pProperty on pObject toward target, using a built-in curve
-#define GUM_animate(widget, propertyName, targetValue, duration, easing) \
-        (GUM_animate(GBL_OBJECT(widget), propertyName, targetValue, duration, easing))
-
-//! Eases pProperty on pObject toward target, using a custom curve
-#define GUM_animateCustom(widget, propertyName, targetValue, duration, easingFunction) \
-        (GUM_animateCustom(GBL_OBJECT(widget), propertyName, targetValue, duration, easingFunction))
-
-//! Attaches a closure to fire when the property's tween settles.
-#define GUM_animateOnDone(widget, propertyName, doneFn) \
-        (GUM_animateOnDone(GBL_OBJECT(widget), propertyName, (GUM_DoneFn)doneFn))
-
-//! Cancels the passed property's tween, freezing it at its current value
-#define GUM_animateCancel(widget, propertyName) \
-        (GUM_animateCancel)(GBL_OBJECT(widget), propertyName)
-
 //! \cond
 GblType GUM_Animator_type(void) GBL_NOEXCEPT;
 //! \endcond
@@ -86,7 +68,7 @@ GblType GUM_Animator_type(void) GBL_NOEXCEPT;
 GBL_EXPORT GUM_Animator GUM_Animator_make      (float value, float duration, GUM_EasingType easing) GBL_NOEXCEPT; //!< Returns a new animator sitting at rest on value, using a built-in curve
 GBL_EXPORT GUM_Animator GUM_Animator_makeCustom(float value, float duration, GUM_EasingFn pFnEase)  GBL_NOEXCEPT; //!< Returns a new animator sitting at rest on value, using a custom curve
 GBL_EXPORT void         GUM_Animator_set       (GUM_Animator* pSelf, float target)                  GBL_NOEXCEPT; //!< Retargets the animator, easing from its current value
-GBL_EXPORT bool         GUM_Animator_update    (GUM_Animator* pSelf, float dt)                      GBL_NOEXCEPT; //!< Advances current toward target. Returns true if it moved
+GBL_EXPORT bool         GUM_Animator_update    (GUM_Animator* pSelf, float dt)                      GBL_NOEXCEPT; //!< Advances current toward target. Returns true if it moved. Does NOT invoke pOnDone -- check GUM_Animator_settled() and invoke it yourself after you're done using pSelf
 GBL_EXPORT bool         GUM_Animator_settled   (const GUM_Animator* pSelf)                          GBL_NOEXCEPT; //!< Returns true if current has reached target
 GBL_EXPORT void         GUM_Animator_setOnDone (GUM_Animator* pSelf, GblClosure* pClosure)          GBL_NOEXCEPT; //!< Sets (or replaces) the closure invoked when the animator settles
 //! @}
@@ -106,24 +88,6 @@ GBL_EXPORT float GUM_Ease_sineInOut   (float t) GBL_NOEXCEPT;
 GBL_EXPORT float GUM_Ease_bounceOut   (float t) GBL_NOEXCEPT;
 GBL_EXPORT float GUM_Ease_elasticOut  (float t) GBL_NOEXCEPT;
 //! @}
-
-/*!  \name  Property Tweening
- *   \brief One-call API for animating any readable/writable GBL_GENERIC property
- *          on any GblObject (widget position, color channels, border radius, etc.),
- *          without having to declare or update a GUM_Animator yourself.
- *   @{
-*/
-
-//! @}
-
-//! \cond GRUGLESS
-//! \note Implementation. You should use the macros instead.
-GBL_EXPORT void (GUM_animate)      (GblObject* pObject, const char* pProperty, float target, float duration, GUM_EasingType easing) GBL_NOEXCEPT;
-GBL_EXPORT void (GUM_animateCustom)(GblObject* pObject, const char* pProperty, float target, float duration, GUM_EasingFn pFnEase)  GBL_NOEXCEPT;
-GBL_EXPORT void (GUM_animateOnDone)(GblObject* pObject, const char* pProperty, GUM_DoneFn pDoneFn)                                  GBL_NOEXCEPT;
-GBL_EXPORT void (GUM_animateCancel)(GblObject* pObject, const char* pProperty)                                                      GBL_NOEXCEPT;
-void GUM_animate_update_(void)                                                                                                      GBL_NOEXCEPT; //!< Advances every active property tween by one frame. Called by GUM_update()
-//! \endcond
 
 GBL_DECLS_END
 

@@ -31,6 +31,7 @@
 #include <gumball/types/gumball_texture.h>
 #include <gumball/types/gumball_renderer.h>
 #include <gumball/types/gumball_rectangle.h>
+#include <gumball/types/gumball_animator.h>
 #include <gumball/gumball_events.h>
 
 
@@ -189,6 +190,30 @@ GUM_Vector2 GUM_get_absolute_position_(GBL_SELF);
 
 //! Returns a new GUM_Widget. Optionally takes in a list of Name/Value pairs for properties
 #define GUM_Widget_create(/* property_name, property_value */...) GBL_NEW(GUM_Widget __VA_OPT__(,) __VA_ARGS__)
+
+//! Callback fired when a property tween settles. Receives the widget that was being animated
+typedef void (*GUM_Widget_doneFn)(GUM_Widget* pSelf);
+
+/*!  \name  Animation
+ *   \brief One-call API for easing any of this widget's readable/writable properties
+ *          (position, size, color channels, border radius, etc.) toward a target float value,
+ *          without declaring or updating a GUM_Animator yourself.
+ *   @{
+*/
+//! Eases pProperty toward target, using a built-in curve
+GBL_EXPORT void GUM_Widget_animate      (GUM_Widget* pSelf, const char* pProperty, float target, float duration, GUM_EasingType easing) GBL_NOEXCEPT;
+//! Eases pProperty toward target, using a custom curve
+GBL_EXPORT void GUM_Widget_animateCustom(GUM_Widget* pSelf, const char* pProperty, float target, float duration, GUM_EasingFn pFnEase)  GBL_NOEXCEPT;
+//! Fires pFnDone when pProperty's in-use tween settles.
+GBL_EXPORT void GUM_Widget_animateOnDone(GUM_Widget* pSelf, const char* pProperty, GUM_Widget_doneFn pFnDone)                           GBL_NOEXCEPT;
+//! Cancels pProperty's in-use tween, freezing it at its current value
+GBL_EXPORT void GUM_Widget_animateCancel(GUM_Widget* pSelf, const char* pProperty) GBL_NOEXCEPT;
+//! @}
+
+//! \cond GRUGLESS
+void GUM_Widget_animate_update_(void)                 GBL_NOEXCEPT; //!< Advances every widget's active property tweens by one frame. Called by GUM_update()
+void GUM_Widget_animate_widgetDestroyed_(GUM_Widget*) GBL_NOEXCEPT; //!< Frees any in-use tweens belonging to pSelf. Called from its destructor
+//! \endcond
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

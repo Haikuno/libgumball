@@ -15,8 +15,8 @@ void onFocusGainedCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
                                                                        deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
                                                                        deviceType == GUM_GAMEPAD_TYPE  ? "gamepad" :
                                                                        "unknown device type");
-    GUM_animate(pSelf, "w", 250.0f, 0.25, GUM_EASE_SINE_IN_OUT);
-    GUM_animate(pSelf, "h", 350.0f, 0.25, GUM_EASE_SINE_IN_OUT);
+    GUM_Widget_animate(pSelf, "w", 250.0f, 0.25, GUM_EASE_SINE_IN_OUT);
+    GUM_Widget_animate(pSelf, "h", 350.0f, 0.25, GUM_EASE_SINE_IN_OUT);
 }
 
 void onReleaseCallback(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
@@ -34,8 +34,8 @@ void onFocusLostCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
                                                                          deviceType == GUM_GAMEPAD_TYPE  ? "gamepad" :
                                                                          "unknown device type");
     if (pSelf->focusCount == 1) {
-        GUM_animate(pSelf, "w", 200.0f, 0.25, GUM_EASE_SINE_IN_OUT);
-        GUM_animate(pSelf, "h", 300.0f, 0.25, GUM_EASE_SINE_IN_OUT);
+        GUM_Widget_animate(pSelf, "w", 200.0f, 0.25, GUM_EASE_SINE_IN_OUT);
+        GUM_Widget_animate(pSelf, "h", 300.0f, 0.25, GUM_EASE_SINE_IN_OUT);
     }
 }
 
