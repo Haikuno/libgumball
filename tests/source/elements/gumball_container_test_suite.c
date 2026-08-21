@@ -34,6 +34,8 @@ GBL_TEST_CASE(verticalLayout)
     GBL_TEST_COMPARE(pSecond->y, 55.0f);
     GBL_TEST_COMPARE(pSecond->w, 80.0f);
     GBL_TEST_COMPARE(pSecond->h, 35.0f);
+
+    GUM_unref(pContainer);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(horizontalLayout)
@@ -54,6 +56,8 @@ GBL_TEST_CASE(horizontalLayout)
     GBL_TEST_COMPARE(pSecond->y, 10.0f);
     GBL_TEST_COMPARE(pSecond->w, 35.0f);
     GBL_TEST_COMPARE(pSecond->h, 40.0f);
+
+    GUM_unref(pContainer);
 GBL_TEST_CASE_END
 
 GBL_TEST_REGISTER(verticalLayout,
