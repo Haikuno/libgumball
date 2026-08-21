@@ -128,7 +128,8 @@ void GUM_Root_update(GUM_Root* pRoot) {
     if (screenSize.x != lastScreenSize_.x ||
         screenSize.y != lastScreenSize_.y) {
         GblObject_foreachChild(GBL_OBJECT(pRoot), pContainer, GUM_Container*) {
-            GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
+            if (GblType_check(GBL_TYPEOF(pContainer), GUM_CONTAINER_TYPE))
+                GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
         }
     }
 
