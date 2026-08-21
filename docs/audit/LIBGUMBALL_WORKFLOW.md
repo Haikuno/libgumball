@@ -13,7 +13,7 @@ This file is the canonical operating procedure for the Devilution C23/UI migrati
 ## Pull-request policy
 
 - Use at most one draft PR as the hosted-CI validation window for this branch.
-- Reuse that PR for every subsequent validation run.
+- Reuse PR #7 for every subsequent hosted validation run.
 - Do not create replacement PRs merely to obtain fresh CI runs.
 - Do not close/recreate the validation PR to clean up CI history.
 - Never merge it without explicit user approval.
@@ -23,10 +23,32 @@ This file is the canonical operating procedure for the Devilution C23/UI migrati
 - Never stall in tool, CI, search, or inspection loops.
 - Once a check has produced usable evidence, advance from that evidence instead of repeating the same check.
 - Do not repeatedly rediscover tool schemas or re-query branch/PR/workflow state when the result is already known and still applicable.
+- When GitHub run or job IDs are already known, use the direct action for those IDs. In particular, fetch workflow job logs directly instead of rediscovering a CLI or workflow route.
+- The connected GitHub integration is action/API based. Do not waste time searching for an interactive `gh` CLI path when the required GitHub action is already available.
 - Keep an explicit mental/checkpoint state of the latest known branch SHA, active PR, failing job, failing step, and next action.
 - If a tool path is unavailable, choose one alternative path once; if that also cannot provide the missing information, state the limitation and continue with the strongest available evidence.
 - Prefer forward progress over redundant verification. Re-check only when a commit, CI rerun, branch change, or new external event could have changed the answer.
 - Preserve all completed work and investigation findings when interrupted. Resume from the last verified checkpoint rather than restarting discovery.
+
+### Hard task timebox and emergency exit
+
+Every concrete task has a hard maximum of 15 minutes. A concrete task is one bounded unit such as diagnosing one CI failure, implementing one fix, validating one change, or proving one ownership/lifecycle path.
+
+Trigger the emergency exit immediately when either condition is reached:
+
+- 15 minutes have been spent on the current concrete task without completing it; or
+- the same obstacle has produced 3 consecutive blocked or failed attempts, even if 15 minutes have not elapsed.
+
+When the emergency exit triggers:
+
+1. Stop investigating that task. Do not enter another discovery/retry loop.
+2. Preserve all useful work and evidence already obtained.
+3. If the current changes form a safe, understandable checkpoint, commit them to the current allowed repository/branch with an explicitly incomplete/WIP description when appropriate.
+4. If the partial state would be dangerous, misleading, uncompilable in a harmful way, or otherwise not safe to commit, do not fabricate a clean checkpoint. Preserve what can be safely preserved and state clearly what remains uncommitted.
+5. Record the exact verified state: current SHA, relevant run/job IDs, failing step/error, files changed, hypotheses proved or disproved, unfinished work, and the best next action.
+6. Tell the user that the emergency exit triggered, why it triggered, what was safely saved, and what remains unfinished.
+
+The emergency exit is a safety mechanism for continuity. A session must leave behind a recoverable checkpoint rather than dying while repeatedly trying the same operation.
 
 ## Validation loop
 
