@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   sdl3:
     name: SDL3 build and tests
@@ -121,6 +125,55 @@ jobs:
         with:
           name: backend-parity-raylib
           path: parity-output/backend-parity-raylib.png
+
+  sanitizer:
+    name: SDL3 ASan and UBSan
+    runs-on: ubuntu-latest
+    env:
+      SDL_VIDEODRIVER: dummy
+      ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install SDL3 host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build pkg-config \
+            libx11-dev libxft-dev libxext-dev \
+            libwayland-dev libxkbcommon-dev libegl1-mesa-dev
+
+      - name: Restore vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3
+
+      - name: Install SDL3 dependencies
+        run: |
+          git clone --branch 2026.07.29 --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
+          "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]' sdl3-image sdl3-ttf
+
+      - name: Configure sanitizers
+        run: |
+          cmake -S . -B build-sanitize -G Ninja \
+            -DGUM_BACKEND=SDL3 \
+            -DGUM_BUILD_TESTS=ON \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
+            -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Build sanitizers
+        run: cmake --build build-sanitize --parallel
+
+      - name: Test sanitizers
+        run: ctest --test-dir build-sanitize --verbose
 
   parity:
     name: Backend pixel parity
