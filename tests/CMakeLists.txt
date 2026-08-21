@@ -17,6 +17,13 @@ target_compile_definitions(GumballTests PRIVATE GUM_TEST_BACKEND_${GUM_BACKEND}=
 
 add_test(NAME GumballTests COMMAND GumballTests)
 
+add_executable(GumballDev ${GUM_BACKEND_DIR}/dev.c)
+target_link_libraries(GumballDev PRIVATE libGumball)
+set_target_properties(GumballDev PROPERTIES
+    OUTPUT_NAME dev
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${GUM_BACKEND_DIR}"
+)
+
 add_executable(GumballBackendParity
     parity/gumball_backend_parity_scene.c
     ${GUM_BACKEND_DIR}/gumball_backend_parity.c
