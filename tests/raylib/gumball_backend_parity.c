@@ -1,5 +1,6 @@
 #include "gumball_backend_parity_scene.h"
 #include <raylib.h>
+#include <rlgl.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -41,17 +42,15 @@ int main(int argc, char* pArgv[]) {
         return 1;
     }
 
-    RenderTexture2D target = LoadRenderTexture(GUM_BACKEND_PARITY_WIDTH,
-                                               GUM_BACKEND_PARITY_HEIGHT);
     GUM_Root* pRoot = GUM_BackendParityScene_create();
 
-    BeginTextureMode(target);
+    BeginDrawing();
     ClearBackground((Color){ 24, 24, 24, 255 });
     GUM_draw();
-    EndTextureMode();
+    rlDrawRenderBatchActive();
+    Image image = LoadImageFromScreen();
+    EndDrawing();
 
-    Image image = LoadImageFromTexture(target.texture);
-    ImageFlipVertical(&image);
     const bool saved = ExportImage(image, pOutputPath);
     if (saved)
         printf("Wrote %s\n", pOutputPath);
@@ -60,7 +59,6 @@ int main(int argc, char* pArgv[]) {
 
     UnloadImage(image);
     GUM_unref(pRoot);
-    UnloadRenderTexture(target);
     CloseWindow();
     return saved ? 0 : 1;
 }
