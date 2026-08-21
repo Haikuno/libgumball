@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 #include <gumball/core/gumball_backend.h>
+#include <gumball/core/gumball_logger.h>
 
 static SDL_LogOutputFunction pPreviousLogger_ = nullptr;
 static void*                 pPreviousLoggerData_ = nullptr;
@@ -12,17 +13,17 @@ static void SDLCALL GUM_SDL3_log_(void* pUserdata, int category, SDL_LogPriority
         case SDL_LOG_PRIORITY_TRACE:
         case SDL_LOG_PRIORITY_VERBOSE:
         case SDL_LOG_PRIORITY_DEBUG:
-            GBL_LOG_DEBUG("SDL3 ", pMessage);
+            GUM_LOG_DEBUG("%s", pMessage);
             break;
         case SDL_LOG_PRIORITY_INFO:
-            GBL_LOG_INFO("SDL3 ", pMessage);
+            GUM_LOG_INFO("%s", pMessage);
             break;
         case SDL_LOG_PRIORITY_WARN:
-            GBL_LOG_WARN("SDL3 ", pMessage);
+            GUM_LOG_WARN("%s", pMessage);
             break;
         case SDL_LOG_PRIORITY_ERROR:
         case SDL_LOG_PRIORITY_CRITICAL:
-            GBL_LOG_ERROR("SDL3 ", pMessage);
+            GUM_LOG_ERROR("%s", pMessage);
             break;
         default:
             break;
