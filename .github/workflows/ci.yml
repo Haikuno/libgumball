@@ -7,6 +7,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      SDL_VIDEODRIVER: dummy
+      LIBGL_ALWAYS_SOFTWARE: "1"
 
     steps:
       - uses: actions/checkout@v4
