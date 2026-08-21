@@ -16,3 +16,10 @@ target_include_directories(GumballTests PRIVATE include)
 target_compile_definitions(GumballTests PRIVATE GUM_TEST_BACKEND_${GUM_BACKEND}=1)
 
 add_test(NAME GumballTests COMMAND GumballTests)
+
+add_executable(GumballBackendParity
+    parity/gumball_backend_parity_scene.c
+    ${GUM_BACKEND_DIR}/gumball_backend_parity.c
+)
+target_link_libraries(GumballBackendParity PRIVATE libGumball)
+target_include_directories(GumballBackendParity PRIVATE parity)
