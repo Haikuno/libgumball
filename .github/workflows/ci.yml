@@ -42,7 +42,9 @@ jobs:
         run: cmake --build build-sdl3 --parallel
 
       - name: Test SDL3
-        run: ctest --test-dir build-sdl3 --output-on-failure
+        run: |
+          ctest --test-dir build-sdl3 --verbose 2>&1 | tee build-sdl3/test-output.log
+          ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-sdl3/test-output.log
 
       - name: Configure raylib
         run: |
@@ -55,7 +57,9 @@ jobs:
         run: cmake --build build-raylib --parallel
 
       - name: Test raylib
-        run: xvfb-run -a ctest --test-dir build-raylib --output-on-failure
+        run: |
+          xvfb-run -a ctest --test-dir build-raylib --verbose 2>&1 | tee build-raylib/test-output.log
+          ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-raylib/test-output.log
 
       - name: Render backend parity scenes
         run: |
