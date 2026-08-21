@@ -2,7 +2,7 @@
 #include <raylib.h>
 
 GBL_EXPORT GUM_Vector2 GUM_Texture_size(GUM_Texture* pSelf) {
-    GUM_Vector2 size;
+    GUM_Vector2 size = { 0 };
     Texture2D*  pTexture = (Texture2D*)GUM_IResource_data(GUM_IRESOURCE(pSelf));
 
     if (pTexture) {
@@ -13,6 +13,10 @@ GBL_EXPORT GUM_Vector2 GUM_Texture_size(GUM_Texture* pSelf) {
     return size;
 }
 
+GBL_EXPORT void* GUM_Texture_getTexture(GUM_Texture* pSelf) {
+    return GUM_IResource_data(GUM_IRESOURCE(pSelf));
+}
+
 GBL_EXPORT GBL_RESULT GUM_Backend_Texture_draw(GUM_Renderer* pRenderer, GUM_Texture* pTexture,
                                                GUM_Rectangle rectangle, GUM_Color color) {
     if (!pTexture) return GBL_RESULT_ERROR_INVALID_POINTER;
@@ -21,7 +25,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Texture_draw(GUM_Renderer* pRenderer, GUM_Text
     Rectangle src     = { 0, 0, (float)texture.width, (float)texture.height };
     Rectangle dst     = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
 
-    DrawTexturePro(texture, src, dst, (Vector2){ 0, 0 }, 0.0f, (Color){ 255, 255, 255, 255 });
+    DrawTexturePro(texture, src, dst, (Vector2){ 0, 0 }, 0.0f, (Color){ color.r, color.g, color.b, color.a });
 
     return GBL_RESULT_SUCCESS;
 }

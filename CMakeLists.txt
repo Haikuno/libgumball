@@ -8,7 +8,7 @@ option(GUM_BUILD_DOCS     "Build docs"       OFF)
 option(GUM_BUILD_EXAMPLES "Build examples"   OFF)
 option(GUM_BUILD_TESTS    "Build unit tests" OFF)
 
-set(GUM_BACKEND "RAYLIB" CACHE STRING "libGumball backend")
+set(GUM_BACKEND "SDL3" CACHE STRING "libGumball backend")
 set_property(CACHE GUM_BACKEND PROPERTY STRINGS SDL3 RAYLIB)
 string(TOUPPER "${GUM_BACKEND}" GUM_BACKEND)
 

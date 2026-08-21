@@ -9,7 +9,7 @@
  *   GUM_Renderer is the renderer type used in libGumball
  *   It exists for backends that require one, such as SDL.
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
  *
 */
@@ -22,8 +22,10 @@
 typedef struct GUM_Renderer GUM_Renderer;
 GBL_DECLS_BEGIN
 
-//! Creates a new GUM_Renderer
+//! Wraps a backend renderer. The backend renderer remains owned by the caller.
 GUM_Renderer* GUM_Renderer_create(void* pRenderer);
+//! Destroys the libGumball renderer wrapper.
+void          GUM_Renderer_destroy(GUM_Renderer* pSelf);
 
 #define GUM_RENDERER_TYPE (GBL_TYPEID(GUM_Renderer)) //!< Returns the GUM_Renderer Type UUID
 

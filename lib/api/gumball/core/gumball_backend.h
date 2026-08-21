@@ -21,6 +21,9 @@
 
 GBL_DECLS_BEGIN
 
+//! Advances backend-owned frame state. Called once per GUM_update().
+void        GUM_Backend_update                           (void);
+
 //! Overrides the library's logger with libGumball's logger
 void        GUM_Backend_setLogger                        (void);
 //! Resets the library's logger back to the default
@@ -57,7 +60,7 @@ GBL_RESULT   GUM_Backend_Font_unload                     (GUM_IResource* pResour
 GBL_RESULT   GUM_Backend_Font_draw                       (GUM_Renderer*  pRenderer, GUM_Font* pFont, GblStringRef* pText, GUM_Vector2 position, GUM_Color color, int fontSize, float spacing);
 //! Returns the size of the passed text, given the font and font size
 GUM_Vector2  GUM_Backend_Font_measureText                (GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize);
-//! Returns a pointer to the default font
+//! Returns a pointer to the backend's built-in default font, or nullptr when it doesn't provide one
 GUM_Font*    GUM_Backend_Font_default                    (void);
 
 //! Updates the mouse state, sending events when needed

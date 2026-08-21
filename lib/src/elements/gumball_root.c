@@ -120,6 +120,8 @@ void GUM_drawQueue_remove(GblObject* pObject) {
 }
 
 void GUM_Root_update(GUM_Root* pRoot) {
+    GUM_Backend_update();
+
     GUM_Vector2 screenSize = GUM_Backend_screenSize();
 
     if (screenSize.x != lastScreenSize_.x ||
