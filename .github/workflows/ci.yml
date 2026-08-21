@@ -20,16 +20,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            autoconf autoconf-archive automake libtool \
             ninja-build xvfb python3-pil pkg-config \
-            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
-            libgl1-mesa-dev libwayland-dev libxkbcommon-dev
+            libx11-dev libxft-dev libxext-dev libxcursor-dev libxinerama-dev libxrandr-dev \
+            libgl1-mesa-dev libegl1-mesa-dev libwayland-dev libxkbcommon-dev
 
       - name: Install backend dependencies
         run: |
-          git clone --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
+          git clone --branch 2026.07.29 --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
           "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
-          "$RUNNER_TEMP/vcpkg/vcpkg" install raylib sdl3 sdl3-image sdl3-ttf
+          "$RUNNER_TEMP/vcpkg/vcpkg" install raylib 'sdl3[core,x11,wayland]' sdl3-image sdl3-ttf
 
       - name: Configure SDL3
         run: |
