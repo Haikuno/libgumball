@@ -13,17 +13,17 @@ static void SDLCALL GUM_SDL3_log_(void* pUserdata, int category, SDL_LogPriority
         case SDL_LOG_PRIORITY_TRACE:
         case SDL_LOG_PRIORITY_VERBOSE:
         case SDL_LOG_PRIORITY_DEBUG:
-            GUM_LOG_DEBUG("%s", pMessage);
+            GUM_LOG_DEBUG("SDL3: %s", pMessage);
             break;
         case SDL_LOG_PRIORITY_INFO:
-            GUM_LOG_INFO("%s", pMessage);
+            GUM_LOG_INFO("SDL3: %s", pMessage);
             break;
         case SDL_LOG_PRIORITY_WARN:
-            GUM_LOG_WARN("%s", pMessage);
+            GUM_LOG_WARN("SDL3: %s", pMessage);
             break;
         case SDL_LOG_PRIORITY_ERROR:
         case SDL_LOG_PRIORITY_CRITICAL:
-            GUM_LOG_ERROR("%s", pMessage);
+            GUM_LOG_ERROR("SDL3: %s", pMessage);
             break;
         default:
             break;
