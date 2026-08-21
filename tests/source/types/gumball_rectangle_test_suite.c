@@ -4,6 +4,10 @@
 
 #define GBL_SELF_TYPE GUM_RectangleTestSuite
 
+GBL_TEST_FIXTURE_NONE
+GBL_TEST_INIT_NONE
+GBL_TEST_FINAL_NONE
+
 GBL_TEST_CASE(overlap)
     GUM_Rectangle result = GUM_Rectangle_intersect((GUM_Rectangle){ 0, 0, 10, 10 },
                                                    (GUM_Rectangle){ 5, 5, 10, 10 });
