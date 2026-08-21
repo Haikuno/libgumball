@@ -1,25 +1,38 @@
 add_subdirectory(libgimbal)
 
-file(GLOB_RECURSE SRCS    CONFIGURE_DEPENDS	src/*.c)
+file(GLOB_RECURSE SRCS    CONFIGURE_DEPENDS src/*.c)
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS api/gumball/*.h)
 list(FILTER SRCS EXCLUDE REGEX ".*/backends/.*")
 
-if (GUM_BUILD_BACKEND_SDL3)
-	list(APPEND SRCS src/backends/gumball_backend_SDL3.c)
-endif()
+set(BACKEND_LIBS)
 
-if (GUM_BUILD_BACKEND_RAYLIB)
-    file(GLOB RAYLIB_SRCS src/backends/raylib/*.c)
-    list(APPEND SRCS ${RAYLIB_SRCS})
+if(GUM_BACKEND STREQUAL "SDL3")
+    list(APPEND SRCS src/backends/gumball_backend_SDL3.c)
 
-	if (PLATFORM_DREAMCAST)
-		include_directories(${KOS_PORTS}/include/raylib) # To use <raylib.h> like in PC, instead of <raylib/raylib.h>
-	endif()
+    if(NOT TARGET SDL3::SDL3)
+        find_package(SDL3 CONFIG REQUIRED)
+    endif()
+    if(NOT TARGET SDL3_ttf::SDL3_ttf)
+        find_package(SDL3_ttf CONFIG REQUIRED)
+    endif()
+
+    list(APPEND BACKEND_LIBS SDL3::SDL3 SDL3_ttf::SDL3_ttf)
+elseif(GUM_BACKEND STREQUAL "RAYLIB")
+    file(GLOB BACKEND_SRCS CONFIGURE_DEPENDS src/backends/raylib/*.c)
+    list(APPEND SRCS ${BACKEND_SRCS})
+
+    if(PLATFORM_DREAMCAST)
+        include_directories(${KOS_PORTS}/include/raylib)
+    elseif(NOT TARGET raylib)
+        find_package(raylib CONFIG REQUIRED)
+    endif()
+
+    list(APPEND BACKEND_LIBS raylib)
 endif()
 
 add_library(libGumball STATIC ${SRCS} ${HEADERS})
-target_link_libraries(libGumball libGimbal raylib)
+target_link_libraries(libGumball PUBLIC libGimbal ${BACKEND_LIBS})
 target_include_directories(libGumball
-	PUBLIC
-		${CMAKE_CURRENT_SOURCE_DIR}/api
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/api
 )

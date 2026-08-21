@@ -1,14 +1,24 @@
 cmake_minimum_required(VERSION 3.10)
-project(LibGumball)
+project(LibGumball LANGUAGES C)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-option(GUM_BUILD_DOCS             "Build docs"            OFF)
-option(GUM_BUILD_EXAMPLES         "Build examples"        OFF)
-option(GUM_BUILD_TESTS            "Build unit tests"      OFF) # Not yet implemented
-option(GUM_BUILD_BACKEND_RAYLIB   "Enable raylib backend" ON )
-option(GUM_BUILD_BACKEND_SDL3     "Enable SDL3 backend"   OFF) # Not yet implemented
+option(GUM_BUILD_DOCS     "Build docs"       OFF)
+option(GUM_BUILD_EXAMPLES "Build examples"   OFF)
+option(GUM_BUILD_TESTS    "Build unit tests" OFF)
+
+set(GUM_BACKEND "RAYLIB" CACHE STRING "libGumball backend")
+set_property(CACHE GUM_BACKEND PROPERTY STRINGS SDL3 RAYLIB)
+string(TOUPPER "${GUM_BACKEND}" GUM_BACKEND)
+
+if(GUM_BACKEND STREQUAL "SDL3")
+    set(GUM_BACKEND_DIR "sdl3")
+elseif(GUM_BACKEND STREQUAL "RAYLIB")
+    set(GUM_BACKEND_DIR "raylib")
+else()
+    message(FATAL_ERROR "Unsupported libGumball backend: ${GUM_BACKEND}")
+endif()
 
 add_subdirectory(lib)
 
