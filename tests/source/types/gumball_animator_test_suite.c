@@ -8,6 +8,9 @@ GBL_TEST_FIXTURE {
     GUM_Animator animator;
 };
 
+GBL_TEST_INIT_NONE
+GBL_TEST_FINAL_NONE
+
 GBL_TEST_CASE(makeSettled)
     pFixture->animator = GUM_Animator_make(3.0f, 1.0f, GUM_EASE_LINEAR);
 
