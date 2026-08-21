@@ -61,5 +61,5 @@ GBL_RESULT GUM_Backend_Font_unload(GUM_IResource* pSelf) {
 }
 
 GUM_Font* GUM_Backend_Font_default(void) {
-    return nullptr;
+    return GUM_Font_default();
 }

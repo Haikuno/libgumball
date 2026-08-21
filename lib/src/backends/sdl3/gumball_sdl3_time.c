@@ -14,6 +14,12 @@ void GUM_Backend_update(void) {
     GUM_SDL3_gamepadsUpdate_();
 }
 
+void GUM_Backend_deinit(void) {
+    GUM_SDL3_gamepadsDeinit_();
+    lastTicks_ = 0;
+    frameTime_ = 0.0f;
+}
+
 uint32_t GUM_Backend_timestamp(void) {
     return (uint32_t)SDL_GetTicks();
 }

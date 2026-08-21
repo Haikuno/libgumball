@@ -2,6 +2,7 @@
 #include <raylib.h>
 
 void GUM_Backend_update(void) {}
+void GUM_Backend_deinit(void) {}
 
 uint32_t GUM_Backend_timestamp(void) {
     return (uint32_t)(GetTime() * 1000);

@@ -28,7 +28,7 @@ GBL_EXPORT GUM_Renderer* GUM_Renderer_create(void* pRenderer) {
     GUM_Renderer* pSelf = malloc(sizeof(*pSelf));
     if (!pSelf) return nullptr;
 
-    pSelf->pRenderer   = pRenderer;
+    *pSelf = (GUM_Renderer){ .pRenderer = pRenderer };
     pSelf->pTextEngine = TTF_CreateRendererTextEngine(pSelf->pRenderer);
 
     if (!pSelf->pTextEngine) {

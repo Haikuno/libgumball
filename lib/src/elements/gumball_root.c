@@ -45,6 +45,7 @@ static GBL_RESULT GUM_RootClass_final_(GblClass* pClass, const void* pData) {
         GblLogger_unregister(pLogger_);
         GUM_Backend_resetLogger();
         GUM_InputSystem_deinit();
+        GUM_Backend_deinit();
     }
 
     return GBL_RESULT_SUCCESS;

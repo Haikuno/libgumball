@@ -3,6 +3,8 @@
 #include <gimbal/meta/instances/gimbal_box.h>
 #include <gimbal/utils/gimbal_byte_array.h>
 
+static GUM_Font* pDefaultFont_ = nullptr;
+
 GBL_RESULT GUM_FontClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
@@ -10,6 +12,22 @@ GBL_RESULT GUM_FontClass_init_(GblClass* pClass, const void* pData) {
     GUM_IRESOURCE_CLASS(pClass)->pFnUnload = GUM_Backend_Font_unload;
 
     return GBL_RESULT_SUCCESS;
+}
+
+GUM_Font* GUM_Font_default(void) {
+    return pDefaultFont_;
+}
+
+void GUM_Font_setDefault(GUM_Font* pFont) {
+    if (pDefaultFont_ == pFont) return;
+
+    if (pFont)
+        GUM_IResource_ref(GUM_IRESOURCE(pFont));
+
+    if (pDefaultFont_)
+        GUM_IResource_unref(GUM_IRESOURCE(pDefaultFont_));
+
+    pDefaultFont_ = pFont;
 }
 
 GblType GUM_Font_type(void) {

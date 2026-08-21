@@ -23,6 +23,8 @@ GBL_DECLS_BEGIN
 
 //! Advances backend-owned frame state. Called once per GUM_update().
 void        GUM_Backend_update                           (void);
+//! Releases backend-owned state.
+void        GUM_Backend_deinit                           (void);
 
 //! Overrides the library's logger with libGumball's logger
 void        GUM_Backend_setLogger                        (void);

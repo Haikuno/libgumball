@@ -62,6 +62,17 @@ void GUM_SDL3_gamepadsUpdate_(void) {
     SDL_free(pIds);
 }
 
+void GUM_SDL3_gamepadsDeinit_(void) {
+    for (int i = 0; i < GUM_SDL3_MAX_GAMEPADS_; ++i) {
+        if (gamepads_[i].pGamepad)
+            SDL_CloseGamepad(gamepads_[i].pGamepad);
+
+        gamepads_[i] = (GUM_SDL3_GamepadSlot_){ 0 };
+    }
+
+    wheel_ = (GUM_Vector2){ 0 };
+}
+
 GBL_EXPORT void GUM_SDL3_processEvent(const SDL_Event* pEvent) {
     if (!pEvent) return;
 

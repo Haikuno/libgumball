@@ -12,7 +12,7 @@
  *   \todo
  *       - Replace text alignments with flags for TOP, RIGHT, BOTTOM, LEFT, CENTER
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 #include <gimbal/gimbal_meta.h>
@@ -57,6 +57,11 @@ GBL_ENUM(GUM_TextAlignment,
     (GUM_TEXT_ALIGN_BOTTOM, "Bottom", 3),
     (GUM_TEXT_ALIGN_LEFT,   "Left",   4)
 )
+
+//! Returns the application-selected default font, or nullptr if one hasn't been set.
+GUM_Font* GUM_Font_default(void) GBL_NOEXCEPT;
+//! Sets the application default font. Pass nullptr to clear it.
+void      GUM_Font_setDefault(GUM_Font* pFont) GBL_NOEXCEPT;
 
 //! \cond
 GblType GUM_Font_type(void) GBL_NOEXCEPT;

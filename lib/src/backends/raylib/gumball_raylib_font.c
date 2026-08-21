@@ -31,6 +31,7 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
 
     Font  font  = LoadFont(pPath);
     void* pFont = malloc(sizeof(Font));
+    if (!pFont) return GBL_RESULT_ERROR_MEM_ALLOC;
 
     memcpy(pFont, &font, sizeof(Font));
     GUM_IResource_setData(pSelf, pFont);
@@ -42,18 +43,23 @@ GBL_RESULT GUM_Backend_Font_unload(GUM_IResource* pSelf) {
     if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     void* pFont = (Font*)GUM_IResource_data(pSelf);
+    if (!pFont) return GBL_RESULT_SUCCESS;
 
     UnloadFont(*(Font*)pFont);
     free(pFont);
+    GUM_IResource_setData(pSelf, nullptr);
 
     return GBL_RESULT_SUCCESS;
 }
 
 GUM_Font* GUM_Backend_Font_default(void) {
+    GUM_Font* pDefault = GUM_Font_default();
+    if (pDefault) return pDefault;
     if (defaultFont_) return defaultFont_;
 
     Font  font     = GetFontDefault();
     void* pRayFont = malloc(sizeof(Font));
+    if (!pRayFont) return nullptr;
 
     memcpy(pRayFont, &font, sizeof(Font));
 
