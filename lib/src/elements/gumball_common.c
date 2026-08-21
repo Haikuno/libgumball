@@ -144,8 +144,10 @@ GBL_EXPORT GblObject* (GUM_ref)(GblObject* pSelf) {
 GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
     GUM_draw_disableAll(pSelf);
 
-    GblObject_foreachChildReverse(pSelf, pChild)
+    GblObject_foreachChildReverse(pSelf, pChild) {
+        GblObject_setParent(pChild, nullptr);
         GUM_unref(pChild);
+    }
 
     if GBL_UNLIKELY (GBL_TYPEOF(pSelf) == GUM_ROOT_TYPE) {
         GblModule_unregister(GBL_MODULE(pSelf));
