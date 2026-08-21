@@ -32,6 +32,13 @@ elseif(GUM_BACKEND STREQUAL "RAYLIB")
     endif()
 
     list(APPEND BACKEND_LIBS raylib)
+
+    if(NOT PLATFORM_DREAMCAST)
+        find_package(glfw3 CONFIG QUIET)
+        if(TARGET glfw)
+            list(APPEND BACKEND_LIBS glfw)
+        endif()
+    endif()
 endif()
 
 add_library(libGumball STATIC ${SRCS} ${HEADERS})
