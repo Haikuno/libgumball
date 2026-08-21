@@ -5,31 +5,36 @@ on:
   pull_request:
 
 jobs:
-  test:
+  sdl3:
+    name: SDL3 build and tests
     runs-on: ubuntu-latest
     env:
       SDL_VIDEODRIVER: dummy
-      LIBGL_ALWAYS_SOFTWARE: "1"
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install host tools
+      - name: Install SDL3 host dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            autoconf autoconf-archive automake libtool \
-            ninja-build xvfb python3-pil pkg-config \
-            xorg-dev libgl1-mesa-dev libglu1-mesa-dev \
+            ninja-build pkg-config \
+            libx11-dev libxft-dev libxext-dev \
             libwayland-dev libxkbcommon-dev libegl1-mesa-dev
 
-      - name: Install backend dependencies
+      - name: Restore vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3
+
+      - name: Install SDL3 dependencies
         run: |
           git clone --branch 2026.07.29 --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
           "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
-          "$RUNNER_TEMP/vcpkg/vcpkg" install 'raylib[core]' 'sdl3[core,x11,wayland]' sdl3-image sdl3-ttf
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]' sdl3-image sdl3-ttf
 
       - name: Configure SDL3
         run: |
@@ -46,6 +51,49 @@ jobs:
           ctest --test-dir build-sdl3 --verbose 2>&1 | tee build-sdl3/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-sdl3/test-output.log
 
+      - name: Render SDL3 parity scene
+        if: success()
+        run: |
+          mkdir -p parity-output
+          build-sdl3/tests/GumballBackendParity parity-output/backend-parity-sdl3.png
+
+      - name: Upload SDL3 parity image
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-parity-sdl3
+          path: parity-output/backend-parity-sdl3.png
+
+  raylib:
+    name: raylib build and tests
+    runs-on: ubuntu-latest
+    env:
+      LIBGL_ALWAYS_SOFTWARE: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install raylib host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build xvfb pkg-config \
+            xorg-dev libgl1-mesa-dev libglu1-mesa-dev
+
+      - name: Restore vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-2026.07.29-raylib
+
+      - name: Install raylib dependencies
+        run: |
+          git clone --branch 2026.07.29 --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
+          "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'raylib[core]'
+
       - name: Configure raylib
         run: |
           cmake -S . -B build-raylib -G Ninja \
@@ -61,11 +109,43 @@ jobs:
           xvfb-run -a ctest --test-dir build-raylib --verbose 2>&1 | tee build-raylib/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-raylib/test-output.log
 
-      - name: Render backend parity scenes
+      - name: Render raylib parity scene
+        if: success()
         run: |
           mkdir -p parity-output
-          build-sdl3/tests/GumballBackendParity parity-output/backend-parity-sdl3.png
           xvfb-run -a build-raylib/tests/GumballBackendParity parity-output/backend-parity-raylib.png
+
+      - name: Upload raylib parity image
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-parity-raylib
+          path: parity-output/backend-parity-raylib.png
+
+  parity:
+    name: Backend pixel parity
+    needs: [sdl3, raylib]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install parity tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pil
+
+      - name: Download SDL3 parity image
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-parity-sdl3
+          path: parity-output
+
+      - name: Download raylib parity image
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-parity-raylib
+          path: parity-output
 
       - name: Compare backend output
         run: python3 tests/parity/compare_images.py parity-output/backend-parity-sdl3.png parity-output/backend-parity-raylib.png parity-output/backend-parity-diff.png
@@ -74,5 +154,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-parity
-          path: parity-output/
+          name: backend-parity-diff
+          path: parity-output/backend-parity-diff.png
+          if-no-files-found: ignore
