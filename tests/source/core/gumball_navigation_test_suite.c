@@ -34,24 +34,28 @@ GBL_TEST_FINAL()
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(defaultFocus)
+    GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), nullptr);
     GUM_Nav_move(GUM_INPUTDEVICE(pFixture->pKeyboard), GUM_INPUTACTION_MOVE_RIGHT);
     GBL_TEST_COMPARE(GUM_INPUTDEVICE(pFixture->pKeyboard)->pFocusedWidget,
                      GUM_WIDGET(pFixture->pSecond));
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(moveRight)
+    GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), GUM_WIDGET(pFixture->pSecond));
     GUM_Nav_move(GUM_INPUTDEVICE(pFixture->pKeyboard), GUM_INPUTACTION_MOVE_RIGHT);
     GBL_TEST_COMPARE(GUM_INPUTDEVICE(pFixture->pKeyboard)->pFocusedWidget,
                      GUM_WIDGET(pFixture->pThird));
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(moveLeft)
+    GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), GUM_WIDGET(pFixture->pThird));
     GUM_Nav_move(GUM_INPUTDEVICE(pFixture->pKeyboard), GUM_INPUTACTION_MOVE_LEFT);
     GBL_TEST_COMPARE(GUM_INPUTDEVICE(pFixture->pKeyboard)->pFocusedWidget,
                      GUM_WIDGET(pFixture->pSecond));
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(explicitFocus)
+    GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), nullptr);
     GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), GUM_WIDGET(pFixture->pFirst));
     GBL_TEST_COMPARE(GUM_INPUTDEVICE(pFixture->pKeyboard)->pFocusedWidget,
                      GUM_WIDGET(pFixture->pFirst));
