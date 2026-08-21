@@ -26,10 +26,12 @@ GblType GUM_Animator_type(void) {
 }
 
 GBL_EXPORT GUM_Animator GUM_Animator_make(float value, float duration, GUM_EasingType easing) {
+    duration = GBL_MAX(duration, 0.0f);
     return (GUM_Animator){ .from     = value,
                            .to       = value,
                            .current  = value,
                            .duration = duration,
+                           .elapsed  = duration,
                            .easing   = easing};
 }
 
@@ -43,6 +45,9 @@ GBL_EXPORT void GUM_Animator_set(GUM_Animator* pSelf, float target) {
     pSelf->from    = pSelf->current;
     pSelf->to      = target;
     pSelf->elapsed = 0.0f;
+
+    if (pSelf->duration <= 0.0f)
+        pSelf->current = target;
 }
 
 GBL_EXPORT bool GUM_Animator_update(GUM_Animator* pSelf, float dt) {
@@ -130,4 +135,3 @@ GBL_EXPORT float GUM_Ease_elasticOut(float t) {
     const float p = 0.3f;
     return powf(2.0f, -10.0f * t) * sinf((t - p / 4.0f) * (2.0f * GBL_F_PI) / p) + 1.0f;
 }
-

@@ -1,16 +1,18 @@
-file(GLOB_RECURSE TEST_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${GUM_BACKEND_DIR}/*.c")
+set(GUMBALL_TEST_SOURCES
+    include/core/gumball_navigation_test_suite.h
+    source/core/gumball_navigation_test_suite.c
+    include/elements/gumball_container_test_suite.h
+    source/elements/gumball_container_test_suite.c
+    include/types/gumball_animator_test_suite.h
+    source/types/gumball_animator_test_suite.c
+    include/types/gumball_rectangle_test_suite.h
+    source/types/gumball_rectangle_test_suite.c
+    source/gumball_test_main.c
+)
 
-foreach(src IN LISTS TEST_SOURCES)
-    get_filename_component(name ${src} NAME_WE)
-    get_filename_component(dir  ${src} DIRECTORY)
+add_executable(GumballTests ${GUMBALL_TEST_SOURCES})
+target_link_libraries(GumballTests PRIVATE libGumball)
+target_include_directories(GumballTests PRIVATE include)
+target_compile_definitions(GumballTests PRIVATE GUM_TEST_BACKEND_${GUM_BACKEND}=1)
 
-    string(REPLACE "/" "_" target "${dir}_${name}")
-
-    add_executable(${target} ${src})
-    target_link_libraries(${target} libGumball)
-
-    set_target_properties(${target} PROPERTIES
-        OUTPUT_NAME "${name}"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${dir}"
-    )
-endforeach()
+add_test(NAME GumballTests COMMAND GumballTests)

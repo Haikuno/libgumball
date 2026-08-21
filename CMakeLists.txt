@@ -37,5 +37,6 @@ if(GUM_BUILD_EXAMPLES)
 endif()
 
 if(GUM_BUILD_TESTS)
+    enable_testing()
     add_subdirectory(tests)
 endif()

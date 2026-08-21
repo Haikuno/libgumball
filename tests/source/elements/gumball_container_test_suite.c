@@ -1,0 +1,60 @@
+#include "elements/gumball_container_test_suite.h"
+#include <gimbal/test/gimbal_test_macros.h>
+#include <gumball/gumball.h>
+
+#define GBL_SELF_TYPE GUM_ContainerTestSuite
+
+GBL_TEST_FIXTURE {
+    GUM_Root* pRoot;
+};
+
+GBL_TEST_INIT()
+    pFixture->pRoot = GUM_Root_create();
+    GBL_TEST_VERIFY(pFixture->pRoot);
+GBL_TEST_CASE_END
+
+GBL_TEST_FINAL()
+    GUM_unref(pFixture->pRoot);
+GBL_TEST_CASE_END
+
+GBL_TEST_CASE(verticalLayout)
+    GUM_Container* pContainer = GUM_Container_create("w", 100.0f,
+                                                     "h", 100.0f,
+                                                     "padding", 10.0f,
+                                                     "margin", 5.0f);
+    GUM_Widget* pFirst  = GUM_Widget_create("parent", pContainer);
+    GUM_Widget* pSecond = GUM_Widget_create("parent", pContainer);
+
+    GBL_TEST_COMPARE(pFirst->x, 10.0f);
+    GBL_TEST_COMPARE(pFirst->y, 10.0f);
+    GBL_TEST_COMPARE(pFirst->w, 80.0f);
+    GBL_TEST_COMPARE(pFirst->h, 35.0f);
+
+    GBL_TEST_COMPARE(pSecond->x, 10.0f);
+    GBL_TEST_COMPARE(pSecond->y, 55.0f);
+    GBL_TEST_COMPARE(pSecond->w, 80.0f);
+    GBL_TEST_COMPARE(pSecond->h, 35.0f);
+GBL_TEST_CASE_END
+
+GBL_TEST_CASE(horizontalLayout)
+    GUM_Container* pContainer = GUM_Container_create("w", 100.0f,
+                                                     "h", 60.0f,
+                                                     "padding", 10.0f,
+                                                     "margin", 5.0f,
+                                                     "direction", GUM_DIRECTION_HORIZONTAL);
+    GUM_Widget* pFirst  = GUM_Widget_create("parent", pContainer);
+    GUM_Widget* pSecond = GUM_Widget_create("parent", pContainer);
+
+    GBL_TEST_COMPARE(pFirst->x, 10.0f);
+    GBL_TEST_COMPARE(pFirst->y, 10.0f);
+    GBL_TEST_COMPARE(pFirst->w, 35.0f);
+    GBL_TEST_COMPARE(pFirst->h, 40.0f);
+
+    GBL_TEST_COMPARE(pSecond->x, 55.0f);
+    GBL_TEST_COMPARE(pSecond->y, 10.0f);
+    GBL_TEST_COMPARE(pSecond->w, 35.0f);
+    GBL_TEST_COMPARE(pSecond->h, 40.0f);
+GBL_TEST_CASE_END
+
+GBL_TEST_REGISTER(verticalLayout,
+                  horizontalLayout)
