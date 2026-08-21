@@ -59,11 +59,11 @@ jobs:
       - name: Render backend parity scenes
         run: |
           mkdir -p parity-output
-          build-sdl3/tests/GumballBackendParity parity-output/sdl3.bmp
-          xvfb-run -a build-raylib/tests/GumballBackendParity parity-output/raylib.bmp
+          build-sdl3/tests/GumballBackendParity parity-output/backend-parity-sdl3.png
+          xvfb-run -a build-raylib/tests/GumballBackendParity parity-output/backend-parity-raylib.png
 
       - name: Compare backend output
-        run: python3 tests/parity/compare_images.py parity-output/sdl3.bmp parity-output/raylib.bmp parity-output/diff.png
+        run: python3 tests/parity/compare_images.py parity-output/backend-parity-sdl3.png parity-output/backend-parity-raylib.png parity-output/backend-parity-diff.png
 
       - name: Upload parity failure
         if: failure()
