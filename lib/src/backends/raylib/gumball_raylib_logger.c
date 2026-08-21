@@ -2,24 +2,25 @@
 #include <gumball/core/gumball_logger.h>
 #include <raylib.h>
 
-static void GUM_raylibTraceLog_(int logLevel, const char* text, va_list args) {
-    char buf[1024];
-    vsnprintf(buf, sizeof(buf), text, args);
+static void GUM_raylibTraceLog_(int logLevel, const char* pText, va_list args) {
+    char buffer[1024];
+    vsnprintf(buffer, sizeof(buffer), pText, args);
+
     switch (logLevel) {
         case LOG_ALL:
         case LOG_TRACE:
         case LOG_DEBUG:
-            GBL_LOG_DEBUG("raylib ", buf);
+            GUM_LOG_DEBUG("raylib: %s", buffer);
             break;
         case LOG_INFO:
-            GBL_LOG_INFO("raylib ", buf);
+            GUM_LOG_INFO("raylib: %s", buffer);
             break;
         case LOG_WARNING:
-            GBL_LOG_WARN("raylib ", buf);
+            GUM_LOG_WARN("raylib: %s", buffer);
             break;
         case LOG_ERROR:
         case LOG_FATAL:
-            GBL_LOG_ERROR("raylib ", buf);
+            GUM_LOG_ERROR("raylib: %s", buffer);
             break;
     }
 }
