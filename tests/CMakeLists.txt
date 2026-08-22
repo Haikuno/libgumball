@@ -5,6 +5,8 @@ set(GUMBALL_TEST_SOURCES
     source/core/gumball_navigation_test_suite.c
     include/elements/gumball_container_test_suite.h
     source/elements/gumball_container_test_suite.c
+    include/elements/gumball_root_test_suite.h
+    source/elements/gumball_root_test_suite.c
     include/elements/gumball_widget_test_suite.h
     source/elements/gumball_widget_test_suite.c
     include/types/gumball_animator_test_suite.h
