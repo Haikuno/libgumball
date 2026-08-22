@@ -47,3 +47,4 @@ target_include_directories(libGumball
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/api
 )
+gum_enable_sanitizers(libGumball)
