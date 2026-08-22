@@ -46,6 +46,8 @@ static GBL_RESULT GUM_RootClass_final_(GblClass* pClass, const void* pData) {
         GUM_Backend_resetLogger();
         GUM_InputSystem_deinit();
         GUM_Backend_deinit();
+        GblLogger_unref(pLogger_);
+        pLogger_ = nullptr;
     }
 
     return GBL_RESULT_SUCCESS;
@@ -71,6 +73,8 @@ GblType GUM_Root_type(void) {
 static int GUM_zIndex_cmp_(const void* pA, const void* pB) {
     GblObject* a = *(GblObject**)pA;
     GblObject* b = *(GblObject**)pB;
+
+    if (!a || !b) return 0;
 
     GUM_Widget* aWidget = GBL_AS(GUM_Widget, a);
     GUM_Widget* bWidget = GBL_AS(GUM_Widget, b);
