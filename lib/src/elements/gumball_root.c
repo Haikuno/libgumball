@@ -7,6 +7,7 @@
 #include <gumball/core/gumball_logger.h>
 #include <gumball/core/gumball_backend.h>
 #include <gumball/core/gumball_inputsystem.h>
+#include <gumball/core/gumball_manager.h>
 #include <gumball/gumball_events.h>
 
 #include <gimbal/gimbal_algorithms.h>
@@ -42,10 +43,11 @@ static GBL_RESULT GUM_RootClass_final_(GblClass* pClass, const void* pData) {
 
     if (!GblType_classRefCount(GUM_ROOT_TYPE)) {
         GUM_drawQueue_free();
+        GUM_Font_setDefault(nullptr);
+        GUM_Manager_deinit();
         GblLogger_unregister(pLogger_);
         GUM_Backend_resetLogger();
         GUM_InputSystem_deinit();
-        GUM_Font_setDefault(nullptr);
         GUM_Backend_deinit();
         GblLogger_unref(pLogger_);
         pLogger_ = nullptr;
