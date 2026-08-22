@@ -7,7 +7,8 @@ GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRe
     TTF_Font* pSdlFont = GUM_IResource_data(GUM_IRESOURCE(pFont));
     if (!pSdlFont) return (GUM_Vector2){ 0 };
 
-    TTF_SetFontSize(pSdlFont, fontSize);
+    if (!TTF_SetFontSize(pSdlFont, fontSize))
+        return (GUM_Vector2){ 0 };
 
     int width  = 0;
     int height = 0;
@@ -27,12 +28,17 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* p
     TTF_Font* pSdlFont = GUM_IResource_data(GUM_IRESOURCE(pFont));
     if (!pTextEngine || !pSdlFont) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    TTF_SetFontSize(pSdlFont, (float)fontSize);
+    if (!TTF_SetFontSize(pSdlFont, (float)fontSize))
+        return GBL_RESULT_ERROR_INTERNAL;
 
     TTF_Text* pSdlText = TTF_CreateText(pTextEngine, pSdlFont, pText, 0);
     if (!pSdlText) return GBL_RESULT_ERROR_INTERNAL;
 
-    TTF_SetTextColor(pSdlText, color.r, color.g, color.b, color.a);
+    if (!TTF_SetTextColor(pSdlText, color.r, color.g, color.b, color.a)) {
+        TTF_DestroyText(pSdlText);
+        return GBL_RESULT_ERROR_INTERNAL;
+    }
+
     const bool success = TTF_DrawRendererText(pSdlText, position.x, position.y);
     TTF_DestroyText(pSdlText);
 
