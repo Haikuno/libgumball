@@ -46,6 +46,10 @@ static GblClass* pPersistentClasses_[8];
 static size_t persistentClassCount_ = 0;
 static GUM_Root* pPersistentRoot_ = nullptr;
 
+static void persistentSignalNoop_(GUM_Widget* pWidget) {
+    GBL_UNUSED(pWidget);
+}
+
 static void pinPersistentClass_(GblType type) {
     GblClass* pClass = GblClass_refDefault(type);
     if (pClass)
@@ -117,6 +121,24 @@ static void preparePersistentMetadata_(void) {
 
         GUM_Root* pRequiredRoot = nullptr;
         GBL_REQUIRE_SCOPE(GUM_Root, &pRequiredRoot, "GUM_Root") {
+        }
+
+        /* libGimbal's signal connection pool and instance-table backing
+         * storage are process-global caches. Warm the exact Widget signals
+         * exercised by the tracked navigation suite so those persistent pages
+         * belong to normal process scope rather than the scenario allocator. */
+        GUM_Widget* pSignalWidget = GUM_Widget_create();
+        if (pSignalWidget) {
+            GBL_CONNECT(pSignalWidget, "onPressConfirm",      persistentSignalNoop_);
+            GBL_CONNECT(pSignalWidget, "onPressMoveUp",       persistentSignalNoop_);
+            GBL_CONNECT(pSignalWidget, "onPressMoveDown",     persistentSignalNoop_);
+            GBL_CONNECT(pSignalWidget, "onPressMoveLeft",     persistentSignalNoop_);
+            GBL_CONNECT(pSignalWidget, "onPressMoveRight",    persistentSignalNoop_);
+            GBL_CONNECT(pSignalWidget, "onReleaseMoveUp",     persistentSignalNoop_);
+            GBL_CONNECT(pSignalWidget, "onReleaseMoveDown",   persistentSignalNoop_);
+            GBL_CONNECT(pSignalWidget, "onReleaseMoveLeft",   persistentSignalNoop_);
+            GBL_CONNECT(pSignalWidget, "onReleaseMoveRight",  persistentSignalNoop_);
+            GUM_unref(pSignalWidget);
         }
     }
 }
