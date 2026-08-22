@@ -4,9 +4,13 @@
 static GUM_Font* defaultFont_ = nullptr;
 
 GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) {
+    if (!pFont || !pText) return (GUM_Vector2){ 0 };
+
+    Font* pRayFont = GUM_IResource_data(GUM_IRESOURCE(pFont));
+    if (!pRayFont) return (GUM_Vector2){ 0 };
+
     GUM_Vector2 size    = { 0, 0 };
-    Font        font    = *(Font*)GUM_IResource_data(GUM_IRESOURCE(pFont));
-    Vector2     raySize = MeasureTextEx(font, pText, fontSize, 1.2f);
+    Vector2     raySize = MeasureTextEx(*pRayFont, pText, fontSize, 1.2f);
     size.x              = raySize.x;
     size.y              = raySize.y;
     return size;
@@ -14,11 +18,12 @@ GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRe
 
 GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* pFont, GblStringRef* pText,
                                             GUM_Vector2 position, GUM_Color color, int fontSize, float spacing) {
-    if (!pFont) return GBL_RESULT_ERROR_INVALID_POINTER;
+    if (!pFont || !pText) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    Font font = *(Font*)GUM_IResource_data(GUM_IRESOURCE(pFont));
+    Font* pRayFont = GUM_IResource_data(GUM_IRESOURCE(pFont));
+    if (!pRayFont) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    DrawTextEx(font, pText,
+    DrawTextEx(*pRayFont, pText,
                (Vector2){ position.x, position.y },
                fontSize, spacing,
                (Color){ color.r, color.g, color.b, color.a });
