@@ -217,7 +217,17 @@ jobs:
         run: cmake --build build-sanitize --parallel
 
       - name: Test sanitizers
-        run: ctest --test-dir build-sanitize --verbose
+        run: |
+          set -o pipefail
+          ctest --test-dir build-sanitize --verbose 2>&1 | tee build-sanitize/test-output.log
+
+      - name: Preserve sanitizer failure output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-test-failure
+          path: build-sanitize/test-output.log
+          if-no-files-found: error
 
   parity:
     name: Backend pixel parity
