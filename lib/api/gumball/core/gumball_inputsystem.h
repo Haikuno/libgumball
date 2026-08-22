@@ -12,6 +12,7 @@
 */
 
 #include <gumball/events/gumball_event_input.h>
+#include <gumball/types/gumball_vector2.h>
 
 GBL_FORWARD_DECLARE_STRUCT(GUM_Widget);
 GBL_FORWARD_DECLARE_STRUCT(GUM_Renderer);
@@ -46,5 +47,13 @@ void       GUM_InputSystem_drawFocusRings(GUM_Renderer* pRenderer);
 GBL_RESULT GUM_InputSystem_bind     (GblType deviceType, GUM_InputAction action, GblFlags button);
 // Given a deviceType, unbinds an action previously associated with the passed button, if it was bound in the first place.
 GBL_RESULT GUM_InputSystem_unbind   (GblType deviceType, GUM_InputAction action, GblFlags button);
+
+//! \cond GRUGLESS
+/*! Returns the top-most interactive widget at the given pointer position.
+ *  Noninteractive widgets are pointer-transparent. This is exposed only so
+ *  the backend-independent input contract can be regression-tested.
+*/
+GUM_Widget* GUM_InputSystem_pointerTargetAt_(GUM_Vector2 position);
+//! \endcond
 
 #endif
