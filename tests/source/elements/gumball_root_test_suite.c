@@ -122,5 +122,22 @@ GBL_TEST_CASE(drawOrderTracksZAndEnableOrder)
     GUM_unref(pC);
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(destroyedWidgetLeavesDrawState)
+    uint8_t order[1] = { 0 };
+    size_t count = 0;
+
+    GUM_RootDrawProbe* pProbe = drawProbeCreate_(1, 50, order, &count);
+    GBL_TEST_VERIFY(pProbe);
+    GBL_TEST_COMPARE(GUM_draw(), GBL_RESULT_SUCCESS);
+    GBL_TEST_COMPARE(count, 1);
+
+    GBL_UNREF(pProbe);
+    count = 0;
+
+    GBL_TEST_COMPARE(GUM_draw(), GBL_RESULT_PARTIAL);
+    GBL_TEST_COMPARE(count, 0);
+GBL_TEST_CASE_END
+
 GBL_TEST_REGISTER(singleRoot,
-                  drawOrderTracksZAndEnableOrder)
+                  drawOrderTracksZAndEnableOrder,
+                  destroyedWidgetLeavesDrawState)
