@@ -36,7 +36,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v2
+          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v3-png
 
       - name: Prepare vcpkg
         run: |
@@ -57,9 +57,9 @@ jobs:
             ${{ runner.temp }}/vcpkg/installed/vcpkg/issue_body.md
           if-no-files-found: warn
 
-      - name: Install SDL3_image
+      - name: Install SDL3_image with PNG support
         run: |
-          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-image
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3-image[png]'
 
       - name: Install SDL3_ttf
         run: |
@@ -77,6 +77,7 @@ jobs:
 
       - name: Test SDL3
         run: |
+          set -o pipefail
           ctest --test-dir build-sdl3 --verbose 2>&1 | tee build-sdl3/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-sdl3/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to realloc unknown pointer" build-sdl3/test-output.log
@@ -146,6 +147,7 @@ jobs:
 
       - name: Test raylib
         run: |
+          set -o pipefail
           xvfb-run -a ctest --test-dir build-raylib --verbose 2>&1 | tee build-raylib/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-raylib/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to realloc unknown pointer" build-raylib/test-output.log
@@ -200,7 +202,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v2
+          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v3-png
 
       - name: Prepare vcpkg
         run: |
@@ -221,9 +223,9 @@ jobs:
             ${{ runner.temp }}/vcpkg/installed/vcpkg/issue_body.md
           if-no-files-found: warn
 
-      - name: Install SDL3_image
+      - name: Install SDL3_image with PNG support
         run: |
-          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-image
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3-image[png]'
 
       - name: Install SDL3_ttf
         run: |
