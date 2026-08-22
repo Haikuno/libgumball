@@ -6,9 +6,12 @@ GUM_Event_Mouse* GUM_Event_Mouse_createFrom(GUM_Mouse* pMouse) {
     if (!pEvent || !pMouse)
         return pEvent;
 
-    GUM_EVENT_POINTER(pEvent)->position = pMouse->position;
-    pEvent->delta = pMouse->delta;
-    pEvent->wheel = pMouse->wheel;
+    GUM_Pointer* pPointer = GUM_POINTER(pMouse);
+    GUM_Event_Pointer* pPointerEvent = GUM_EVENT_POINTER(pEvent);
+
+    pPointerEvent->position = pPointer->position;
+    pPointerEvent->delta    = pPointer->delta;
+    pEvent->wheel           = pMouse->wheel;
     GUM_EVENT_INPUT(pEvent)->pInputDevice = GUM_INPUTDEVICE(pMouse);
     return pEvent;
 }
