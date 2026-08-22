@@ -2,6 +2,7 @@
 #include <gumball/elements/gumball_container.h>
 #include <gumball/elements/gumball_root.h>
 #include <gumball/elements/gumball_common.h>
+#include <gumball/types/gumball_font.h>
 #include <gumball/types/gumball_renderer.h>
 #include <gumball/core/gumball_logger.h>
 #include <gumball/core/gumball_backend.h>
@@ -44,6 +45,7 @@ static GBL_RESULT GUM_RootClass_final_(GblClass* pClass, const void* pData) {
         GblLogger_unregister(pLogger_);
         GUM_Backend_resetLogger();
         GUM_InputSystem_deinit();
+        GUM_Font_setDefault(nullptr);
         GUM_Backend_deinit();
         GblLogger_unref(pLogger_);
         pLogger_ = nullptr;
