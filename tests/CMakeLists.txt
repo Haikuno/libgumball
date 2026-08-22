@@ -1,4 +1,6 @@
 set(GUMBALL_TEST_SOURCES
+    include/core/gumball_manager_test_suite.h
+    source/core/gumball_manager_test_suite.c
     include/core/gumball_navigation_test_suite.h
     source/core/gumball_navigation_test_suite.c
     include/elements/gumball_container_test_suite.h
