@@ -15,7 +15,6 @@ static GblArrayList GUM_drawQueue_  = {0};
 static GUM_Vector2  lastScreenSize_ = {0};
 
 static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
-    GblObject_setName(GBL_OBJECT(pInstance), "GUM_Root");
     if (!GblModule_isLoaded(GBL_MODULE(pInstance))) {
         GblModule_register(GBL_MODULE(pInstance));
     }
