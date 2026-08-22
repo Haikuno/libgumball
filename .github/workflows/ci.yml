@@ -41,13 +41,16 @@ jobs:
           "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
 
       - name: Install SDL3
-        run: "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
 
       - name: Install SDL3_image
-        run: "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-image
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-image
 
       - name: Install SDL3_ttf
-        run: "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
 
       - name: Configure SDL3
         run: |
@@ -169,13 +172,16 @@ jobs:
           "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
 
       - name: Install SDL3
-        run: "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
 
       - name: Install SDL3_image
-        run: "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-image
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-image
 
       - name: Install SDL3_ttf
-        run: "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
 
       - name: Configure sanitizers
         run: |
