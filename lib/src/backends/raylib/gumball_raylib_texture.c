@@ -21,17 +21,19 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Texture_draw(GUM_Renderer* pRenderer, GUM_Text
                                                GUM_Rectangle rectangle, GUM_Color color) {
     if (!pTexture) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    Texture2D texture = *(Texture2D*)GUM_IResource_data(GUM_IRESOURCE(pTexture));
-    Rectangle src     = { 0, 0, (float)texture.width, (float)texture.height };
-    Rectangle dst     = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
+    Texture2D* pRayTexture = GUM_IResource_data(GUM_IRESOURCE(pTexture));
+    if (!pRayTexture) return GBL_RESULT_ERROR_INTERNAL;
 
-    DrawTexturePro(texture, src, dst, (Vector2){ 0, 0 }, 0.0f, (Color){ color.r, color.g, color.b, color.a });
+    Rectangle src = { 0, 0, (float)pRayTexture->width, (float)pRayTexture->height };
+    Rectangle dst = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
+
+    DrawTexturePro(*pRayTexture, src, dst, (Vector2){ 0, 0 }, 0.0f, (Color){ color.r, color.g, color.b, color.a });
 
     return GBL_RESULT_SUCCESS;
 }
 
 GBL_RESULT GUM_Backend_Texture_load(GUM_IResource* pSelf, GblStringRef* path) {
-    if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
+    if (!pSelf || !path) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     Texture2D texture = LoadTexture(path);
 
@@ -48,10 +50,12 @@ GBL_RESULT GUM_Backend_Texture_load(GUM_IResource* pSelf, GblStringRef* path) {
 GBL_RESULT GUM_Backend_Texture_unload(GUM_IResource* pSelf) {
     if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    void* pTexture = (Texture2D*)GUM_IResource_data(pSelf);
+    Texture2D* pTexture = GUM_IResource_data(pSelf);
+    if (!pTexture) return GBL_RESULT_SUCCESS;
 
-    UnloadTexture(*(Texture2D*)pTexture);
+    UnloadTexture(*pTexture);
     free(pTexture);
+    GUM_IResource_setData(pSelf, nullptr);
 
     return GBL_RESULT_SUCCESS;
 }
