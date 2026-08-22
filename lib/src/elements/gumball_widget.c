@@ -24,7 +24,14 @@ static void GUM_Widget_GblObject_onPropertyChange_(GblObject* pSelf, GblProperty
 }
 
 static GBL_RESULT GUM_Widget_handleInputEvent_(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
-    if (!pSelf->isActive || !pEvent->state || !pEvent->action)
+    if (!pSelf || !pEvent || !pSelf->isInteractive || !pSelf->isActive)
+        return GBL_RESULT_SUCCESS;
+
+    if (pEvent->state != GUM_INPUTSTATE_PRESS && pEvent->state != GUM_INPUTSTATE_RELEASE)
+        return GBL_RESULT_SUCCESS;
+
+    if (pEvent->action <= GUM_INPUTACTION_NULL ||
+        (pEvent->action >= GUM_INPUTACTION_COUNT && pEvent->action != GUM_INPUTACTION_UNBOUND))
         return GBL_RESULT_SUCCESS;
 
     static const char* pressActionSignals_[] = {
@@ -50,7 +57,7 @@ static GBL_RESULT GUM_Widget_handleInputEvent_(GUM_Widget* pSelf, GUM_Event_Inpu
     if (pEvent->state == GUM_INPUTSTATE_PRESS) {
         GBL_EMIT(pSelf, "onPress", pEvent);
         signal = pEvent->action == GUM_INPUTACTION_UNBOUND ? "onPressUnbound" : pressActionSignals_[pEvent->action];
-    } else if (pEvent->state == GUM_INPUTSTATE_RELEASE) {
+    } else {
         GBL_EMIT(pSelf, "onRelease", pEvent);
         signal = pEvent->action == GUM_INPUTACTION_UNBOUND ? "onReleaseUnbound" : releaseActionSignals_[pEvent->action];
     }
@@ -799,16 +806,24 @@ static GBL_RESULT GUM_WidgetClass_init_(GblClass* pClass, const void* pData) {
     if (!GblType_classRefCount(GUM_WIDGET_TYPE)) {
         GBL_PROPERTIES_REGISTER(GUM_Widget);
 
-        GblSignal_install(GUM_WIDGET_TYPE, "onPress",          GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_EVENT_INPUT_TYPE);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressConfirm",   GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressCancel",    GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressUnbound",   GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onRelease",        GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_EVENT_INPUT_TYPE);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseConfirm", GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseCancel",  GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseUnbound", GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onFocusGained",    GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
-        GblSignal_install(GUM_WIDGET_TYPE, "onFocusLost",      GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPress",            GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_EVENT_INPUT_TYPE);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressConfirm",     GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressCancel",      GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressMoveUp",      GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressMoveDown",    GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressMoveLeft",    GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressMoveRight",   GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onPressUnbound",     GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onRelease",          GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_EVENT_INPUT_TYPE);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseConfirm",   GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseCancel",    GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveUp",    GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveDown",  GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveLeft",  GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveRight", GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseUnbound",   GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onFocusGained",      GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
+        GblSignal_install(GUM_WIDGET_TYPE, "onFocusLost",        GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
     }
 
     GBL_IEVENT_RECEIVER_CLASS(pClass)->pFnReceiveEvent = GUM_Widget_receiveEvent_;
@@ -835,16 +850,24 @@ static GBL_RESULT GUM_WidgetClass_final_(GblClass* pClass, const void* pClassDat
     if (!GblType_classRefCount(GUM_WIDGET_TYPE)) {
         GblProperty_uninstallAll(GUM_WIDGET_TYPE);
 
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPress"         );
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressConfirm"  );
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressCancel"   );
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressUnbound"  );
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onRelease"       );
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseConfirm");
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseCancel" );
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseUnbound");
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onFocusGained");
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onFocusLost");
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPress"          );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressConfirm"   );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressCancel"    );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressMoveUp"    );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressMoveDown"  );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressMoveLeft"  );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressMoveRight" );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onPressUnbound"   );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onRelease"        );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseConfirm" );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseCancel"  );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseMoveUp"  );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseMoveDown");
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseMoveLeft");
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseMoveRight");
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseUnbound" );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onFocusGained"     );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onFocusLost"       );
     }
 
     return GBL_RESULT_SUCCESS;
