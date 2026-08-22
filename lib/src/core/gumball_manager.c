@@ -162,12 +162,15 @@ GBL_EXPORT void GUM_Manager_unload(GUM_IResource* pResource) {
                 GBL_SCOPE_EXIT;
             }
 
-            if (GblBox_refCount(GBL_BOX(pResource)) > 1) {
+            /* One manager-owned ref plus at most one caller-owned ref may remain.
+             * This preserves the existing unload contract without releasing the
+             * manager ref before we finish using the resource object. */
+            if (GblBox_refCount(GBL_BOX(pResource)) > 2) {
                 GUM_LOG_ERROR("Attempted to unload a resource that is still being used!");
                 GBL_SCOPE_EXIT;
             }
 
-            GUM_LOG_DEBUG("No references left! Unloading...");
+            GUM_LOG_DEBUG("No additional references left! Unloading...");
             GUM_IRESOURCE_CLASSOF(pResource)->pFnUnload(pResource);
             GblHashSet_erase(&GUM_Manager_hashSet_, (const void*)&entry);
             GBL_UNREF(pResource);
