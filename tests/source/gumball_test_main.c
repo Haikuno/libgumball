@@ -97,19 +97,24 @@ static void preparePersistentMetadata_(void) {
     pinPersistentClass_(GUM_CONTAINER_TYPE);
     pinPersistentClass_(GUM_ROOT_TYPE);
 
-    /* The global draw queue retains capacity for the lifetime of the Root class.
-     * Allocate its first slot in the process context rather than the temporary
-     * scenario allocator used to measure test-owned allocations. */
-    GblArrayList_reserve(GUM_drawQueue_get(), 1);
-
-    /* GblModule's registry is also process-global and lazily allocated. Exercise
-     * its registration and first use while the normal process context is active
-     * so the tracked scenario only measures test-owned allocations. */
+    /* Exercise one representative hierarchy in the normal process context.
+     * This initializes the process-global module/draw/runtime metadata that is
+     * lazily grown on first real Widget use without charging it to a test suite. */
     GUM_Root* pRoot = GUM_Root_create();
     if (pRoot) {
+        GUM_Container* pContainer = GUM_Container_create("w", 100.0f,
+                                                         "h", 100.0f,
+                                                         "padding", 10.0f,
+                                                         "margin", 5.0f);
+        if (pContainer) {
+            (void)GUM_Widget_create("parent", pContainer);
+            (void)GUM_Widget_create("parent", pContainer);
+        }
+
         GUM_Root* pRequiredRoot = nullptr;
         GBL_REQUIRE_SCOPE(GUM_Root, &pRequiredRoot, "GUM_Root") {
         }
+
         GUM_unref(pRoot);
     }
 }
