@@ -144,8 +144,23 @@ int main(int argc, const char* pArgv[]) {
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_NAVIGATION_TEST_SUITE_TYPE));
 
-    const int result = GblTestScenario_exec(pScenario, argc, pArgv);
+    int result = GblTestScenario_exec(pScenario, argc, pArgv);
+
+    GUM_Font* pShutdownFont = GUM_FONT(GblBox_create(GUM_FONT_TYPE));
+    if (!pShutdownFont) {
+        result = 1;
+    } else {
+        GUM_Font_setDefault(pShutdownFont);
+        GBL_UNREF(pShutdownFont);
+    }
+
     releasePersistentMetadata_();
+
+    if (GUM_Font_default()) {
+        GUM_Font_setDefault(nullptr);
+        result = 1;
+    }
+
     backendDeinit_();
     return result;
 }
