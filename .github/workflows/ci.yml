@@ -24,6 +24,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            autoconf autoconf-archive automake libtool \
             ninja-build pkg-config \
             libx11-dev libxft-dev libxext-dev \
             libwayland-dev libxkbcommon-dev libegl1-mesa-dev
@@ -143,6 +144,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            autoconf autoconf-archive automake libtool \
             ninja-build pkg-config \
             libx11-dev libxft-dev libxext-dev \
             libwayland-dev libxkbcommon-dev libegl1-mesa-dev
