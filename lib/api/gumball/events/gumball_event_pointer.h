@@ -7,9 +7,9 @@
  *   \ref     GUM_Event_Pointer "GUM_Event_Pointer data structure and hierarchy graph"
  *   \ingroup events
  *
- *   Base input event for pointing devices. It snapshots the pointer position
- *   at the moment the event is created so receivers do not have to read
- *   mutable device-global state while handling the event.
+ *   Base input event for pointing devices. It snapshots pointer position and
+ *   relative motion at event creation so receivers do not have to read mutable
+ *   device-global state while handling the event.
  *
  *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License
@@ -37,6 +37,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Event_Pointer, GUM_Event_Input)
 
 GBL_INSTANCE_DERIVE(GUM_Event_Pointer, GUM_Event_Input)
     GUM_Vector2 position; //!< Pointer position when the event was created.
+    GUM_Vector2 delta;    //!< Pointer motion delta when the event was created.
 GBL_INSTANCE_END
 
 GblType GUM_Event_Pointer_type(void) GBL_NOEXCEPT;
