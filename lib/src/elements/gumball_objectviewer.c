@@ -21,7 +21,7 @@ static GBL_RESULT GUM_ObjectViewer_GblObject_setProperty_(GblObject* pObject, co
             if (pSelf->pObject)
                 GBL_UNREF(pSelf->pObject);
             GblVariant_valueCopy(pValue, &pSelf->pObject);
-            pSelf->base.base.shouldUpdate = true;
+            GUM_WIDGET(pSelf)->shouldUpdate = true;
             break;
         default:
             return GBL_RESULT_ERROR_INVALID_PROPERTY;
