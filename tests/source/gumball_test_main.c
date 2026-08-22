@@ -131,20 +131,6 @@ static void releasePersistentMetadata_(void) {
         GblClass_unrefDefault(pPersistentClasses_[--persistentClassCount_]);
 }
 
-static void trackedScenarioBegan_(GblTestScenario* pScenario) {
-    GBL_UNUSED(pScenario);
-    /* GblTestScenario has now installed its allocation tracker as the global
-     * context. Construct the process-global draw queue inside that same scope
-     * so any growth and final destruction use one allocator consistently. */
-    GUM_drawQueue_init();
-}
-
-static void trackedScenarioEnded_(GblTestScenario* pScenario) {
-    GBL_UNUSED(pScenario);
-    /* The tracker is still the global context while "ended" is emitted. */
-    GUM_drawQueue_free();
-}
-
 int main(int argc, const char* pArgv[]) {
     if (!backendInit_()) return 1;
 
@@ -169,12 +155,9 @@ int main(int argc, const char* pArgv[]) {
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_NAVIGATION_TEST_SUITE_TYPE));
 
-    /* The root class/root instance remain alive across the scenario, but the
-     * draw queue is mutable runtime storage. Transfer only that storage into
-     * the tracked allocation scope for the duration of the test run. */
+    /* Widget suites construct and destroy the draw queue inside their own
+     * tracked suite lifetime so leak accounting sees it fully balanced. */
     GUM_drawQueue_free();
-    GBL_CONNECT(pScenario, "began", trackedScenarioBegan_);
-    GBL_CONNECT(pScenario, "ended", trackedScenarioEnded_);
 
     int result = GblTestScenario_exec(pScenario, argc, pArgv);
 
