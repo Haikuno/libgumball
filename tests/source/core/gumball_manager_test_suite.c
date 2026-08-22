@@ -10,49 +10,58 @@ GBL_TEST_FINAL_NONE
 
 GBL_TEST_CASE(invalidResources)
     GUM_Root* pRoot = GUM_Root_create();
+    GUM_IResource* pInvalidFont = pRoot ? GUM_Manager_load("invalid.ttf") : nullptr;
+    GUM_IResource* pInvalidTexture = pRoot ? GUM_Manager_load("invalid.png") : nullptr;
+
+    if (pRoot)
+        GUM_unref(pRoot);
+
     GBL_TEST_VERIFY(pRoot);
-
-    GUM_IResource* pInvalidFont = GUM_Manager_load("invalid.ttf");
-    GUM_IResource* pInvalidTexture = GUM_Manager_load("invalid.png");
-
     GBL_TEST_COMPARE(pInvalidFont, nullptr);
     GBL_TEST_COMPARE(pInvalidTexture, nullptr);
-
-    GUM_unref(pRoot);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(rootShutdownReleasesResources)
     GUM_Root* pRoot = GUM_Root_create();
+    GUM_IResource* pTexture = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
+    GUM_Font* pFont = pRoot ? GUM_FONT(GblBox_create(GUM_FONT_TYPE)) : nullptr;
+
+    if (pFont)
+        GUM_Font_setDefault(pFont);
+    if (pRoot)
+        GUM_unref(pRoot);
+
+    const bool defaultCleared = GUM_Font_default() == nullptr;
+    const bool textureReleased = pTexture && GUM_IResource_data(pTexture) == nullptr;
+
+    if (pTexture)
+        GUM_IResource_unref(pTexture);
+    if (pFont)
+        GUM_IResource_unref(GUM_IRESOURCE(pFont));
+
     GBL_TEST_VERIFY(pRoot);
-
-    GUM_IResource* pTexture = GUM_Manager_load("koslogo.png");
     GBL_TEST_VERIFY(pTexture);
-
-    GUM_Font* pFont = GUM_FONT(GblBox_create(GUM_FONT_TYPE));
     GBL_TEST_VERIFY(pFont);
-    GUM_Font_setDefault(pFont);
-
-    GUM_unref(pRoot);
-
-    GBL_TEST_COMPARE(GUM_Font_default(), nullptr);
-    GBL_TEST_COMPARE(GUM_IResource_data(pTexture), nullptr);
-
-    GUM_IResource_unref(pTexture);
-    GUM_IResource_unref(GUM_IRESOURCE(pFont));
+    GBL_TEST_VERIFY(defaultCleared);
+    GBL_TEST_VERIFY(textureReleased);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(rootRestart)
     GUM_Root* pRoot = GUM_Root_create();
+    GUM_IResource* pTexture = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
+    bool unloaded = false;
+
+    if (pTexture) {
+        GUM_Manager_unload(pTexture);
+        unloaded = GUM_IResource_data(pTexture) == nullptr;
+        GUM_IResource_unref(pTexture);
+    }
+    if (pRoot)
+        GUM_unref(pRoot);
+
     GBL_TEST_VERIFY(pRoot);
-
-    GUM_IResource* pTexture = GUM_Manager_load("koslogo.png");
     GBL_TEST_VERIFY(pTexture);
-
-    GUM_Manager_unload(pTexture);
-    GBL_TEST_COMPARE(GUM_IResource_data(pTexture), nullptr);
-
-    GUM_IResource_unref(pTexture);
-    GUM_unref(pRoot);
+    GBL_TEST_VERIFY(unloaded);
 GBL_TEST_CASE_END
 
 GBL_TEST_REGISTER(invalidResources,
