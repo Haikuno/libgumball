@@ -43,7 +43,8 @@ void GUM_Backend_Gamepad_update(GUM_Gamepad* pGamepad) {
 }
 
 const char* GUM_Backend_Gamepad_name(int index) {
-    return GetGamepadName(index);
+    const char* pName = GetGamepadName(index);
+    return pName ? pName : "";
 }
 
 // ---------------------------------- Keyboard ---------------------------------- //
