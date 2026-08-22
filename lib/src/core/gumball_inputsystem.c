@@ -64,11 +64,17 @@ void GUM_InputSystem_deinit(void) {
 }
 
 GBL_RESULT GUM_InputSystem_bind(GblType deviceType, GUM_InputAction action, GblFlags button) {
+    if (action <= GUM_INPUTACTION_NULL || action >= GUM_INPUTACTION_COUNT)
+        return GBL_RESULT_ERROR_INVALID_ARG;
+
     GUM_InputBinding binding = { .deviceType = deviceType, .button = button };
     return GblArrayList_pushBack(&bindings_[action], &binding);
 }
 
 GBL_RESULT GUM_InputSystem_unbind(GblType deviceType, GUM_InputAction action, GblFlags button) {
+    if (action <= GUM_INPUTACTION_NULL || action >= GUM_INPUTACTION_COUNT)
+        return GBL_RESULT_ERROR_INVALID_ARG;
+
     GblArrayList* pList = &bindings_[action];
 
     for (size_t i = 0; i < GblArrayList_size(pList); i++) {
@@ -203,6 +209,7 @@ static void GUM_InputSystem_Mouse_hitTest_(void) {
     GblArrayList* drawQueue = GUM_drawQueue_get();
 
     GUM_Vector2 mousePos = pMouse_->position;
+    GUM_Widget* pHitWidget = nullptr;
 
     for (size_t i = GblArrayList_size(drawQueue); i-- > 0;) {
         GblObject*  pObj       = *(GblObject**)GblArrayList_at(drawQueue, i);
@@ -219,14 +226,14 @@ static void GUM_InputSystem_Mouse_hitTest_(void) {
             mousePos.x <  widgetPos.x + widgetSize.x &&
             mousePos.y >= widgetPos.y &&
             mousePos.y <  widgetPos.y + widgetSize.y) {
-            pHoveredWidget_ = pWidget;
-            if (pWidget->isSelectable)
-                GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), pWidget);
-            else
-                GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_), nullptr);
+            pHitWidget = pWidget;
             break;
         }
     }
+
+    pHoveredWidget_ = pHitWidget;
+    GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_),
+                  pHitWidget && pHitWidget->isSelectable ? pHitWidget : nullptr);
 }
 
 static void GUM_InputSystem_Mouse_dispatchEvent_(void* pContext, GblFlags button, GUM_InputState state) {
