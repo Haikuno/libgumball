@@ -153,6 +153,13 @@ int main(int argc, const char* pArgv[]) {
         GBL_UNREF(pInvalidFont);
     }
 
+    GUM_IResource* pInvalidTexture = GUM_Manager_load("invalid.png");
+    if (pInvalidTexture) {
+        result = 1;
+        GUM_Manager_unload(pInvalidTexture);
+        GBL_UNREF(pInvalidTexture);
+    }
+
     GUM_IResource* pShutdownTexture = GUM_Manager_load("psyoplogo.png");
     if (!pShutdownTexture)
         result = 1;
