@@ -9,6 +9,7 @@
 // TODO: make these private variables!
 static GblHashSet GUM_Manager_hashSet_;
 static char       GUM_Manager_currentPath_[1024];
+static bool       GUM_Manager_initialized_ = false;
 
 typedef struct GUM_HashSetEntry {
     GUM_IResource* pResource;
@@ -28,6 +29,42 @@ static GblBool resourceComparator_(const GblHashSet* pSelf, const void* pEntry1,
     return pResEntry1->quark == pResEntry2->quark;
 }
 
+static void resourceDestructor_(const GblHashSet* pSet, void* pItem) {
+    GBL_UNUSED(pSet);
+    GUM_HashSetEntry* pEntry = pItem;
+    if (!pEntry->pResource) return;
+
+    const GBL_RESULT unloadResult = GUM_IRESOURCE_CLASSOF(pEntry->pResource)->pFnUnload(pEntry->pResource);
+    if (unloadResult != GBL_RESULT_SUCCESS)
+        GUM_LOG_ERROR("Backend failed to unload resource!");
+
+    GBL_UNREF(pEntry->pResource);
+    pEntry->pResource = nullptr;
+}
+
+static GBL_RESULT GUM_Manager_ensureInitialized_(void) {
+    if (GUM_Manager_initialized_)
+        return GBL_RESULT_SUCCESS;
+
+    const GBL_RESULT result = GblHashSet_construct(&GUM_Manager_hashSet_,
+                                                   sizeof(GUM_HashSetEntry),
+                                                   resourceHasher_,
+                                                   resourceComparator_,
+                                                   resourceDestructor_);
+    if (result != GBL_RESULT_SUCCESS)
+        return result;
+
+    if (!getcwd(GUM_Manager_currentPath_, sizeof(GUM_Manager_currentPath_))) {
+        GblHashSet_destruct(&GUM_Manager_hashSet_);
+        GUM_Manager_hashSet_ = (GblHashSet){ 0 };
+        GUM_Manager_currentPath_[0] = '\0';
+        return GBL_RESULT_ERROR_INTERNAL;
+    }
+
+    GUM_Manager_initialized_ = true;
+    return GBL_RESULT_SUCCESS;
+}
+
 static bool isExtension(const GblStringView path, GblStringRef** extensions, GblStringRef** outExt) {
     for (size_t i = 0; extensions[i]; i++) {
         if (GblStringView_endsWith(path, extensions[i])) {
@@ -44,12 +81,20 @@ GBL_EXPORT GUM_IResource* GUM_Manager_load(GblStringRef* path) {
 
     if (!path) {
         GUM_LOG_ERROR("Path passed to GUM_Manager_load() is null");
+        GBL_LOG_POP(1);
         return nullptr;
     }
 
     GUM_LOG_DEBUG("Path is %s", path);
 
-    GblClass*       managerClass = GblClass_refDefault(GUM_MANAGER_TYPE);
+    GblClass* managerClass = GblClass_refDefault(GUM_MANAGER_TYPE);
+    if (!managerClass || GUM_Manager_ensureInitialized_() != GBL_RESULT_SUCCESS) {
+        GUM_LOG_ERROR("Failed to initialize resource manager!");
+        if (managerClass) GblClass_unrefDefault(managerClass);
+        GBL_LOG_POP(1);
+        return nullptr;
+    }
+
     GblStringBuffer stringBuffer;
 
     GUM_LOG_DEBUG_SCOPE("Creating string buffer...") {
@@ -151,6 +196,11 @@ GBL_EXPORT void GUM_Manager_unload(GUM_IResource* pResource) {
             GBL_SCOPE_EXIT;
         }
 
+        if (!GUM_Manager_initialized_) {
+            GUM_LOG_ERROR("Attempted to unload a resource while the manager is not initialized!");
+            GBL_SCOPE_EXIT;
+        }
+
         GblQuark quark;
         GUM_IRESOURCE_CLASSOF(pResource)->pFnQuark(pResource, &quark);
 
@@ -171,22 +221,23 @@ GBL_EXPORT void GUM_Manager_unload(GUM_IResource* pResource) {
             }
 
             GUM_LOG_DEBUG("No additional references left! Unloading...");
-            GUM_IRESOURCE_CLASSOF(pResource)->pFnUnload(pResource);
             GblHashSet_erase(&GUM_Manager_hashSet_, (const void*)&entry);
-            GBL_UNREF(pResource);
         }
     }
 }
 
+void GUM_Manager_deinit(void) {
+    if (!GUM_Manager_initialized_) return;
+
+    GblHashSet_destruct(&GUM_Manager_hashSet_);
+    GUM_Manager_hashSet_ = (GblHashSet){ 0 };
+    GUM_Manager_currentPath_[0] = '\0';
+    GUM_Manager_initialized_ = false;
+}
+
 GBL_RESULT GUM_ManagerClass_init_(GblClass* pClass, const void* pData) {
-    GBL_UNUSED(pData);
-
-    if (!GblType_classRefCount(GUM_MANAGER_TYPE)) {
-        GblHashSet_construct(&GUM_Manager_hashSet_, sizeof(GUM_HashSetEntry), resourceHasher_, resourceComparator_);
-        getcwd(GUM_Manager_currentPath_, 1024);
-    }
-
-    return GBL_RESULT_SUCCESS;
+    GBL_UNUSED(pClass, pData);
+    return GUM_Manager_ensureInitialized_();
 }
 
 GblType GUM_Manager_type(void) {
