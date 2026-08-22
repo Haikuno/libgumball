@@ -17,6 +17,9 @@ target_compile_definitions(GumballTests PRIVATE GUM_TEST_BACKEND_${GUM_BACKEND}=
 gum_enable_sanitizers(GumballTests)
 
 add_test(NAME GumballTests COMMAND GumballTests)
+set_tests_properties(GumballTests PROPERTIES
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
 
 if(GUM_BACKEND STREQUAL "SDL3")
     add_executable(GumballSDLRendererRecreation
