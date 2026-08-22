@@ -93,7 +93,10 @@ static GBL_RESULT GUM_Widget_init_(GblInstance* pInstance) {
     pSelf->border_radius    = 0.0f;
     pSelf->border_highlight = false;
 
-    pSelf->font                  = GUM_Backend_Font_default();
+    pSelf->font = GUM_Backend_Font_default();
+    if (pSelf->font)
+        GUM_IResource_ref(GUM_IRESOURCE(pSelf->font));
+
     pSelf->font_size             = 22;
     pSelf->font_r                = 255;
     pSelf->font_g                = 255;
@@ -174,6 +177,9 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject, const Gb
             break;
         case GUM_Widget_Property_Id_isInteractive:
             GblVariant_valueCopy(pValue, &pSelf->isInteractive);
+            break;
+        case GUM_Widget_Property_Id_isActive:
+            GblVariant_valueCopy(pValue, &pSelf->isActive);
             break;
         case GUM_Widget_Property_Id_isSelectable:
             GblVariant_valueCopy(pValue, &pSelf->isSelectable);
@@ -288,14 +294,22 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject, const Gb
         case GUM_Widget_Property_Id_font_border_thickness:
             GblVariant_valueCopy(pValue, &pSelf->font_border_thickness);
             break;
-        case GUM_Widget_Property_Id_font:
+        case GUM_Widget_Property_Id_font: {
+            if (pSelf->font)
+                GUM_IResource_unref(GUM_IRESOURCE(pSelf->font));
+
             GblBox* pFont = GblVariant_boxMove(pValue);
             pSelf->font   = GUM_FONT(pFont);
             break;
-        case GUM_Widget_Property_Id_texture:
+        }
+        case GUM_Widget_Property_Id_texture: {
+            if (pSelf->texture)
+                GUM_IResource_unref(GUM_IRESOURCE(pSelf->texture));
+
             GblBox* pTexture = GblVariant_boxMove(pValue);
             pSelf->texture   = GUM_TEXTURE(pTexture);
             break;
+        }
         default:
             return GBL_RESULT_ERROR_INVALID_PROPERTY;
     }
@@ -432,7 +446,7 @@ static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject* pObject, const
             GblVariant_setUint8(pValue, pSelf->font_border_thickness);
             break;
         case GUM_Widget_Property_Id_font:
-            GblVariant_setBoxCopy(pValue, GBL_BOX(pSelf->font));
+            if (pSelf->font) GblVariant_setBoxCopy(pValue, GBL_BOX(pSelf->font));
             break;
         case GUM_Widget_Property_Id_texture:
             if (pSelf->texture) GblVariant_setBoxCopy(pValue, GBL_BOX(pSelf->texture));
@@ -760,7 +774,7 @@ static GBL_RESULT GUM_Widget_GblBox_destructor_(GblBox* pBox) {
     if (pSelf->texture)
         GUM_IResource_unref(GUM_IRESOURCE(pSelf->texture));
 
-    if (pSelf->font && pSelf->font != GUM_Backend_Font_default())
+    if (pSelf->font)
         GUM_IResource_unref(GUM_IRESOURCE(pSelf->font));
 
     GblObjectClass* pObjClass = GBL_OBJECT_CLASS(GblClass_weakRefDefault(GBL_OBJECT_TYPE));
