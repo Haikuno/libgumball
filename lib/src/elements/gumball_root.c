@@ -11,6 +11,7 @@
 #include <gumball/gumball_events.h>
 
 #include <gimbal/gimbal_algorithms.h>
+#include <gimbal/meta/instances/gimbal_context.h>
 
 static GblLogger*   pLogger_        = nullptr;
 static GblArrayList GUM_drawQueue_  = {0};
@@ -95,7 +96,16 @@ GblArrayList* GUM_drawQueue_get(void) {
 }
 
 void GUM_drawQueue_init(void) {
-    GblArrayList_construct(&GUM_drawQueue_, sizeof(GblObject*));
+    /* The draw queue is process-lifetime runtime state. Capture the allocator
+     * context active when it is created instead of following later global
+     * context swaps (for example GblTestScenario's temporary tracker). */
+    GblArrayList_construct(&GUM_drawQueue_,
+                           sizeof(GblObject*),
+                           0,
+                           nullptr,
+                           sizeof(GblArrayList),
+                           false,
+                           GblContext_global());
 }
 
 void GUM_drawQueue_free(void) {
