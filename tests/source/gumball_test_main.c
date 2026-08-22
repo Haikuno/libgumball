@@ -1,4 +1,5 @@
 #include <gimbal/test/gimbal_test_scenario.h>
+#include <gumball/gumball.h>
 #include "core/gumball_navigation_test_suite.h"
 #include "elements/gumball_container_test_suite.h"
 #include "types/gumball_animator_test_suite.h"
@@ -41,8 +42,45 @@ static void backendDeinit_(void) {
 }
 #endif
 
+static void registerPersistentTypes_(void) {
+    /* GblTestScenario temporarily replaces the global allocation context while
+     * it runs. libGimbal's type registry is process-global, so keep all
+     * persistent libGumball type metadata in the process allocation context
+     * instead of first registering types inside the tracked test context. */
+    (void)GUM_IResource_type();
+
+    (void)GUM_Event_type();
+    (void)GUM_Event_Input_type();
+    (void)GUM_Event_Key_type();
+    (void)GUM_Event_Gamepad_type();
+    (void)GUM_Event_Mouse_type();
+
+    (void)GUM_InputDevice_type();
+    (void)GUM_Mouse_type();
+    (void)GUM_Gamepad_type();
+    (void)GUM_Keyboard_type();
+
+    (void)GUM_Font_type();
+    (void)GUM_Texture_type();
+    (void)GUM_Color_type();
+    (void)GUM_Rectangle_type();
+    (void)GUM_Vector2_type();
+    (void)GUM_Renderer_type();
+    (void)GUM_Animator_type();
+
+    (void)GUM_Root_type();
+    (void)GUM_Widget_type();
+    (void)GUM_Button_type();
+    (void)GUM_Container_type();
+    (void)GUM_ObjectViewer_type();
+
+    (void)GUM_Manager_type();
+}
+
 int main(int argc, const char* pArgv[]) {
     if (!backendInit_()) return 1;
+
+    registerPersistentTypes_();
 
     GblTestScenario* pScenario = GblTestScenario_create("libGumballTests");
 
