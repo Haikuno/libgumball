@@ -67,3 +67,14 @@ GUM_Font* GUM_Backend_Font_default(void) {
     GUM_IResource_setData(GUM_IRESOURCE(defaultFont_), pRayFont);
     return defaultFont_;
 }
+
+void GUM_Raylib_Font_deinit(void) {
+    if (!defaultFont_) return;
+
+    /* GetFontDefault() is owned by raylib, so only release libGumball's
+     * copied Font struct and wrapper. Do not call UnloadFont(). */
+    free(GUM_IResource_data(GUM_IRESOURCE(defaultFont_)));
+    GUM_IResource_setData(GUM_IRESOURCE(defaultFont_), nullptr);
+    GBL_UNREF(defaultFont_);
+    defaultFont_ = nullptr;
+}
