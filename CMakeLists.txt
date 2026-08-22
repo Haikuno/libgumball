@@ -4,9 +4,10 @@ project(LibGumball LANGUAGES C)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-option(GUM_BUILD_DOCS     "Build docs"       OFF)
-option(GUM_BUILD_EXAMPLES "Build examples"   OFF)
-option(GUM_BUILD_TESTS    "Build unit tests" OFF)
+option(GUM_BUILD_DOCS       "Build docs"       OFF)
+option(GUM_BUILD_EXAMPLES   "Build examples"   OFF)
+option(GUM_BUILD_TESTS      "Build unit tests" OFF)
+option(GUM_ENABLE_SANITIZERS "Instrument libGumball targets with ASan/UBSan" OFF)
 
 set(GUM_BACKEND "SDL3" CACHE STRING "libGumball backend")
 set_property(CACHE GUM_BACKEND PROPERTY STRINGS SDL3 RAYLIB)
@@ -19,6 +20,26 @@ elseif(GUM_BACKEND STREQUAL "RAYLIB")
 else()
     message(FATAL_ERROR "Unsupported libGumball backend: ${GUM_BACKEND}")
 endif()
+
+function(gum_enable_sanitizers target)
+    if(NOT GUM_ENABLE_SANITIZERS)
+        return()
+    endif()
+
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        message(FATAL_ERROR "GUM_ENABLE_SANITIZERS requires GCC or Clang")
+    endif()
+
+    target_compile_options(${target} PRIVATE
+        -fsanitize=address,undefined
+        -fno-omit-frame-pointer
+    )
+
+    get_target_property(target_type ${target} TYPE)
+    if(NOT target_type STREQUAL "STATIC_LIBRARY")
+        set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -fsanitize=address,undefined")
+    endif()
+endfunction()
 
 add_subdirectory(lib)
 
