@@ -185,9 +185,29 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject, const Gb
         case GUM_Widget_Property_Id_isInteractive:
             GblVariant_valueCopy(pValue, &pSelf->isInteractive);
             break;
-        case GUM_Widget_Property_Id_isActive:
-            GblVariant_valueCopy(pValue, &pSelf->isActive);
+        case GUM_Widget_Property_Id_isActive: {
+            bool requested;
+            GblVariant_valueCopy(pValue, &requested);
+
+            if (requested == pSelf->isActive)
+                break;
+
+            const bool previous = pSelf->isActive;
+            pSelf->isActive = requested;
+
+            GUM_WidgetClass* pClass = GUM_WIDGET_CLASSOF(pSelf);
+            const GBL_RESULT result = requested ?
+                                      pClass->pFnActivate(pSelf) :
+                                      pClass->pFnDeactivate(pSelf);
+
+            if (result != GBL_RESULT_SUCCESS) {
+                pSelf->isActive = previous;
+                return result;
+            }
+
+            GBL_EMIT(pSelf, requested ? "onActivate" : "onDeactivate");
             break;
+        }
         case GUM_Widget_Property_Id_isSelectable:
             GblVariant_valueCopy(pValue, &pSelf->isSelectable);
             break;
@@ -822,6 +842,8 @@ static GBL_RESULT GUM_WidgetClass_init_(GblClass* pClass, const void* pData) {
         GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveLeft",  GblMarshal_CClosure_VOID__INSTANCE, 0);
         GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveRight", GblMarshal_CClosure_VOID__INSTANCE, 0);
         GblSignal_install(GUM_WIDGET_TYPE, "onReleaseUnbound",   GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onActivate",         GblMarshal_CClosure_VOID__INSTANCE, 0);
+        GblSignal_install(GUM_WIDGET_TYPE, "onDeactivate",       GblMarshal_CClosure_VOID__INSTANCE, 0);
         GblSignal_install(GUM_WIDGET_TYPE, "onFocusGained",      GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
         GblSignal_install(GUM_WIDGET_TYPE, "onFocusLost",        GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
     }
@@ -863,9 +885,11 @@ static GBL_RESULT GUM_WidgetClass_final_(GblClass* pClass, const void* pClassDat
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseCancel"  );
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseMoveUp"  );
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseMoveDown");
-        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseMoveLeft");
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseMoveLeft" );
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseMoveRight");
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onReleaseUnbound" );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onActivate"       );
+        GblSignal_uninstall(GUM_WIDGET_TYPE, "onDeactivate"     );
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onFocusGained"     );
         GblSignal_uninstall(GUM_WIDGET_TYPE, "onFocusLost"       );
     }

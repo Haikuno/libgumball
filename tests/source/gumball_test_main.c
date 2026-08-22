@@ -3,6 +3,7 @@
 #include "core/gumball_manager_test_suite.h"
 #include "core/gumball_navigation_test_suite.h"
 #include "elements/gumball_container_test_suite.h"
+#include "elements/gumball_widget_test_suite.h"
 #include "types/gumball_animator_test_suite.h"
 #include "types/gumball_rectangle_test_suite.h"
 
@@ -60,6 +61,8 @@ int main(int argc, const char* pArgv[]) {
                                  GblTestSuite_create(GUM_ANIMATOR_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_RECTANGLE_TEST_SUITE_TYPE));
+    GblTestScenario_enqueueSuite(pScenario,
+                                 GblTestSuite_create(GUM_WIDGET_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_CONTAINER_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
