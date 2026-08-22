@@ -170,16 +170,24 @@ GBL_PROPERTIES(GUM_Widget,
 )
 
 GBL_SIGNALS(GUM_Widget,
-    (onPress,           (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
-    (onRelease,         (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
-    (onPressConfirm,    (GBL_INSTANCE_TYPE, pReceiver)),
-    (onPressCancel,     (GBL_INSTANCE_TYPE, pReceiver)),
-    (onPressUnbound,    (GBL_INSTANCE_TYPE, pReceiver)),
-    (onReleaseConfirm,  (GBL_INSTANCE_TYPE, pReceiver)),
-    (onReleaseCancel,   (GBL_INSTANCE_TYPE, pReceiver)),
-    (onReleaseUnbound,  (GBL_INSTANCE_TYPE, pReceiver)),
-    (onFocusGained,     (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice)), //!< Emitted when a device navigates focus onto this widget
-    (onFocusLost,       (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice))  //!< Emitted when a device navigates focus away from this widget
+    (onPress,             (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
+    (onRelease,           (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
+    (onPressConfirm,      (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressCancel,       (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressMoveUp,       (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressMoveDown,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressMoveLeft,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressMoveRight,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressUnbound,      (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseConfirm,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseCancel,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseMoveUp,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseMoveDown,   (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseMoveLeft,   (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseMoveRight,  (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseUnbound,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onFocusGained,       (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice)), //!< Emitted when a device navigates focus onto this widget
+    (onFocusLost,         (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice))  //!< Emitted when a device navigates focus away from this widget
 )
 
 GblType GUM_Widget_type(void) GBL_NOEXCEPT;
