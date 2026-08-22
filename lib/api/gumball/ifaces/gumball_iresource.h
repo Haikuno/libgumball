@@ -49,7 +49,12 @@ GblType GUM_IResource_type(void) GBL_NOEXCEPT;
 
 //! Returns a new reference to a GUM_IResource, increasing the reference count.
 GBL_EXPORT GUM_IResource*  GUM_IResource_ref         (GBL_SELF)                  GBL_NOEXCEPT;
-//! Decrements the reference count for the passed GUM_IResource. \note The GUM_Manager holds a reference to the resource, so to free the resource, call GUM_Manager_unload()
+/*! Releases one resource reference.
+ *  The final reference to a still-loaded managed resource is retained until
+ *  GUM_Manager_unload() unloads its backend data. A caller-held wrapper that
+ *  survives explicit manager unload or manager teardown can then safely release
+ *  its final reference with this function.
+*/
 GBL_EXPORT GblRefCount     GUM_IResource_unref       (GBL_SELF)                  GBL_NOEXCEPT;
 //! Returns the backend-specific data of the resource as a void*
 GBL_EXPORT void*           GUM_IResource_data        (GBL_CSELF)                 GBL_NOEXCEPT;
