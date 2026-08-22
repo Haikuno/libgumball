@@ -80,6 +80,28 @@ GBL_TEST_CASE(minimumChildSizeOverflow)
     GUM_unref(pContainer);
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(scrollStateClamping)
+    GUM_Container* pContainer = GUM_Container_create("w", 100.0f,
+                                                     "h", 100.0f,
+                                                     "padding", 0.0f,
+                                                     "margin", 0.0f,
+                                                     "minChildSize", 0.4f);
+    GUM_Widget_create("parent", pContainer);
+    GUM_Widget_create("parent", pContainer);
+    GUM_Widget_create("parent", pContainer);
+
+    pContainer->scrollAnimatorY.from    = 50.0f;
+    pContainer->scrollAnimatorY.current = 50.0f;
+    pContainer->scrollAnimatorY.to      = 50.0f;
+    GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
+
+    GBL_TEST_COMPARE(pContainer->scrollAnimatorY.from, 20.0f);
+    GBL_TEST_COMPARE(pContainer->scrollAnimatorY.current, 20.0f);
+    GBL_TEST_COMPARE(pContainer->scrollAnimatorY.to, 20.0f);
+
+    GUM_unref(pContainer);
+GBL_TEST_CASE_END
+
 GBL_TEST_CASE(retainedChild)
     GUM_Container* pContainer = GUM_Container_create();
     GUM_Widget* pChild = GUM_Widget_create("parent", pContainer);
@@ -98,4 +120,5 @@ GBL_TEST_CASE_END
 GBL_TEST_REGISTER(verticalLayout,
                   horizontalLayout,
                   minimumChildSizeOverflow,
+                  scrollStateClamping,
                   retainedChild)
