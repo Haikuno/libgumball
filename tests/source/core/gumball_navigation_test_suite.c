@@ -5,6 +5,7 @@
 #define GBL_SELF_TYPE GUM_NavigationTestSuite
 
 GBL_TEST_FIXTURE {
+    GUM_Root* pRoot;
     GUM_Keyboard* pKeyboard;
     GUM_Container* pContainer;
     GUM_Button* pFirst;
@@ -20,8 +21,11 @@ static void GUM_NavigationTestSuite_inputSignal_(GUM_Widget* pWidget) {
 }
 
 GBL_TEST_INIT()
-    GUM_drawQueue_init();
+    pFixture->pRoot = GUM_Root_create();
+    GBL_TEST_VERIFY(pFixture->pRoot);
+
     pFixture->pKeyboard = GUM_Keyboard_create();
+    GBL_TEST_VERIFY(pFixture->pKeyboard);
 
     pFixture->pContainer = GUM_Container_create("w", 300.0f,
                                                 "h", 100.0f,
@@ -38,7 +42,7 @@ GBL_TEST_CASE_END
 GBL_TEST_FINAL()
     GUM_unref(pFixture->pKeyboard);
     GUM_unref(pFixture->pContainer);
-    GUM_drawQueue_free();
+    GUM_unref(pFixture->pRoot);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(defaultFocus)
