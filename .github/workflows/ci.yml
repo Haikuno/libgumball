@@ -239,7 +239,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build sanitizers
-        run: cmake --build build-sanitize --target GumballTests --parallel
+        run: cmake --build build-sanitize --parallel
 
       - name: Test sanitizers
         run: |
