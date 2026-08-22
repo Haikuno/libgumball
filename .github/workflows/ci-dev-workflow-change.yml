@@ -11,3 +11,33 @@ on:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
+
+  report:
+    if: always()
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+    steps:
+      - name: Publish connector-readable CI status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ needs.ci.result }}
+          SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          case "$RESULT" in
+            success) state=success ;;
+            failure) state=failure ;;
+            *) state=error ;;
+          esac
+
+          curl --fail-with-body --silent --show-error -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPOSITORY/statuses/$SHA" \
+            -d "{\"state\":\"$state\",\"context\":\"libgumball/ci\",\"description\":\"Reusable CI: $RESULT\"}"
+
+          test "$RESULT" = success
