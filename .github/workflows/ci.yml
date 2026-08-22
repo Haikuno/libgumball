@@ -44,6 +44,16 @@ jobs:
         run: |
           "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
 
+      - name: Preserve SDL3 vcpkg failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdl3-vcpkg-failure
+          path: |
+            ${{ runner.temp }}/vcpkg/buildtrees/sdl3/**/*.log
+            ${{ runner.temp }}/vcpkg/installed/vcpkg/issue_body.md
+          if-no-files-found: warn
+
       - name: Install SDL3_image
         run: |
           "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-image
@@ -174,6 +184,16 @@ jobs:
       - name: Install SDL3
         run: |
           "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
+
+      - name: Preserve SDL3 sanitizer vcpkg failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdl3-sanitizer-vcpkg-failure
+          path: |
+            ${{ runner.temp }}/vcpkg/buildtrees/sdl3/**/*.log
+            ${{ runner.temp }}/vcpkg/installed/vcpkg/issue_body.md
+          if-no-files-found: warn
 
       - name: Install SDL3_image
         run: |
