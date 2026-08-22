@@ -68,6 +68,23 @@ GBL_TEST_CASE(explicitFocus)
                      GUM_WIDGET(pFixture->pFirst));
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(nonContainerAncestor)
+    GUM_Widget* pWrapper = GUM_Widget_create("w", 200.0f, "h", 100.0f);
+    GUM_Container* pContainer = GUM_Container_create("parent", pWrapper,
+                                                     "w", 200.0f,
+                                                     "h", 100.0f,
+                                                     "padding", 0.0f,
+                                                     "margin", 0.0f,
+                                                     "direction", GUM_DIRECTION_HORIZONTAL);
+    GUM_Button* pLeft = GUM_Button_create("parent", pContainer);
+    GUM_Button* pRight = GUM_Button_create("parent", pContainer);
+
+    GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), GUM_WIDGET(pLeft));
+    GUM_Nav_move(GUM_INPUTDEVICE(pFixture->pKeyboard), GUM_INPUTACTION_MOVE_RIGHT);
+    GBL_TEST_COMPARE(GUM_INPUTDEVICE(pFixture->pKeyboard)->pFocusedWidget,
+                     GUM_WIDGET(pRight));
+GBL_TEST_CASE_END
+
 GBL_TEST_CASE(inputSignalContract)
     GUM_Widget* pWidget = GUM_WIDGET(pFixture->pSecond);
     pWidget->isActive = true;
@@ -135,5 +152,6 @@ GBL_TEST_REGISTER(defaultFocus,
                   moveRight,
                   moveLeft,
                   explicitFocus,
+                  nonContainerAncestor,
                   inputSignalContract,
                   deviceDestructionClearsFocus)
