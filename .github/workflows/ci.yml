@@ -239,9 +239,21 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build sanitizers
-        run: cmake --build build-sanitize --parallel
+        id: sanitizer_build
+        run: |
+          set -o pipefail
+          cmake --build build-sanitize --parallel 2>&1 | tee build-sanitize/build-output.log
+
+      - name: Preserve sanitizer build failure output
+        if: ${{ failure() && steps.sanitizer_build.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-build-failure
+          path: build-sanitize/build-output.log
+          if-no-files-found: error
 
       - name: Test sanitizers
+        id: sanitizer_test
         run: |
           set -o pipefail
           ctest --test-dir build-sanitize --verbose 2>&1 | tee build-sanitize/test-output.log
@@ -249,8 +261,8 @@ jobs:
           ! grep -Fq "[Allocation Tracker] Attempt to realloc unknown pointer" build-sanitize/test-output.log
           ! grep -Fiq "invalid pointer" build-sanitize/test-output.log
 
-      - name: Preserve sanitizer failure output
-        if: failure()
+      - name: Preserve sanitizer test failure output
+        if: ${{ failure() && steps.sanitizer_test.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
           name: sanitizer-test-failure
