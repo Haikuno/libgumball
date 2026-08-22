@@ -140,25 +140,30 @@ GBL_TEST_CASE_END
 GBL_TEST_CASE(mouseEventSnapshot)
     GUM_Mouse* pMouse = GUM_Mouse_create();
     GBL_TEST_VERIFY(pMouse);
+    GBL_TEST_VERIFY(GblType_check(GBL_TYPEOF(pMouse), GUM_POINTER_TYPE));
 
-    pMouse->position = (GUM_Vector2){ 12.5f, 24.0f };
-    pMouse->delta    = (GUM_Vector2){ -3.0f, 4.5f };
-    pMouse->wheel    = (GUM_Vector2){ 1.0f, -2.0f };
+    GUM_Pointer* pPointer = GUM_POINTER(pMouse);
+    pPointer->position = (GUM_Vector2){ 12.5f, 24.0f };
+    pPointer->delta    = (GUM_Vector2){ -3.0f, 4.5f };
+    pMouse->wheel      = (GUM_Vector2){ 1.0f, -2.0f };
 
     GUM_Event_Mouse* pEvent = GUM_Event_Mouse_createFrom(pMouse);
     GBL_TEST_VERIFY(pEvent);
     GBL_TEST_VERIFY(GblType_check(GBL_TYPEOF(pEvent), GUM_EVENT_POINTER_TYPE));
     GBL_TEST_COMPARE(GUM_EVENT_INPUT(pEvent)->pInputDevice, GUM_INPUTDEVICE(pMouse));
-    GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->position.x, pMouse->position.x);
-    GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->position.y, pMouse->position.y);
-    GBL_TEST_COMPARE(pEvent->delta.x, pMouse->delta.x);
-    GBL_TEST_COMPARE(pEvent->delta.y, pMouse->delta.y);
+    GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->position.x, pPointer->position.x);
+    GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->position.y, pPointer->position.y);
+    GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->delta.x, pPointer->delta.x);
+    GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->delta.y, pPointer->delta.y);
     GBL_TEST_COMPARE(pEvent->wheel.x, pMouse->wheel.x);
     GBL_TEST_COMPARE(pEvent->wheel.y, pMouse->wheel.y);
 
-    pMouse->position = (GUM_Vector2){ 100.0f, 200.0f };
+    pPointer->position = (GUM_Vector2){ 100.0f, 200.0f };
+    pPointer->delta    = (GUM_Vector2){ 50.0f, 60.0f };
     GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->position.x, 12.5f);
     GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->position.y, 24.0f);
+    GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->delta.x, -3.0f);
+    GBL_TEST_COMPARE(GUM_EVENT_POINTER(pEvent)->delta.y, 4.5f);
 
     GBL_UNREF(pEvent);
     GUM_unref(pMouse);
