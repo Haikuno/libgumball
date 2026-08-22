@@ -117,8 +117,23 @@ GBL_TEST_CASE(inputSignalContract)
     GBL_UNREF(pEvent);
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(deviceDestructionClearsFocus)
+    GUM_Widget* pWidget = GUM_WIDGET(pFixture->pSecond);
+    const uint8_t initialFocusCount = pWidget->focusCount;
+
+    GUM_Keyboard* pKeyboard = GUM_Keyboard_create();
+    GBL_TEST_VERIFY(pKeyboard);
+
+    GUM_Nav_focus(GUM_INPUTDEVICE(pKeyboard), pWidget);
+    GBL_TEST_COMPARE(pWidget->focusCount, initialFocusCount + 1);
+
+    GUM_unref(pKeyboard);
+    GBL_TEST_COMPARE(pWidget->focusCount, initialFocusCount);
+GBL_TEST_CASE_END
+
 GBL_TEST_REGISTER(defaultFocus,
                   moveRight,
                   moveLeft,
                   explicitFocus,
-                  inputSignalContract)
+                  inputSignalContract,
+                  deviceDestructionClearsFocus)
