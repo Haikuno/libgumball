@@ -96,6 +96,17 @@ static void preparePersistentMetadata_(void) {
     pinPersistentClass_(GUM_BUTTON_TYPE);
     pinPersistentClass_(GUM_CONTAINER_TYPE);
     pinPersistentClass_(GUM_ROOT_TYPE);
+
+    /* GblModule's registry is also process-global and lazily allocated. Exercise
+     * its registration and first use while the normal process context is active
+     * so the tracked scenario only measures test-owned allocations. */
+    GUM_Root* pRoot = GUM_Root_create();
+    if (pRoot) {
+        GUM_Root* pRequiredRoot = nullptr;
+        GBL_REQUIRE_SCOPE(GUM_Root, &pRequiredRoot, "GUM_Root") {
+        }
+        GUM_unref(pRoot);
+    }
 }
 
 static void releasePersistentMetadata_(void) {
