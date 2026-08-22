@@ -151,7 +151,6 @@ int main(int argc, const char* pArgv[]) {
         result = 1;
     } else {
         GUM_Font_setDefault(pShutdownFont);
-        GBL_UNREF(pShutdownFont);
     }
 
     releasePersistentMetadata_();
@@ -160,6 +159,9 @@ int main(int argc, const char* pArgv[]) {
         GUM_Font_setDefault(nullptr);
         result = 1;
     }
+
+    if (pShutdownFont)
+        GBL_UNREF(pShutdownFont);
 
     backendDeinit_();
     return result;
