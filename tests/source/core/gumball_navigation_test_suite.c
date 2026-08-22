@@ -20,6 +20,7 @@ static void GUM_NavigationTestSuite_inputSignal_(GUM_Widget* pWidget) {
 }
 
 GBL_TEST_INIT()
+    GUM_drawQueue_init();
     pFixture->pKeyboard = GUM_Keyboard_create();
 
     pFixture->pContainer = GUM_Container_create("w", 300.0f,
@@ -37,6 +38,7 @@ GBL_TEST_CASE_END
 GBL_TEST_FINAL()
     GUM_unref(pFixture->pKeyboard);
     GUM_unref(pFixture->pContainer);
+    GUM_drawQueue_free();
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(defaultFocus)
