@@ -49,9 +49,10 @@ GBL_RESULT GUM_InputSystem_bind     (GblType deviceType, GUM_InputAction action,
 GBL_RESULT GUM_InputSystem_unbind   (GblType deviceType, GUM_InputAction action, GblFlags button);
 
 //! \cond GRUGLESS
-/*! Returns the top-most interactive widget at the given pointer position.
- *  Noninteractive widgets are pointer-transparent. This is exposed only so
- *  the backend-independent input contract can be regression-tested.
+/*! Returns the top-most widget at the given pointer position that is both
+ *  interactive and active. Noninteractive or inactive widgets are
+ *  pointer-transparent. This is exposed only so the backend-independent input
+ *  contract can be regression-tested.
 */
 GUM_Widget* GUM_InputSystem_pointerTargetAt_(GUM_Vector2 position);
 //! \endcond
