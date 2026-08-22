@@ -108,7 +108,8 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     const float resizedMainDim            = GBL_MAX(availableMainDim / (float)childCount, minimumMainDim);
     const float resizedSecondaryDim       = GBL_MAX(container_secondaryDim - totalPaddingWithRoundness, 0.0f);
 
-    float* scrollOffsetMain = isHorizontal ? &pSelf->scrollAnimatorX.current : &pSelf->scrollAnimatorY.current;
+    GUM_Animator* pScrollAnimator = isHorizontal ? &pSelf->scrollAnimatorX : &pSelf->scrollAnimatorY;
+    float*        scrollOffsetMain = &pScrollAnimator->current;
 
     float offset        = container_mainPos + pSelf->padding + roundnessInset;
     float contentExtent = offset;
@@ -143,8 +144,11 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
 
     const bool  contentOverflows = contentExtent > (container_mainPos + container_mainDim);
     const float maxScroll        = contentOverflows ? (contentExtent - container_mainPos - container_mainDim) : 0.0f;
+    const float scrollLimit      = pSelf->scrollable ? maxScroll : 0.0f;
 
-    *scrollOffsetMain = pSelf->scrollable ? GBL_CLAMP(*scrollOffsetMain, 0.0f, maxScroll) : 0.0f;
+    pScrollAnimator->from    = GBL_CLAMP(pScrollAnimator->from,    0.0f, scrollLimit);
+    pScrollAnimator->to      = GBL_CLAMP(pScrollAnimator->to,      0.0f, scrollLimit);
+    pScrollAnimator->current = GBL_CLAMP(pScrollAnimator->current, 0.0f, scrollLimit);
 
     GUM_Rectangle outgoingClip = pSelfWidget->clipRect;
 
