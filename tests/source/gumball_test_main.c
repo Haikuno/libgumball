@@ -42,7 +42,7 @@ static void backendDeinit_(void) {
 }
 #endif
 
-static GblClass* pPersistentClasses_[8];
+static GblClass* pPersistentClasses_[9];
 static size_t persistentClassCount_ = 0;
 static GUM_Root* pPersistentRoot_ = nullptr;
 
@@ -71,6 +71,7 @@ static void preparePersistentMetadata_(void) {
     (void)GUM_Event_Mouse_type();
 
     (void)GUM_InputDevice_type();
+    (void)GUM_Pointer_type();
     (void)GUM_Mouse_type();
     (void)GUM_Gamepad_type();
     (void)GUM_Keyboard_type();
@@ -95,6 +96,7 @@ static void preparePersistentMetadata_(void) {
      * tracked run. Their property/signal registration is global metadata and
      * must not resize global registries through the scenario allocator. */
     pinPersistentClass_(GUM_INPUTDEVICE_TYPE);
+    pinPersistentClass_(GUM_POINTER_TYPE);
     pinPersistentClass_(GUM_MOUSE_TYPE);
     pinPersistentClass_(GUM_GAMEPAD_TYPE);
     pinPersistentClass_(GUM_KEYBOARD_TYPE);
