@@ -47,14 +47,20 @@ void GUM_InputSystem_init(void) {
 
 void GUM_InputSystem_deinit(void) {
     GUM_unref(pMouse_);
-    GUM_unref(pKeyboard_);
+    pMouse_ = nullptr;
 
-    for (int i = 0; i < GUM_MAX_GAMEPADS; i++)
+    GUM_unref(pKeyboard_);
+    pKeyboard_ = nullptr;
+
+    for (int i = 0; i < GUM_MAX_GAMEPADS; i++) {
         if (pGamepads_[i]) GUM_unref(pGamepads_[i]);
+        pGamepads_[i] = nullptr;
+    }
+
+    pHoveredWidget_ = nullptr;
 
     for (size_t i = 0; i < GBL_COUNT_OF(bindings_); i++)
         GblArrayList_destruct(&bindings_[i]);
-
 }
 
 GBL_RESULT GUM_InputSystem_bind(GblType deviceType, GUM_InputAction action, GblFlags button) {
@@ -92,6 +98,9 @@ static GUM_InputAction GUM_InputSystem_actionFor_(GblType deviceType, GblFlags b
 
 void GUM_InputSystem_widgetDestroyed(GUM_Widget* pWidget) {
     if (!pWidget) return;
+
+    if (pHoveredWidget_ == pWidget)
+        pHoveredWidget_ = nullptr;
 
     if (pMouse_ && GUM_INPUTDEVICE(pMouse_)->pFocusedWidget == pWidget)
         GUM_INPUTDEVICE(pMouse_)->pFocusedWidget = nullptr;
@@ -183,7 +192,6 @@ static void GUM_InputSystem_NavDevice_dispatchEvent_(GUM_InputDevice* pDevice, G
         pEvent->action >= GUM_INPUTACTION_MOVE_UP && pEvent->action <= GUM_INPUTACTION_MOVE_RIGHT) {
         GUM_Nav_move(pDevice, pEvent->action);
     }
-
 
     GBL_UNREF(pEvent);
 }
@@ -330,7 +338,6 @@ static void GUM_InputSystem_Gamepad_update_(void) {
         GUM_Gamepad* pGamepad = pGamepads_[i];
         if (!pGamepad) continue;
 
-
         GUM_Backend_Gamepad_update(pGamepad);
         GUM_InputSystem_dispatchButton_(GUM_INPUTDEVICE(pGamepad), pGamepad, GUM_InputSystem_Gamepad_dispatchEvent_);
     }
@@ -348,7 +355,6 @@ static void GUM_InputSystem_Keyboard_update_(void) {
     GUM_Backend_Keyboard_update(pKeyboard_);
     GUM_InputSystem_dispatchButton_(GUM_INPUTDEVICE(pKeyboard_), nullptr, GUM_InputSystem_Keyboard_dispatchEvent_);
 }
-
 
 void GUM_InputSystem_update(void) {
     GUM_InputSystem_Mouse_update_();
