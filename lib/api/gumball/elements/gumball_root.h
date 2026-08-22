@@ -8,16 +8,11 @@
  *   \ingroup    elements
  *
  *   GUM_Root is the element responsible for holding all other elements in the scene.
- *   It also internally holds the draw queue, which is a list of all drawable elements in the scene,
- *   sorted by z-index.
- *
- *   \todo
- *       - Make the draw queue private.
+ *   It owns the scene's runtime state, including drawable ordering, as private instance data.
 */
 
 #include <gimbal/gimbal_meta.h>
 #include <gimbal/core/gimbal_module.h>
-#include <gimbal/gimbal_containers.h>
 
 /*!  \name  Type System
  *   \brief Type UUID and cast operators
@@ -25,7 +20,7 @@
 */
 #define GUM_ROOT_TYPE            (GBL_TYPEID     (GUM_Root))           //!< Returns the GUM_Root Type UUID
 #define GUM_ROOT(self)           (GBL_CAST       (GUM_Root, self))     //!< Casts an instance of a compatible element to a GUM_Root
-#define GUM_ROOT_CLASS(klass)    (GBL_CLASS_CAST (GUM_Root, klass))    //!< Casts a  class    of a compatible element to a GUM_RootClass
+#define GUM_ROOT_CLASS(klass)    (GBL_CLASS_CAST (GUM_Root, klass))    //!< Casts a class of a compatible element to a GUM_RootClass
 #define GUM_ROOT_CLASSOF(self)   (GBL_CLASSOF    (GUM_Root, self))     //!< Casts an instance of a compatible element to a GUM_RootClass
 //! @}
 
@@ -48,17 +43,10 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Root, GblModule)
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Root, GblModule)
 
-#define GUM_Root_create() GBL_NEW(GUM_Root) //!< Returns a new GUM_Root. \note Currently there is no support for having multiple roots at once.
-//! \cond
-GblType GUM_Root_type(void) GBL_NOEXCEPT;
+//! Creates the process's single active root. Returns nullptr while another GUM_Root is registered.
+GBL_EXPORT GUM_Root* GUM_Root_create(void) GBL_NOEXCEPT;
 
-void             GUM_drawQueue_init      (void);
-void             GUM_drawQueue_free      (void);
-void             GUM_drawQueue_push      (GblObject* pObject);
-void             GUM_drawQueue_remove    (GblObject* pObject);
-void             GUM_drawQueue_sort      (void);
-GblArrayList*    GUM_drawQueue_get       (void);
-//!\endcond
+GblType GUM_Root_type(void) GBL_NOEXCEPT;
 
 //! Updates the root element.
 void GUM_Root_update(GBL_SELF);
