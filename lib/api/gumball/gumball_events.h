@@ -8,16 +8,18 @@
  *   \ingroup    events
  *
  *   \author     2025, 2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \copyright MIT License
 */
 
 #include "events/gumball_event.h"
+#include "events/gumball_event_input.h"
+#include "events/gumball_event_pointer.h"
 #include "events/gumball_event_key.h"
 #include "events/gumball_event_gamepad.h"
 #include "events/gumball_event_mouse.h"
 
 /*!  \defgroup events Events
- *   \brief    Element types
+ *   \brief    Input and application event types
 */
 
 #endif // GUM_EVENTS_H
