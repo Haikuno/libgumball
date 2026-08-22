@@ -1,0 +1,12 @@
+name: CI workflow validation
+
+on:
+  push:
+    branches:
+      - devilution/full-game-ui
+    paths:
+      - '.github/workflows/**'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
