@@ -287,9 +287,9 @@ void GUM_Nav_move(GUM_InputDevice* pDevice, GUM_InputAction direction) {
     GblObject* pAncestor    = GblObject_parent(pChildOnPath);
 
     while (pAncestor && GBL_TYPEOF(pAncestor) != GUM_ROOT_TYPE) {
-        GUM_Container* pContainer = GUM_CONTAINER(pAncestor);
+        GUM_Container* pContainer = GBL_AS(GUM_Container, pAncestor);
 
-        if (pContainer->scrollable) {
+        if (pContainer && pContainer->scrollable) {
             const GUM_Vector2 nextAbsPos = GUM_get_absolute_position_(pNext);
             const GUM_Rectangle pNextRec = (GUM_Rectangle){ nextAbsPos.x, nextAbsPos.y,
                                                                 pNext->w, pNext->h };
