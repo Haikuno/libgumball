@@ -1,4 +1,5 @@
 #include <gumball/devices/gumball_inputdevice.h>
+#include <gumball/core/gumball_navigation.h>
 
 static GBL_RESULT GUM_InputDevice_init_(GblInstance* pInstance) {
     GUM_InputDevice* pSelf = GUM_INPUTDEVICE(pInstance);
@@ -19,6 +20,7 @@ static GBL_RESULT GUM_InputDevice_init_(GblInstance* pInstance) {
 
 static GBL_RESULT GUM_InputDevice_GblBox_destructor_(GblBox* pBox) {
     GUM_InputDevice* pSelf = GUM_INPUTDEVICE(pBox);
+    GUM_Nav_focus(pSelf, nullptr);
     GblStringRef_unref(pSelf->deviceName);
 
     GblObjectClass* pObjClass = GBL_OBJECT_CLASS(GblClass_weakRefDefault(GBL_OBJECT_TYPE));
