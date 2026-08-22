@@ -17,11 +17,11 @@ Normal development is local-first. Hosted GitHub Actions is reserved for CI-spec
 - For ordinary source/framework work, configure, build, test, sanitize, and run parity locally when an executable environment is available. Do not query workflow runs, jobs, logs, artifacts, checks, or check suites merely because a commit was pushed or a PR exists.
 - A task explicitly about diagnosing, fixing, or validating CI authorizes use of hosted GitHub Actions for that task. Outside CI-specific work, hosted Actions still requires explicit current-turn user opt-in.
 - Never use hosted Actions as a fallback because local execution is unavailable. Report the execution limitation and continue from repository/static evidence.
-- Feature-branch source commits should not automatically consume hosted CI. The workflow is designed so PR CI runs automatically only when the workflow configuration itself changes; ordinary feature work is validated locally.
+- Feature-branch source commits should not automatically consume hosted CI. On `devilution/full-game-ui`, a small wrapper may invoke the reusable CI only when `.github/workflows/**` itself changes, so CI-specific workflow edits receive one validation run without making ordinary source commits hosted-CI events.
 - `workflow_dispatch` exists for an explicitly requested hosted validation run when needed.
-- Push CI is restricted to `master` for post-merge coverage. Feature branches must not also run a duplicate push workflow when a PR run exists.
+- Push CI in the main reusable workflow is restricted to `master` for post-merge coverage. The migration-branch wrapper is limited to workflow-file changes and must not become a general feature-branch push trigger.
 - When hosted CI is intentionally used, one hosted run per commit/change is the target. Do not create duplicate PR/push validation for the same feature-branch commit.
-- Reuse an existing suitable PR rather than creating replacement PRs solely to obtain fresh runs, and never merge without explicit approval.
+- Reuse an existing suitable PR when a PR is otherwise needed, rather than creating replacement PRs solely to obtain fresh runs, and never merge without explicit approval.
 
 ### Hosted diagnostics without stalls
 
@@ -106,10 +106,11 @@ Independent backend jobs should run in parallel.
 Trigger policy:
 
 - ordinary feature-branch source commits: no automatic hosted CI;
-- PR changes to `.github/workflows/**`: one PR-triggered CI run, appropriate for CI-specific work;
+- `devilution/full-game-ui` changes under `.github/workflows/**`: one migration-branch push wrapper run that calls the reusable CI, appropriate for CI-specific workflow work;
 - explicit hosted validation: manual `workflow_dispatch`;
-- `master` pushes: one post-merge CI run;
-- never run both feature-branch push CI and PR CI for the same commit.
+- `master` pushes: one post-merge CI run from the main workflow;
+- no automatic PR trigger on the migration branch;
+- never run duplicate feature-branch validation paths for the same commit.
 
 Cancel superseded runs when a newer commit makes an older run irrelevant.
 
@@ -128,6 +129,7 @@ Cancel superseded runs when a newer commit makes an older run irrelevant.
 - Prefer focused gates over globally enabling noisy warning policies that mostly expose third-party code.
 - Maintain an ASan + UBSan lane for lifecycle/memory correctness where the backend/toolchain supports it cleanly.
 - Sanitizers complement the libGimbal allocation tracker; they do not replace it.
+- LeakSanitizer suppressions are allowed only for a source-proven dependency process-lifetime allocation site that is outside libGumball ownership. Keep such suppressions symbol-specific, documented, and separate from the libGimbal allocation tracker; never use them to hide libGumball-owned leaks or allocator-context warnings.
 
 ## Rendering parity
 
@@ -166,8 +168,8 @@ Cancel superseded runs when a newer commit makes an older run irrelevant.
 
 For allocator/lifetime issues in particular:
 
-- Treat `[Allocation Tracker] Attempt to free unknown pointer` as a real allocator/context mismatch until disproven.
-- Trace the exact allocation and free ownership/context before patching.
+- Treat `[Allocation Tracker] Attempt to free unknown pointer` or `[Allocation Tracker] Attempt to realloc unknown pointer` as a real allocator/context mismatch until disproven.
+- Trace the exact allocation and free/reallocation ownership/context before patching.
 - Do not suppress the tracker, weaken tests, or paper over the symptom.
 - Use the smallest reproducer and first failing test as the primary evidence.
 - Once the concrete allocation/free path is established, fix ownership at the correct architectural layer and rerun available local tests/sanitizers. Use hosted CI only when the task is specifically about CI or the user explicitly requests hosted validation.
