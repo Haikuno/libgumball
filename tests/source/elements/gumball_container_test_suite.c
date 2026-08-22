@@ -9,9 +9,11 @@ GBL_TEST_FIXTURE {
 };
 
 GBL_TEST_INIT()
+    GUM_drawQueue_init();
 GBL_TEST_CASE_END
 
 GBL_TEST_FINAL()
+    GUM_drawQueue_free();
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(verticalLayout)
