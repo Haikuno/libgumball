@@ -28,6 +28,10 @@ if(GUM_BACKEND STREQUAL "SDL3")
     target_link_libraries(GumballSDLRendererRecreation PRIVATE libGumball)
     gum_enable_sanitizers(GumballSDLRendererRecreation)
 
+    # CTest registers both SDL3 executables. Keep GumballTests as the workflow's
+    # convenient build target while guaranteeing the full registered suite exists.
+    add_dependencies(GumballTests GumballSDLRendererRecreation)
+
     add_test(NAME GumballSDLRendererRecreation COMMAND GumballSDLRendererRecreation)
     set_tests_properties(GumballSDLRendererRecreation PROPERTIES
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
