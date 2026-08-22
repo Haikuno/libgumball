@@ -12,21 +12,23 @@ This file is the canonical operating procedure for the Devilution C23/UI migrati
 
 ## Hosted GitHub Actions policy
 
-Normal development is local-first. Hosted GitHub Actions is reserved for CI-specific work or an explicit user request for hosted validation.
+Normal development is local-first. Hosted GitHub Actions is a checkpoint-validation tool, not the normal iteration loop.
 
 - For ordinary source/framework work, configure, build, test, sanitize, and run parity locally when an executable environment is available. Do not query workflow runs, jobs, logs, artifacts, checks, or check suites merely because a commit was pushed or a PR exists.
-- A task explicitly about diagnosing, fixing, or validating CI authorizes use of hosted GitHub Actions for that task. Outside CI-specific work, hosted Actions still requires explicit current-turn user opt-in.
-- Never use hosted Actions as a fallback because local execution is unavailable. Report the execution limitation and continue from repository/static evidence.
+- During normal iteration, do not substitute hosted Actions for local debugging simply because local execution is unavailable. Report the execution limitation and continue from repository/static evidence.
+- A task explicitly about diagnosing, fixing, or validating CI authorizes hosted GitHub Actions during that task.
+- Independently of CI-specific work, when wrapping up a meaningful batch or checkpoint, one hosted CI validation run is allowed and recommended when the workflow supports it. This does not require separate current-turn user opt-in.
 - Feature-branch source commits should not automatically consume hosted CI. On `devilution/full-game-ui`, a small wrapper may invoke the reusable CI only when `.github/workflows/**` itself changes, so CI-specific workflow edits receive one validation run without making ordinary source commits hosted-CI events.
-- `workflow_dispatch` exists for an explicitly requested hosted validation run when needed.
+- `workflow_dispatch` exists for the intentional wrap-up validation run when needed.
 - Push CI in the main reusable workflow is restricted to `master` for post-merge coverage. The migration-branch wrapper is limited to workflow-file changes and must not become a general feature-branch push trigger.
-- When hosted CI is intentionally used, one hosted run per commit/change is the target. Do not create duplicate PR/push validation for the same feature-branch commit.
+- When hosted CI is intentionally used, one hosted run per commit/change/checkpoint is the target. Do not create duplicate PR/push/manual validation for the same feature-branch commit.
 - Reuse an existing suitable PR when a PR is otherwise needed, rather than creating replacement PRs solely to obtain fresh runs, and never merge without explicit approval.
 
 ### Hosted diagnostics without stalls
 
 Raw GitHub Actions job-log retrieval is a best-effort convenience, not the primary diagnostic path.
 
+- Inspect the hosted run/status once after intentional validation rather than polling it repeatedly.
 - Attempt raw job-log retrieval at most once for a failing job.
 - If that attempt is blocked, empty, redirected incorrectly, undecodable, or otherwise unusable, do not retry it.
 - Switch immediately to normal run/job step metadata to identify the failing step.
@@ -34,7 +36,7 @@ Raw GitHub Actions job-log retrieval is a best-effort convenience, not the prima
 - When exact output is required, preserve focused failure-only diagnostic artifacts from the workflow and inspect those instead of repeatedly fetching raw job logs.
 - Do not suppress or weaken failures merely to make diagnostic artifacts easier to obtain.
 
-The repository may still contain GitHub Actions configuration because CI architecture itself is part of the project. Inspecting or editing those files is ordinary repository work and does not by itself authorize hosted Actions outside the rules above.
+The repository may still contain GitHub Actions configuration because CI architecture itself is part of the project. Inspecting or editing those files is ordinary repository work and does not by itself authorize repeated hosted execution outside the rules above.
 
 ## Anti-stall rules
 
@@ -76,9 +78,10 @@ The emergency exit is a safety mechanism for continuity. A session must leave be
 4. Run the narrowest relevant local validation first when possible.
 5. Run broader local configure/build/tests/parity when appropriate and available.
 6. Commit a small, independently understandable change directly to the allowed branch.
-7. If execution is unavailable, state exactly what was not run; do not switch automatically to hosted GitHub Actions.
-8. Use hosted CI only for CI-specific work or explicit hosted-validation requests.
-9. Record meaningful validated changes in the Devilution-side migration changelog when appropriate.
+7. If execution is unavailable during iteration, state exactly what was not run; do not switch automatically to hosted GitHub Actions.
+8. When wrapping up a meaningful batch/checkpoint, run one hosted CI validation when practical via the intended manual path. Do not duplicate an already suitable run for that commit/checkpoint.
+9. Inspect the hosted result once. On failure, use step metadata and focused artifacts; raw job logs get at most one attempt per failing job.
+10. Record meaningful validated changes in the Devilution-side migration changelog when appropriate.
 
 ## Local validation
 
@@ -107,10 +110,10 @@ Trigger policy:
 
 - ordinary feature-branch source commits: no automatic hosted CI;
 - `devilution/full-game-ui` changes under `.github/workflows/**`: one migration-branch push wrapper run that calls the reusable CI, appropriate for CI-specific workflow work;
-- explicit hosted validation: manual `workflow_dispatch`;
+- meaningful batch/checkpoint wrap-up: one manual `workflow_dispatch` validation run when practical;
 - `master` pushes: one post-merge CI run from the main workflow;
 - no automatic PR trigger on the migration branch;
-- never run duplicate feature-branch validation paths for the same commit.
+- never run duplicate feature-branch validation paths for the same commit/checkpoint.
 
 Cancel superseded runs when a newer commit makes an older run irrelevant.
 
@@ -172,4 +175,4 @@ For allocator/lifetime issues in particular:
 - Trace the exact allocation and free/reallocation ownership/context before patching.
 - Do not suppress the tracker, weaken tests, or paper over the symptom.
 - Use the smallest reproducer and first failing test as the primary evidence.
-- Once the concrete allocation/free path is established, fix ownership at the correct architectural layer and rerun available local tests/sanitizers. Use hosted CI only when the task is specifically about CI or the user explicitly requests hosted validation.
+- Once the concrete allocation/free path is established, fix ownership at the correct architectural layer and rerun available local tests/sanitizers. Use the single hosted wrap-up validation run when appropriate; do not turn hosted CI into the normal debugging loop.
