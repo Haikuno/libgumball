@@ -37,6 +37,7 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Manager);
 GBL_STATIC_CLASS_DERIVE_EMPTY(GUM_Manager)
 
 GblType GUM_Manager_type(void) GBL_NOEXCEPT;
+void    GUM_Manager_deinit(void) GBL_NOEXCEPT;
 //!  \endcond
 
 //!  Loads a resource from the given path, and stores it in the internal hashset. If the resource has already been loaded, returns a reference to the existing resource.
