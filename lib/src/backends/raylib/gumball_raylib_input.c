@@ -9,10 +9,11 @@ void GUM_Backend_Mouse_update(GUM_Mouse* pMouse) {
     Vector2 position_ = GetMousePosition();
     Vector2 delta_    = GetMouseDelta();
     Vector2 wheel_    = GetMouseWheelMoveV();
+    GUM_Pointer* pPointer = GUM_POINTER(pMouse);
 
-    pMouse->position = (GUM_Vector2){position_.x, position_.y};
-    pMouse->delta    = (GUM_Vector2){delta_.x, delta_.y};
-    pMouse->wheel    = (GUM_Vector2){wheel_.x, wheel_.y};
+    pPointer->position = (GUM_Vector2){position_.x, position_.y};
+    pPointer->delta    = (GUM_Vector2){delta_.x, delta_.y};
+    pMouse->wheel      = (GUM_Vector2){wheel_.x, wheel_.y};
 
     GUM_INPUTDEVICE(pMouse)->buttons = 0;
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))   GUM_INPUTDEVICE(pMouse)->buttons |= GUM_MOUSE_BUTTON_LEFT;
