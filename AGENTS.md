@@ -8,7 +8,7 @@ Critical continuity rules:
 - Normal development is local-first. Do not use hosted GitHub Actions merely because a commit was pushed or a PR exists.
 - A task explicitly about diagnosing, fixing, or validating CI authorizes hosted GitHub Actions for that task. Outside CI-specific work, hosted Actions requires explicit current-turn user opt-in.
 - Never use GitHub Actions as an automatic fallback when local execution is unavailable. State what could not be executed and continue from repository evidence instead.
-- Feature-branch source commits should not automatically consume hosted CI. CI workflow edits may receive one PR-triggered run; explicit hosted validation uses the manual workflow; `master` receives post-merge push CI.
+- Feature-branch source commits should not automatically consume hosted CI. On `devilution/full-game-ui`, only changes under `.github/workflows/**` may automatically invoke the reusable CI for one CI-specific validation; explicit hosted validation otherwise uses the manual workflow; `master` receives post-merge push CI.
 - Never create duplicate feature-branch push and PR CI runs for the same commit.
 - Raw GitHub Actions job logs get at most one retrieval attempt per failing job. If unusable, immediately switch to job/step metadata and focused failure artifacts; never retry the raw-log route.
 - Do not repeatedly rediscover GitHub tooling. Use the narrowest direct repository action needed for the current task.
