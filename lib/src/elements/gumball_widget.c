@@ -777,6 +777,7 @@ static GBL_RESULT GUM_Widget_postDraw_(GUM_Widget* pSelf, GUM_Renderer* pRendere
 static GBL_RESULT GUM_Widget_GblBox_destructor_(GblBox* pBox) {
     GUM_Widget* pSelf = GUM_WIDGET(pBox);
 
+    GUM_Root_drawDisable_(pSelf);
     GUM_InputSystem_widgetDestroyed(pSelf);
     GUM_Widget_animate_widgetDestroyed_(pSelf);
     GblStringRef_unref(pSelf->label);
