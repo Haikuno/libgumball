@@ -35,11 +35,19 @@ jobs:
           path: ~/.cache/vcpkg/archives
           key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v2
 
-      - name: Install SDL3 dependencies
+      - name: Prepare vcpkg
         run: |
           git clone --branch 2026.07.29 --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
           "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
-          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]' sdl3-image sdl3-ttf
+
+      - name: Install SDL3
+        run: "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
+
+      - name: Install SDL3_image
+        run: "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-image
+
+      - name: Install SDL3_ttf
+        run: "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
 
       - name: Configure SDL3
         run: |
@@ -155,11 +163,19 @@ jobs:
           path: ~/.cache/vcpkg/archives
           key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v2
 
-      - name: Install SDL3 dependencies
+      - name: Prepare vcpkg
         run: |
           git clone --branch 2026.07.29 --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
           "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
-          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]' sdl3-image sdl3-ttf
+
+      - name: Install SDL3
+        run: "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
+
+      - name: Install SDL3_image
+        run: "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-image
+
+      - name: Install SDL3_ttf
+        run: "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
 
       - name: Configure sanitizers
         run: |
