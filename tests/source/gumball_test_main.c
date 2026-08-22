@@ -146,6 +146,13 @@ int main(int argc, const char* pArgv[]) {
 
     int result = GblTestScenario_exec(pScenario, argc, pArgv);
 
+    GUM_IResource* pInvalidFont = GUM_Manager_load("invalid.ttf");
+    if (pInvalidFont) {
+        result = 1;
+        GUM_Manager_unload(pInvalidFont);
+        GBL_UNREF(pInvalidFont);
+    }
+
     GUM_IResource* pShutdownTexture = GUM_Manager_load("psyoplogo.png");
     if (!pShutdownTexture)
         result = 1;
