@@ -1,7 +1,7 @@
 #include <gumball/events/gumball_event_mouse.h>
 #include <gumball/devices/gumball_mouse.h>
 
-GUM_Event_Mouse* GUM_Event_Mouse_createFrom(const GUM_Mouse* pMouse) {
+GUM_Event_Mouse* GUM_Event_Mouse_createFrom(GUM_Mouse* pMouse) {
     GUM_Event_Mouse* pEvent = GUM_Event_Mouse_create();
     if (!pEvent || !pMouse)
         return pEvent;
