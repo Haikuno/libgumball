@@ -119,12 +119,24 @@ static GBL_RESULT GUM_ObjectViewer_Widget_deactivate_(GUM_Widget* pSelf) {
     return GBL_RESULT_SUCCESS;
 }
 
+static GBL_RESULT GUM_ObjectViewer_GblBox_destructor_(GblBox* pBox) {
+    GUM_ObjectViewer* pSelf = GUM_OBJECTVIEWER(pBox);
+    if (pSelf->pObject) {
+        GBL_UNREF(pSelf->pObject);
+        pSelf->pObject = nullptr;
+    }
+
+    GblBoxClass* pWidgetClass = GBL_BOX_CLASS(GblClass_weakRefDefault(GUM_WIDGET_TYPE));
+    return pWidgetClass->pFnDestructor(pBox);
+}
+
 static GBL_RESULT GUM_ObjectViewerClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
     if (!GblType_classRefCount(GUM_OBJECTVIEWER_TYPE))
         GBL_PROPERTIES_REGISTER(GUM_ObjectViewer);
 
+    GBL_BOX_CLASS(pClass)->pFnDestructor      = GUM_ObjectViewer_GblBox_destructor_;
     GBL_OBJECT_CLASS(pClass)->pFnSetProperty  = GUM_ObjectViewer_GblObject_setProperty_;
     GBL_OBJECT_CLASS(pClass)->pFnProperty     = GUM_ObjectViewer_GblObject_property_;
     GBL_OBJECT_CLASS(pClass)->pFnInstantiated = GUM_ObjectViewer_Object_instantiated_;
