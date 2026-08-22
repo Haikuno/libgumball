@@ -21,6 +21,7 @@ static GBL_RESULT GUM_ObjectViewer_GblObject_setProperty_(GblObject* pObject, co
             if (pSelf->pObject)
                 GBL_UNREF(pSelf->pObject);
             GblVariant_valueCopy(pValue, &pSelf->pObject);
+            pSelf->base.base.shouldUpdate = true;
             break;
         default:
             return GBL_RESULT_ERROR_INVALID_PROPERTY;
@@ -135,10 +136,15 @@ static GBL_RESULT GUM_ObjectViewerClass_init_(GblClass* pClass, const void* pDat
 }
 
 GBL_RESULT GUM_ObjectViewer_setObject(GUM_ObjectViewer* pSelf, GblObject* pObject) {
-    if GBL_UNLIKELY (!pObject)
+    if GBL_UNLIKELY (!pSelf || !pObject)
         return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    pSelf->pObject = pObject;
+    GblObject* pNewObject = GBL_OBJECT(GBL_REF(pObject));
+    if (pSelf->pObject)
+        GBL_UNREF(pSelf->pObject);
+
+    pSelf->pObject = pNewObject;
+    GUM_WIDGET(pSelf)->shouldUpdate = true;
     return GBL_RESULT_SUCCESS;
 }
 
