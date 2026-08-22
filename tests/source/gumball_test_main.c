@@ -125,6 +125,20 @@ static void releasePersistentMetadata_(void) {
         GblClass_unrefDefault(pPersistentClasses_[--persistentClassCount_]);
 }
 
+static void trackedScenarioBegan_(GblTestScenario* pScenario) {
+    GBL_UNUSED(pScenario);
+    /* GblTestScenario has now installed its allocation tracker as the global
+     * context. Construct the process-global draw queue inside that same scope
+     * so any growth and final destruction use one allocator consistently. */
+    GUM_drawQueue_init();
+}
+
+static void trackedScenarioEnded_(GblTestScenario* pScenario) {
+    GBL_UNUSED(pScenario);
+    /* The tracker is still the global context while "ended" is emitted. */
+    GUM_drawQueue_free();
+}
+
 int main(int argc, const char* pArgv[]) {
     if (!backendInit_()) return 1;
 
@@ -145,7 +159,17 @@ int main(int argc, const char* pArgv[]) {
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_NAVIGATION_TEST_SUITE_TYPE));
 
+    /* The root class is deliberately pinned across the scenario, but its draw
+     * queue is mutable runtime storage. Transfer that storage into the tracked
+     * allocation scope for the duration of the test run. */
+    GUM_drawQueue_free();
+    GBL_CONNECT(pScenario, "began", trackedScenarioBegan_);
+    GBL_CONNECT(pScenario, "ended", trackedScenarioEnded_);
+
     int result = GblTestScenario_exec(pScenario, argc, pArgv);
+
+    /* GblTestScenario_exec() has restored the normal global context. */
+    GUM_drawQueue_init();
 
     GUM_IResource* pInvalidFont = GUM_Manager_load("invalid.ttf");
     if (pInvalidFont) {
@@ -161,7 +185,7 @@ int main(int argc, const char* pArgv[]) {
         GUM_IResource_unref(pInvalidTexture);
     }
 
-    GUM_IResource* pShutdownTexture = GUM_Manager_load("psyoplogo.png");
+    GUM_IResource* pShutdownTexture = GUM_Manager_load("koslogo.png");
     if (!pShutdownTexture)
         result = 1;
 
@@ -188,7 +212,7 @@ int main(int argc, const char* pArgv[]) {
         GUM_IResource_unref(GUM_IRESOURCE(pShutdownFont));
 
     GUM_Root* pRestartRoot = GUM_Root_create();
-    GUM_IResource* pRestartTexture = pRestartRoot ? GUM_Manager_load("psyoplogo.png") : nullptr;
+    GUM_IResource* pRestartTexture = pRestartRoot ? GUM_Manager_load("koslogo.png") : nullptr;
     if (!pRestartRoot || !pRestartTexture) {
         result = 1;
     } else {
