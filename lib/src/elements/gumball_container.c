@@ -29,6 +29,7 @@ static GBL_RESULT GUM_Container_GblObject_setProperty_(GblObject* pObject, const
             GblVariant_valueCopy(pValue, &pSelf->margin);
             break;
         case GUM_Container_Property_Id_minChildSize:
+            pValue->f32 = GBL_CLAMP(pValue->f32, 0.0f, 1.0f);
             GblVariant_valueCopy(pValue, &pSelf->minChildSize);
             break;
         case GUM_Container_Property_Id_direction:
@@ -47,6 +48,7 @@ static GBL_RESULT GUM_Container_GblObject_setProperty_(GblObject* pObject, const
             return GBL_RESULT_ERROR_INVALID_PROPERTY;
     }
 
+    GUM_CONTAINER_CLASSOF(pSelf)->pFnUpdateContent(pSelf);
     return GBL_RESULT_SUCCESS;
 }
 
@@ -101,6 +103,10 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     const float cornerRadius              = pSelfWidget->border_radius * GBL_MIN(container_mainDim, container_secondaryDim) * 0.5f;
     const float roundnessInset            = cornerRadius * (1 - 1/sqrt(2));
     const float totalPaddingWithRoundness = totalPadding + roundnessInset * 2.0f;
+    const float availableMainDim          = GBL_MAX(container_mainDim - totalMargin - totalPaddingWithRoundness, 0.0f);
+    const float minimumMainDim            = GBL_MAX(container_mainDim, 0.0f) * pSelf->minChildSize;
+    const float resizedMainDim            = GBL_MAX(availableMainDim / (float)childCount, minimumMainDim);
+    const float resizedSecondaryDim       = GBL_MAX(container_secondaryDim - totalPaddingWithRoundness, 0.0f);
 
     float* scrollOffsetMain = isHorizontal ? &pSelf->scrollAnimatorX.current : &pSelf->scrollAnimatorY.current;
 
@@ -117,8 +123,8 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
         float* widget_secondaryDim = isHorizontal ? &pChildWidget->h : &pChildWidget->w;
 
         if (pSelf->resizeWidgets) {
-            *widget_mainDim      = (container_mainDim - totalMargin - totalPaddingWithRoundness) / (float)childCount;
-            *widget_secondaryDim = container_secondaryDim - totalPaddingWithRoundness;
+            *widget_mainDim      = resizedMainDim;
+            *widget_secondaryDim = resizedSecondaryDim;
         }
 
         if (pSelf->alignWidgets) {
