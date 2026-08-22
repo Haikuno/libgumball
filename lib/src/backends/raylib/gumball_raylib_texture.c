@@ -22,7 +22,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Texture_draw(GUM_Renderer* pRenderer, GUM_Text
     if (!pTexture) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     Texture2D* pRayTexture = GUM_IResource_data(GUM_IRESOURCE(pTexture));
-    if (!pRayTexture) return GBL_RESULT_ERROR_INTERNAL;
+    if (!pRayTexture || pRayTexture->id == 0) return GBL_RESULT_ERROR_INTERNAL;
 
     Rectangle src = { 0, 0, (float)pRayTexture->width, (float)pRayTexture->height };
     Rectangle dst = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
@@ -38,7 +38,13 @@ GBL_RESULT GUM_Backend_Texture_load(GUM_IResource* pSelf, GblStringRef* path) {
     Texture2D* pTexture = malloc(sizeof(*pTexture));
     if (!pTexture) return GBL_RESULT_ERROR_MEM_ALLOC;
 
-    *pTexture = LoadTexture(path);
+    const Texture2D loaded = LoadTexture(path);
+    if (loaded.id == 0 || loaded.width <= 0 || loaded.height <= 0) {
+        free(pTexture);
+        return GBL_RESULT_ERROR_FILE_READ;
+    }
+
+    *pTexture = loaded;
     GUM_IRESOURCE_CLASSOF(pSelf)->pFnSetValue(pSelf, pTexture);
 
     return GBL_RESULT_SUCCESS;
