@@ -6,6 +6,7 @@ on:
       - devilution/full-game-ui
     paths:
       - '.github/workflows/**'
+      - '.github/ci-trigger'
 
 jobs:
   ci:
