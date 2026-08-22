@@ -3,6 +3,13 @@
 
 static GUM_Font* defaultFont_ = nullptr;
 
+static bool GUM_Raylib_Font_isDefault_(Font font) {
+    const Font fallback = GetFontDefault();
+    return font.texture.id == fallback.texture.id &&
+           font.glyphs     == fallback.glyphs &&
+           font.recs       == fallback.recs;
+}
+
 GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) {
     if (!pFont || !pText) return (GUM_Vector2){ 0 };
 
@@ -39,7 +46,16 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
     Font* pFont = malloc(sizeof(*pFont));
     if (!pFont) return GBL_RESULT_ERROR_MEM_ALLOC;
 
-    *pFont = LoadFont(pPath);
+    const Font loaded = LoadFont(pPath);
+    if (loaded.texture.id == 0 || !loaded.glyphs || !loaded.recs || GUM_Raylib_Font_isDefault_(loaded)) {
+        /* raylib falls back to GetFontDefault() when a file cannot be loaded.
+         * Treat that as a real load failure so the resource manager never owns
+         * or later UnloadFont()s raylib's process-global default font. */
+        free(pFont);
+        return GBL_RESULT_ERROR_FILE_READ;
+    }
+
+    *pFont = loaded;
     GUM_IResource_setData(pSelf, pFont);
 
     return GBL_RESULT_SUCCESS;
