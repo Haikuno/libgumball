@@ -33,7 +33,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3
+          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v2
 
       - name: Install SDL3 dependencies
         run: |
@@ -153,7 +153,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3
+          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v2
 
       - name: Install SDL3 dependencies
         run: |
