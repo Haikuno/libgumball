@@ -3,11 +3,49 @@
 #include <gumball/core/gumball_backend.h>
 #include <stdlib.h>
 
-typedef struct {
-    SDL_Surface*  pSurface;
-    SDL_Texture*  pTexture;
-    SDL_Renderer* pRenderer;
+typedef struct GUM_SDL3_Texture_ {
+    SDL_Surface*             pSurface;
+    SDL_Texture*             pTexture;
+    SDL_Renderer*            pRenderer;
+    struct GUM_SDL3_Texture_* pPrev;
+    struct GUM_SDL3_Texture_* pNext;
 } GUM_SDL3_Texture_;
+
+static GUM_SDL3_Texture_* pTextures_ = nullptr;
+
+static void GUM_SDL3_Texture_register_(GUM_SDL3_Texture_* pSelf) {
+    pSelf->pPrev = nullptr;
+    pSelf->pNext = pTextures_;
+    if (pTextures_)
+        pTextures_->pPrev = pSelf;
+    pTextures_ = pSelf;
+}
+
+static void GUM_SDL3_Texture_unregister_(GUM_SDL3_Texture_* pSelf) {
+    if (pSelf->pPrev)
+        pSelf->pPrev->pNext = pSelf->pNext;
+    else if (pTextures_ == pSelf)
+        pTextures_ = pSelf->pNext;
+
+    if (pSelf->pNext)
+        pSelf->pNext->pPrev = pSelf->pPrev;
+
+    pSelf->pPrev = nullptr;
+    pSelf->pNext = nullptr;
+}
+
+void GUM_SDL3_Texture_rendererDestroyed_(SDL_Renderer* pRenderer) {
+    if (!pRenderer) return;
+
+    for (GUM_SDL3_Texture_* pTexture = pTextures_; pTexture; pTexture = pTexture->pNext) {
+        if (pTexture->pRenderer != pRenderer)
+            continue;
+
+        SDL_DestroyTexture(pTexture->pTexture);
+        pTexture->pTexture  = nullptr;
+        pTexture->pRenderer = nullptr;
+    }
+}
 
 GBL_EXPORT GUM_Vector2 GUM_Texture_size(GUM_Texture* pSelf) {
     GUM_Vector2 size = { 0 };
@@ -71,6 +109,7 @@ GBL_RESULT GUM_Backend_Texture_load(GUM_IResource* pSelf, GblStringRef* pPath) {
     }
 
     *pTexture = (GUM_SDL3_Texture_){ .pSurface = pSurface };
+    GUM_SDL3_Texture_register_(pTexture);
     GUM_IResource_setData(pSelf, pTexture);
     return GBL_RESULT_SUCCESS;
 }
@@ -81,6 +120,7 @@ GBL_RESULT GUM_Backend_Texture_unload(GUM_IResource* pSelf) {
     GUM_SDL3_Texture_* pTexture = GUM_IResource_data(pSelf);
     if (!pTexture) return GBL_RESULT_SUCCESS;
 
+    GUM_SDL3_Texture_unregister_(pTexture);
     SDL_DestroyTexture(pTexture->pTexture);
     SDL_DestroySurface(pTexture->pSurface);
     free(pTexture);
