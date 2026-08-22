@@ -80,7 +80,16 @@ jobs:
           ctest --test-dir build-sdl3 --verbose 2>&1 | tee build-sdl3/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-sdl3/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to realloc unknown pointer" build-sdl3/test-output.log
+          ! grep -Fiq "invalid pointer" build-sdl3/test-output.log
           ! grep -Eq 'Remaining Allocs[[:space:]]*:[[:space:]]*[1-9][0-9]*' build-sdl3/test-output.log
+
+      - name: Preserve SDL3 test failure output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdl3-test-failure
+          path: build-sdl3/test-output.log
+          if-no-files-found: warn
 
       - name: Render SDL3 parity scene
         if: success()
@@ -140,7 +149,16 @@ jobs:
           xvfb-run -a ctest --test-dir build-raylib --verbose 2>&1 | tee build-raylib/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-raylib/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to realloc unknown pointer" build-raylib/test-output.log
+          ! grep -Fiq "invalid pointer" build-raylib/test-output.log
           ! grep -Eq 'Remaining Allocs[[:space:]]*:[[:space:]]*[1-9][0-9]*' build-raylib/test-output.log
+
+      - name: Preserve raylib test failure output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raylib-test-failure
+          path: build-raylib/test-output.log
+          if-no-files-found: warn
 
       - name: Render raylib parity scene
         if: success()
@@ -229,6 +247,7 @@ jobs:
           ctest --test-dir build-sanitize --verbose 2>&1 | tee build-sanitize/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-sanitize/test-output.log
           ! grep -Fq "[Allocation Tracker] Attempt to realloc unknown pointer" build-sanitize/test-output.log
+          ! grep -Fiq "invalid pointer" build-sanitize/test-output.log
           ! grep -Eq 'Remaining Allocs[[:space:]]*:[[:space:]]*[1-9][0-9]*' build-sanitize/test-output.log
 
       - name: Preserve sanitizer failure output
