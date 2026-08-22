@@ -6,11 +6,12 @@ Critical continuity rules:
 
 - Work only in `Haikuno/libgumball` and `Haikuno/devilution-revamp`. Never commit to libGimbal or any other repository.
 - Normal development is local-first. Do not use hosted GitHub Actions merely because a commit was pushed or a PR exists.
-- A task explicitly about diagnosing, fixing, or validating CI authorizes hosted GitHub Actions for that task. Outside CI-specific work, hosted Actions requires explicit current-turn user opt-in.
-- Never use GitHub Actions as an automatic fallback when local execution is unavailable. State what could not be executed and continue from repository evidence instead.
-- Feature-branch source commits should not automatically consume hosted CI. On `devilution/full-game-ui`, only changes under `.github/workflows/**` may automatically invoke the reusable CI for one CI-specific validation; explicit hosted validation otherwise uses the manual workflow; `master` receives post-merge push CI.
-- Never create duplicate feature-branch push and PR CI runs for the same commit.
-- Raw GitHub Actions job logs get at most one retrieval attempt per failing job. If unusable, immediately switch to job/step metadata and focused failure artifacts; never retry the raw-log route.
+- During normal iteration, prefer local configure/build/test/sanitizer/parity validation whenever an executable environment is available. Hosted CI is not the normal development loop.
+- When wrapping up a meaningful batch or checkpoint, one hosted CI validation run is allowed and recommended when the workflow supports it, even if the task was not specifically about CI. Use the manual validation path rather than creating duplicate automatic runs.
+- Never use GitHub Actions as an automatic fallback simply because local execution is unavailable during normal iteration. Continue from repository evidence, then use the single wrap-up CI run when appropriate.
+- Feature-branch source commits should not automatically consume hosted CI. On `devilution/full-game-ui`, only changes under `.github/workflows/**` may automatically invoke the reusable CI for one CI-specific validation; explicit wrap-up hosted validation otherwise uses the manual workflow; `master` receives post-merge push CI.
+- Never create duplicate feature-branch push, PR, or manual CI runs for the same commit/checkpoint.
+- When hosted validation is intentionally used, inspect the run/status once. Raw GitHub Actions job logs get at most one retrieval attempt per failing job. If unusable, immediately switch to job/step metadata and focused failure artifacts; never retry or loop on raw-log retrieval.
 - Do not repeatedly rediscover GitHub tooling. Use the narrowest direct repository action needed for the current task.
 - Every concrete task has a hard 15-minute limit. Also stop early after 3 consecutive blocked/failed attempts on the same obstacle.
 - On either limit, perform the emergency exit defined in `docs/audit/LIBGUMBALL_WORKFLOW.md`: stop, preserve useful work/evidence, make a safe checkpoint commit if appropriate, mark incomplete work clearly, record exact remaining state and next action, and report the interruption to the user.
