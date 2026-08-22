@@ -7,9 +7,8 @@
  *   \ref     GUM_Event_Mouse "GUM_Event_Mouse data structure and hierarchy graph"
  *   \ingroup events
  *
- *   Mouse button event. In addition to the common input state/action fields,
- *   it snapshots pointer position, movement delta, and wheel delta from the
- *   emitting mouse device.
+ *   Mouse pointer event. Common position and movement-delta snapshots live in
+ *   GUM_Event_Pointer; GUM_Event_Mouse adds the mouse-specific wheel delta.
  *
  *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License
@@ -36,7 +35,6 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Mouse);
 GBL_CLASS_DERIVE_EMPTY(GUM_Event_Mouse, GUM_Event_Pointer)
 
 GBL_INSTANCE_DERIVE(GUM_Event_Mouse, GUM_Event_Pointer)
-    GUM_Vector2 delta; //!< Mouse movement delta when the event was created.
     GUM_Vector2 wheel; //!< Wheel delta when the event was created.
 GBL_INSTANCE_END
 
@@ -44,7 +42,7 @@ GblType GUM_Event_Mouse_type(void) GBL_NOEXCEPT;
 
 //! Returns a new zero-initialized GUM_Event_Mouse.
 #define GUM_Event_Mouse_create() GUM_EVENT_MOUSE(GblEvent_create(GUM_EVENT_MOUSE_TYPE))
-//! Creates a mouse event and snapshots position/delta/wheel/device from pMouse.
+//! Creates a mouse event and snapshots pointer position/delta, wheel, and device from pMouse.
 GUM_Event_Mouse* GUM_Event_Mouse_createFrom(GUM_Mouse* pMouse) GBL_NOEXCEPT;
 
 GBL_DECLS_END
