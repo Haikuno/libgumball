@@ -10,7 +10,7 @@ GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRe
     if (!pRayFont) return (GUM_Vector2){ 0 };
 
     GUM_Vector2 size    = { 0, 0 };
-    Vector2     raySize = MeasureTextEx(*pRayFont, pText, fontSize, 1.2f);
+    Vector2     raySize = MeasureTextEx(*pRayFont, pText, fontSize, 0.0f);
     size.x              = raySize.x;
     size.y              = raySize.y;
     return size;
@@ -20,12 +20,14 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* p
                                             GUM_Vector2 position, GUM_Color color, int fontSize, float spacing) {
     if (!pFont || !pText) return GBL_RESULT_ERROR_INVALID_POINTER;
 
+    GBL_UNUSED(pRenderer, spacing);
+
     Font* pRayFont = GUM_IResource_data(GUM_IRESOURCE(pFont));
     if (!pRayFont) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     DrawTextEx(*pRayFont, pText,
                (Vector2){ position.x, position.y },
-               fontSize, spacing,
+               fontSize, 0.0f,
                (Color){ color.r, color.g, color.b, color.a });
 
     return GBL_RESULT_SUCCESS;
