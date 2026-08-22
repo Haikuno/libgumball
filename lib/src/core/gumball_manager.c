@@ -162,20 +162,15 @@ GBL_EXPORT void GUM_Manager_unload(GUM_IResource* pResource) {
                 GBL_SCOPE_EXIT;
             }
 
-            GUM_LOG_DEBUG_SCOPE("The resource is currently loaded! Unreffing...") {
-                GblHashSet_erase(&GUM_Manager_hashSet_, (const void*)&entry);
-                GUM_IResource_unref(pResource);
-
-                GUM_LOG_DEBUG_SCOPE("Checking if the resource is still being used...") {
-                    if (GblBox_refCount(GBL_BOX(pResource)) > 1) {
-                        GUM_LOG_ERROR("Attempted to unload a resource that is still being used!");
-                        GBL_SCOPE_EXIT;
-                    }
-
-                    GUM_LOG_DEBUG("No references left! Unloading...");
-                    GUM_IRESOURCE_CLASSOF(pResource)->pFnUnload(GUM_IRESOURCE(pResource));
-                }
+            if (GblBox_refCount(GBL_BOX(pResource)) > 1) {
+                GUM_LOG_ERROR("Attempted to unload a resource that is still being used!");
+                GBL_SCOPE_EXIT;
             }
+
+            GUM_LOG_DEBUG("No references left! Unloading...");
+            GUM_IRESOURCE_CLASSOF(pResource)->pFnUnload(pResource);
+            GblHashSet_erase(&GUM_Manager_hashSet_, (const void*)&entry);
+            GBL_UNREF(pResource);
         }
     }
 }
