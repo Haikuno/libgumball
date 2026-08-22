@@ -235,7 +235,7 @@ GUM_Widget* GUM_InputSystem_pointerTargetAt_(GUM_Vector2 mousePos) {
 }
 
 static void GUM_InputSystem_Mouse_hitTest_(void) {
-    pHoveredWidget_ = GUM_InputSystem_pointerTargetAt_(pMouse_->position);
+    pHoveredWidget_ = GUM_InputSystem_pointerTargetAt_(GUM_POINTER(pMouse_)->position);
     GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_),
                   pHoveredWidget_ && pHoveredWidget_->isSelectable ? pHoveredWidget_ : nullptr);
 }
