@@ -1,5 +1,6 @@
 #include <gimbal/test/gimbal_test_scenario.h>
 #include <gumball/gumball.h>
+#include "core/gumball_manager_test_suite.h"
 #include "core/gumball_navigation_test_suite.h"
 #include "elements/gumball_container_test_suite.h"
 #include "types/gumball_animator_test_suite.h"
@@ -42,129 +43,14 @@ static void backendDeinit_(void) {
 }
 #endif
 
-static GblClass* pPersistentClasses_[9];
-static size_t persistentClassCount_ = 0;
-static GUM_Root* pPersistentRoot_ = nullptr;
-
-static void persistentSignalNoop_(GUM_Widget* pWidget) {
-    GBL_UNUSED(pWidget);
-}
-
-static void pinPersistentClass_(GblType type) {
-    GblClass* pClass = GblClass_refDefault(type);
-    if (pClass)
-        pPersistentClasses_[persistentClassCount_++] = pClass;
-}
-
-static void preparePersistentMetadata_(void) {
-    /* GblTestScenario temporarily replaces the global allocation context while
-     * it runs. libGimbal's type/property/signal/module registries are
-     * process-global, so initialize and retain persistent libGumball metadata
-     * before entering the tracked test context. */
-    (void)GUM_IResource_type();
-
-    (void)GUM_Event_type();
-    (void)GUM_Event_Input_type();
-    (void)GUM_Event_Pointer_type();
-    (void)GUM_Event_Key_type();
-    (void)GUM_Event_Gamepad_type();
-    (void)GUM_Event_Mouse_type();
-
-    (void)GUM_InputDevice_type();
-    (void)GUM_Pointer_type();
-    (void)GUM_Mouse_type();
-    (void)GUM_Gamepad_type();
-    (void)GUM_Keyboard_type();
-
-    (void)GUM_Font_type();
-    (void)GUM_Texture_type();
-    (void)GUM_Color_type();
-    (void)GUM_Rectangle_type();
-    (void)GUM_Vector2_type();
-    (void)GUM_Renderer_type();
-    (void)GUM_Animator_type();
-
-    (void)GUM_Root_type();
-    (void)GUM_Widget_type();
-    (void)GUM_Button_type();
-    (void)GUM_Container_type();
-    (void)GUM_ObjectViewer_type();
-
-    (void)GUM_Manager_type();
-
-    /* Keep the classes exercised by the current suites alive for the whole
-     * tracked run. Their property/signal registration is global metadata and
-     * must not resize global registries through the scenario allocator. */
-    pinPersistentClass_(GUM_INPUTDEVICE_TYPE);
-    pinPersistentClass_(GUM_POINTER_TYPE);
-    pinPersistentClass_(GUM_MOUSE_TYPE);
-    pinPersistentClass_(GUM_GAMEPAD_TYPE);
-    pinPersistentClass_(GUM_KEYBOARD_TYPE);
-    pinPersistentClass_(GUM_WIDGET_TYPE);
-    pinPersistentClass_(GUM_BUTTON_TYPE);
-    pinPersistentClass_(GUM_CONTAINER_TYPE);
-    pinPersistentClass_(GUM_ROOT_TYPE);
-
-    /* Keep one root alive across every tracked suite. GUM_Root is process-wide
-     * runtime/module state; re-registering it under the scenario allocator
-     * would make persistent module metadata look like a test leak. */
-    pPersistentRoot_ = GUM_Root_create();
-    if (pPersistentRoot_) {
-        GUM_Container* pContainer = GUM_Container_create("w", 100.0f,
-                                                         "h", 100.0f,
-                                                         "padding", 10.0f,
-                                                         "margin", 5.0f,
-                                                         "direction", GUM_DIRECTION_HORIZONTAL);
-        if (pContainer) {
-            (void)GUM_Widget_create("parent", pContainer);
-            (void)GUM_Widget_create("parent", pContainer);
-            GUM_unref(pContainer);
-        }
-
-        GUM_Root* pRequiredRoot = nullptr;
-        GBL_REQUIRE_SCOPE(GUM_Root, &pRequiredRoot, "GUM_Root") {
-        }
-
-        /* libGimbal's signal connection pool and instance-table backing
-         * storage are process-global caches. Warm the exact Widget signals
-         * exercised by the tracked navigation suite so those persistent pages
-         * belong to normal process scope rather than the scenario allocator. */
-        GUM_Widget* pSignalWidget = GUM_Widget_create();
-        if (pSignalWidget) {
-            GBL_CONNECT(pSignalWidget, "onPressConfirm",      persistentSignalNoop_);
-            GBL_CONNECT(pSignalWidget, "onPressMoveUp",       persistentSignalNoop_);
-            GBL_CONNECT(pSignalWidget, "onPressMoveDown",     persistentSignalNoop_);
-            GBL_CONNECT(pSignalWidget, "onPressMoveLeft",     persistentSignalNoop_);
-            GBL_CONNECT(pSignalWidget, "onPressMoveRight",    persistentSignalNoop_);
-            GBL_CONNECT(pSignalWidget, "onReleaseMoveUp",     persistentSignalNoop_);
-            GBL_CONNECT(pSignalWidget, "onReleaseMoveDown",   persistentSignalNoop_);
-            GBL_CONNECT(pSignalWidget, "onReleaseMoveLeft",   persistentSignalNoop_);
-            GBL_CONNECT(pSignalWidget, "onReleaseMoveRight",  persistentSignalNoop_);
-            GUM_unref(pSignalWidget);
-        }
-    }
-}
-
-static void releasePersistentMetadata_(void) {
-    if (pPersistentRoot_) {
-        GUM_unref(pPersistentRoot_);
-        pPersistentRoot_ = nullptr;
-    }
-
-    while (persistentClassCount_ != 0)
-        GblClass_unrefDefault(pPersistentClasses_[--persistentClassCount_]);
-}
-
 int main(int argc, const char* pArgv[]) {
     if (!backendInit_()) return 1;
 
-    preparePersistentMetadata_();
-    if (!pPersistentRoot_) {
+    GblTestScenario* pScenario = GblTestScenario_create("libGumballTests");
+    if (!pScenario) {
         backendDeinit_();
         return 1;
     }
-
-    GblTestScenario* pScenario = GblTestScenario_create("libGumballTests");
 
     GblContext_setLogFilter(GBL_CONTEXT(pScenario), GBL_LOG_LEVEL_INFO |
                                                     GBL_LOG_LEVEL_WARNING |
@@ -178,70 +64,10 @@ int main(int argc, const char* pArgv[]) {
                                  GblTestSuite_create(GUM_CONTAINER_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_NAVIGATION_TEST_SUITE_TYPE));
+    GblTestScenario_enqueueSuite(pScenario,
+                                 GblTestSuite_create(GUM_MANAGER_TEST_SUITE_TYPE));
 
-    /* Widget suites construct and destroy the draw queue inside their own
-     * tracked suite lifetime so leak accounting sees it fully balanced. */
-    GUM_drawQueue_free();
-
-    int result = GblTestScenario_exec(pScenario, argc, pArgv);
-
-    /* GblTestScenario_exec() has restored the normal global context. */
-    GUM_drawQueue_init();
-
-    GUM_IResource* pInvalidFont = GUM_Manager_load("invalid.ttf");
-    if (pInvalidFont) {
-        result = 1;
-        GUM_Manager_unload(pInvalidFont);
-        GUM_IResource_unref(pInvalidFont);
-    }
-
-    GUM_IResource* pInvalidTexture = GUM_Manager_load("invalid.png");
-    if (pInvalidTexture) {
-        result = 1;
-        GUM_Manager_unload(pInvalidTexture);
-        GUM_IResource_unref(pInvalidTexture);
-    }
-
-    GUM_IResource* pShutdownTexture = GUM_Manager_load("koslogo.png");
-    if (!pShutdownTexture)
-        result = 1;
-
-    GUM_Font* pShutdownFont = GUM_FONT(GblBox_create(GUM_FONT_TYPE));
-    if (!pShutdownFont) {
-        result = 1;
-    } else {
-        GUM_Font_setDefault(pShutdownFont);
-    }
-
-    releasePersistentMetadata_();
-
-    if (GUM_Font_default()) {
-        GUM_Font_setDefault(nullptr);
-        result = 1;
-    }
-
-    if (pShutdownTexture && GUM_IResource_data(pShutdownTexture))
-        result = 1;
-
-    if (pShutdownTexture)
-        GUM_IResource_unref(pShutdownTexture);
-    if (pShutdownFont)
-        GUM_IResource_unref(GUM_IRESOURCE(pShutdownFont));
-
-    GUM_Root* pRestartRoot = GUM_Root_create();
-    GUM_IResource* pRestartTexture = pRestartRoot ? GUM_Manager_load("koslogo.png") : nullptr;
-    if (!pRestartRoot || !pRestartTexture) {
-        result = 1;
-    } else {
-        GUM_Manager_unload(pRestartTexture);
-        if (GUM_IResource_data(pRestartTexture))
-            result = 1;
-        GUM_IResource_unref(pRestartTexture);
-    }
-
-    if (pRestartRoot)
-        GUM_unref(pRestartRoot);
-
+    const int result = GblTestScenario_exec(pScenario, argc, pArgv);
     backendDeinit_();
     return result;
 }
