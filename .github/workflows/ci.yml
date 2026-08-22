@@ -26,7 +26,7 @@ jobs:
           sudo apt-get install -y \
             autoconf autoconf-archive automake libtool \
             ninja-build pkg-config \
-            libx11-dev libxft-dev libxext-dev \
+            xorg-dev libgl1-mesa-dev libglu1-mesa-dev \
             libwayland-dev libxkbcommon-dev libegl1-mesa-dev
 
       - name: Restore vcpkg binary cache
@@ -167,7 +167,7 @@ jobs:
           sudo apt-get install -y \
             autoconf autoconf-archive automake libtool \
             ninja-build pkg-config \
-            libx11-dev libxft-dev libxext-dev \
+            xorg-dev libgl1-mesa-dev libglu1-mesa-dev \
             libwayland-dev libxkbcommon-dev libegl1-mesa-dev
 
       - name: Restore vcpkg binary cache
