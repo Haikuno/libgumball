@@ -60,6 +60,26 @@ GBL_TEST_CASE(horizontalLayout)
     GUM_unref(pContainer);
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(minimumChildSizeOverflow)
+    GUM_Container* pContainer = GUM_Container_create("w", 100.0f,
+                                                     "h", 100.0f,
+                                                     "padding", 0.0f,
+                                                     "margin", 0.0f,
+                                                     "minChildSize", 0.4f);
+    GUM_Widget* pFirst  = GUM_Widget_create("parent", pContainer);
+    GUM_Widget* pSecond = GUM_Widget_create("parent", pContainer);
+    GUM_Widget* pThird  = GUM_Widget_create("parent", pContainer);
+
+    GBL_TEST_COMPARE(pFirst->h, 40.0f);
+    GBL_TEST_COMPARE(pSecond->h, 40.0f);
+    GBL_TEST_COMPARE(pThird->h, 40.0f);
+    GBL_TEST_COMPARE(pFirst->y, 0.0f);
+    GBL_TEST_COMPARE(pSecond->y, 40.0f);
+    GBL_TEST_COMPARE(pThird->y, 80.0f);
+
+    GUM_unref(pContainer);
+GBL_TEST_CASE_END
+
 GBL_TEST_CASE(retainedChild)
     GUM_Container* pContainer = GUM_Container_create();
     GUM_Widget* pChild = GUM_Widget_create("parent", pContainer);
@@ -77,4 +97,5 @@ GBL_TEST_CASE_END
 
 GBL_TEST_REGISTER(verticalLayout,
                   horizontalLayout,
+                  minimumChildSizeOverflow,
                   retainedChild)
