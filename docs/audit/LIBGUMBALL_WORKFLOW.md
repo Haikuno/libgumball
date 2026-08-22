@@ -10,29 +10,34 @@ This file is the canonical operating procedure for the Devilution C23/UI migrati
 - Devilution migration notes use `Haikuno/devilution-revamp`, branch `migration/c23-libgimbal`.
 - Never merge a pull request unless the user explicitly says to merge it.
 
-## Pull-request policy
+## Hosted GitHub Actions policy
 
-- Use at most one draft PR as the hosted-CI validation window for this branch.
-- Reuse PR #7 for every subsequent hosted validation run.
-- Do not create replacement PRs merely to obtain fresh CI runs.
-- Do not close/recreate the validation PR to clean up CI history.
-- Never merge it without explicit user approval.
+Hosted GitHub Actions is not part of the default agent workflow for this migration.
+
+- Do not query workflow runs, jobs, logs, artifacts, checks, or check suites unless the user explicitly requests hosted GitHub Actions diagnostics in the current turn.
+- Do not use a pull request as a hosted-CI validation window unless the user explicitly requests that workflow in the current turn.
+- The existence of `.github/workflows/*`, a failing check, an existing PR, a known run/job ID, or wording such as `CI`, `fix CI`, `CI failure`, or `validation` does not authorize hosted Actions access.
+- Never fetch workflow logs merely because a run/job ID is known.
+- Never use hosted Actions as a fallback because local execution is unavailable. Report the execution limitation and continue from repository/static evidence.
+- If the user explicitly opts into hosted Actions, reuse an existing suitable validation PR rather than creating replacement PRs solely to obtain fresh runs, and never merge without explicit approval.
+
+The repository may still contain GitHub Actions configuration because CI architecture itself is part of the project. Inspecting or editing those files is ordinary repository work and does not imply that the agent should invoke the hosted service.
 
 ## Anti-stall rules
 
 - Never stall in tool, CI, search, or inspection loops.
 - Once a check has produced usable evidence, advance from that evidence instead of repeating the same check.
 - Do not repeatedly rediscover tool schemas or re-query branch/PR/workflow state when the result is already known and still applicable.
-- When GitHub run or job IDs are already known, use the direct action for those IDs. In particular, fetch workflow job logs directly instead of rediscovering a CLI or workflow route.
-- The connected GitHub integration is action/API based. Do not waste time searching for an interactive `gh` CLI path when the required GitHub action is already available.
-- Keep an explicit mental/checkpoint state of the latest known branch SHA, active PR, failing job, failing step, and next action.
+- Use the narrowest direct repository operation needed for the task. Hosted Actions endpoints remain forbidden unless explicitly opted into as described above.
+- The connected GitHub integration is action/API based. Do not waste time searching for an interactive `gh` CLI path when a direct repository action is already available.
+- Keep an explicit checkpoint state of the latest known branch SHA, files changed, evidence obtained, remaining blocker, and next action. Track run/job IDs only when hosted Actions was explicitly requested.
 - If a tool path is unavailable, choose one alternative path once; if that also cannot provide the missing information, state the limitation and continue with the strongest available evidence.
-- Prefer forward progress over redundant verification. Re-check only when a commit, CI rerun, branch change, or new external event could have changed the answer.
+- Prefer forward progress over redundant verification. Re-check only when a commit, branch change, or relevant external event could have changed the answer.
 - Preserve all completed work and investigation findings when interrupted. Resume from the last verified checkpoint rather than restarting discovery.
 
 ### Hard task timebox and emergency exit
 
-Every concrete task has a hard maximum of 15 minutes. A concrete task is one bounded unit such as diagnosing one CI failure, implementing one fix, validating one change, or proving one ownership/lifecycle path.
+Every concrete task has a hard maximum of 15 minutes. A concrete task is one bounded unit such as diagnosing one failure, implementing one fix, validating one change, or proving one ownership/lifecycle path.
 
 Trigger the emergency exit immediately when either condition is reached:
 
@@ -45,35 +50,36 @@ When the emergency exit triggers:
 2. Preserve all useful work and evidence already obtained.
 3. If the current changes form a safe, understandable checkpoint, commit them to the current allowed repository/branch with an explicitly incomplete/WIP description when appropriate.
 4. If the partial state would be dangerous, misleading, uncompilable in a harmful way, or otherwise not safe to commit, do not fabricate a clean checkpoint. Preserve what can be safely preserved and state clearly what remains uncommitted.
-5. Record the exact verified state: current SHA, relevant run/job IDs, failing step/error, files changed, hypotheses proved or disproved, unfinished work, and the best next action.
+5. Record the exact verified state: current SHA, files changed, hypotheses proved or disproved, unfinished work, blocker, and best next action. Include run/job details only if hosted Actions was explicitly requested.
 6. Tell the user that the emergency exit triggered, why it triggered, what was safely saved, and what remains unfinished.
 
 The emergency exit is a safety mechanism for continuity. A session must leave behind a recoverable checkpoint rather than dying while repeatedly trying the same operation.
 
-## Validation loop
+## Default validation loop
 
-1. Inspect the current branch state and latest relevant CI evidence before changing code.
-2. Reproduce and validate locally whenever practical.
+1. Inspect the current branch state and relevant repository evidence before changing code.
+2. Reproduce and validate locally whenever a local/executable environment is actually available.
 3. Make one focused change for one understood cause.
-4. Run the narrowest relevant local validation first.
-5. Run broader local configure/build/tests/parity as appropriate.
-6. Commit a small, independently understandable change.
-7. Push to the same branch and validate through the same draft PR.
-8. Read the actual failing hosted job/step before making another CI-driven fix.
-9. Record validated changes in the Devilution-side migration changelog.
+4. Run the narrowest relevant local validation first when possible.
+5. Run broader local configure/build/tests/parity when appropriate and available.
+6. Commit a small, independently understandable change directly to the allowed branch.
+7. If execution is unavailable, state exactly what was not run; do not switch automatically to hosted GitHub Actions.
+8. Record meaningful validated changes in the Devilution-side migration changelog when appropriate.
 
-Hosted CI is confirmation and platform coverage, not the primary debugging loop.
+Hosted GitHub Actions may be used only after explicit current-turn user opt-in. It is never the default debugging or validation loop.
 
 ## Local validation
 
-- Use local validation as the fast iteration loop.
+- Use local validation as the fast iteration loop when an executable checkout/environment is available.
 - Run configure, build, tests, and backend parity for the backends affected by a change.
 - SDL3 is the default and must remain first-class.
 - raylib must remain equally clean and supported.
 - Do not hide backend-specific problems in tests or application code; fix the backend abstraction/dependency boundary.
 - Keep backend-specific interactive `dev.c` executables separate from automated `GumballTests`.
 
-## CI structure
+## CI architecture
+
+The following describes the desired project CI configuration. It is not an instruction for agents to invoke hosted GitHub Actions.
 
 CI should be split into focused jobs:
 
@@ -84,14 +90,14 @@ CI should be split into focused jobs:
 
 Independent backend jobs should run in parallel.
 
-Cancel superseded runs when a newer commit on the same PR makes an older run irrelevant.
+Cancel superseded runs when a newer commit on the same PR makes an older run irrelevant, if hosted CI is being used by an explicitly authorized workflow.
 
 ## Dependency policy
 
 - Pin vcpkg/toolchain revisions instead of following floating upstream state.
 - Treat dependency upgrades as explicit changes.
 - Cache vcpkg downloads/binaries/packages where practical so ordinary validation spends time on libGumball rather than rebuilding unchanged dependencies.
-- Install only prerequisites justified by the actual dependency graph or build logs.
+- Install only prerequisites justified by the actual dependency graph or build evidence.
 - Do not remove a prerequisite merely because it appears indirect; verify what the relevant vcpkg port actually invokes.
 
 ## Diagnostics and sanitizers
@@ -143,4 +149,4 @@ For allocator/lifetime issues in particular:
 - Trace the exact allocation and free ownership/context before patching.
 - Do not suppress the tracker, weaken tests, or paper over the symptom.
 - Use the smallest reproducer and first failing test as the primary evidence.
-- Once the concrete allocation/free path is established, fix ownership at the correct architectural layer and rerun the existing tests plus sanitizer/hosted CI validation.
+- Once the concrete allocation/free path is established, fix ownership at the correct architectural layer and rerun available local tests/sanitizers. Use hosted CI only if the user explicitly opts into it.
