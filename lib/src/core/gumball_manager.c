@@ -121,9 +121,15 @@ GBL_EXPORT GUM_IResource* GUM_Manager_load(GblStringRef* path) {
         }
 
         entry.pResource = GUM_IRESOURCE(GblBox_create(resourceType));
-        GUM_IRESOURCE_CLASSOF(entry.pResource)->pFnLoad(entry.pResource, fullPath);
-        GUM_IRESOURCE_CLASSOF(entry.pResource)->pFnSetQuark(entry.pResource, entry.quark);
+        const GBL_RESULT loadResult = GUM_IRESOURCE_CLASSOF(entry.pResource)->pFnLoad(entry.pResource, fullPath);
+        if (loadResult != GBL_RESULT_SUCCESS) {
+            GUM_LOG_ERROR("Backend failed to load resource!");
+            GBL_UNREF(entry.pResource);
+            entry.pResource = nullptr;
+            GBL_SCOPE_EXIT;
+        }
 
+        GUM_IRESOURCE_CLASSOF(entry.pResource)->pFnSetQuark(entry.pResource, entry.quark);
         GblHashSet_insert(&GUM_Manager_hashSet_, &entry);
 
         GUM_LOG_DEBUG("Resource loaded successfuly!");
