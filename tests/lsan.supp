@@ -1,3 +1,5 @@
-# libGimbal retains process-global type metadata until process exit.
-# All known non-test-owned LSan reports from the linked dependency root here.
+# libGimbal allocates per-type class/type-info chunks in this function.
+# Its process-exit type-registry finalizer destroys the metaclass registry without
+# releasing every still-registered type's class chunk first. That shutdown leak
+# belongs to the unmodified dependency, not libGumball-owned runtime state.
 leak:GblType_updateTypeInfoClassChunk_
