@@ -6,6 +6,7 @@
 #define GUM_WIDGET_LIFECYCLE_PROBE(self) (GBL_CAST(GUM_WidgetLifecycleProbe, self))
 
 GBL_FORWARD_DECLARE_STRUCT(GUM_WidgetLifecycleProbe);
+GblType GUM_WidgetLifecycleProbe_type(void) GBL_NOEXCEPT;
 
 GBL_CLASS_DERIVE_EMPTY(GUM_WidgetLifecycleProbe, GUM_Widget)
 
