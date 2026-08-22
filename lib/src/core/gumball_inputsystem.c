@@ -243,11 +243,10 @@ static void GUM_InputSystem_Mouse_hitTest_(void) {
 static void GUM_InputSystem_Mouse_dispatchEvent_(void* pContext, GblFlags button, GUM_InputState state) {
     GBL_UNUSED(pContext);
 
-    GUM_Event_Mouse* pEvent = GUM_Event_Mouse_create();
-    GUM_EVENT_INPUT(pEvent)->button       = button;
-    GUM_EVENT_INPUT(pEvent)->state        = state;
-    GUM_EVENT_INPUT(pEvent)->action       = GUM_InputSystem_actionFor_(GUM_MOUSE_TYPE, button);
-    GUM_EVENT_INPUT(pEvent)->pInputDevice = GUM_INPUTDEVICE(pMouse_);
+    GUM_Event_Mouse* pEvent = GUM_Event_Mouse_createFrom(pMouse_);
+    GUM_EVENT_INPUT(pEvent)->button = button;
+    GUM_EVENT_INPUT(pEvent)->state  = state;
+    GUM_EVENT_INPUT(pEvent)->action = GUM_InputSystem_actionFor_(GUM_MOUSE_TYPE, button);
 
     if (pHoveredWidget_)
         GblObject_notifyEvent(GBL_OBJECT(pHoveredWidget_), GBL_EVENT(pEvent));
