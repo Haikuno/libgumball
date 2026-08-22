@@ -22,4 +22,17 @@ Critical continuity rules:
 - Do not reinterpret libGimbal's informational allocation counters as test failures. Unknown-pointer allocator diagnostics are errors; process-lifetime dependency allocations must be evaluated separately and, if suppressed from LeakSanitizer, must be source-proven and narrowly symbol-scoped.
 - Do not start the Devilution UI port until the libGumball framework foundation is solid.
 
+## Foundation quality bar
+
+Before adding new framework features or starting the Devilution UI port, treat 10/10 as the required baseline for every non-feature-completion quality category: architecture, API design, internal design, correctness, ownership/lifetime safety, test design, backend abstraction, maintainability, consistency, simplicity, performance design, portability, error handling, documentation/contracts, and build/tooling quality.
+
+- Score the repository as if encountering it anonymously. Do not raise a score because the project is early, ambitious, familiar, or already contains substantial invested work.
+- A category is 10/10 only when there is no concrete, material improvement presently justified that would make it meaningfully better without an equal or larger tradeoff. Pure taste, speculative generalization, or extra abstraction without demonstrated benefit does not lower the score.
+- If a concrete material defect is known, that category is not 10/10. Do not call green CI or passing tests proof of architectural quality by itself.
+- Temporary quality regressions are allowed only inside a bounded active migration with an explicit removal/exit condition. The workstream must not end with that temporary state as accepted debt. A TODO or “fix later” note is not an exit condition.
+- Prefer deleting workaround machinery over normalizing it. Never manipulate tests, initialization order, dependency internals, or architecture merely to avoid fixing an owned problem.
+- Generalize only when an abstraction represents a real concept already present in the design. Do not add hypothetical abstraction layers for imagined future requirements.
+- After every meaningful implementation batch, review it adversarially: look for unnecessary state, duplicate paths, hidden ordering requirements, backend leakage, unclear ownership, representable invalid states, workaround logic, avoidable hot-path cost, or tests that require unnatural setup. A material finding means the batch is not finished.
+- Preserve libGumball's existing style and philosophy where they remain compatible with the quality bar; redesign rather than preserve a local convention that materially prevents a 10/10 result.
+
 The full workflow file contains the authoritative details for validation, CI triggering, diagnostics, dependency policy, rendering parity, allocator investigation, commits, and handoff discipline.
