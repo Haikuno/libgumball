@@ -9,19 +9,22 @@ GBL_EXPORT GUM_IResource* GUM_IResource_ref(GUM_IResource* pResource) {
 }
 
 GBL_EXPORT GblRefCount GUM_IResource_unref(GUM_IResource* pResource) {
-    GUM_LOG_DEBUG_SCOPE("GUM_IResource_unref() called...") {
-        if (!pResource) {
-            GBL_SCOPE_EXIT;
-        }
+    if (!pResource)
+        return 0;
 
-        if (GblBox_refCount(GBL_BOX(pResource)) <= 1) {
-            GUM_LOG_ERROR("Tried to unref a resource that is not being used!");
-            GUM_LOG_ERROR("Use GUM_Manager_unload() instead.");
-        }
+    const GblRefCount refCount = GblBox_refCount(GBL_BOX(pResource));
 
-        GUM_LOG_DEBUG("Resource unreffed!");
+    /* A last reference to a still-loaded resource cannot be dropped safely:
+     * destroying the wrapper would orphan backend data. Managed callers must
+     * unload it first. Once backend data is null (explicit unload or manager
+     * teardown), the final caller-held wrapper reference is safe to release. */
+    if (refCount <= 1 && GUM_IResource_data(pResource)) {
+        GUM_LOG_ERROR("Tried to release the last reference to a loaded resource!");
+        GUM_LOG_ERROR("Use GUM_Manager_unload() before releasing the final reference.");
+        return refCount;
     }
 
+    GUM_LOG_DEBUG("Resource unreffed!");
     return GBL_UNREF(pResource);
 }
 
@@ -51,8 +54,8 @@ static GBL_RESULT GUM_IResource_setQuark_(GUM_IResource* pResource, GblQuark pQu
 static GBL_RESULT GUM_IResourceClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
 
-    GUM_IRESOURCE_CLASS(pClass)->pFnSetValue   = GUM_IResource_setValue_;
-    GUM_IRESOURCE_CLASS(pClass)->pFnQuark      = GUM_IResource_quark_;
+    GUM_IRESOURCE_CLASS(pClass)->pFnSetValue = GUM_IResource_setValue_;
+    GUM_IRESOURCE_CLASS(pClass)->pFnQuark    = GUM_IResource_quark_;
     GUM_IRESOURCE_CLASS(pClass)->pFnSetQuark = GUM_IResource_setQuark_;
 
     return GBL_RESULT_SUCCESS;
