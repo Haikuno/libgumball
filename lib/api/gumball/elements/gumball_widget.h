@@ -101,7 +101,7 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     bool               isSelectable;             //!< If the widget is visible to the navigation system.                             Default value is false
     bool               isSelectedByDefault;      //!< If the widget should be selected by default when no other is focused.          Default value is false
     bool               isInteractive;            //!< If the widget is eligible for input events.                                    Default value is true
-    bool               isActive;                 //!< If the widget can accept input events, and fire signals accordingly.           Default value is false
+    bool               isActive;                 //!< Runtime active state. Transitions invoke pFnActivate/pFnDeactivate and emit lifecycle signals. Default value is false
     bool               shouldUpdate;             //!< If the widget should be updated.                                               Default value is true
     GblStringRef*      label;                    //!< Optional text label of the widget.                                             Default value is nullptr
     GUM_Font*          font;                     //!< Optional font for the widget's label. If not set, the default font is used.    Default value is nullptr
@@ -186,6 +186,8 @@ GBL_SIGNALS(GUM_Widget,
     (onReleaseMoveLeft,   (GBL_INSTANCE_TYPE, pReceiver)),
     (onReleaseMoveRight,  (GBL_INSTANCE_TYPE, pReceiver)),
     (onReleaseUnbound,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onActivate,          (GBL_INSTANCE_TYPE, pReceiver)),
+    (onDeactivate,        (GBL_INSTANCE_TYPE, pReceiver)),
     (onFocusGained,       (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice)), //!< Emitted when a device navigates focus onto this widget
     (onFocusLost,         (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice))  //!< Emitted when a device navigates focus away from this widget
 )
