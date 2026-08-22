@@ -44,6 +44,7 @@ static void backendDeinit_(void) {
 
 static GblClass* pPersistentClasses_[8];
 static size_t persistentClassCount_ = 0;
+static GUM_Root* pPersistentRoot_ = nullptr;
 
 static void pinPersistentClass_(GblType type) {
     GblClass* pClass = GblClass_refDefault(type);
@@ -53,9 +54,9 @@ static void pinPersistentClass_(GblType type) {
 
 static void preparePersistentMetadata_(void) {
     /* GblTestScenario temporarily replaces the global allocation context while
-     * it runs. libGimbal's type/property/signal registries are process-global,
-     * so initialize libGumball's persistent metadata before entering the
-     * tracked test context. */
+     * it runs. libGimbal's type/property/signal/module registries are
+     * process-global, so initialize and retain persistent libGumball metadata
+     * before entering the tracked test context. */
     (void)GUM_IResource_type();
 
     (void)GUM_Event_type();
@@ -98,29 +99,34 @@ static void preparePersistentMetadata_(void) {
     pinPersistentClass_(GUM_CONTAINER_TYPE);
     pinPersistentClass_(GUM_ROOT_TYPE);
 
-    /* Exercise one representative hierarchy in the normal process context.
-     * This initializes the process-global module/draw/runtime metadata that is
-     * lazily grown on first real Widget use without charging it to a test suite. */
-    GUM_Root* pRoot = GUM_Root_create();
-    if (pRoot) {
+    /* Keep one root alive across every tracked suite. GUM_Root is process-wide
+     * runtime/module state; re-registering it under the scenario allocator
+     * would make persistent module metadata look like a test leak. */
+    pPersistentRoot_ = GUM_Root_create();
+    if (pPersistentRoot_) {
         GUM_Container* pContainer = GUM_Container_create("w", 100.0f,
                                                          "h", 100.0f,
                                                          "padding", 10.0f,
-                                                         "margin", 5.0f);
+                                                         "margin", 5.0f,
+                                                         "direction", GUM_DIRECTION_HORIZONTAL);
         if (pContainer) {
             (void)GUM_Widget_create("parent", pContainer);
             (void)GUM_Widget_create("parent", pContainer);
+            GUM_unref(pContainer);
         }
 
         GUM_Root* pRequiredRoot = nullptr;
         GBL_REQUIRE_SCOPE(GUM_Root, &pRequiredRoot, "GUM_Root") {
         }
-
-        GUM_unref(pRoot);
     }
 }
 
 static void releasePersistentMetadata_(void) {
+    if (pPersistentRoot_) {
+        GUM_unref(pPersistentRoot_);
+        pPersistentRoot_ = nullptr;
+    }
+
     while (persistentClassCount_ != 0)
         GblClass_unrefDefault(pPersistentClasses_[--persistentClassCount_]);
 }
@@ -143,6 +149,10 @@ int main(int argc, const char* pArgv[]) {
     if (!backendInit_()) return 1;
 
     preparePersistentMetadata_();
+    if (!pPersistentRoot_) {
+        backendDeinit_();
+        return 1;
+    }
 
     GblTestScenario* pScenario = GblTestScenario_create("libGumballTests");
 
@@ -159,9 +169,9 @@ int main(int argc, const char* pArgv[]) {
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_NAVIGATION_TEST_SUITE_TYPE));
 
-    /* The root class is deliberately pinned across the scenario, but its draw
-     * queue is mutable runtime storage. Transfer that storage into the tracked
-     * allocation scope for the duration of the test run. */
+    /* The root class/root instance remain alive across the scenario, but the
+     * draw queue is mutable runtime storage. Transfer only that storage into
+     * the tracked allocation scope for the duration of the test run. */
     GUM_drawQueue_free();
     GBL_CONNECT(pScenario, "began", trackedScenarioBegan_);
     GBL_CONNECT(pScenario, "ended", trackedScenarioEnded_);
