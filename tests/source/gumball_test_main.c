@@ -146,6 +146,10 @@ int main(int argc, const char* pArgv[]) {
 
     int result = GblTestScenario_exec(pScenario, argc, pArgv);
 
+    GUM_IResource* pShutdownTexture = GUM_Manager_load("psyoplogo.png");
+    if (!pShutdownTexture)
+        result = 1;
+
     GUM_Font* pShutdownFont = GUM_FONT(GblBox_create(GUM_FONT_TYPE));
     if (!pShutdownFont) {
         result = 1;
@@ -160,8 +164,27 @@ int main(int argc, const char* pArgv[]) {
         result = 1;
     }
 
+    if (pShutdownTexture && GUM_IResource_data(pShutdownTexture))
+        result = 1;
+
+    if (pShutdownTexture)
+        GBL_UNREF(pShutdownTexture);
     if (pShutdownFont)
         GBL_UNREF(pShutdownFont);
+
+    GUM_Root* pRestartRoot = GUM_Root_create();
+    GUM_IResource* pRestartTexture = pRestartRoot ? GUM_Manager_load("psyoplogo.png") : nullptr;
+    if (!pRestartRoot || !pRestartTexture) {
+        result = 1;
+    } else {
+        GUM_Manager_unload(pRestartTexture);
+        if (GUM_IResource_data(pRestartTexture))
+            result = 1;
+        GBL_UNREF(pRestartTexture);
+    }
+
+    if (pRestartRoot)
+        GUM_unref(pRestartRoot);
 
     backendDeinit_();
     return result;
