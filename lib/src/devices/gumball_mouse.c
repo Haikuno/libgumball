@@ -5,6 +5,7 @@ static GBL_RESULT GUM_Mouse_init_(GblInstance* pInstance) {
 
     pSelf->position = (GUM_Vector2){0,0};
     pSelf->delta    = (GUM_Vector2){0,0};
+    pSelf->wheel    = (GUM_Vector2){0,0};
 
     return GBL_RESULT_SUCCESS;
 }
