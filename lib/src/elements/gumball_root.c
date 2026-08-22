@@ -234,6 +234,22 @@ void GUM_Root_drawOrderChanged_(GUM_Widget* pWidget) {
     }
 }
 
+void GUM_Root_foreachDrawable_(GUM_Root* pRoot,
+                               GUM_Root_WidgetIterFn_ pFnIter,
+                               void* pClosure) {
+    if (!pRoot || !pFnIter)
+        return;
+
+    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
+    const size_t count = GblArrayList_size(&pSelf_->drawQueue);
+
+    for (size_t i = 0; i < count; ++i) {
+        const GUM_DrawEntry_* pEntry = GblArrayList_at(&pSelf_->drawQueue, i);
+        if (pFnIter(pEntry->pWidget, pClosure))
+            return;
+    }
+}
+
 GBL_RESULT GUM_Root_draw_(GUM_Root* pRoot, GUM_Renderer* pRenderer) {
     if (!pRoot)
         return GBL_RESULT_ERROR_INVALID_POINTER;
