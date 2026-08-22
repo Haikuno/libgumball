@@ -45,7 +45,7 @@ GblType GUM_Event_Mouse_type(void) GBL_NOEXCEPT;
 //! Returns a new zero-initialized GUM_Event_Mouse.
 #define GUM_Event_Mouse_create() GUM_EVENT_MOUSE(GblEvent_create(GUM_EVENT_MOUSE_TYPE))
 //! Creates a mouse event and snapshots position/delta/wheel/device from pMouse.
-GUM_Event_Mouse* GUM_Event_Mouse_createFrom(const GUM_Mouse* pMouse) GBL_NOEXCEPT;
+GUM_Event_Mouse* GUM_Event_Mouse_createFrom(GUM_Mouse* pMouse) GBL_NOEXCEPT;
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE
