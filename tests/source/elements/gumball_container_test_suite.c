@@ -5,16 +5,13 @@
 #define GBL_SELF_TYPE GUM_ContainerTestSuite
 
 GBL_TEST_FIXTURE {
-    GUM_Root* pRoot;
+    uint8_t unused;
 };
 
 GBL_TEST_INIT()
-    pFixture->pRoot = GUM_Root_create();
-    GBL_TEST_VERIFY(pFixture->pRoot);
 GBL_TEST_CASE_END
 
 GBL_TEST_FINAL()
-    GUM_unref(pFixture->pRoot);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(verticalLayout)
