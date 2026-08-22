@@ -10,21 +10,33 @@ GBL_TEST_FINAL_NONE
 
 GBL_TEST_CASE(invalidResources)
     GUM_Root* pRoot = GUM_Root_create();
+    const bool rootCreated = pRoot != nullptr;
+
     GUM_IResource* pInvalidFont = pRoot ? GUM_Manager_load("invalid.ttf") : nullptr;
     GUM_IResource* pInvalidTexture = pRoot ? GUM_Manager_load("invalid.png") : nullptr;
+    const bool fontRejected = pInvalidFont == nullptr;
+    const bool textureRejected = pInvalidTexture == nullptr;
 
     if (pRoot)
         GUM_unref(pRoot);
+    if (pInvalidFont)
+        GUM_IResource_unref(pInvalidFont);
+    if (pInvalidTexture)
+        GUM_IResource_unref(pInvalidTexture);
 
-    GBL_TEST_VERIFY(pRoot);
-    GBL_TEST_COMPARE(pInvalidFont, nullptr);
-    GBL_TEST_COMPARE(pInvalidTexture, nullptr);
+    GBL_TEST_VERIFY(rootCreated);
+    GBL_TEST_VERIFY(fontRejected);
+    GBL_TEST_VERIFY(textureRejected);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(rootShutdownReleasesResources)
     GUM_Root* pRoot = GUM_Root_create();
+    const bool rootCreated = pRoot != nullptr;
+
     GUM_IResource* pTexture = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
     GUM_Font* pFont = pRoot ? GUM_FONT(GblBox_create(GUM_FONT_TYPE)) : nullptr;
+    const bool textureLoaded = pTexture != nullptr;
+    const bool fontCreated = pFont != nullptr;
 
     if (pFont)
         GUM_Font_setDefault(pFont);
@@ -39,16 +51,19 @@ GBL_TEST_CASE(rootShutdownReleasesResources)
     if (pFont)
         GUM_IResource_unref(GUM_IRESOURCE(pFont));
 
-    GBL_TEST_VERIFY(pRoot);
-    GBL_TEST_VERIFY(pTexture);
-    GBL_TEST_VERIFY(pFont);
+    GBL_TEST_VERIFY(rootCreated);
+    GBL_TEST_VERIFY(textureLoaded);
+    GBL_TEST_VERIFY(fontCreated);
     GBL_TEST_VERIFY(defaultCleared);
     GBL_TEST_VERIFY(textureReleased);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(rootRestart)
     GUM_Root* pRoot = GUM_Root_create();
+    const bool rootCreated = pRoot != nullptr;
+
     GUM_IResource* pTexture = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
+    const bool textureLoaded = pTexture != nullptr;
     bool unloaded = false;
 
     if (pTexture) {
@@ -59,8 +74,8 @@ GBL_TEST_CASE(rootRestart)
     if (pRoot)
         GUM_unref(pRoot);
 
-    GBL_TEST_VERIFY(pRoot);
-    GBL_TEST_VERIFY(pTexture);
+    GBL_TEST_VERIFY(rootCreated);
+    GBL_TEST_VERIFY(textureLoaded);
     GBL_TEST_VERIFY(unloaded);
 GBL_TEST_CASE_END
 
