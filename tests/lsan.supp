@@ -1,0 +1,3 @@
+# libGimbal retains process-global type metadata until process exit.
+# All known non-test-owned LSan reports from the linked dependency root here.
+leak:GblType_updateTypeInfoClassChunk_
