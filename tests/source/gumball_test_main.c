@@ -42,11 +42,20 @@ static void backendDeinit_(void) {
 }
 #endif
 
-static void registerPersistentTypes_(void) {
+static GblClass* pPersistentClasses_[8];
+static size_t persistentClassCount_ = 0;
+
+static void pinPersistentClass_(GblType type) {
+    GblClass* pClass = GblClass_refDefault(type);
+    if (pClass)
+        pPersistentClasses_[persistentClassCount_++] = pClass;
+}
+
+static void preparePersistentMetadata_(void) {
     /* GblTestScenario temporarily replaces the global allocation context while
-     * it runs. libGimbal's type registry is process-global, so keep all
-     * persistent libGumball type metadata in the process allocation context
-     * instead of first registering types inside the tracked test context. */
+     * it runs. libGimbal's type/property/signal registries are process-global,
+     * so initialize libGumball's persistent metadata before entering the
+     * tracked test context. */
     (void)GUM_IResource_type();
 
     (void)GUM_Event_type();
@@ -75,12 +84,29 @@ static void registerPersistentTypes_(void) {
     (void)GUM_ObjectViewer_type();
 
     (void)GUM_Manager_type();
+
+    /* Keep the classes exercised by the current suites alive for the whole
+     * tracked run. Their property/signal registration is global metadata and
+     * must not resize global registries through the scenario allocator. */
+    pinPersistentClass_(GUM_INPUTDEVICE_TYPE);
+    pinPersistentClass_(GUM_MOUSE_TYPE);
+    pinPersistentClass_(GUM_GAMEPAD_TYPE);
+    pinPersistentClass_(GUM_KEYBOARD_TYPE);
+    pinPersistentClass_(GUM_WIDGET_TYPE);
+    pinPersistentClass_(GUM_BUTTON_TYPE);
+    pinPersistentClass_(GUM_CONTAINER_TYPE);
+    pinPersistentClass_(GUM_ROOT_TYPE);
+}
+
+static void releasePersistentMetadata_(void) {
+    while (persistentClassCount_ != 0)
+        GblClass_unrefDefault(pPersistentClasses_[--persistentClassCount_]);
 }
 
 int main(int argc, const char* pArgv[]) {
     if (!backendInit_()) return 1;
 
-    registerPersistentTypes_();
+    preparePersistentMetadata_();
 
     GblTestScenario* pScenario = GblTestScenario_create("libGumballTests");
 
@@ -98,6 +124,7 @@ int main(int argc, const char* pArgv[]) {
                                  GblTestSuite_create(GUM_NAVIGATION_TEST_SUITE_TYPE));
 
     const int result = GblTestScenario_exec(pScenario, argc, pArgv);
+    releasePersistentMetadata_();
     backendDeinit_();
     return result;
 }
