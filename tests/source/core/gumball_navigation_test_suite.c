@@ -85,6 +85,48 @@ GBL_TEST_CASE(nonContainerAncestor)
                      GUM_WIDGET(pRight));
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(pointerTargetContract)
+    const GUM_Vector2 point = { 20.0f, 120.0f };
+
+    GUM_Widget* pUnderlay = GUM_Widget_create("x", 10.0f,
+                                              "y", 110.0f,
+                                              "w", 40.0f,
+                                              "h", 40.0f,
+                                              "z_index", (uint8_t)60,
+                                              "isActive", true,
+                                              "isSelectable", true,
+                                              "isInteractive", true);
+    GUM_Widget* pOverlay = GUM_Widget_create("x", 10.0f,
+                                             "y", 110.0f,
+                                             "w", 40.0f,
+                                             "h", 40.0f,
+                                             "z_index", (uint8_t)70,
+                                             "isActive", true,
+                                             "isSelectable", false,
+                                             "isInteractive", false);
+
+    GBL_TEST_COMPARE(GUM_InputSystem_pointerTargetAt_(point), pUnderlay);
+
+    pOverlay->isInteractive = true;
+    GBL_TEST_COMPARE(GUM_InputSystem_pointerTargetAt_(point), pOverlay);
+    GBL_TEST_VERIFY(!pOverlay->isSelectable);
+
+    inputSignalCount_ = 0;
+    GUM_connect(pOverlay, "onPressConfirm", GUM_NavigationTestSuite_inputSignal_);
+
+    GUM_Event_Input* pEvent = GUM_EVENT_INPUT(GblEvent_create(GUM_EVENT_INPUT_TYPE));
+    GBL_TEST_VERIFY(pEvent);
+    pEvent->action = GUM_INPUTACTION_CONFIRM;
+    pEvent->state = GUM_INPUTSTATE_PRESS;
+
+    GUM_Widget* pTarget = GUM_InputSystem_pointerTargetAt_(point);
+    GBL_TEST_COMPARE(GUM_WIDGET_CLASSOF(pTarget)->pFnInputEvent(pTarget, pEvent),
+                     GBL_RESULT_SUCCESS);
+    GBL_TEST_COMPARE(inputSignalCount_, 1u);
+
+    GBL_UNREF(pEvent);
+GBL_TEST_CASE_END
+
 GBL_TEST_CASE(inputSignalContract)
     GUM_Widget* pWidget = GUM_WIDGET(pFixture->pSecond);
     pWidget->isActive = true;
@@ -153,5 +195,6 @@ GBL_TEST_REGISTER(defaultFocus,
                   moveLeft,
                   explicitFocus,
                   nonContainerAncestor,
+                  pointerTargetContract,
                   inputSignalContract,
                   deviceDestructionClearsFocus)
