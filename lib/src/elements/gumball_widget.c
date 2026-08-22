@@ -760,7 +760,7 @@ static GBL_RESULT GUM_Widget_GblBox_destructor_(GblBox* pBox) {
     if (pSelf->texture)
         GUM_IResource_unref(GUM_IRESOURCE(pSelf->texture));
 
-    if (pSelf->label && pSelf->font != GUM_Backend_Font_default())
+    if (pSelf->font && pSelf->font != GUM_Backend_Font_default())
         GUM_IResource_unref(GUM_IRESOURCE(pSelf->font));
 
     GblObjectClass* pObjClass = GBL_OBJECT_CLASS(GblClass_weakRefDefault(GBL_OBJECT_TYPE));
