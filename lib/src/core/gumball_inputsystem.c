@@ -10,7 +10,7 @@
 constexpr int GUM_MAX_GAMEPADS = 16;
 
 static GUM_Mouse*    pMouse_                       = nullptr;
-static GUM_Widget*   pHoveredWidget_               = nullptr; // different to pMouse_'s pFocusedWidget, this doesn't need to be selectable.
+static GUM_Widget*   pHoveredWidget_               = nullptr; // pointer target; does not need to be selectable.
 static GUM_Gamepad*  pGamepads_[GUM_MAX_GAMEPADS]  = { nullptr };
 static GUM_Keyboard* pKeyboard_                    = nullptr;
 static GblArrayList  bindings_[GUM_INPUTACTION_COUNT];
@@ -204,18 +204,19 @@ static void GUM_InputSystem_NavDevice_dispatchEvent_(GUM_InputDevice* pDevice, G
 
 // ---------------------------------- Mouse ---------------------------------- //
 
-static void GUM_InputSystem_Mouse_hitTest_(void) {
-    // using drawQueue because it's already Z-sorted
+GUM_Widget* GUM_InputSystem_pointerTargetAt_(GUM_Vector2 mousePos) {
+    // drawQueue is already Z-sorted; walk backwards to find the top-most target.
     GblArrayList* drawQueue = GUM_drawQueue_get();
-
-    GUM_Vector2 mousePos = pMouse_->position;
-    GUM_Widget* pHitWidget = nullptr;
 
     for (size_t i = GblArrayList_size(drawQueue); i-- > 0;) {
         GblObject*  pObj       = *(GblObject**)GblArrayList_at(drawQueue, i);
         GUM_Widget* pWidget    = GUM_WIDGET(pObj);
+
+        if (!pWidget->isInteractive)
+            continue;
+
         GUM_Vector2 widgetPos  = GUM_get_absolute_position_(pWidget);
-        GUM_Vector2 widgetSize = (GUM_Vector2){pWidget->w, pWidget->h};
+        GUM_Vector2 widgetSize = (GUM_Vector2){ pWidget->w, pWidget->h };
 
         const GUM_Rectangle clip = pWidget->clipRect;
         const bool inClip = mousePos.x >= clip.x && mousePos.x < clip.x + clip.width &&
@@ -226,14 +227,17 @@ static void GUM_InputSystem_Mouse_hitTest_(void) {
             mousePos.x <  widgetPos.x + widgetSize.x &&
             mousePos.y >= widgetPos.y &&
             mousePos.y <  widgetPos.y + widgetSize.y) {
-            pHitWidget = pWidget;
-            break;
+            return pWidget;
         }
     }
 
-    pHoveredWidget_ = pHitWidget;
+    return nullptr;
+}
+
+static void GUM_InputSystem_Mouse_hitTest_(void) {
+    pHoveredWidget_ = GUM_InputSystem_pointerTargetAt_(pMouse_->position);
     GUM_Nav_focus(GUM_INPUTDEVICE(pMouse_),
-                  pHitWidget && pHitWidget->isSelectable ? pHitWidget : nullptr);
+                  pHoveredWidget_ && pHoveredWidget_->isSelectable ? pHoveredWidget_ : nullptr);
 }
 
 static void GUM_InputSystem_Mouse_dispatchEvent_(void* pContext, GblFlags button, GUM_InputState state) {
@@ -245,8 +249,8 @@ static void GUM_InputSystem_Mouse_dispatchEvent_(void* pContext, GblFlags button
     GUM_EVENT_INPUT(pEvent)->action       = GUM_InputSystem_actionFor_(GUM_MOUSE_TYPE, button);
     GUM_EVENT_INPUT(pEvent)->pInputDevice = GUM_INPUTDEVICE(pMouse_);
 
-    if (GUM_INPUTDEVICE(pMouse_)->pFocusedWidget)
-        GblObject_notifyEvent(GBL_OBJECT(GUM_INPUTDEVICE(pMouse_)->pFocusedWidget), GBL_EVENT(pEvent));
+    if (pHoveredWidget_)
+        GblObject_notifyEvent(GBL_OBJECT(pHoveredWidget_), GBL_EVENT(pEvent));
 
     GBL_UNREF(pEvent);
 }
