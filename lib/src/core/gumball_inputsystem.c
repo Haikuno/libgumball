@@ -209,10 +209,10 @@ GUM_Widget* GUM_InputSystem_pointerTargetAt_(GUM_Vector2 mousePos) {
     GblArrayList* drawQueue = GUM_drawQueue_get();
 
     for (size_t i = GblArrayList_size(drawQueue); i-- > 0;) {
-        GblObject*  pObj       = *(GblObject**)GblArrayList_at(drawQueue, i);
-        GUM_Widget* pWidget    = GUM_WIDGET(pObj);
+        GblObject*  pObj    = *(GblObject**)GblArrayList_at(drawQueue, i);
+        GUM_Widget* pWidget = GUM_WIDGET(pObj);
 
-        if (!pWidget->isInteractive)
+        if (!pWidget->isInteractive || !pWidget->isActive)
             continue;
 
         GUM_Vector2 widgetPos  = GUM_get_absolute_position_(pWidget);
