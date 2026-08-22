@@ -12,6 +12,13 @@ GBL_TEST_FIXTURE {
     GUM_Button* pThird;
 };
 
+static unsigned inputSignalCount_ = 0;
+
+static void GUM_NavigationTestSuite_inputSignal_(GUM_Widget* pWidget) {
+    GBL_UNUSED(pWidget);
+    ++inputSignalCount_;
+}
+
 GBL_TEST_INIT()
     pFixture->pRoot = GUM_Root_create();
     pFixture->pKeyboard = GUM_Keyboard_create();
@@ -61,7 +68,57 @@ GBL_TEST_CASE(explicitFocus)
                      GUM_WIDGET(pFixture->pFirst));
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(inputSignalContract)
+    GUM_Widget* pWidget = GUM_WIDGET(pFixture->pSecond);
+    pWidget->isActive = true;
+    inputSignalCount_ = 0;
+
+    GUM_connect(pWidget,
+                "onPressMoveUp",      GUM_NavigationTestSuite_inputSignal_,
+                "onPressMoveDown",    GUM_NavigationTestSuite_inputSignal_,
+                "onPressMoveLeft",    GUM_NavigationTestSuite_inputSignal_,
+                "onPressMoveRight",   GUM_NavigationTestSuite_inputSignal_,
+                "onReleaseMoveUp",    GUM_NavigationTestSuite_inputSignal_,
+                "onReleaseMoveDown",  GUM_NavigationTestSuite_inputSignal_,
+                "onReleaseMoveLeft",  GUM_NavigationTestSuite_inputSignal_,
+                "onReleaseMoveRight", GUM_NavigationTestSuite_inputSignal_);
+
+    GUM_Event_Input* pEvent = GUM_EVENT_INPUT(GblEvent_create(GUM_EVENT_INPUT_TYPE));
+    GBL_TEST_VERIFY(pEvent);
+
+    for (GUM_InputAction action = GUM_INPUTACTION_MOVE_UP;
+         action <= GUM_INPUTACTION_MOVE_RIGHT;
+         ++action) {
+        pEvent->action = action;
+        pEvent->state = GUM_INPUTSTATE_PRESS;
+        GBL_TEST_COMPARE(GUM_WIDGET_CLASSOF(pWidget)->pFnInputEvent(pWidget, pEvent),
+                         GBL_RESULT_SUCCESS);
+
+        pEvent->state = GUM_INPUTSTATE_RELEASE;
+        GBL_TEST_COMPARE(GUM_WIDGET_CLASSOF(pWidget)->pFnInputEvent(pWidget, pEvent),
+                         GBL_RESULT_SUCCESS);
+    }
+
+    GBL_TEST_COMPARE(inputSignalCount_, 8u);
+
+    pWidget->isInteractive = false;
+    pEvent->action = GUM_INPUTACTION_MOVE_RIGHT;
+    pEvent->state = GUM_INPUTSTATE_PRESS;
+    GBL_TEST_COMPARE(GUM_WIDGET_CLASSOF(pWidget)->pFnInputEvent(pWidget, pEvent),
+                     GBL_RESULT_SUCCESS);
+    GBL_TEST_COMPARE(inputSignalCount_, 8u);
+
+    pWidget->isInteractive = true;
+    pEvent->action = GUM_INPUTACTION_COUNT;
+    GBL_TEST_COMPARE(GUM_WIDGET_CLASSOF(pWidget)->pFnInputEvent(pWidget, pEvent),
+                     GBL_RESULT_SUCCESS);
+    GBL_TEST_COMPARE(inputSignalCount_, 8u);
+
+    GBL_UNREF(pEvent);
+GBL_TEST_CASE_END
+
 GBL_TEST_REGISTER(defaultFocus,
                   moveRight,
                   moveLeft,
-                  explicitFocus)
+                  explicitFocus,
+                  inputSignalContract)
