@@ -10,6 +10,8 @@
 #include <gumball/core/gumball_backend.h>
 #include <gumball/core/gumball_inputsystem.h>
 
+#include "gumball_root_.h"
+
 static void GUM_update_recursive_(GblObject* pObject) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
     if (pWidget && pWidget->shouldUpdate)
@@ -20,21 +22,16 @@ static void GUM_update_recursive_(GblObject* pObject) {
 }
 
 GBL_EXPORT GBL_RESULT (GUM_update)(void) {
-    GBL_RESULT result      = GBL_RESULT_SUCCESS;
-    static GUM_Root* pRoot = nullptr;
-
-    GBL_REQUIRE_SCOPE(GUM_Root, &pRoot, "GUM_Root") {
-        if GBL_UNLIKELY (!pRoot) {
-            GUM_LOG_ERROR("No root element found! Create one first.");
-            result = GBL_RESULT_NOT_FOUND;
-            GBL_SCOPE_EXIT;
-        }
-        GUM_Root_update(pRoot);
-        GUM_update_recursive_(GBL_OBJECT(pRoot));
-        GUM_Widget_animate_update_();
+    GUM_Root* pRoot = GUM_Root_active_();
+    if GBL_UNLIKELY (!pRoot) {
+        GUM_LOG_ERROR("No root element found! Create one first.");
+        return GBL_RESULT_NOT_FOUND;
     }
 
-    return result;
+    GUM_Root_update(pRoot);
+    GUM_update_recursive_(GBL_OBJECT(pRoot));
+    GUM_Widget_animate_update_();
+    return GBL_RESULT_SUCCESS;
 }
 
 GBL_EXPORT GBL_RESULT (GUM_update_disable)(GblObject* pSelf) {
@@ -78,23 +75,15 @@ GBL_EXPORT GBL_RESULT (GUM_update_enableAll)(GblObject* pSelf) {
 }
 
 GBL_EXPORT GBL_RESULT GUM_draw(GUM_Renderer* pRenderer) {
-    const GblArrayList* pDrawQueue = GUM_drawQueue_get();
-    const size_t        queueSize  = GblArrayList_size(pDrawQueue);
+    GUM_Root* pRoot = GUM_Root_active_();
+    if GBL_UNLIKELY (!pRoot)
+        return GBL_RESULT_NOT_FOUND;
 
-    if GBL_UNLIKELY (queueSize <= 0)
-        return GBL_RESULT_PARTIAL;
+    const GBL_RESULT result = GUM_Root_draw_(pRoot, pRenderer);
+    if (GBL_RESULT_SUCCESS(result))
+        GUM_InputSystem_drawFocusRings(pRenderer);
 
-    GblObject** ppObjects  = (GblObject**)GblArrayList_data(pDrawQueue);
-
-    for (size_t i = 0; i < queueSize; i++) {
-        GUM_WidgetClass* pWidgetClass = GUM_WIDGET_CLASSOF(ppObjects[i]);
-        GUM_Widget*      pWidget      = GUM_WIDGET(ppObjects[i]);
-        pWidgetClass->pFnDraw(pWidget, pRenderer);
-    }
-
-    GUM_InputSystem_drawFocusRings(pRenderer);
-
-    return GBL_RESULT_SUCCESS;
+    return result;
 }
 
 GBL_EXPORT GBL_RESULT (GUM_draw_disable)(GblObject* pSelf) {
@@ -102,7 +91,7 @@ GBL_EXPORT GBL_RESULT (GUM_draw_disable)(GblObject* pSelf) {
     if GBL_UNLIKELY (!pWidget)
         return GBL_RESULT_ERROR_INVALID_TYPE;
 
-    GUM_drawQueue_remove(pSelf);
+    GUM_Root_drawDisable_(pWidget);
     return GBL_RESULT_SUCCESS;
 }
 
@@ -111,8 +100,7 @@ GBL_EXPORT GBL_RESULT (GUM_draw_enable)(GblObject* pSelf) {
     if GBL_UNLIKELY (!pWidget)
         return GBL_RESULT_ERROR_INVALID_TYPE;
 
-    GUM_drawQueue_push(pSelf);
-    return GBL_RESULT_SUCCESS;
+    return GUM_Root_drawEnable_(pWidget);
 }
 
 GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)(GblObject* pSelf) {
@@ -149,9 +137,8 @@ GBL_EXPORT GBL_RESULT (GUM_unref)(GblObject* pSelf) {
         GUM_unref(pChild);
     }
 
-    if GBL_UNLIKELY (GBL_TYPEOF(pSelf) == GUM_ROOT_TYPE) {
+    if GBL_UNLIKELY (GBL_TYPEOF(pSelf) == GUM_ROOT_TYPE)
         GblModule_unregister(GBL_MODULE(pSelf));
-    }
 
     GBL_UNREF(pSelf);
 
