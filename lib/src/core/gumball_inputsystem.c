@@ -7,6 +7,8 @@
 #include <gumball/gumball_events.h>
 #include <gumball/gumball_types.h>
 
+#include "../elements/gumball_root_.h"
+
 constexpr int GUM_MAX_GAMEPADS = 16;
 
 static GUM_Mouse*    pMouse_                       = nullptr;
@@ -205,33 +207,7 @@ static void GUM_InputSystem_NavDevice_dispatchEvent_(GUM_InputDevice* pDevice, G
 // ---------------------------------- Mouse ---------------------------------- //
 
 GUM_Widget* GUM_InputSystem_pointerTargetAt_(GUM_Vector2 mousePos) {
-    // drawQueue is already Z-sorted; walk backwards to find the top-most target.
-    GblArrayList* drawQueue = GUM_drawQueue_get();
-
-    for (size_t i = GblArrayList_size(drawQueue); i-- > 0;) {
-        GblObject*  pObj    = *(GblObject**)GblArrayList_at(drawQueue, i);
-        GUM_Widget* pWidget = GUM_WIDGET(pObj);
-
-        if (!pWidget->isInteractive || !pWidget->isActive)
-            continue;
-
-        GUM_Vector2 widgetPos  = GUM_get_absolute_position_(pWidget);
-        GUM_Vector2 widgetSize = (GUM_Vector2){ pWidget->w, pWidget->h };
-
-        const GUM_Rectangle clip = pWidget->clipRect;
-        const bool inClip = mousePos.x >= clip.x && mousePos.x < clip.x + clip.width &&
-                            mousePos.y >= clip.y && mousePos.y < clip.y + clip.height;
-
-        if (inClip &&
-            mousePos.x >= widgetPos.x &&
-            mousePos.x <  widgetPos.x + widgetSize.x &&
-            mousePos.y >= widgetPos.y &&
-            mousePos.y <  widgetPos.y + widgetSize.y) {
-            return pWidget;
-        }
-    }
-
-    return nullptr;
+    return GUM_Root_pointerTargetAt_(GUM_Root_active_(), mousePos);
 }
 
 static void GUM_InputSystem_Mouse_hitTest_(void) {
