@@ -25,5 +25,6 @@ TTF_TextEngine* GUM_SDL3_textEngine_(GUM_Renderer* pRenderer);
 bool            GUM_SDL3_ttfEnsure_(void);
 void            GUM_SDL3_gamepadsUpdate_(void);
 void            GUM_SDL3_gamepadsDeinit_(void);
+void            GUM_SDL3_Texture_rendererDestroyed_(SDL_Renderer* pRenderer);
 
 #endif // GUM_SDL3_INTERNAL_H
