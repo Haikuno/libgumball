@@ -150,14 +150,14 @@ int main(int argc, const char* pArgv[]) {
     if (pInvalidFont) {
         result = 1;
         GUM_Manager_unload(pInvalidFont);
-        GBL_UNREF(pInvalidFont);
+        GUM_IResource_unref(pInvalidFont);
     }
 
     GUM_IResource* pInvalidTexture = GUM_Manager_load("invalid.png");
     if (pInvalidTexture) {
         result = 1;
         GUM_Manager_unload(pInvalidTexture);
-        GBL_UNREF(pInvalidTexture);
+        GUM_IResource_unref(pInvalidTexture);
     }
 
     GUM_IResource* pShutdownTexture = GUM_Manager_load("psyoplogo.png");
@@ -182,9 +182,9 @@ int main(int argc, const char* pArgv[]) {
         result = 1;
 
     if (pShutdownTexture)
-        GBL_UNREF(pShutdownTexture);
+        GUM_IResource_unref(pShutdownTexture);
     if (pShutdownFont)
-        GBL_UNREF(pShutdownFont);
+        GUM_IResource_unref(GUM_IRESOURCE(pShutdownFont));
 
     GUM_Root* pRestartRoot = GUM_Root_create();
     GUM_IResource* pRestartTexture = pRestartRoot ? GUM_Manager_load("psyoplogo.png") : nullptr;
@@ -194,7 +194,7 @@ int main(int argc, const char* pArgv[]) {
         GUM_Manager_unload(pRestartTexture);
         if (GUM_IResource_data(pRestartTexture))
             result = 1;
-        GBL_UNREF(pRestartTexture);
+        GUM_IResource_unref(pRestartTexture);
     }
 
     if (pRestartRoot)
