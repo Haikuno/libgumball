@@ -97,6 +97,11 @@ static void preparePersistentMetadata_(void) {
     pinPersistentClass_(GUM_CONTAINER_TYPE);
     pinPersistentClass_(GUM_ROOT_TYPE);
 
+    /* The global draw queue retains capacity for the lifetime of the Root class.
+     * Allocate its first slot in the process context rather than the temporary
+     * scenario allocator used to measure test-owned allocations. */
+    GblArrayList_reserve(GUM_drawQueue_get(), 1);
+
     /* GblModule's registry is also process-global and lazily allocated. Exercise
      * its registration and first use while the normal process context is active
      * so the tracked scenario only measures test-owned allocations. */
