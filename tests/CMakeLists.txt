@@ -14,6 +14,7 @@ add_executable(GumballTests ${GUMBALL_TEST_SOURCES})
 target_link_libraries(GumballTests PRIVATE libGumball)
 target_include_directories(GumballTests PRIVATE include)
 target_compile_definitions(GumballTests PRIVATE GUM_TEST_BACKEND_${GUM_BACKEND}=1)
+gum_enable_sanitizers(GumballTests)
 
 add_test(NAME GumballTests COMMAND GumballTests)
 
@@ -23,6 +24,7 @@ set_target_properties(GumballDev PROPERTIES
     OUTPUT_NAME dev
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${GUM_BACKEND_DIR}"
 )
+gum_enable_sanitizers(GumballDev)
 
 add_executable(GumballBackendParity
     parity/gumball_backend_parity_scene.c
@@ -30,3 +32,4 @@ add_executable(GumballBackendParity
 )
 target_link_libraries(GumballBackendParity PRIVATE libGumball)
 target_include_directories(GumballBackendParity PRIVATE parity)
+gum_enable_sanitizers(GumballBackendParity)
