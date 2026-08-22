@@ -95,14 +95,15 @@ void GUM_Backend_Mouse_update(GUM_Mouse* pMouse) {
     float y;
     const SDL_MouseButtonFlags buttons = SDL_GetMouseState(&x, &y);
     SDL_Renderer* pRenderer = GUM_SDL3_nativeRenderer_(nullptr);
+    GUM_Pointer* pPointer = GUM_POINTER(pMouse);
 
     if (pRenderer)
         SDL_RenderCoordinatesFromWindow(pRenderer, x, y, &x, &y);
 
-    pMouse->delta    = (GUM_Vector2){ x - pMouse->position.x, y - pMouse->position.y };
-    pMouse->position = (GUM_Vector2){ x, y };
-    pMouse->wheel    = wheel_;
-    wheel_           = (GUM_Vector2){ 0 };
+    pPointer->delta    = (GUM_Vector2){ x - pPointer->position.x, y - pPointer->position.y };
+    pPointer->position = (GUM_Vector2){ x, y };
+    pMouse->wheel      = wheel_;
+    wheel_             = (GUM_Vector2){ 0 };
 
     GUM_INPUTDEVICE(pMouse)->buttons = 0;
     if (buttons & SDL_BUTTON_MASK(SDL_BUTTON_LEFT))   GUM_INPUTDEVICE(pMouse)->buttons |= GUM_MOUSE_BUTTON_LEFT;
