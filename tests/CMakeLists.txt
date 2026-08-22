@@ -18,6 +18,19 @@ gum_enable_sanitizers(GumballTests)
 
 add_test(NAME GumballTests COMMAND GumballTests)
 
+if(GUM_BACKEND STREQUAL "SDL3")
+    add_executable(GumballSDLRendererRecreation
+        sdl3/gumball_renderer_recreation_test.c
+    )
+    target_link_libraries(GumballSDLRendererRecreation PRIVATE libGumball)
+    gum_enable_sanitizers(GumballSDLRendererRecreation)
+
+    add_test(NAME GumballSDLRendererRecreation COMMAND GumballSDLRendererRecreation)
+    set_tests_properties(GumballSDLRendererRecreation PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+endif()
+
 add_executable(GumballDev ${GUM_BACKEND_DIR}/dev.c)
 target_link_libraries(GumballDev PRIVATE libGumball)
 set_target_properties(GumballDev PROPERTIES
