@@ -103,6 +103,12 @@ void GUM_drawQueue_push(GblObject* pObject) {
     GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
     if (!pWidget) return;
 
+    for (size_t i = 0; i < GblArrayList_size(&GUM_drawQueue_); ++i) {
+        GblObject* pQueued = *(GblObject**)GblArrayList_at(&GUM_drawQueue_, i);
+        if (pQueued == pObject)
+            return;
+    }
+
     GblArrayList_pushBack(&GUM_drawQueue_, &pObject);
     GUM_drawQueue_sort();
 }
