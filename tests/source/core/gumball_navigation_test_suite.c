@@ -111,6 +111,10 @@ GBL_TEST_CASE(pointerTargetContract)
     GBL_TEST_COMPARE(GUM_InputSystem_pointerTargetAt_(point), pOverlay);
     GBL_TEST_VERIFY(!pOverlay->isSelectable);
 
+    pOverlay->isActive = false;
+    GBL_TEST_COMPARE(GUM_InputSystem_pointerTargetAt_(point), pUnderlay);
+
+    pOverlay->isActive = true;
     inputSignalCount_ = 0;
     GUM_connect(pOverlay, "onPressConfirm", GUM_NavigationTestSuite_inputSignal_);
 
