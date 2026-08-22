@@ -30,10 +30,10 @@ int main(void) {
     }
 
     pTexture = GUM_TEXTURE(GblBox_create(GUM_TEXTURE_TYPE));
-    pPath = GblStringRef_create("psyoplogo.png");
+    pPath = GblStringRef_create("koslogo.png");
     if (!pTexture || !pPath ||
         GUM_Backend_Texture_load(GUM_IRESOURCE(pTexture), pPath) != GBL_RESULT_SUCCESS) {
-        fprintf(stderr, "Failed to load test texture\n");
+        fprintf(stderr, "Failed to load test texture: %s\n", SDL_GetError());
         goto cleanup;
     }
     textureLoaded = true;
