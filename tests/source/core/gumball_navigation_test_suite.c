@@ -5,8 +5,8 @@
 #define GBL_SELF_TYPE GUM_NavigationTestSuite
 
 GBL_TEST_FIXTURE {
-    GUM_Root* pRoot;
     GUM_Keyboard* pKeyboard;
+    GUM_Container* pContainer;
     GUM_Button* pFirst;
     GUM_Button* pSecond;
     GUM_Button* pThird;
@@ -20,24 +20,23 @@ static void GUM_NavigationTestSuite_inputSignal_(GUM_Widget* pWidget) {
 }
 
 GBL_TEST_INIT()
-    pFixture->pRoot = GUM_Root_create();
     pFixture->pKeyboard = GUM_Keyboard_create();
 
-    GUM_Container* pContainer = GUM_Container_create("w", 300.0f,
-                                                     "h", 100.0f,
-                                                     "padding", 0.0f,
-                                                     "margin", 0.0f,
-                                                     "direction", GUM_DIRECTION_HORIZONTAL);
+    pFixture->pContainer = GUM_Container_create("w", 300.0f,
+                                                "h", 100.0f,
+                                                "padding", 0.0f,
+                                                "margin", 0.0f,
+                                                "direction", GUM_DIRECTION_HORIZONTAL);
 
-    pFixture->pFirst  = GUM_Button_create("parent", pContainer);
-    pFixture->pSecond = GUM_Button_create("parent", pContainer,
+    pFixture->pFirst  = GUM_Button_create("parent", pFixture->pContainer);
+    pFixture->pSecond = GUM_Button_create("parent", pFixture->pContainer,
                                           "isSelectedByDefault", true);
-    pFixture->pThird  = GUM_Button_create("parent", pContainer);
+    pFixture->pThird  = GUM_Button_create("parent", pFixture->pContainer);
 GBL_TEST_CASE_END
 
 GBL_TEST_FINAL()
     GUM_unref(pFixture->pKeyboard);
-    GUM_unref(pFixture->pRoot);
+    GUM_unref(pFixture->pContainer);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(defaultFocus)
@@ -83,6 +82,9 @@ GBL_TEST_CASE(nonContainerAncestor)
     GUM_Nav_move(GUM_INPUTDEVICE(pFixture->pKeyboard), GUM_INPUTACTION_MOVE_RIGHT);
     GBL_TEST_COMPARE(GUM_INPUTDEVICE(pFixture->pKeyboard)->pFocusedWidget,
                      GUM_WIDGET(pRight));
+
+    GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), nullptr);
+    GUM_unref(pWrapper);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(pointerTargetContract)
@@ -129,6 +131,8 @@ GBL_TEST_CASE(pointerTargetContract)
     GBL_TEST_COMPARE(inputSignalCount_, 1u);
 
     GBL_UNREF(pEvent);
+    GUM_unref(pOverlay);
+    GUM_unref(pUnderlay);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(mouseEventSnapshot)
