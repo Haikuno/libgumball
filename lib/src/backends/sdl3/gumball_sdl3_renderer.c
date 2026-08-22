@@ -46,6 +46,7 @@ GBL_EXPORT void GUM_Renderer_destroy(GUM_Renderer* pSelf) {
     if (pActiveRenderer_ == pSelf)
         pActiveRenderer_ = nullptr;
 
+    GUM_SDL3_Texture_rendererDestroyed_(pSelf->pRenderer);
     TTF_DestroyRendererTextEngine(pSelf->pTextEngine);
     free(pSelf);
 }
