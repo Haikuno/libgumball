@@ -60,6 +60,7 @@ static void preparePersistentMetadata_(void) {
 
     (void)GUM_Event_type();
     (void)GUM_Event_Input_type();
+    (void)GUM_Event_Pointer_type();
     (void)GUM_Event_Key_type();
     (void)GUM_Event_Gamepad_type();
     (void)GUM_Event_Mouse_type();
