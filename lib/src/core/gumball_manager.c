@@ -29,16 +29,20 @@ static GblBool resourceComparator_(const GblHashSet* pSelf, const void* pEntry1,
     return pResEntry1->quark == pResEntry2->quark;
 }
 
-static void resourceDestructor_(const GblHashSet* pSet, void* pItem) {
-    GBL_UNUSED(pSet);
-    GUM_HashSetEntry* pEntry = pItem;
-    if (!pEntry->pResource) return;
+static void resourceRelease_(GUM_IResource* pResource) {
+    if (!pResource) return;
 
-    const GBL_RESULT unloadResult = GUM_IRESOURCE_CLASSOF(pEntry->pResource)->pFnUnload(pEntry->pResource);
+    const GBL_RESULT unloadResult = GUM_IRESOURCE_CLASSOF(pResource)->pFnUnload(pResource);
     if (unloadResult != GBL_RESULT_SUCCESS)
         GUM_LOG_ERROR("Backend failed to unload resource!");
 
-    GBL_UNREF(pEntry->pResource);
+    GBL_UNREF(pResource);
+}
+
+static void resourceDestructor_(const GblHashSet* pSet, void* pItem) {
+    GBL_UNUSED(pSet);
+    GUM_HashSetEntry* pEntry = pItem;
+    resourceRelease_(pEntry->pResource);
     pEntry->pResource = nullptr;
 }
 
@@ -95,22 +99,27 @@ GBL_EXPORT GUM_IResource* GUM_Manager_load(GblStringRef* path) {
         return nullptr;
     }
 
-    GblStringBuffer stringBuffer;
+    GblStringBuffer stringBuffer = { 0 };
+    bool stringBufferConstructed = false;
+    GUM_HashSetEntry entry = { 0 };
 
-    GUM_LOG_DEBUG_SCOPE("Creating string buffer...") {
-        if (!GblStringBuffer_construct(&stringBuffer, path)) {
-            GUM_LOG_ERROR("Failed to construct string buffer!");
-        }
-        GUM_LOG_DEBUG("String buffer created successfuly!");
+    const GBL_RESULT constructResult = GblStringBuffer_construct(&stringBuffer, path);
+    if (constructResult != GBL_RESULT_SUCCESS) {
+        GUM_LOG_ERROR("Failed to construct resource path buffer!");
+        goto end;
     }
+    stringBufferConstructed = true;
 
-    GblStringBuffer_prepend(&stringBuffer, "/");
-    GblStringBuffer_prepend(&stringBuffer, GUM_Manager_currentPath_);
+    if (GblStringBuffer_prepend(&stringBuffer, "/") != GBL_RESULT_SUCCESS ||
+        GblStringBuffer_prepend(&stringBuffer, GUM_Manager_currentPath_) != GBL_RESULT_SUCCESS) {
+        GUM_LOG_ERROR("Failed to build resource path!");
+        goto end;
+    }
 
     GblStringRef* fullPath = GblStringBuffer_cString(&stringBuffer);
     GUM_LOG_DEBUG("Full path is %s", fullPath);
 
-    GUM_HashSetEntry entry = { .pResource = nullptr, .quark = GblQuark_fromString(fullPath) };
+    entry.quark = GblQuark_fromString(fullPath);
 
     // Check if the resource is already loaded
     if (GblHashSet_contains(&GUM_Manager_hashSet_, (const void*)&entry)) {
@@ -166,6 +175,11 @@ GBL_EXPORT GUM_IResource* GUM_Manager_load(GblStringRef* path) {
         }
 
         entry.pResource = GUM_IRESOURCE(GblBox_create(resourceType));
+        if (!entry.pResource) {
+            GUM_LOG_ERROR("Failed to allocate resource wrapper!");
+            GBL_SCOPE_EXIT;
+        }
+
         const GBL_RESULT loadResult = GUM_IRESOURCE_CLASSOF(entry.pResource)->pFnLoad(entry.pResource, fullPath);
         if (loadResult != GBL_RESULT_SUCCESS) {
             GUM_LOG_ERROR("Backend failed to load resource!");
@@ -175,15 +189,21 @@ GBL_EXPORT GUM_IResource* GUM_Manager_load(GblStringRef* path) {
         }
 
         GUM_IRESOURCE_CLASSOF(entry.pResource)->pFnSetQuark(entry.pResource, entry.quark);
-        GblHashSet_insert(&GUM_Manager_hashSet_, &entry);
+        if (!GblHashSet_insert(&GUM_Manager_hashSet_, &entry)) {
+            GUM_LOG_ERROR("Failed to cache loaded resource!");
+            resourceRelease_(entry.pResource);
+            entry.pResource = nullptr;
+            GBL_SCOPE_EXIT;
+        }
 
         GUM_LOG_DEBUG("Resource loaded successfuly!");
     }
 
 end:
-    GUM_LOG_POP(1);
+    if (stringBufferConstructed)
+        GblStringBuffer_destruct(&stringBuffer);
     GblClass_unrefDefault(managerClass);
-    GblStringBuffer_destruct(&stringBuffer);
+    GUM_LOG_POP(1);
 
     if (entry.pResource) return GUM_IResource_ref(entry.pResource);
     return nullptr;
