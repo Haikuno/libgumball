@@ -7,7 +7,7 @@
  *   \ref        GUM_Font "GUM_Font data structure and hierarchy graph"
  *   \ingroup    types
  *
- *   GUM_Font is the backend-agnostic font type used in libGumball
+ *   GUM_Font is the backend-agnostic font type used in libGumball.
  *
  *   \todo
  *       - Replace text alignments with flags for TOP, RIGHT, BOTTOM, LEFT, CENTER
@@ -25,7 +25,7 @@
 */
 #define GUM_FONT_TYPE           (GBL_TYPEID      (GUM_Font))         //!< Returns the GUM_Font Type UUID
 #define GUM_FONT(self)          (GBL_CAST        (GUM_Font, self))   //!< Casts an instance of a compatible resource to a GUM_Font
-#define GUM_FONT_CLASS(klass)   (GBL_CLASS_CAST  (GUM_Font, klass))  //!< Casts a  class    of a compatible resource to a GUM_FontClass
+#define GUM_FONT_CLASS(klass)   (GBL_CLASS_CAST  (GUM_Font, klass))  //!< Casts a class of a compatible resource to a GUM_FontClass
 #define GUM_FONT_CLASSOF(self)  (GBL_CLASSOF     (GUM_Font, self))   //!< Casts an instance of a compatible resource to a GUM_FontClass
 
 #define GUM_TEXT_ALIGNMENT_TYPE (GBL_TYPEID(GUM_TextAlignment))      //!< Returns the GUM_TextAlignment Type UUID
@@ -40,13 +40,13 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Font);
  *   \brief      GUM_Font structure
  *
  *   GUM_FontClass derives from GblBoxClass, adding nothing new.
- *   It also implements the GUM_IResource interface
+ *   It also implements the GUM_IResource interface.
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Font, GblBox, GUM_IResource)
 
 /*!  \struct     GUM_Font
  *   \extends    GblBox
- *   \brief      Backend agnostic font type
+ *   \brief      Backend-agnostic font type
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Font, GblBox)
 
@@ -58,10 +58,10 @@ GBL_ENUM(GUM_TextAlignment,
     (GUM_TEXT_ALIGN_LEFT,   "Left",   4)
 )
 
-//! Returns the application-selected default font, or nullptr if one hasn't been set.
-GUM_Font* GUM_Font_default(void) GBL_NOEXCEPT;
-//! Sets the application default font. Pass nullptr to clear it.
-void      GUM_Font_setDefault(GUM_Font* pFont) GBL_NOEXCEPT;
+//! Returns the borrowed application default font, or nullptr if none is set.
+GUM_Font* GUM_Font_default    (void) GBL_NOEXCEPT;
+//! Sets the application default font. Holds its own reference; nullptr clears it.
+void      GUM_Font_setDefault (GUM_Font* pFont) GBL_NOEXCEPT;
 
 //! \cond
 GblType GUM_Font_type(void) GBL_NOEXCEPT;
