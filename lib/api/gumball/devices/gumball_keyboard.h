@@ -1,7 +1,7 @@
 #ifndef GUM_KEYBOARD_H
 #define GUM_KEYBOARD_H
 
-// View this file's documentation online: TODO: add link
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__keyboard_8h.html
 
 /*!  \file
  *   \ref     GUM_Keyboard "GUM_Keyboard data structure and hierarchy graph"
@@ -33,15 +33,13 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Keyboard);
 /*!
  *    \struct  GUM_KeyboardClass
  *    \extends GUM_InputDeviceClass
- *    \brief   GUM_Keyboard structure
- *
- *    GUM_KeyboardClass derives from GUM_InputDeviceClass, adding nothing new.
+ *    \brief   GUM_Keyboard class structure
 */
 //! \cond
 GBL_CLASS_DERIVE_EMPTY(GUM_Keyboard, GUM_InputDevice)
 //! \endcond
 
-//! Bitmask of the subset of keys libGumball cares about (nav + confirm/cancel).
+//! Bitmask of the subset of keys libGumball uses for navigation and default actions.
 GBL_FLAGS(GUM_KEYBOARD_FLAGS,
     (GUM_KEYBOARD_KEY_UP,     "GUM_key_up",     0b00000000'00000001),
     (GUM_KEYBOARD_KEY_DOWN,   "GUM_key_down",   0b00000000'00000010),
@@ -58,13 +56,13 @@ GBL_FLAGS(GUM_KEYBOARD_FLAGS,
 /*!
  *    \class   GUM_Keyboard
  *    \extends GUM_InputDevice
- *    \brief   The system keyboard
+ *    \brief   System keyboard input device
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Keyboard, GUM_InputDevice)
 
 GblType GUM_Keyboard_type(void) GBL_NOEXCEPT;
 
-//! Returns a new GUM_Keyboard. Optionally takes in a list of Name/Value pairs for properties
+//! Returns a new GUM_Keyboard. Optionally takes Name/Value property pairs.
 #define GUM_Keyboard_create(/* property_name, property_value */...) GBL_NEW(GUM_Keyboard __VA_OPT__(,) __VA_ARGS__)
 
 GBL_DECLS_END

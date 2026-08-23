@@ -1,16 +1,13 @@
 #ifndef GUM_INPUTDEVICE_H
 #define GUM_INPUTDEVICE_H
 
-// View this file's documentation online: TODO: add link
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__inputdevice_8h.html
 
 /*!  \file
  *   \ref     GUM_InputDevice "GUM_InputDevice data structure and hierarchy graph"
  *   \ingroup devices
  *
- *   TODO: Brief description
- *
- *   TODO: Extended
- *         Description.
+ *   Base class for libGumball input devices.
  *
  *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License
@@ -37,27 +34,22 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Widget);
 /*!
  *    \struct  GUM_InputDeviceClass
  *    \extends GblObjectClass
- *    \brief   GUM_InputDevice structure
- *
- *    GUM_InputDeviceClass derives from GblObjectClass,
- *    adding nothing new.
+ *    \brief   Input-device class structure
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_InputDevice, GblObject)
 
 /*!
  *    \class   GUM_InputDevice
  *    \extends GblObject
- *    \brief   GUM_InputDevice derives from GblObject, adding TODO: doc
+ *    \brief   Base input device state shared by keyboard, pointer, and gamepad devices
 */
 GBL_INSTANCE_DERIVE(GUM_InputDevice, GblObject)
-    GblFlags      buttons;        //!< Current device buttons state
-    GblFlags      buttonsPrev;    //!< Previous frame's device buttons state
-    GblStringRef* deviceName;     //!< The name of the device, if it can be detected.
-    GUM_Widget*   pFocusedWidget; //!< The widget this device currently has navigation focus on, or nullptr.
-    uint8_t       highlight_r;    //!< Red   component of this device's focus-ring color. Default value is 255
-    uint8_t       highlight_g;    //!< Green component of this device's focus-ring color. Default value is 255
-    uint8_t       highlight_b;    //!< Blue  component of this device's focus-ring color. Default value is 255
-    uint8_t       highlight_a;    //!< Alpha component of this device's focus-ring color. Default value is 255
+    GblFlags buttons;     //!< Current device button state.
+    GblFlags buttonsPrev; //!< Previous update's device button state.
+    uint8_t  highlight_r; //!< Red   component of this device's focus-ring color. Default value is 255
+    uint8_t  highlight_g; //!< Green component of this device's focus-ring color. Default value is 255
+    uint8_t  highlight_b; //!< Blue  component of this device's focus-ring color. Default value is 255
+    uint8_t  highlight_a; //!< Alpha component of this device's focus-ring color. Default value is 255
 GBL_INSTANCE_END
 
 GBL_PROPERTIES(GUM_InputDevice,
@@ -69,6 +61,12 @@ GBL_PROPERTIES(GUM_InputDevice,
 )
 
 GblType GUM_InputDevice_type(void) GBL_NOEXCEPT;
+
+//! Returns the detected device name as a borrowed reference.
+GBL_EXPORT GblStringRef* GUM_InputDevice_name(const GUM_InputDevice* pSelf) GBL_NOEXCEPT;
+
+//! Returns the borrowed navigation-focus target, or nullptr.
+GBL_EXPORT GUM_Widget* GUM_InputDevice_focusedWidget(const GUM_InputDevice* pSelf) GBL_NOEXCEPT;
 
 GBL_DECLS_END
 

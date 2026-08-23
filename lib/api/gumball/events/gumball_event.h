@@ -20,7 +20,7 @@
 */
 #define GUM_EVENT_TYPE            (GBL_TYPEID     (GUM_Event))         //!< Returns the GUM_Event Type UUID
 #define GUM_EVENT(self)           (GBL_CAST       (GUM_Event, self))   //!< Casts an instance of a compatible event to a GUM_Event
-#define GUM_EVENT_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event, klass))  //!< Casts a  class    of a compatible event to a GUM_EventClass
+#define GUM_EVENT_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event, klass))  //!< Casts a class of a compatible event to a GUM_EventClass
 #define GUM_EVENT_CLASSOF(self)   (GBL_CLASSOF    (GUM_Event, self))   //!< Casts an instance of a compatible event to a GUM_EventClass
 //! @}
 
@@ -42,8 +42,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Event, GblEvent)
  *   \brief   Basic event type
  *
  *   GUM_Event is the base event type used in libGumball.
- *   It inhertis from GblEvent, and only adds a timestamp.
- *
+ *   It inherits from GblEvent and adds a timestamp.
 */
 GBL_INSTANCE_DERIVE(GUM_Event, GblEvent)
     uint32_t timestamp; //!< Timestamp of the event in ms since program start, wraps after ~49 days

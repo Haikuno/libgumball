@@ -1,14 +1,11 @@
 #ifndef GUM_NAVIGATION_H
 #define GUM_NAVIGATION_H
 
-// View this file's documentation online: TODO: add link
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__navigation_8h.html
 
 /*!  \file
  *   \brief     Keyboard/controller widget navigation
  *   \ingroup   core
- *
- *   gumball_navigation implements directional widget-to-widget focus movement
- *   for any GUM_InputDevice
  *
  *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License
@@ -20,25 +17,13 @@
 
 GBL_DECLS_BEGIN
 
-/*!  Moves \p pDevice's navigation focus one step in the given direction
- *   (GUM_INPUTACTION_MOVE_UP/DOWN/LEFT/RIGHT).
- *
- *   If the device doesn't currently have a focused widget, this instead
- *   acquires one (preferring a widget with \c isSelectedByDefault set,
- *   falling back to the first selectable widget found) and does not move.
- *
- *   Emits \c onFocusLost on the previously-focused widget and \c onFocusGained
- *   on the newly-focused widget, both passing \p pDevice as the argument.
- *
- *   No-op if \p direction isn't one of the four movement actions.
-*/
-void GUM_Nav_move(GUM_InputDevice* pDevice, GUM_InputAction direction) GBL_NOEXCEPT;
+/*! Moves pDevice's focus in one of the four directional input actions.
+ *  With no current focus, selects a default/first selectable Widget instead.
+ */
+void GUM_Nav_move  (GUM_InputDevice* pDevice, GUM_InputAction direction) GBL_NOEXCEPT;
 
-/*!  Explicitly sets \p pDevice's navigation focus to \p pWidget (or clears it,
- *   if \p pWidget is \c nullptr), emitting \c onFocusLost / \c onFocusGained
- *   as appropriate.
-*/
-void GUM_Nav_focus(GUM_InputDevice* pDevice, GUM_Widget* pWidget) GBL_NOEXCEPT;
+//! Sets pDevice's focus to pWidget, or clears it when pWidget is nullptr.
+void GUM_Nav_focus (GUM_InputDevice* pDevice, GUM_Widget* pWidget) GBL_NOEXCEPT;
 
 GBL_DECLS_END
 

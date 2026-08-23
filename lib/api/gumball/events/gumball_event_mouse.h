@@ -1,7 +1,7 @@
 #ifndef GUM_EVENT_MOUSE_H
 #define GUM_EVENT_MOUSE_H
 
-// View this file's documentation online: TODO: add link
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__event__mouse_8h.html
 
 /*!  \file
  *   \ref     GUM_Event_Mouse "GUM_Event_Mouse data structure and hierarchy graph"
@@ -42,7 +42,7 @@ GblType GUM_Event_Mouse_type(void) GBL_NOEXCEPT;
 
 //! Returns a new zero-initialized GUM_Event_Mouse.
 #define GUM_Event_Mouse_create() GUM_EVENT_MOUSE(GblEvent_create(GUM_EVENT_MOUSE_TYPE))
-//! Creates a mouse event and snapshots pointer position/delta, wheel, and device from pMouse.
+//! Creates a mouse event and snapshots pointer position/delta, wheel, and borrowed device identity from pMouse.
 GUM_Event_Mouse* GUM_Event_Mouse_createFrom(GUM_Mouse* pMouse) GBL_NOEXCEPT;
 
 GBL_DECLS_END

@@ -12,9 +12,9 @@ GblType GUM_Event_type(void) {
     if (type == GBL_INVALID_TYPE) {
         type = GblType_register(GblQuark_internStatic("GUM_Event"),
                                 GBL_EVENT_TYPE,
-                                &(static GblTypeInfo){.classSize       = sizeof(GUM_EventClass),
-                                                      .instanceSize    = sizeof(GUM_Event),
-                                                      .pFnInstanceInit = GUM_Event_init_ },
+                                &(static GblTypeInfo){ .classSize       = sizeof(GUM_EventClass),
+                                                       .instanceSize    = sizeof(GUM_Event),
+                                                       .pFnInstanceInit = GUM_Event_init_ },
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC);
     }
 

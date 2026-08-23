@@ -1,14 +1,13 @@
 #ifndef GUM_MOUSE_H
 #define GUM_MOUSE_H
 
-// View this file's documentation online: TODO: add link
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__mouse_8h.html
 
 /*!  \file
  *   \ref     GUM_Mouse "GUM_Mouse data structure and hierarchy graph"
  *   \ingroup devices
  *
- *   Mouse pointing device. Common pointer position and motion state live in
- *   GUM_Pointer; GUM_Mouse adds only mouse-specific wheel state.
+ *   Mouse pointing device.
  *
  *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License
@@ -45,7 +44,7 @@ GBL_INSTANCE_END
 
 GblType GUM_Mouse_type(void) GBL_NOEXCEPT;
 
-//! Returns a new GUM_Mouse. Optionally takes in a list of Name/Value pairs for properties.
+//! Returns a new GUM_Mouse. Optionally takes Name/Value property pairs.
 #define GUM_Mouse_create(/* property_name, property_value */...) GBL_NEW(GUM_Mouse __VA_OPT__(,) __VA_ARGS__)
 
 GBL_DECLS_END

@@ -1,15 +1,13 @@
 #ifndef GUM_POINTER_H
 #define GUM_POINTER_H
 
-// View this file's documentation online: TODO: add link
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__pointer_8h.html
 
 /*!  \file
  *   \ref     GUM_Pointer "GUM_Pointer data structure and hierarchy graph"
  *   \ingroup devices
  *
- *   Base input device for a single positional pointing source. It stores
- *   absolute position and relative motion while leaving device-specific state
- *   such as a mouse wheel to derived device types.
+ *   Base input device for a positional pointer.
  *
  *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License

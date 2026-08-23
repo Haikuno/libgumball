@@ -6,7 +6,7 @@
 /*!  \file
  *   \ingroup events
  *
- *   Base event type for input
+ *   Base event type for input.
  *
  *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
@@ -35,12 +35,7 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Event_Input);
 
 /*!  \struct  GUM_Event_InputClass
  *   \extends GUM_EventClass
- *   \brief   GUM_Event_Input structure
- *
- *   \todo
- *      - Add more actions.
- *
- *   GUM_Event_InputClass derives from GUM_EventClass, adding nothing new.
+ *   \brief   GUM_Event_Input class structure
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Event_Input, GUM_Event);
 
@@ -51,7 +46,7 @@ GBL_ENUM(GUM_InputState,
 )
 
 GBL_ENUM(GUM_InputAction,
-    (GUM_INPUTACTION_NULL,       "GUM_IA_null",       0), // buttonaction not initialized
+    (GUM_INPUTACTION_NULL,       "GUM_IA_null",       0), // action not initialized
     (GUM_INPUTACTION_CONFIRM,    "GUM_IA_confirm",    1),
     (GUM_INPUTACTION_CANCEL,     "GUM_IA_cancel",     2),
     (GUM_INPUTACTION_MOVE_UP,    "GUM_IA_move_up",    3),
@@ -59,21 +54,18 @@ GBL_ENUM(GUM_InputAction,
     (GUM_INPUTACTION_MOVE_LEFT,  "GUM_IA_move_left",  5),
     (GUM_INPUTACTION_MOVE_RIGHT, "GUM_IA_move_right", 6),
     (GUM_INPUTACTION_COUNT,      "GUM_IA_count",      7),
-    (GUM_INPUTACTION_UNBOUND,    "GUM_IA_unbound",    8)  // button not bound to an action
+    (GUM_INPUTACTION_UNBOUND,    "GUM_IA_unbound",    8)  // button is not bound to a semantic action
 )
 
 /*!  \class   GUM_Event_Input
  *   \extends GUM_Event
  *   \brief   Input event
- *
- *   GUM_Event_Input represents any input event.
- *
 */
 GBL_INSTANCE_DERIVE(GUM_Event_Input, GUM_Event)
-    GUM_InputDevice* pInputDevice; //!< Pointer to the input device that emitted the event
-    GblFlags button;               //!< Bitmask of the button involved
-    GUM_InputState state;          //!< Input state (pressed / released)
-    GUM_InputAction action;        //!< Semantic action
+    GUM_InputDevice* pInputDevice; //!< Borrowed emitting device; valid during synchronous dispatch.
+    GblFlags button;               //!< Physical button/key bit associated with this transition.
+    GUM_InputState state;          //!< Press or release transition state.
+    GUM_InputAction action;        //!< Bound semantic action, or GUM_INPUTACTION_UNBOUND.
 GBL_INSTANCE_END
 
 GblType GUM_Event_Input_type(void);

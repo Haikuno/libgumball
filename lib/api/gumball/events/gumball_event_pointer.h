@@ -1,7 +1,7 @@
 #ifndef GUM_EVENT_POINTER_H
 #define GUM_EVENT_POINTER_H
 
-// View this file's documentation online: TODO: add link
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__event__pointer_8h.html
 
 /*!  \file
  *   \ref     GUM_Event_Pointer "GUM_Event_Pointer data structure and hierarchy graph"
