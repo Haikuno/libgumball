@@ -1,16 +1,20 @@
 #include <gimbal/test/gimbal_test_scenario.h>
 #include <gumball/gumball.h>
+#include "core/gumball_inputsystem_test_suite.h"
 #include "core/gumball_manager_test_suite.h"
 #include "core/gumball_navigation_test_suite.h"
+#include "elements/gumball_common_test_suite.h"
 #include "elements/gumball_container_test_suite.h"
+#include "elements/gumball_hierarchy_test_suite.h"
+#include "elements/gumball_objectviewer_test_suite.h"
 #include "elements/gumball_root_test_suite.h"
 #include "elements/gumball_widget_test_suite.h"
 #include "types/gumball_animator_test_suite.h"
 #include "types/gumball_rectangle_test_suite.h"
+#include "types/gumball_vector2_test_suite.h"
 
 #if defined(GUM_TEST_BACKEND_SDL3)
 #include <SDL3/SDL.h>
-#include <gumball/backends/gumball_sdl3.h>
 
 static SDL_Surface* pSurface_ = nullptr;
 static SDL_Renderer* pSdlRenderer_ = nullptr;
@@ -21,7 +25,7 @@ static bool backendInit_(void) {
 
     pSurface_ = SDL_CreateSurface(320, 240, SDL_PIXELFORMAT_RGBA32);
     pSdlRenderer_ = pSurface_ ? SDL_CreateSoftwareRenderer(pSurface_) : nullptr;
-    pRenderer_ = pSdlRenderer_ ? GUM_SDL3_Renderer_create(pSdlRenderer_) : nullptr;
+    pRenderer_ = pSdlRenderer_ ? GUM_Renderer_create(pSdlRenderer_) : nullptr;
     return pRenderer_ != nullptr;
 }
 
@@ -63,13 +67,23 @@ int main(int argc, const char* pArgv[]) {
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_RECTANGLE_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
+                                 GblTestSuite_create(GUM_VECTOR2_TEST_SUITE_TYPE));
+    GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_ROOT_TEST_SUITE_TYPE));
+    GblTestScenario_enqueueSuite(pScenario,
+                                 GblTestSuite_create(GUM_HIERARCHY_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_WIDGET_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
+                                 GblTestSuite_create(GUM_COMMON_TEST_SUITE_TYPE));
+    GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_CONTAINER_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
+                                 GblTestSuite_create(GUM_OBJECTVIEWER_TEST_SUITE_TYPE));
+    GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_NAVIGATION_TEST_SUITE_TYPE));
+    GblTestScenario_enqueueSuite(pScenario,
+                                 GblTestSuite_create(GUM_INPUTSYSTEM_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_MANAGER_TEST_SUITE_TYPE));
 
