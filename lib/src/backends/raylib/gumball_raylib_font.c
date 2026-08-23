@@ -1,5 +1,7 @@
+#include "../../ifaces/gumball_iresource_.h"
 #include <gumball/core/gumball_backend.h>
 #include <raylib.h>
+#include <stdlib.h>
 
 static GUM_Font* defaultFont_ = nullptr;
 
@@ -13,11 +15,11 @@ static bool GUM_Raylib_Font_isDefault_(Font font) {
 GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) {
     if (!pFont || !pText) return (GUM_Vector2){ 0 };
 
-    Font* pRayFont = GUM_IResource_data(GUM_IRESOURCE(pFont));
+    Font* pRayFont = GUM_IResource_data_(GUM_IRESOURCE(pFont));
     if (!pRayFont) return (GUM_Vector2){ 0 };
 
     GUM_Vector2 size    = { 0, 0 };
-    Vector2     raySize = MeasureTextEx(*pRayFont, pText, fontSize, 0.0f);
+    Vector2     raySize = MeasureTextEx(*pRayFont, pText, fontSize, 1.2f);
     size.x              = raySize.x;
     size.y              = raySize.y;
     return size;
@@ -27,14 +29,14 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* p
                                             GUM_Vector2 position, GUM_Color color, int fontSize, float spacing) {
     if (!pFont || !pText) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    GBL_UNUSED(pRenderer, spacing);
+    GBL_UNUSED(pRenderer);
 
-    Font* pRayFont = GUM_IResource_data(GUM_IRESOURCE(pFont));
+    Font* pRayFont = GUM_IResource_data_(GUM_IRESOURCE(pFont));
     if (!pRayFont) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     DrawTextEx(*pRayFont, pText,
                (Vector2){ position.x, position.y },
-               fontSize, 0.0f,
+               fontSize, spacing,
                (Color){ color.r, color.g, color.b, color.a });
 
     return GBL_RESULT_SUCCESS;
@@ -48,15 +50,13 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
 
     const Font loaded = LoadFont(pPath);
     if (loaded.texture.id == 0 || !loaded.glyphs || !loaded.recs || GUM_Raylib_Font_isDefault_(loaded)) {
-        /* raylib falls back to GetFontDefault() when a file cannot be loaded.
-         * Treat that as a real load failure so the resource manager never owns
-         * or later UnloadFont()s raylib's process-global default font. */
+        // LoadFont falls back to the default font on failure.
         free(pFont);
         return GBL_RESULT_ERROR_FILE_READ;
     }
 
     *pFont = loaded;
-    GUM_IResource_setData(pSelf, pFont);
+    GUM_IResource_setData_(pSelf, pFont);
 
     return GBL_RESULT_SUCCESS;
 }
@@ -64,12 +64,14 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
 GBL_RESULT GUM_Backend_Font_unload(GUM_IResource* pSelf) {
     if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    void* pFont = (Font*)GUM_IResource_data(pSelf);
+    Font* pFont = GUM_IResource_data_(pSelf);
     if (!pFont) return GBL_RESULT_SUCCESS;
 
-    UnloadFont(*(Font*)pFont);
+    if (!GUM_Raylib_Font_isDefault_(*pFont))
+        UnloadFont(*pFont);
+
     free(pFont);
-    GUM_IResource_setData(pSelf, nullptr);
+    GUM_IResource_setData_(pSelf, nullptr);
 
     return GBL_RESULT_SUCCESS;
 }
@@ -79,24 +81,26 @@ GUM_Font* GUM_Backend_Font_default(void) {
     if (pDefault) return pDefault;
     if (defaultFont_) return defaultFont_;
 
-    Font  font     = GetFontDefault();
-    void* pRayFont = malloc(sizeof(Font));
+    Font* pRayFont = malloc(sizeof(*pRayFont));
     if (!pRayFont) return nullptr;
+    *pRayFont = GetFontDefault();
 
-    memcpy(pRayFont, &font, sizeof(Font));
+    GUM_Font* pWrapper = GUM_FONT(GblBox_create(GUM_Font_type()));
+    if (!pWrapper) {
+        free(pRayFont);
+        return nullptr;
+    }
 
-    defaultFont_ = GUM_FONT(GblBox_create(GUM_Font_type()));
-    GUM_IResource_setData(GUM_IRESOURCE(defaultFont_), pRayFont);
+    GUM_IResource_setData_(GUM_IRESOURCE(pWrapper), pRayFont);
+    defaultFont_ = pWrapper;
     return defaultFont_;
 }
 
 void GUM_Raylib_Font_deinit(void) {
     if (!defaultFont_) return;
 
-    /* GetFontDefault() is owned by raylib, so only release libGumball's
-     * copied Font struct and wrapper. Do not call UnloadFont(). */
-    free(GUM_IResource_data(GUM_IRESOURCE(defaultFont_)));
-    GUM_IResource_setData(GUM_IRESOURCE(defaultFont_), nullptr);
-    GBL_UNREF(defaultFont_);
+    // Other owners may retain the wrapper across Roots.
+    GUM_Font* pDefault = defaultFont_;
     defaultFont_ = nullptr;
+    GBL_UNREF(pDefault);
 }

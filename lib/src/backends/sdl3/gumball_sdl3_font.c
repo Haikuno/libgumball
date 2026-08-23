@@ -1,10 +1,11 @@
 #include "gumball_sdl3_internal.h"
+#include "../../ifaces/gumball_iresource_.h"
 #include <gumball/core/gumball_backend.h>
 
 GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) {
     if (!pFont || !pText) return (GUM_Vector2){ 0 };
 
-    TTF_Font* pSdlFont = GUM_IResource_data(GUM_IRESOURCE(pFont));
+    TTF_Font* pSdlFont = GUM_IResource_data_(GUM_IRESOURCE(pFont));
     if (!pSdlFont) return (GUM_Vector2){ 0 };
 
     if (!TTF_SetFontSize(pSdlFont, fontSize))
@@ -25,7 +26,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* p
     GBL_UNUSED(spacing);
 
     TTF_TextEngine* pTextEngine = GUM_SDL3_textEngine_(pRenderer);
-    TTF_Font* pSdlFont = GUM_IResource_data(GUM_IRESOURCE(pFont));
+    TTF_Font* pSdlFont = GUM_IResource_data_(GUM_IRESOURCE(pFont));
     if (!pTextEngine || !pSdlFont) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     if (!TTF_SetFontSize(pSdlFont, (float)fontSize))
@@ -52,16 +53,16 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
     TTF_Font* pFont = TTF_OpenFont(pPath, 22.0f);
     if (!pFont) return GBL_RESULT_ERROR_FILE_READ;
 
-    GUM_IResource_setData(pSelf, pFont);
+    GUM_IResource_setData_(pSelf, pFont);
     return GBL_RESULT_SUCCESS;
 }
 
 GBL_RESULT GUM_Backend_Font_unload(GUM_IResource* pSelf) {
     if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    TTF_Font* pFont = GUM_IResource_data(pSelf);
+    TTF_Font* pFont = GUM_IResource_data_(pSelf);
     if (pFont) TTF_CloseFont(pFont);
-    GUM_IResource_setData(pSelf, nullptr);
+    GUM_IResource_setData_(pSelf, nullptr);
     return GBL_RESULT_SUCCESS;
 }
 

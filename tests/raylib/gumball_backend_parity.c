@@ -26,11 +26,6 @@ static const char* outputPath_(int argc, char* pArgv[], char path[GUM_PARITY_PAT
 }
 
 int main(int argc, char* pArgv[]) {
-    if (argc > 2) {
-        fprintf(stderr, "usage: %s [output.png]\n", pArgv[0]);
-        return 1;
-    }
-
     SetConfigFlags(FLAG_WINDOW_HIDDEN);
     InitWindow(GUM_BACKEND_PARITY_WIDTH, GUM_BACKEND_PARITY_HEIGHT, "libGumball parity");
     if (!IsWindowReady()) return 1;
@@ -43,22 +38,25 @@ int main(int argc, char* pArgv[]) {
     }
 
     GUM_Root* pRoot = GUM_BackendParityScene_create();
+    Image image = { 0 };
 
     BeginDrawing();
     ClearBackground((Color){ 24, 24, 24, 255 });
-    GUM_draw();
-    rlDrawRenderBatchActive();
-    Image image = LoadImageFromScreen();
+    const bool rendered = pRoot && GUM_draw() == GBL_RESULT_SUCCESS;
+    if (rendered) {
+        rlDrawRenderBatchActive();
+        image = LoadImageFromScreen();
+    }
     EndDrawing();
 
-    const bool saved = ExportImage(image, pOutputPath);
+    const bool saved = image.data && ExportImage(image, pOutputPath);
     if (saved)
         printf("Wrote %s\n", pOutputPath);
     else
-        fprintf(stderr, "Failed to write %s\n", pOutputPath);
+        fprintf(stderr, "Failed to render/write %s\n", pOutputPath);
 
-    UnloadImage(image);
-    GUM_unref(pRoot);
+    if (image.data) UnloadImage(image);
+    if (pRoot) GUM_unref(pRoot);
     CloseWindow();
     return saved ? 0 : 1;
 }

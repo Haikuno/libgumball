@@ -4,9 +4,9 @@
 // View this file's documentation online: https://libgumball.psyops.studio/gumball_8h.html
 
 /*!  \file
- *   \brief Global include file for entire library.
+ *   \brief Global include file for the entire library.
  *
- *   This header file includes the entierty of libGumball
+ *   This header includes the entirety of libGumball.
  *
  *   \author    2025, 2026 Agustín Bellagamba
  *   \copyright MIT License

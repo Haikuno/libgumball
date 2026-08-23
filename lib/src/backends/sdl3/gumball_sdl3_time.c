@@ -15,6 +15,7 @@ void GUM_Backend_update(void) {
 }
 
 void GUM_Backend_deinit(void) {
+    // Resource payloads may outlive a Root; only backend-owned transient state resets here.
     GUM_SDL3_gamepadsDeinit_();
     lastTicks_ = 0;
     frameTime_ = 0.0f;

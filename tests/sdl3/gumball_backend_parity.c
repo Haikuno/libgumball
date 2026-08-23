@@ -1,7 +1,6 @@
 #include "gumball_backend_parity_scene.h"
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
-#include <gumball/backends/gumball_sdl3.h>
 #include <stdio.h>
 
 #define GUM_PARITY_PATH_CAPACITY 4096
@@ -36,7 +35,7 @@ int main(int argc, char* pArgv[]) {
                                               GUM_BACKEND_PARITY_HEIGHT,
                                               SDL_PIXELFORMAT_RGBA32);
     SDL_Renderer* pSdlRenderer = pSurface ? SDL_CreateSoftwareRenderer(pSurface) : nullptr;
-    GUM_Renderer* pRenderer = pSdlRenderer ? GUM_SDL3_Renderer_create(pSdlRenderer) : nullptr;
+    GUM_Renderer* pRenderer = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
     if (!pRenderer) {
         SDL_DestroyRenderer(pSdlRenderer);
         SDL_DestroySurface(pSurface);
@@ -45,19 +44,22 @@ int main(int argc, char* pArgv[]) {
     }
 
     GUM_Root* pRoot = GUM_BackendParityScene_create();
+    bool rendered = false;
 
-    SDL_SetRenderDrawColor(pSdlRenderer, 24, 24, 24, 255);
-    SDL_RenderClear(pSdlRenderer);
-    GUM_draw(pRenderer);
-    SDL_RenderPresent(pSdlRenderer);
+    if (pRoot) {
+        SDL_SetRenderDrawColor(pSdlRenderer, 24, 24, 24, 255);
+        SDL_RenderClear(pSdlRenderer);
+        rendered = GUM_draw(pRenderer) == GBL_RESULT_SUCCESS;
+        SDL_RenderPresent(pSdlRenderer);
+    }
 
-    const bool saved = IMG_SavePNG(pSurface, pOutputPath);
+    const bool saved = rendered && IMG_SavePNG(pSurface, pOutputPath);
     if (saved)
         printf("Wrote %s\n", pOutputPath);
     else
-        fprintf(stderr, "Failed to write %s: %s\n", pOutputPath, SDL_GetError());
+        fprintf(stderr, "Failed to render/write %s: %s\n", pOutputPath, SDL_GetError());
 
-    GUM_unref(pRoot);
+    if (pRoot) GUM_unref(pRoot);
     GUM_Renderer_destroy(pRenderer);
     SDL_DestroyRenderer(pSdlRenderer);
     SDL_DestroySurface(pSurface);

@@ -1,6 +1,6 @@
 #include "gumball_sdl3_internal.h"
-#include <gumball/backends/gumball_sdl3.h>
 #include <gumball/core/gumball_backend.h>
+#include <gumball/elements/gumball_common.h>
 
 constexpr int GUM_SDL3_MAX_GAMEPADS_ = 16;
 
@@ -23,7 +23,10 @@ void GUM_SDL3_gamepadsUpdate_(void) {
     int count = 0;
     SDL_JoystickID* pIds = SDL_GetGamepads(&count);
 
-    if (!pIds && count)
+    /* SDL documents NULL as enumeration failure, not as the empty-list value.
+     * Preserve the last known slots on failure rather than interpreting a failed
+     * poll as every controller disconnecting simultaneously. */
+    if (!pIds)
         return;
 
     for (int i = 0; i < GUM_SDL3_MAX_GAMEPADS_; ++i) {
@@ -73,14 +76,15 @@ void GUM_SDL3_gamepadsDeinit_(void) {
     wheel_ = (GUM_Vector2){ 0 };
 }
 
-GBL_EXPORT void GUM_SDL3_processEvent(const SDL_Event* pEvent) {
-    if (!pEvent) return;
+GBL_EXPORT void GUM_processEvent(const void* pEvent) {
+    const SDL_Event* pSdlEvent = pEvent;
+    if (!pSdlEvent) return;
 
-    if (pEvent->type == SDL_EVENT_MOUSE_WHEEL) {
-        float x = pEvent->wheel.x;
-        float y = pEvent->wheel.y;
+    if (pSdlEvent->type == SDL_EVENT_MOUSE_WHEEL) {
+        float x = pSdlEvent->wheel.x;
+        float y = pSdlEvent->wheel.y;
 
-        if (pEvent->wheel.direction == SDL_MOUSEWHEEL_FLIPPED) {
+        if (pSdlEvent->wheel.direction == SDL_MOUSEWHEEL_FLIPPED) {
             x = -x;
             y = -y;
         }
@@ -97,8 +101,14 @@ void GUM_Backend_Mouse_update(GUM_Mouse* pMouse) {
     SDL_Renderer* pRenderer = GUM_SDL3_nativeRenderer_(nullptr);
     GUM_Pointer* pPointer = GUM_POINTER(pMouse);
 
-    if (pRenderer)
-        SDL_RenderCoordinatesFromWindow(pRenderer, x, y, &x, &y);
+    if (pRenderer) {
+        float renderX = x;
+        float renderY = y;
+        if (SDL_RenderCoordinatesFromWindow(pRenderer, x, y, &renderX, &renderY)) {
+            x = renderX;
+            y = renderY;
+        }
+    }
 
     pPointer->delta    = (GUM_Vector2){ x - pPointer->position.x, y - pPointer->position.y };
     pPointer->position = (GUM_Vector2){ x, y };

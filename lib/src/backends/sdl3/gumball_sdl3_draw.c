@@ -21,16 +21,28 @@ static GBL_RESULT GUM_SDL3_result_(bool success) {
     return success ? GBL_RESULT_SUCCESS : GBL_RESULT_ERROR_INTERNAL;
 }
 
-static GUM_SDL3_DrawState_ GUM_SDL3_drawState_(SDL_Renderer* pRenderer) {
-    GUM_SDL3_DrawState_ state = { 0 };
-    SDL_GetRenderDrawBlendMode(pRenderer, &state.blendMode);
-    SDL_GetRenderDrawColor(pRenderer, &state.r, &state.g, &state.b, &state.a);
-    return state;
+static bool GUM_SDL3_drawState_(SDL_Renderer* pRenderer, GUM_SDL3_DrawState_* pState) {
+    return SDL_GetRenderDrawBlendMode(pRenderer, &pState->blendMode) &&
+           SDL_GetRenderDrawColor(pRenderer, &pState->r, &pState->g, &pState->b, &pState->a);
 }
 
-static void GUM_SDL3_restoreDrawState_(SDL_Renderer* pRenderer, GUM_SDL3_DrawState_ state) {
-    SDL_SetRenderDrawBlendMode(pRenderer, state.blendMode);
-    SDL_SetRenderDrawColor(pRenderer, state.r, state.g, state.b, state.a);
+static bool GUM_SDL3_setDrawState_(SDL_Renderer* pRenderer, GUM_SDL3_DrawState_ state) {
+    const bool blendSuccess = SDL_SetRenderDrawBlendMode(pRenderer, state.blendMode);
+    const bool colorSuccess = SDL_SetRenderDrawColor(pRenderer, state.r, state.g, state.b, state.a);
+    return blendSuccess && colorSuccess;
+}
+
+static bool GUM_SDL3_setDrawColor_(SDL_Renderer* pRenderer, GUM_Color color) {
+    const bool blendSuccess = SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
+    const bool colorSuccess = SDL_SetRenderDrawColor(pRenderer, color.r, color.g, color.b, color.a);
+    return blendSuccess && colorSuccess;
+}
+
+static GBL_RESULT GUM_SDL3_finishDraw_(SDL_Renderer* pRenderer,
+                                       GUM_SDL3_DrawState_ state,
+                                       GBL_RESULT result) {
+    const bool restored = GUM_SDL3_setDrawState_(pRenderer, state);
+    return GBL_RESULT_SUCCESS(result) && !restored ? GBL_RESULT_ERROR_INTERNAL : result;
 }
 
 static float GUM_SDL3_radius_(GUM_Rectangle rectangle, float roundness) {
@@ -82,9 +94,11 @@ GBL_EXPORT GBL_RESULT GUM_Backend_rectangleDraw(GUM_Renderer* pRenderer, GUM_Rec
     SDL_Renderer* pSdlRenderer = GUM_SDL3_nativeRenderer_(pRenderer);
     if (!pSdlRenderer) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    const GUM_SDL3_DrawState_ state = GUM_SDL3_drawState_(pSdlRenderer);
-    SDL_SetRenderDrawBlendMode(pSdlRenderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(pSdlRenderer, color.r, color.g, color.b, color.a);
+    GUM_SDL3_DrawState_ state;
+    if (!GUM_SDL3_drawState_(pSdlRenderer, &state))
+        return GBL_RESULT_ERROR_INTERNAL;
+    if (!GUM_SDL3_setDrawColor_(pSdlRenderer, color))
+        return GUM_SDL3_finishDraw_(pSdlRenderer, state, GBL_RESULT_ERROR_INTERNAL);
 
     GBL_RESULT result;
     const float radius = GUM_SDL3_radius_(rectangle, roundness);
@@ -113,8 +127,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_rectangleDraw(GUM_Renderer* pRenderer, GUM_Rec
                                                      indices, count * 3));
     }
 
-    GUM_SDL3_restoreDrawState_(pSdlRenderer, state);
-    return result;
+    return GUM_SDL3_finishDraw_(pSdlRenderer, state, result);
 }
 
 GBL_EXPORT GBL_RESULT GUM_Backend_rectangleLinesDraw(GUM_Renderer* pRenderer, GUM_Rectangle rectangle,
@@ -123,9 +136,11 @@ GBL_EXPORT GBL_RESULT GUM_Backend_rectangleLinesDraw(GUM_Renderer* pRenderer, GU
     if (!pSdlRenderer) return GBL_RESULT_ERROR_INVALID_POINTER;
     if (border_width <= 0.0f) return GBL_RESULT_SUCCESS;
 
-    const GUM_SDL3_DrawState_ state = GUM_SDL3_drawState_(pSdlRenderer);
-    SDL_SetRenderDrawBlendMode(pSdlRenderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(pSdlRenderer, color.r, color.g, color.b, color.a);
+    GUM_SDL3_DrawState_ state;
+    if (!GUM_SDL3_drawState_(pSdlRenderer, &state))
+        return GBL_RESULT_ERROR_INTERNAL;
+    if (!GUM_SDL3_setDrawColor_(pSdlRenderer, color))
+        return GUM_SDL3_finishDraw_(pSdlRenderer, state, GBL_RESULT_ERROR_INTERNAL);
 
     GBL_RESULT result;
     const float radius = GUM_SDL3_radius_(rectangle, roundness);
@@ -143,8 +158,9 @@ GBL_EXPORT GBL_RESULT GUM_Backend_rectangleLinesDraw(GUM_Renderer* pRenderer, GU
                                 rectangle.width - border_width * 2.0f, rectangle.height - border_width * 2.0f };
 
         if (inner.width <= 0.0f || inner.height <= 0.0f) {
-            GUM_SDL3_restoreDrawState_(pSdlRenderer, state);
-            return GUM_Backend_rectangleDraw(pRenderer, rectangle, roundness, color);
+            const GBL_RESULT restoreResult = GUM_SDL3_finishDraw_(pSdlRenderer, state, GBL_RESULT_SUCCESS);
+            return GBL_RESULT_SUCCESS(restoreResult) ?
+                   GUM_Backend_rectangleDraw(pRenderer, rectangle, roundness, color) : restoreResult;
         }
 
         SDL_FPoint outerPoints[GUM_SDL3_PERIMETER_POINTS_];
@@ -173,8 +189,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_rectangleLinesDraw(GUM_Renderer* pRenderer, GU
                                                      indices, count * 6));
     }
 
-    GUM_SDL3_restoreDrawState_(pSdlRenderer, state);
-    return result;
+    return GUM_SDL3_finishDraw_(pSdlRenderer, state, result);
 }
 
 GBL_EXPORT GBL_RESULT GUM_Backend_beginScissor(GUM_Renderer* pRenderer, GUM_Rectangle clipRect) {
@@ -182,19 +197,23 @@ GBL_EXPORT GBL_RESULT GUM_Backend_beginScissor(GUM_Renderer* pRenderer, GUM_Rect
     if (!pGumRenderer || pGumRenderer->clipDepth >= GUM_SDL3_CLIP_STACK_MAX_)
         return GBL_RESULT_ERROR_OUT_OF_RANGE;
 
-    GUM_SDL3_ClipState_* pState = &pGumRenderer->clipStack[pGumRenderer->clipDepth++];
-    pState->enabled = SDL_RenderClipEnabled(pGumRenderer->pRenderer);
-    if (pState->enabled)
-        SDL_GetRenderClipRect(pGumRenderer->pRenderer, &pState->rect);
+    GUM_SDL3_ClipState_ state = {
+        .enabled = SDL_RenderClipEnabled(pGumRenderer->pRenderer),
+        .rect = { 0 }
+    };
+    if (state.enabled && !SDL_GetRenderClipRect(pGumRenderer->pRenderer, &state.rect))
+        return GBL_RESULT_ERROR_INTERNAL;
 
-    const SDL_Rect rect = { (int)floorf(clipRect.x), (int)floorf(clipRect.y),
-                            (int)ceilf(clipRect.width), (int)ceilf(clipRect.height) };
+    const int x = (int)floorf(clipRect.x);
+    const int y = (int)floorf(clipRect.y);
+    const int right = (int)ceilf(clipRect.x + clipRect.width);
+    const int bottom = (int)ceilf(clipRect.y + clipRect.height);
+    const SDL_Rect rect = { x, y, right - x, bottom - y };
+    if (!SDL_SetRenderClipRect(pGumRenderer->pRenderer, &rect))
+        return GBL_RESULT_ERROR_INTERNAL;
 
-    if (SDL_SetRenderClipRect(pGumRenderer->pRenderer, &rect))
-        return GBL_RESULT_SUCCESS;
-
-    pGumRenderer->clipDepth--;
-    return GBL_RESULT_ERROR_INTERNAL;
+    pGumRenderer->clipStack[pGumRenderer->clipDepth++] = state;
+    return GBL_RESULT_SUCCESS;
 }
 
 GBL_EXPORT GBL_RESULT GUM_Backend_endScissor(GUM_Renderer* pRenderer) {
@@ -202,7 +221,13 @@ GBL_EXPORT GBL_RESULT GUM_Backend_endScissor(GUM_Renderer* pRenderer) {
     if (!pGumRenderer || !pGumRenderer->clipDepth)
         return GBL_RESULT_ERROR_OUT_OF_RANGE;
 
-    const GUM_SDL3_ClipState_ state = pGumRenderer->clipStack[--pGumRenderer->clipDepth];
-    return GUM_SDL3_result_(SDL_SetRenderClipRect(pGumRenderer->pRenderer,
-                                                  state.enabled ? &state.rect : nullptr));
+    const size_t index = pGumRenderer->clipDepth - 1;
+    const GUM_SDL3_ClipState_ state = pGumRenderer->clipStack[index];
+    if (!SDL_SetRenderClipRect(pGumRenderer->pRenderer,
+                               state.enabled ? &state.rect : nullptr)) {
+        return GBL_RESULT_ERROR_INTERNAL;
+    }
+
+    pGumRenderer->clipDepth = (uint8_t)index;
+    return GBL_RESULT_SUCCESS;
 }

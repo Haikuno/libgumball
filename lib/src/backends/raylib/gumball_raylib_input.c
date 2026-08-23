@@ -1,19 +1,17 @@
 #include <gumball/core/gumball_backend.h>
-#include <gumball/gumball_events.h>
-#include <gumball/core/gumball_logger.h>
 #include <raylib.h>
 
 // ---------------------------------- Mouse ---------------------------------- //
 
 void GUM_Backend_Mouse_update(GUM_Mouse* pMouse) {
-    Vector2 position_ = GetMousePosition();
-    Vector2 delta_    = GetMouseDelta();
-    Vector2 wheel_    = GetMouseWheelMoveV();
-    GUM_Pointer* pPointer = GUM_POINTER(pMouse);
+    const Vector2 position = GetMousePosition();
+    const Vector2 delta    = GetMouseDelta();
+    const Vector2 wheel    = GetMouseWheelMoveV();
+    GUM_Pointer* pPointer  = GUM_POINTER(pMouse);
 
-    pPointer->position = (GUM_Vector2){position_.x, position_.y};
-    pPointer->delta    = (GUM_Vector2){delta_.x, delta_.y};
-    pMouse->wheel      = (GUM_Vector2){wheel_.x, wheel_.y};
+    pPointer->position = (GUM_Vector2){ position.x, position.y };
+    pPointer->delta    = (GUM_Vector2){ delta.x, delta.y };
+    pMouse->wheel      = (GUM_Vector2){ wheel.x, wheel.y };
 
     GUM_INPUTDEVICE(pMouse)->buttons = 0;
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))   GUM_INPUTDEVICE(pMouse)->buttons |= GUM_MOUSE_BUTTON_LEFT;
@@ -26,7 +24,7 @@ bool GUM_Backend_Gamepad_isConnected(int index) {
 }
 
 void GUM_Backend_Gamepad_update(GUM_Gamepad* pGamepad) {
-    int index = pGamepad->rawIndex;
+    const int index = pGamepad->rawIndex;
 
     GUM_INPUTDEVICE(pGamepad)->buttons = 0;
     if (IsGamepadButtonDown(index, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))  GUM_INPUTDEVICE(pGamepad)->buttons |= GUM_GAMEPAD_BUTTON_A;

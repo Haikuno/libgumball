@@ -1,5 +1,4 @@
 #include "gumball_sdl3_internal.h"
-#include <gumball/backends/gumball_sdl3.h>
 #include <stdlib.h>
 
 static GUM_Renderer* pActiveRenderer_ = nullptr;
@@ -49,8 +48,4 @@ GBL_EXPORT void GUM_Renderer_destroy(GUM_Renderer* pSelf) {
     GUM_SDL3_Texture_rendererDestroyed_(pSelf->pRenderer);
     TTF_DestroyRendererTextEngine(pSelf->pTextEngine);
     free(pSelf);
-}
-
-GBL_EXPORT GUM_Renderer* GUM_SDL3_Renderer_create(SDL_Renderer* pRenderer) {
-    return GUM_Renderer_create(pRenderer);
 }
