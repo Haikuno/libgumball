@@ -9,58 +9,204 @@
 #include <gumball/core/gumball_inputsystem.h>
 #include <gumball/core/gumball_manager.h>
 
-#include <gimbal/gimbal_algorithms.h>
+#include <gimbal/gimbal_containers.h>
 
 #include "gumball_root_.h"
+#include "gumball_widget_.h"
 
 #include <stdint.h>
 
 #define GUM_ROOT_(self) (GBL_PRIVATE(GUM_Root, self))
 
-typedef struct GUM_DrawEntry_ {
-    GUM_Widget* pWidget;
-    uint64_t    enableOrder;
-} GUM_DrawEntry_;
-
 typedef struct GUM_Root_ {
-    GblLogger*   pLogger;
-    GblArrayList drawQueue;
-    GUM_Vector2  lastScreenSize;
-    uint64_t     nextEnableOrder;
+    GblLogger*  pLogger;
+    GUM_Widget* pDrawFirst;
+    GUM_Widget* pDrawLast;
+    GUM_Vector2 lastScreenSize;
+    uint64_t    nextEnableOrder;
 } GUM_Root_;
 
-static int GUM_Root_drawEntryCmp_(const void* pA, const void* pB) {
-    const GUM_DrawEntry_* pEntryA = pA;
-    const GUM_DrawEntry_* pEntryB = pB;
-    const uint8_t zA = pEntryA->pWidget->z_index;
-    const uint8_t zB = pEntryB->pWidget->z_index;
+typedef struct GUM_RootSnapshot_ {
+    GblArrayList widgets;
+    GUM_Widget*  stack[GUM_SNAPSHOT_INLINE_CAPACITY];
+} GUM_RootSnapshot_;
 
-    if (zA < zB) return -1;
-    if (zA > zB) return 1;
-    if (pEntryA->enableOrder < pEntryB->enableOrder) return -1;
-    if (pEntryA->enableOrder > pEntryB->enableOrder) return 1;
+typedef struct GUM_RootChildSnapshot_ {
+    GblArrayList objects;
+    GblObject*   stack[GUM_SNAPSHOT_INLINE_CAPACITY];
+} GUM_RootChildSnapshot_;
+
+static size_t GUM_Root_widgetDepth_(const GUM_Widget* pWidget) {
+    size_t depth = 0;
+    for (GblObject* pParent = GblObject_parent(GBL_OBJECT(pWidget));
+         pParent && GBL_TYPEOF(pParent) != GUM_ROOT_TYPE;
+         pParent = GblObject_parent(pParent)) {
+        ++depth;
+    }
+    return depth;
+}
+
+static int GUM_Root_widgetCmp_(const GUM_Widget* pA, const GUM_Widget* pB) {
+    const GUM_Widget_* pA_ = GUM_WIDGET_(pA);
+    const GUM_Widget_* pB_ = GUM_WIDGET_(pB);
+
+    if (pA_->zIndex < pB_->zIndex) return -1;
+    if (pA_->zIndex > pB_->zIndex) return 1;
+
+    const size_t depthA = GUM_Root_widgetDepth_(pA);
+    const size_t depthB = GUM_Root_widgetDepth_(pB);
+    if (depthA < depthB) return -1;
+    if (depthA > depthB) return 1;
+
+    if (pA_->enableOrder < pB_->enableOrder) return -1;
+    if (pA_->enableOrder > pB_->enableOrder) return 1;
     return 0;
 }
 
-static void GUM_Root_drawQueueSort_(GUM_Root* pRoot) {
-    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
-    gblSortInsertion(GblArrayList_data(&pSelf_->drawQueue),
-                     GblArrayList_size(&pSelf_->drawQueue),
-                     sizeof(GUM_DrawEntry_),
-                     GUM_Root_drawEntryCmp_);
-}
+static void GUM_Root_linkBefore_(GUM_Root* pRoot, GUM_Widget* pBefore, GUM_Widget* pWidget) {
+    GUM_Root_*   pRoot_   = GUM_ROOT_(pRoot);
+    GUM_Widget_* pWidget_ = GUM_WIDGET_(pWidget);
 
-static void GUM_Root_rebaseEnableOrder_(GUM_Root* pRoot) {
-    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
-    GUM_Root_drawQueueSort_(pRoot);
+    if (!pBefore) {
+        pWidget_->pDrawPrev = pRoot_->pDrawLast;
+        pWidget_->pDrawNext = nullptr;
 
-    const size_t count = GblArrayList_size(&pSelf_->drawQueue);
-    for (size_t i = 0; i < count; ++i) {
-        GUM_DrawEntry_* pEntry = GblArrayList_at(&pSelf_->drawQueue, i);
-        pEntry->enableOrder = i;
+        if (pRoot_->pDrawLast)
+            GUM_WIDGET_(pRoot_->pDrawLast)->pDrawNext = pWidget;
+        else
+            pRoot_->pDrawFirst = pWidget;
+
+        pRoot_->pDrawLast = pWidget;
+        return;
     }
 
-    pSelf_->nextEnableOrder = count;
+    GUM_Widget_* pBefore_ = GUM_WIDGET_(pBefore);
+    pWidget_->pDrawPrev = pBefore_->pDrawPrev;
+    pWidget_->pDrawNext = pBefore;
+
+    if (pBefore_->pDrawPrev)
+        GUM_WIDGET_(pBefore_->pDrawPrev)->pDrawNext = pWidget;
+    else
+        pRoot_->pDrawFirst = pWidget;
+
+    pBefore_->pDrawPrev = pWidget;
+}
+
+static void GUM_Root_insertOrdered_(GUM_Root* pRoot, GUM_Widget* pWidget) {
+    GUM_Root_* pRoot_ = GUM_ROOT_(pRoot);
+    GUM_Widget* pIt   = pRoot_->pDrawFirst;
+
+    while (pIt && GUM_Root_widgetCmp_(pIt, pWidget) <= 0)
+        pIt = GUM_WIDGET_(pIt)->pDrawNext;
+
+    GUM_Root_linkBefore_(pRoot, pIt, pWidget);
+}
+
+static void GUM_Root_unlink_(GUM_Root* pRoot, GUM_Widget* pWidget) {
+    GUM_Root_*   pRoot_   = GUM_ROOT_(pRoot);
+    GUM_Widget_* pWidget_ = GUM_WIDGET_(pWidget);
+
+    if (pWidget_->pDrawPrev)
+        GUM_WIDGET_(pWidget_->pDrawPrev)->pDrawNext = pWidget_->pDrawNext;
+    else
+        pRoot_->pDrawFirst = pWidget_->pDrawNext;
+
+    if (pWidget_->pDrawNext)
+        GUM_WIDGET_(pWidget_->pDrawNext)->pDrawPrev = pWidget_->pDrawPrev;
+    else
+        pRoot_->pDrawLast = pWidget_->pDrawPrev;
+
+    pWidget_->pDrawPrev = nullptr;
+    pWidget_->pDrawNext = nullptr;
+}
+
+static void GUM_Root_resort_(GUM_Root* pRoot) {
+    GUM_Root_* pRoot_ = GUM_ROOT_(pRoot);
+    GUM_Widget* pIt   = pRoot_->pDrawFirst;
+
+    pRoot_->pDrawFirst = nullptr;
+    pRoot_->pDrawLast  = nullptr;
+
+    while (pIt) {
+        GUM_Widget_* pIt_ = GUM_WIDGET_(pIt);
+        GUM_Widget* pNext = pIt_->pDrawNext;
+        pIt_->pDrawPrev = nullptr;
+        pIt_->pDrawNext = nullptr;
+        GUM_Root_insertOrdered_(pRoot, pIt);
+        pIt = pNext;
+    }
+}
+
+static void GUM_Root_snapshotRelease_(GUM_RootSnapshot_* pSnapshot) {
+    const size_t count = GblArrayList_size(&pSnapshot->widgets);
+
+    for (size_t i = 0; i < count; ++i) {
+        GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&pSnapshot->widgets, i);
+        GblBox_unref(GBL_BOX(pWidget));
+    }
+
+    GblArrayList_destruct(&pSnapshot->widgets);
+}
+
+static GBL_RESULT GUM_Root_snapshot_(GUM_Root* pRoot, GUM_RootSnapshot_* pSnapshot) {
+    GBL_RESULT result = GblArrayList_construct(&pSnapshot->widgets,
+                                               sizeof(GUM_Widget*),
+                                               0,
+                                               nullptr,
+                                               sizeof(*pSnapshot));
+    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
+        return result;
+
+    for (GUM_Widget* pIt = GUM_ROOT_(pRoot)->pDrawFirst;
+         pIt;
+         pIt = GUM_WIDGET_(pIt)->pDrawNext) {
+        GUM_Widget* pRetained = GUM_WIDGET(GblBox_ref(GBL_BOX(pIt)));
+        result = GblArrayList_pushBack(&pSnapshot->widgets, &pRetained);
+
+        if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
+            GblBox_unref(GBL_BOX(pRetained));
+            GUM_Root_snapshotRelease_(pSnapshot);
+            return result;
+        }
+    }
+
+    return GBL_RESULT_SUCCESS;
+}
+
+static void GUM_Root_childSnapshotRelease_(GUM_RootChildSnapshot_* pSnapshot) {
+    const size_t count = GblArrayList_size(&pSnapshot->objects);
+
+    for (size_t i = 0; i < count; ++i) {
+        GblObject* pObject = *(GblObject**)GblArrayList_at(&pSnapshot->objects, i);
+        GblBox_unref(GBL_BOX(pObject));
+    }
+
+    GblArrayList_destruct(&pSnapshot->objects);
+}
+
+static GBL_RESULT GUM_Root_childSnapshot_(GUM_Root* pRoot, GUM_RootChildSnapshot_* pSnapshot) {
+    GBL_RESULT result = GblArrayList_construct(&pSnapshot->objects,
+                                               sizeof(GblObject*),
+                                               0,
+                                               nullptr,
+                                               sizeof(*pSnapshot));
+    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
+        return result;
+
+    for (GblObject* pChild = GblObject_childFirst(GBL_OBJECT(pRoot));
+         pChild;
+         pChild = GblObject_siblingNext(pChild)) {
+        GblObject* pRetained = GBL_OBJECT(GblBox_ref(GBL_BOX(pChild)));
+        result = GblArrayList_pushBack(&pSnapshot->objects, &pRetained);
+
+        if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
+            GblBox_unref(GBL_BOX(pRetained));
+            GUM_Root_childSnapshotRelease_(pSnapshot);
+            return result;
+        }
+    }
+
+    return GBL_RESULT_SUCCESS;
 }
 
 GUM_Root* GUM_Root_active_(void) {
@@ -82,26 +228,31 @@ static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
     GUM_Root*  pSelf  = GUM_ROOT(pInstance);
     GUM_Root_* pSelf_ = GUM_ROOT_(pSelf);
 
-    GBL_RESULT result = GblArrayList_construct(&pSelf_->drawQueue, sizeof(GUM_DrawEntry_));
-    if (!GBL_RESULT_SUCCESS(result))
-        return result;
+    pSelf_->pDrawFirst      = nullptr;
+    pSelf_->pDrawLast       = nullptr;
+    pSelf_->nextEnableOrder = 0;
 
     pSelf_->pLogger = GblLogger_create(GBL_LOGGER_TYPE, sizeof(GblLogger), nullptr);
-    if (!pSelf_->pLogger) {
-        GblArrayList_destruct(&pSelf_->drawQueue);
+    if (!pSelf_->pLogger)
         return GBL_RESULT_ERROR_MEM_ALLOC;
-    }
 
-    result = GblLogger_register(pSelf_->pLogger);
+    GBL_RESULT result = GblLogger_register(pSelf_->pLogger);
     if (!GBL_RESULT_SUCCESS(result)) {
         GblLogger_unref(pSelf_->pLogger);
         pSelf_->pLogger = nullptr;
-        GblArrayList_destruct(&pSelf_->drawQueue);
         return result;
     }
 
     GUM_Backend_setLogger();
-    GUM_InputSystem_init();
+
+    result = GUM_InputSystem_init();
+    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
+        GUM_Backend_resetLogger();
+        GblLogger_unregister(pSelf_->pLogger);
+        GblLogger_unref(pSelf_->pLogger);
+        pSelf_->pLogger = nullptr;
+        return result;
+    }
 
     result = GblModule_register(GBL_MODULE(pSelf));
     if (!GBL_RESULT_SUCCESS(result)) {
@@ -110,7 +261,6 @@ static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
         GblLogger_unregister(pSelf_->pLogger);
         GblLogger_unref(pSelf_->pLogger);
         pSelf_->pLogger = nullptr;
-        GblArrayList_destruct(&pSelf_->drawQueue);
         return result;
     }
 
@@ -121,7 +271,8 @@ static GBL_RESULT GUM_Root_GblBox_destructor_(GblBox* pBox) {
     GUM_Root*  pSelf  = GUM_ROOT(pBox);
     GUM_Root_* pSelf_ = GUM_ROOT_(pSelf);
 
-    GblArrayList_destruct(&pSelf_->drawQueue);
+    // Focus-loss callbacks still need framework services.
+    GUM_InputSystem_deinit();
     GUM_Font_setDefault(nullptr);
     GUM_Manager_deinit();
 
@@ -129,7 +280,6 @@ static GBL_RESULT GUM_Root_GblBox_destructor_(GblBox* pBox) {
         GblLogger_unregister(pSelf_->pLogger);
 
     GUM_Backend_resetLogger();
-    GUM_InputSystem_deinit();
     GUM_Backend_deinit();
 
     if (pSelf_->pLogger) {
@@ -164,40 +314,23 @@ GblType GUM_Root_type(void) {
     return type;
 }
 
-GBL_RESULT GUM_Root_drawEnable_(GUM_Widget* pWidget) {
+void GUM_Root_drawEnable_(GUM_Widget* pWidget) {
     if (!pWidget)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
+        return;
 
     GUM_Root* pRoot = GUM_Root_active_();
-    if (!pRoot)
-        return GBL_RESULT_NOT_FOUND;
+    if (!pRoot ||
+        GblObject_findAncestorByType(GBL_OBJECT(pWidget), GUM_ROOT_TYPE) != GBL_OBJECT(pRoot))
+        return;
 
-    GblObject* pSceneRoot = GblObject_findAncestorByType(GBL_OBJECT(pWidget), GUM_ROOT_TYPE);
-    if (pSceneRoot != GBL_OBJECT(pRoot))
-        return GBL_RESULT_NOT_FOUND;
+    GUM_Widget_* pWidget_ = GUM_WIDGET_(pWidget);
+    if (pWidget_->drawMember)
+        return;
 
-    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
-    const size_t count = GblArrayList_size(&pSelf_->drawQueue);
-
-    for (size_t i = 0; i < count; ++i) {
-        const GUM_DrawEntry_* pEntry = GblArrayList_at(&pSelf_->drawQueue, i);
-        if (pEntry->pWidget == pWidget)
-            return GBL_RESULT_SUCCESS;
-    }
-
-    if (pSelf_->nextEnableOrder == UINT64_MAX)
-        GUM_Root_rebaseEnableOrder_(pRoot);
-
-    const GUM_DrawEntry_ entry = {
-        .pWidget     = pWidget,
-        .enableOrder = pSelf_->nextEnableOrder++
-    };
-
-    const GBL_RESULT result = GblArrayList_pushBack(&pSelf_->drawQueue, &entry);
-    if (GBL_RESULT_SUCCESS(result))
-        GUM_Root_drawQueueSort_(pRoot);
-
-    return result;
+    GUM_Root_* pRoot_ = GUM_ROOT_(pRoot);
+    pWidget_->enableOrder = pRoot_->nextEnableOrder++;
+    pWidget_->drawMember  = true;
+    GUM_Root_insertOrdered_(pRoot, pWidget);
 }
 
 void GUM_Root_drawDisable_(GUM_Widget* pWidget) {
@@ -205,85 +338,85 @@ void GUM_Root_drawDisable_(GUM_Widget* pWidget) {
     if (!pRoot || !pWidget)
         return;
 
-    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
-    const size_t count = GblArrayList_size(&pSelf_->drawQueue);
+    GUM_Widget_* pWidget_ = GUM_WIDGET_(pWidget);
+    if (!pWidget_->drawMember)
+        return;
 
-    for (size_t i = 0; i < count; ++i) {
-        const GUM_DrawEntry_* pEntry = GblArrayList_at(&pSelf_->drawQueue, i);
-        if (pEntry->pWidget == pWidget) {
-            GblArrayList_erase(&pSelf_->drawQueue, i, 1);
-            return;
-        }
-    }
+    GUM_Root_unlink_(pRoot, pWidget);
+    pWidget_->drawMember = false;
 }
 
-void GUM_Root_drawOrderChanged_(GUM_Widget* pWidget) {
+void GUM_Root_drawOrderChanged_(void) {
     GUM_Root* pRoot = GUM_Root_active_();
-    if (!pRoot || !pWidget)
-        return;
-
-    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
-    const size_t count = GblArrayList_size(&pSelf_->drawQueue);
-
-    for (size_t i = 0; i < count; ++i) {
-        const GUM_DrawEntry_* pEntry = GblArrayList_at(&pSelf_->drawQueue, i);
-        if (pEntry->pWidget == pWidget) {
-            GUM_Root_drawQueueSort_(pRoot);
-            return;
-        }
-    }
+    if (pRoot)
+        GUM_Root_resort_(pRoot);
 }
 
-void GUM_Root_foreachDrawable_(GUM_Root* pRoot,
-                               GUM_Root_WidgetIterFn_ pFnIter,
-                               void* pClosure) {
+GBL_RESULT GUM_Root_foreachDrawable_(GUM_Root* pRoot,
+                                     GUM_Root_WidgetIterFn_ pFnIter,
+                                     void* pClosure) {
     if (!pRoot || !pFnIter)
-        return;
+        return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
-    const size_t count = GblArrayList_size(&pSelf_->drawQueue);
+    if (!GUM_ROOT_(pRoot)->pDrawFirst)
+        return GBL_RESULT_PARTIAL;
 
+    GUM_RootSnapshot_ snapshot;
+    GBL_RESULT result = GUM_Root_snapshot_(pRoot, &snapshot);
+    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
+        return result;
+
+    const size_t count = GblArrayList_size(&snapshot.widgets);
     for (size_t i = 0; i < count; ++i) {
-        const GUM_DrawEntry_* pEntry = GblArrayList_at(&pSelf_->drawQueue, i);
-        if (pFnIter(pEntry->pWidget, pClosure))
-            return;
+        GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
+        if (pFnIter(pWidget, pClosure))
+            break;
     }
+
+    GUM_Root_snapshotRelease_(&snapshot);
+    return GBL_RESULT_SUCCESS;
 }
 
 GBL_RESULT GUM_Root_draw_(GUM_Root* pRoot, GUM_Renderer* pRenderer) {
     if (!pRoot)
         return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
-    const size_t count = GblArrayList_size(&pSelf_->drawQueue);
-    if (!count)
+    if (!GUM_ROOT_(pRoot)->pDrawFirst)
         return GBL_RESULT_PARTIAL;
 
+    GUM_RootSnapshot_ snapshot;
+    GBL_RESULT result = GUM_Root_snapshot_(pRoot, &snapshot);
+    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
+        return result;
+
+    GBL_RESULT firstFailure = GBL_RESULT_SUCCESS;
+    const size_t count = GblArrayList_size(&snapshot.widgets);
+
     for (size_t i = 0; i < count; ++i) {
-        const GUM_DrawEntry_* pEntry = GblArrayList_at(&pSelf_->drawQueue, i);
-        GUM_Widget* pWidget = pEntry->pWidget;
-        GUM_WIDGET_CLASSOF(pWidget)->pFnDraw(pWidget, pRenderer);
+        GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
+        const GBL_RESULT drawResult = GUM_WIDGET_CLASSOF(pWidget)->pFnDraw(pWidget, pRenderer);
+
+        if (GBL_RESULT_SUCCESS(firstFailure) && !GBL_RESULT_SUCCESS(drawResult))
+            firstFailure = drawResult;
     }
 
-    return GBL_RESULT_SUCCESS;
+    GUM_Root_snapshotRelease_(&snapshot);
+    return firstFailure;
 }
 
 GUM_Widget* GUM_Root_pointerTargetAt_(GUM_Root* pRoot, GUM_Vector2 position) {
     if (!pRoot)
         return nullptr;
 
-    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
-
-    for (size_t i = GblArrayList_size(&pSelf_->drawQueue); i-- > 0;) {
-        const GUM_DrawEntry_* pEntry = GblArrayList_at(&pSelf_->drawQueue, i);
-        GUM_Widget* pWidget = pEntry->pWidget;
-
-        if (!pWidget->isInteractive || !pWidget->isActive)
+    for (GUM_Widget* pWidget = GUM_ROOT_(pRoot)->pDrawLast;
+         pWidget;
+         pWidget = GUM_WIDGET_(pWidget)->pDrawPrev) {
+        if (!pWidget->isInteractive || !GUM_Widget_isActive(pWidget))
             continue;
 
         const GUM_Vector2 widgetPos  = GUM_get_absolute_position_(pWidget);
         const GUM_Vector2 widgetSize = { pWidget->w, pWidget->h };
-        const GUM_Rectangle clip = pWidget->clipRect;
+        const GUM_Rectangle clip     = GUM_Widget_clipRect_(pWidget);
         const bool inClip = position.x >= clip.x && position.x < clip.x + clip.width &&
                             position.y >= clip.y && position.y < clip.y + clip.height;
 
@@ -299,22 +432,60 @@ GUM_Widget* GUM_Root_pointerTargetAt_(GUM_Root* pRoot, GUM_Vector2 position) {
     return nullptr;
 }
 
-void GUM_Root_update(GUM_Root* pRoot) {
+GBL_RESULT GUM_Root_update(GUM_Root* pRoot) {
+    if (!pRoot)
+        return GBL_RESULT_ERROR_INVALID_POINTER;
+    if (GUM_Root_active_() != pRoot)
+        return GBL_RESULT_NOT_READY;
+
+    GblBox_ref(GBL_BOX(pRoot));
     GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
+    GBL_RESULT firstFailure = GBL_RESULT_SUCCESS;
 
     GUM_Backend_update();
+    if (GUM_Root_active_() != pRoot)
+        goto done;
 
     const GUM_Vector2 screenSize = GUM_Backend_screenSize();
 
     if (screenSize.x != pSelf_->lastScreenSize.x ||
         screenSize.y != pSelf_->lastScreenSize.y) {
-        GblObject_foreachChild(GBL_OBJECT(pRoot), pContainer, GUM_Container*) {
-            if (GblType_check(GBL_TYPEOF(pContainer), GUM_CONTAINER_TYPE))
-                GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
+        GUM_RootChildSnapshot_ snapshot;
+        GBL_RESULT result = GUM_Root_childSnapshot_(pRoot, &snapshot);
+        if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
+            firstFailure = result;
+            goto done;
         }
+
+        const size_t count = GblArrayList_size(&snapshot.objects);
+        for (size_t i = 0; i < count; ++i) {
+            if (GUM_Root_active_() != pRoot)
+                break;
+
+            GblObject* pObject = *(GblObject**)GblArrayList_at(&snapshot.objects, i);
+            GUM_Container* pContainer = GBL_AS(GUM_Container, pObject);
+            if (!pContainer)
+                continue;
+
+            result = GUM_CONTAINER_CLASSOF(pContainer)->pFnUpdateContent(pContainer);
+            if (GBL_RESULT_SUCCESS(firstFailure) && !GBL_RESULT_SUCCESS(result))
+                firstFailure = result;
+        }
+
+        const bool stillActive = GUM_Root_active_() == pRoot;
+        GUM_Root_childSnapshotRelease_(&snapshot);
+        if (!stillActive)
+            goto done;
+        if (!GBL_RESULT_SUCCESS(firstFailure))
+            goto done;
+
+        pSelf_->lastScreenSize = screenSize;
     }
 
-    pSelf_->lastScreenSize = screenSize;
+    if (GUM_Root_active_() == pRoot)
+        GUM_InputSystem_update();
 
-    GUM_InputSystem_update();
+done:
+    GblBox_unref(GBL_BOX(pRoot));
+    return firstFailure;
 }

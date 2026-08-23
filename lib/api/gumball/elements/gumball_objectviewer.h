@@ -7,8 +7,9 @@
  *   \ref        GUM_ObjectViewer "GUM_ObjectViewer data structure and hierarchy graph"
  *   \ingroup    elements
  *
- *   TODO: document
-
+ *   GUM_ObjectViewer holds a retained object for inspection.
+ *   Presentation is not implemented yet.
+ *
  *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License
 */
@@ -40,8 +41,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_ObjectViewer, GUM_Container)
 
 /*!  \class   GUM_ObjectViewer
  *   \extends GUM_Container
- *   \brief   An element to reflect over properties of any object.
- *
+ *   \brief   Object inspection container
 */
 
 /*!  \name  Properties
@@ -50,7 +50,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_ObjectViewer, GUM_Container)
  *    @{
 */
 GBL_INSTANCE_DERIVE(GUM_ObjectViewer, GUM_Container)
-    GblObject* pObject; //!< A pointer to the object to be displayed. Default value is nullptr
+    GblObject* pObject; //!< Retained object selected for inspection. Default value is nullptr
 GBL_INSTANCE_END
 //! @}
 
@@ -58,18 +58,12 @@ GBL_PROPERTIES(GUM_ObjectViewer,
     (object, GBL_GENERIC, (READ, WRITE), GBL_OBJECT_TYPE)
 )
 
-//! \cond
-// GBL_SIGNALS(GUM_ObjectViewer,
-//     // TODO: signals?
-// )
-
 GblType GUM_ObjectViewer_type(void) GBL_NOEXCEPT;
-//! \endcond
 
 //! Returns a new GUM_ObjectViewer. Optionally takes in a list of Name/Value pairs for properties
 #define GUM_ObjectViewer_create(/* propertyName, propertyValue */ ...) GBL_NEW(GUM_ObjectViewer __VA_OPT__(,) __VA_ARGS__)
 
-//! Sets the object whose properties are displayed by the Object Viewer.
+//! Sets the object shown by the viewer.
 GBL_EXPORT GBL_RESULT GUM_ObjectViewer_setObject(GBL_SELF, GblObject* pObject) GBL_NOEXCEPT;
 
 GBL_DECLS_END

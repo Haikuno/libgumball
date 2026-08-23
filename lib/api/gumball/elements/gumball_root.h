@@ -8,7 +8,6 @@
  *   \ingroup    elements
  *
  *   GUM_Root is the element responsible for holding all other elements in the scene.
- *   It owns the scene's runtime state, including drawable ordering, as private instance data.
 */
 
 #include <gimbal/gimbal_meta.h>
@@ -32,8 +31,6 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Root);
 /*!  \struct  GUM_RootClass
  *   \extends GblModuleClass
  *   \brief   GUM_Root structure
- *
- *   GUM_RootClass derives from GblModuleClass, adding nothing new.
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Root, GblModule)
 
@@ -43,13 +40,13 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Root, GblModule)
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Root, GblModule)
 
-//! Creates the process's single active root. Returns nullptr while another GUM_Root is registered.
+//! Creates the process's single active Root.
 GBL_EXPORT GUM_Root* GUM_Root_create(void) GBL_NOEXCEPT;
 
 GblType GUM_Root_type(void) GBL_NOEXCEPT;
 
-//! Updates the root element.
-void GUM_Root_update(GBL_SELF);
+//! Updates backend/input state and top-level layout.
+GBL_RESULT GUM_Root_update(GBL_SELF) GBL_NOEXCEPT;
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

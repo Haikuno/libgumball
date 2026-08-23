@@ -2,58 +2,135 @@
 #include <gimbal/test/gimbal_test_macros.h>
 #include <gumball/gumball.h>
 
-#define GUM_ROOT_DRAW_PROBE_TYPE (GBL_TYPEID(GUM_RootDrawProbe))
-#define GUM_ROOT_DRAW_PROBE(self) (GBL_CAST(GUM_RootDrawProbe, self))
+#define GUM_ROOT_PROBE_TYPE (GBL_TYPEID(GUM_RootProbe))
+#define GUM_ROOT_PROBE(self) (GBL_CAST(GUM_RootProbe, self))
 
-GBL_FORWARD_DECLARE_STRUCT(GUM_RootDrawProbe);
-GblType GUM_RootDrawProbe_type(void) GBL_NOEXCEPT;
+GBL_FORWARD_DECLARE_STRUCT(GUM_RootProbe);
+GblType GUM_RootProbe_type(void) GBL_NOEXCEPT;
 
-GBL_CLASS_DERIVE_EMPTY(GUM_RootDrawProbe, GUM_Widget)
+GBL_CLASS_DERIVE_EMPTY(GUM_RootProbe, GUM_Widget)
 
-GBL_INSTANCE_DERIVE(GUM_RootDrawProbe, GUM_Widget)
-    uint8_t  id;
-    uint8_t* pOrder;
-    size_t*  pCount;
+typedef enum GUM_RootProbeAction_ {
+    GUM_ROOT_PROBE_NONE,
+    GUM_ROOT_PROBE_UNREF_SELF,
+    GUM_ROOT_PROBE_UNREF_TARGET,
+    GUM_ROOT_PROBE_DISABLE_TARGET,
+    GUM_ROOT_PROBE_ENABLE_TARGET,
+    GUM_ROOT_PROBE_REPARENT_TARGET,
+    GUM_ROOT_PROBE_SET_TARGET_Z
+} GUM_RootProbeAction_;
+
+GBL_INSTANCE_DERIVE(GUM_RootProbe, GUM_Widget)
+    uint8_t              id;
+    uint8_t*             pOrder;
+    size_t*              pDrawCount;
+    size_t*              pUpdateCount;
+    GBL_RESULT           drawResult;
+    GBL_RESULT           updateResult;
+    GUM_RootProbeAction_ action;
+    GUM_Widget*          pTarget;
+    GblObject*           pNewParent;
+    uint8_t              targetZ;
+    GUM_RootProbe**      ppSelfOwner;
+    GUM_RootProbe**      ppTargetOwner;
 GBL_INSTANCE_END
 
-static GBL_RESULT GUM_RootDrawProbe_draw_(GUM_Widget* pWidget, GUM_Renderer* pRenderer) {
+static GBL_RESULT GUM_RootProbe_draw_(GUM_Widget* pWidget, GUM_Renderer* pRenderer) {
     GBL_UNUSED(pRenderer);
-    GUM_RootDrawProbe* pSelf = GUM_ROOT_DRAW_PROBE(pWidget);
+    GUM_RootProbe* pSelf = GUM_ROOT_PROBE(pWidget);
 
-    if (pSelf->pOrder && pSelf->pCount)
-        pSelf->pOrder[(*pSelf->pCount)++] = pSelf->id;
+    if (pSelf->pOrder && pSelf->pDrawCount)
+        pSelf->pOrder[(*pSelf->pDrawCount)++] = pSelf->id;
 
-    return GBL_RESULT_SUCCESS;
+    const GBL_RESULT result = pSelf->drawResult;
+
+    switch (pSelf->action) {
+    case GUM_ROOT_PROBE_UNREF_SELF:
+        pSelf->action = GUM_ROOT_PROBE_NONE;
+        if (pSelf->ppSelfOwner)
+            *pSelf->ppSelfOwner = nullptr;
+        GUM_unref(pSelf);
+        return result;
+    case GUM_ROOT_PROBE_UNREF_TARGET: {
+        GUM_Widget* pTarget = pSelf->pTarget;
+        pSelf->action  = GUM_ROOT_PROBE_NONE;
+        pSelf->pTarget = nullptr;
+        if (pSelf->ppTargetOwner)
+            *pSelf->ppTargetOwner = nullptr;
+        if (pTarget)
+            GUM_unref(pTarget);
+        break;
+    }
+    case GUM_ROOT_PROBE_DISABLE_TARGET:
+        pSelf->action = GUM_ROOT_PROBE_NONE;
+        if (pSelf->pTarget)
+            GUM_draw_disable(pSelf->pTarget);
+        break;
+    case GUM_ROOT_PROBE_ENABLE_TARGET:
+        pSelf->action = GUM_ROOT_PROBE_NONE;
+        if (pSelf->pTarget)
+            GUM_draw_enable(pSelf->pTarget);
+        break;
+    case GUM_ROOT_PROBE_REPARENT_TARGET:
+        pSelf->action = GUM_ROOT_PROBE_NONE;
+        if (pSelf->pTarget)
+            GUM_setProperty(pSelf->pTarget, "parent", pSelf->pNewParent);
+        break;
+    case GUM_ROOT_PROBE_SET_TARGET_Z:
+        pSelf->action = GUM_ROOT_PROBE_NONE;
+        if (pSelf->pTarget)
+            GUM_setProperty(pSelf->pTarget, "z_index", pSelf->targetZ);
+        break;
+    case GUM_ROOT_PROBE_NONE:
+    default:
+        break;
+    }
+
+    return result;
 }
 
-static GBL_RESULT GUM_RootDrawProbeClass_init_(GblClass* pClass, const void* pData) {
+static GBL_RESULT GUM_RootProbe_update_(GUM_Widget* pWidget) {
+    GUM_RootProbe* pSelf = GUM_ROOT_PROBE(pWidget);
+    if (pSelf->pUpdateCount)
+        ++*pSelf->pUpdateCount;
+    return pSelf->updateResult;
+}
+
+static GBL_RESULT GUM_RootProbeClass_init_(GblClass* pClass, const void* pData) {
     GBL_UNUSED(pData);
-    GUM_WIDGET_CLASS(pClass)->pFnDraw = GUM_RootDrawProbe_draw_;
+    GUM_WIDGET_CLASS(pClass)->pFnDraw   = GUM_RootProbe_draw_;
+    GUM_WIDGET_CLASS(pClass)->pFnUpdate = GUM_RootProbe_update_;
     return GBL_RESULT_SUCCESS;
 }
 
-GblType GUM_RootDrawProbe_type(void) {
+GblType GUM_RootProbe_type(void) {
     static GblType type = GBL_INVALID_TYPE;
 
     if (type == GBL_INVALID_TYPE) {
-        type = GblType_register(GblQuark_internStatic("GUM_RootDrawProbe"),
+        type = GblType_register(GblQuark_internStatic("GUM_RootProbe"),
                                 GUM_WIDGET_TYPE,
-                                &(static GblTypeInfo){ .classSize    = sizeof(GUM_RootDrawProbeClass),
-                                                       .instanceSize = sizeof(GUM_RootDrawProbe),
-                                                       .pFnClassInit = GUM_RootDrawProbeClass_init_ },
+                                &(static GblTypeInfo){
+                                    .classSize    = sizeof(GUM_RootProbeClass),
+                                    .instanceSize = sizeof(GUM_RootProbe),
+                                    .pFnClassInit = GUM_RootProbeClass_init_
+                                },
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC);
     }
 
     return type;
 }
 
-static GUM_RootDrawProbe* drawProbeCreate_(uint8_t id, uint8_t zIndex,
-                                           uint8_t* pOrder, size_t* pCount) {
-    GUM_RootDrawProbe* pProbe = GBL_NEW(GUM_RootDrawProbe, "z_index", zIndex);
+static GUM_RootProbe* rootProbe_(GblObject* pParent, uint8_t id, uint8_t zIndex,
+                                 uint8_t* pOrder, size_t* pDrawCount) {
+    GUM_RootProbe* pProbe = GBL_NEW(GUM_RootProbe,
+                                    "parent", pParent,
+                                    "z_index", zIndex);
     if (pProbe) {
-        pProbe->id     = id;
-        pProbe->pOrder = pOrder;
-        pProbe->pCount = pCount;
+        pProbe->id           = id;
+        pProbe->pOrder       = pOrder;
+        pProbe->pDrawCount   = pDrawCount;
+        pProbe->drawResult   = GBL_RESULT_SUCCESS;
+        pProbe->updateResult = GBL_RESULT_SUCCESS;
     }
     return pProbe;
 }
@@ -75,69 +152,251 @@ GBL_TEST_CASE_END
 
 GBL_TEST_CASE(singleRoot)
     GUM_Root* pSecond = GUM_Root_create();
-    GblModule* pRegistered = GblModule_find("GUM_Root");
-
-    if (pSecond)
-        GUM_unref(pSecond);
-
     GBL_TEST_VERIFY(!pSecond);
-    GBL_TEST_COMPARE(pRegistered, GBL_MODULE(pFixture->pRoot));
+    GBL_TEST_COMPARE(GblModule_find("GUM_Root"), GBL_MODULE(pFixture->pRoot));
 GBL_TEST_CASE_END
 
-GBL_TEST_CASE(drawOrderTracksZAndEnableOrder)
-    uint8_t order[3] = { 0 };
+GBL_TEST_CASE(drawOrder)
+    uint8_t order[4] = { 0 };
     size_t count = 0;
+    GUM_RootProbe* pA = rootProbe_(nullptr, 1, 100, order, &count);
+    GUM_RootProbe* pB = rootProbe_(nullptr, 2,  50, order, &count);
+    GUM_RootProbe* pC = rootProbe_(nullptr, 3, 100, order, &count);
+    GUM_RootProbe* pChild = rootProbe_(GBL_OBJECT(pA), 4, 100, order, &count);
+    GBL_TEST_VERIFY(pA && pB && pC && pChild);
 
-    GUM_RootDrawProbe* pA = drawProbeCreate_(1, 100, order, &count);
-    GUM_RootDrawProbe* pB = drawProbeCreate_(2,  50, order, &count);
-    GUM_RootDrawProbe* pC = drawProbeCreate_(3, 100, order, &count);
-
-    GBL_TEST_VERIFY(pA && pB && pC);
-
-    GBL_TEST_COMPARE(GUM_draw(), GBL_RESULT_SUCCESS);
-    GBL_TEST_COMPARE(count, 3);
-    GBL_TEST_COMPARE(order[0], 2);
-    GBL_TEST_COMPARE(order[1], 1);
-    GBL_TEST_COMPARE(order[2], 3);
-
-    count = 0;
-    GBL_TEST_COMPARE(GUM_setProperty(pB, "z_index", (uint8_t)100), GBL_RESULT_SUCCESS);
-    GBL_TEST_COMPARE(GUM_draw(), GBL_RESULT_SUCCESS);
-    GBL_TEST_COMPARE(count, 3);
-    GBL_TEST_COMPARE(order[0], 1);
-    GBL_TEST_COMPARE(order[1], 2);
-    GBL_TEST_COMPARE(order[2], 3);
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 4u);
+    GBL_TEST_COMPARE(order[0], 2u);
+    GBL_TEST_COMPARE(order[1], 1u);
+    GBL_TEST_COMPARE(order[2], 3u);
+    GBL_TEST_COMPARE(order[3], 4u);
 
     count = 0;
-    GBL_TEST_COMPARE(GUM_draw_disable(pA), GBL_RESULT_SUCCESS);
-    GBL_TEST_COMPARE(GUM_draw_enable(pA), GBL_RESULT_SUCCESS);
-    GBL_TEST_COMPARE(GUM_draw(), GBL_RESULT_SUCCESS);
-    GBL_TEST_COMPARE(count, 3);
-    GBL_TEST_COMPARE(order[0], 2);
-    GBL_TEST_COMPARE(order[1], 3);
-    GBL_TEST_COMPARE(order[2], 1);
+    GBL_TEST_CALL(GUM_setProperty(pB, "z_index", (uint8_t)100));
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(order[0], 1u);
+    GBL_TEST_COMPARE(order[1], 2u);
+    GBL_TEST_COMPARE(order[2], 3u);
+    GBL_TEST_COMPARE(order[3], 4u);
 
-    GUM_unref(pA);
-    GUM_unref(pB);
+    count = 0;
+    GBL_TEST_CALL(GUM_draw_disable(pA));
+    GBL_TEST_CALL(GUM_draw_enable(pA));
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(order[0], 2u);
+    GBL_TEST_COMPARE(order[1], 3u);
+    GBL_TEST_COMPARE(order[2], 1u);
+    GBL_TEST_COMPARE(order[3], 4u);
+
+    GBL_TEST_COMPARE(GUM_Widget_zIndex(GUM_WIDGET(pA)), 100u);
+    GBL_TEST_COMPARE(GUM_Widget_zIndex(GUM_WIDGET(pChild)), 100u);
+    GBL_TEST_CALL(GUM_remove_child(pA, pChild));
+    GBL_TEST_COMPARE(GUM_Widget_zIndex(GUM_WIDGET(pChild)), 100u);
+    GBL_TEST_CALL(GUM_add_child(pA, pChild));
+    GBL_TEST_COMPARE(GUM_Widget_zIndex(GUM_WIDGET(pChild)), 100u);
+
+    GUM_unref(pChild);
     GUM_unref(pC);
+    GUM_unref(pB);
+    GUM_unref(pA);
 GBL_TEST_CASE_END
 
-GBL_TEST_CASE(destroyedWidgetLeavesDrawState)
-    uint8_t order[1] = { 0 };
+GBL_TEST_CASE(membership)
+    uint8_t order[2] = { 0 };
     size_t count = 0;
+    GUM_Container* pA = GUM_Container_create();
+    GUM_Container* pB = GUM_Container_create();
+    GUM_Container* pNested = GUM_Container_create("parent", pA);
+    GUM_RootProbe* pOne = rootProbe_(GBL_OBJECT(pNested), 1, 50, order, &count);
+    GUM_RootProbe* pTwo = rootProbe_(GBL_OBJECT(pNested), 2, 50, order, &count);
+    GBL_TEST_VERIFY(pA && pB && pNested && pOne && pTwo);
 
-    GUM_RootDrawProbe* pProbe = drawProbeCreate_(1, 50, order, &count);
-    GBL_TEST_VERIFY(pProbe);
-    GBL_TEST_COMPARE(GUM_draw(), GBL_RESULT_SUCCESS);
-    GBL_TEST_COMPARE(count, 1);
-
-    GBL_UNREF(pProbe);
+    GBL_TEST_CALL(GUM_draw_disable(pTwo));
+    GBL_TEST_CALL(GUM_remove_child(pA, pNested));
+    GBL_TEST_CALL(GUM_draw_enable(pTwo));
     count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 0u);
 
+    GBL_TEST_CALL(GUM_add_child(pB, pNested));
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 2u);
+
+    GBL_TEST_CALL(GUM_draw_disable(pOne));
+    GBL_TEST_CALL(GUM_setProperty(pNested, "parent", pA));
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 1u);
+    GBL_TEST_COMPARE(order[0], 2u);
+
+    GUM_unref(pTwo);
+    GUM_unref(pOne);
+    GUM_unref(pNested);
+    GUM_unref(pB);
+    GUM_unref(pA);
+GBL_TEST_CASE_END
+
+GBL_TEST_CASE(largeSubtree)
+    enum { ProbeCount = 65 };
+    uint8_t order[ProbeCount];
+    size_t count = 0;
+    GUM_RootProbe* probes[ProbeCount] = { nullptr };
+    GUM_Container* pContainer = GUM_Container_create();
+    GBL_TEST_VERIFY(pContainer);
+
+    for (size_t i = 0; i < ProbeCount; ++i) {
+        probes[i] = rootProbe_(GBL_OBJECT(pContainer), (uint8_t)i, 50, order, &count);
+        GBL_TEST_VERIFY(probes[i]);
+    }
+
+    GBL_TEST_CALL(GUM_remove_child(pFixture->pRoot, pContainer));
+    count = 0;
     GBL_TEST_COMPARE(GUM_draw(), GBL_RESULT_PARTIAL);
-    GBL_TEST_COMPARE(count, 0);
+    GBL_TEST_COMPARE(count, 0u);
+
+    GBL_TEST_CALL(GUM_add_child(pFixture->pRoot, pContainer));
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, ProbeCount);
+
+    for (size_t i = 0; i < ProbeCount; ++i)
+        GUM_unref(probes[i]);
+    GUM_unref(pContainer);
+GBL_TEST_CASE_END
+
+GBL_TEST_CASE(drawLifetime)
+    uint8_t order[2] = { 0 };
+    size_t count = 0;
+    GUM_RootProbe* pA = rootProbe_(nullptr, 1, 10, order, &count);
+    GUM_RootProbe* pB = rootProbe_(nullptr, 2, 20, order, &count);
+    GBL_TEST_VERIFY(pA && pB);
+
+    pA->action      = GUM_ROOT_PROBE_UNREF_SELF;
+    pA->ppSelfOwner = &pA;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_VERIFY(!pA);
+    GBL_TEST_COMPARE(count, 2u);
+    GBL_TEST_COMPARE(order[0], 1u);
+    GBL_TEST_COMPARE(order[1], 2u);
+
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 1u);
+    GBL_TEST_COMPARE(order[0], 2u);
+    GUM_unref(pB);
+
+    count = 0;
+    pA = rootProbe_(nullptr, 1, 10, order, &count);
+    pB = rootProbe_(nullptr, 2, 20, order, &count);
+    GBL_TEST_VERIFY(pA && pB);
+
+    pA->action        = GUM_ROOT_PROBE_UNREF_TARGET;
+    pA->pTarget       = GUM_WIDGET(pB);
+    pA->ppTargetOwner = &pB;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_VERIFY(!pB);
+    GBL_TEST_COMPARE(count, 2u);
+
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 1u);
+    GUM_unref(pA);
+
+    GUM_Container* pContainer = GUM_Container_create();
+    rootProbe_(GBL_OBJECT(pContainer), 1, 10, order, &count);
+    rootProbe_(GBL_OBJECT(pContainer), 2, 20, order, &count);
+    GBL_TEST_VERIFY(pContainer);
+    GUM_unref(pContainer);
+
+    count = 0;
+    GBL_TEST_COMPARE(GUM_draw(), GBL_RESULT_PARTIAL);
+    GBL_TEST_COMPARE(count, 0u);
+GBL_TEST_CASE_END
+
+GBL_TEST_CASE(drawMutation)
+    uint8_t order[2] = { 0 };
+    size_t count = 0;
+    GUM_RootProbe* pA = rootProbe_(nullptr, 1, 10, order, &count);
+    GUM_RootProbe* pB = rootProbe_(nullptr, 2, 20, order, &count);
+    GBL_TEST_VERIFY(pA && pB);
+
+    pA->pTarget = GUM_WIDGET(pB);
+    pA->action  = GUM_ROOT_PROBE_DISABLE_TARGET;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 2u);
+
+    count = 0;
+    pA->action = GUM_ROOT_PROBE_ENABLE_TARGET;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 1u);
+
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 2u);
+
+    pA->action     = GUM_ROOT_PROBE_REPARENT_TARGET;
+    pA->pNewParent = nullptr;
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 2u);
+
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 1u);
+
+    pA->action     = GUM_ROOT_PROBE_REPARENT_TARGET;
+    pA->pNewParent = GBL_OBJECT(pFixture->pRoot);
+    GBL_TEST_CALL(GUM_draw());
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(count, 2u);
+
+    pA->action  = GUM_ROOT_PROBE_SET_TARGET_Z;
+    pA->targetZ = 5;
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(order[0], 1u);
+    GBL_TEST_COMPARE(order[1], 2u);
+
+    count = 0;
+    GBL_TEST_CALL(GUM_draw());
+    GBL_TEST_COMPARE(order[0], 2u);
+    GBL_TEST_COMPARE(order[1], 1u);
+
+    GUM_unref(pB);
+    GUM_unref(pA);
+GBL_TEST_CASE_END
+
+GBL_TEST_CASE(results)
+    uint8_t order[2] = { 0 };
+    size_t drawCount = 0;
+    size_t updateA = 0;
+    size_t updateB = 0;
+    GUM_RootProbe* pA = rootProbe_(nullptr, 1, 10, order, &drawCount);
+    GUM_RootProbe* pB = rootProbe_(nullptr, 2, 20, order, &drawCount);
+    GBL_TEST_VERIFY(pA && pB);
+
+    pA->drawResult = GBL_RESULT_ERROR_INTERNAL;
+    GBL_TEST_COMPARE(GUM_draw(), GBL_RESULT_ERROR_INTERNAL);
+    GBL_TEST_COMPARE(drawCount, 2u);
+
+    pA->pUpdateCount = &updateA;
+    pB->pUpdateCount = &updateB;
+    pA->updateResult = GBL_RESULT_ERROR_INVALID_OPERATION;
+    GBL_TEST_COMPARE(GUM_update(), GBL_RESULT_ERROR_INVALID_OPERATION);
+    GBL_TEST_COMPARE(updateA, 1u);
+    GBL_TEST_COMPARE(updateB, 1u);
+
+    GUM_unref(pB);
+    GUM_unref(pA);
 GBL_TEST_CASE_END
 
 GBL_TEST_REGISTER(singleRoot,
-                  drawOrderTracksZAndEnableOrder,
-                  destroyedWidgetLeavesDrawState)
+                  drawOrder,
+                  membership,
+                  largeSubtree,
+                  drawLifetime,
+                  drawMutation,
+                  results)
