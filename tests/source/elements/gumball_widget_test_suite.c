@@ -347,6 +347,45 @@ GBL_TEST_CASE(animate)
     GUM_unref(pWidget);
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(animateLayout)
+    GUM_Container* pContainer = GUM_Container_create("w", 100.0f,
+                                                     "h", 100.0f,
+                                                     "padding", 0.0f,
+                                                     "margin", 5.0f,
+                                                     "resizeWidgets", false);
+    GUM_Widget* pFirst = GUM_Widget_create("parent", pContainer,
+                                           "w", 20.0f,
+                                           "h", 20.0f);
+    GUM_Widget* pSecond = GUM_Widget_create("parent", pContainer,
+                                            "w", 20.0f,
+                                            "h", 20.0f);
+    GBL_TEST_VERIFY(pContainer && pFirst && pSecond);
+    GBL_TEST_COMPARE(pFirst->x, 40.0f);
+    GBL_TEST_COMPARE(pSecond->y, 30.0f);
+
+    GUM_Widget_animate(pFirst, "h", 40.0f, 0.0f, GUM_EASE_LINEAR);
+    GBL_TEST_COMPARE(pFirst->h, 40.0f);
+    GBL_TEST_COMPARE(pSecond->y, 50.0f);
+
+    GUM_Widget_animate(pFirst, "w", 40.0f, 0.0f, GUM_EASE_LINEAR);
+    GBL_TEST_COMPARE(pFirst->w, 40.0f);
+    GBL_TEST_COMPARE(pFirst->x, 30.0f);
+
+    GUM_Container* pResizable = GUM_Container_create("w", 100.0f,
+                                                     "h", 100.0f,
+                                                     "padding", 10.0f,
+                                                     "margin", 0.0f);
+    GUM_Widget* pChild = GUM_Widget_create("parent", pResizable);
+    GBL_TEST_VERIFY(pResizable && pChild);
+    GBL_TEST_COMPARE(pChild->h, 80.0f);
+
+    GUM_Widget_animate(GUM_WIDGET(pResizable), "h", 120.0f, 0.0f, GUM_EASE_LINEAR);
+    GBL_TEST_COMPARE(pChild->h, 100.0f);
+
+    GUM_unref(pResizable);
+    GUM_unref(pContainer);
+GBL_TEST_CASE_END
+
 GBL_TEST_CASE(animateOnDone)
     resetState_();
     GUM_Widget* pWidget = GUM_Widget_create("x", 1.0f);
@@ -373,4 +412,5 @@ GBL_TEST_REGISTER(lifecycle,
                   lifecycleLifetime,
                   inputSignals,
                   animate,
+                  animateLayout,
                   animateOnDone)
