@@ -375,6 +375,7 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
                                                     GblVariant* pValue) {
     GUM_Widget* pSelf = GUM_WIDGET(pObject);
     GUM_Widget_* pSelf_ = GUM_WIDGET_(pSelf);
+    bool refreshLayout = false;
 
     switch (pProp->id) {
         case GUM_Widget_Property_Id_z_index: {
@@ -385,21 +386,46 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
             }
             break;
         }
-        case GUM_Widget_Property_Id_x:
-            pSelf->x = GblVariant_float(pValue);
+        case GUM_Widget_Property_Id_x: {
+            const float value = GblVariant_float(pValue);
+            if (pSelf->x != value) {
+                pSelf->x = value;
+                refreshLayout = true;
+            }
             break;
-        case GUM_Widget_Property_Id_y:
-            pSelf->y = GblVariant_float(pValue);
+        }
+        case GUM_Widget_Property_Id_y: {
+            const float value = GblVariant_float(pValue);
+            if (pSelf->y != value) {
+                pSelf->y = value;
+                refreshLayout = true;
+            }
             break;
-        case GUM_Widget_Property_Id_w:
-            pSelf->w = GblVariant_float(pValue);
+        }
+        case GUM_Widget_Property_Id_w: {
+            const float value = GblVariant_float(pValue);
+            if (pSelf->w != value) {
+                pSelf->w = value;
+                refreshLayout = true;
+            }
             break;
-        case GUM_Widget_Property_Id_h:
-            pSelf->h = GblVariant_float(pValue);
+        }
+        case GUM_Widget_Property_Id_h: {
+            const float value = GblVariant_float(pValue);
+            if (pSelf->h != value) {
+                pSelf->h = value;
+                refreshLayout = true;
+            }
             break;
-        case GUM_Widget_Property_Id_isRelative:
-            pSelf->isRelative = GblVariant_bool(pValue);
+        }
+        case GUM_Widget_Property_Id_isRelative: {
+            const bool value = GblVariant_bool(pValue);
+            if (pSelf->isRelative != value) {
+                pSelf->isRelative = value;
+                refreshLayout = true;
+            }
             break;
+        }
         case GUM_Widget_Property_Id_isInteractive:
             pSelf->isInteractive = GblVariant_bool(pValue);
             break;
@@ -467,12 +493,22 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
         case GUM_Widget_Property_Id_border_a:
             pSelf->border_a = GblVariant_uint8(pValue);
             break;
-        case GUM_Widget_Property_Id_border_width:
-            pSelf->border_width = GblVariant_uint8(pValue);
+        case GUM_Widget_Property_Id_border_width: {
+            const uint8_t value = GblVariant_uint8(pValue);
+            if (pSelf->border_width != value) {
+                pSelf->border_width = value;
+                refreshLayout = true;
+            }
             break;
-        case GUM_Widget_Property_Id_border_radius:
-            pSelf->border_radius = GBL_CLAMP(GblVariant_float(pValue), 0.0f, 1.0f);
+        }
+        case GUM_Widget_Property_Id_border_radius: {
+            const float value = GBL_CLAMP(GblVariant_float(pValue), 0.0f, 1.0f);
+            if (pSelf->border_radius != value) {
+                pSelf->border_radius = value;
+                refreshLayout = true;
+            }
             break;
+        }
         case GUM_Widget_Property_Id_border_highlight:
             pSelf->border_highlight = GblVariant_bool(pValue);
             break;
@@ -530,7 +566,8 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
             return GBL_RESULT_ERROR_INVALID_PROPERTY;
     }
 
-    return GBL_RESULT_SUCCESS;
+    return refreshLayout ? GUM_Widget_refreshHierarchyLayout_(pSelf, nullptr)
+                         : GBL_RESULT_SUCCESS;
 }
 
 static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject* pObject,
