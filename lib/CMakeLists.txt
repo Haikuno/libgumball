@@ -47,4 +47,7 @@ target_include_directories(libGumball
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/api
 )
+target_compile_definitions(libGumball PRIVATE
+    GUM_SNAPSHOT_INLINE_CAPACITY=64
+)
 gum_enable_sanitizers(libGumball)

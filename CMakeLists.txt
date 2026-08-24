@@ -4,9 +4,9 @@ project(LibGumball LANGUAGES C)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-option(GUM_BUILD_DOCS       "Build docs"       OFF)
-option(GUM_BUILD_EXAMPLES   "Build examples"   OFF)
-option(GUM_BUILD_TESTS      "Build unit tests" OFF)
+option(GUM_BUILD_DOCS        "Build docs"       OFF)
+option(GUM_BUILD_EXAMPLES    "Build examples"   OFF)
+option(GUM_BUILD_TESTS       "Build unit tests" OFF)
 option(GUM_ENABLE_SANITIZERS "Instrument libGumball targets with ASan/UBSan" OFF)
 
 set(GUM_BACKEND "SDL3" CACHE STRING "libGumball backend")

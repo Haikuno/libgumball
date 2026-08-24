@@ -1,10 +1,18 @@
 set(GUMBALL_TEST_SOURCES
+    include/core/gumball_inputsystem_test_suite.h
+    source/core/gumball_inputsystem_test_suite.c
     include/core/gumball_manager_test_suite.h
     source/core/gumball_manager_test_suite.c
     include/core/gumball_navigation_test_suite.h
     source/core/gumball_navigation_test_suite.c
+    include/elements/gumball_common_test_suite.h
+    source/elements/gumball_common_test_suite.c
     include/elements/gumball_container_test_suite.h
     source/elements/gumball_container_test_suite.c
+    include/elements/gumball_hierarchy_test_suite.h
+    source/elements/gumball_hierarchy_test_suite.c
+    include/elements/gumball_objectviewer_test_suite.h
+    source/elements/gumball_objectviewer_test_suite.c
     include/elements/gumball_root_test_suite.h
     source/elements/gumball_root_test_suite.c
     include/elements/gumball_widget_test_suite.h
@@ -13,12 +21,22 @@ set(GUMBALL_TEST_SOURCES
     source/types/gumball_animator_test_suite.c
     include/types/gumball_rectangle_test_suite.h
     source/types/gumball_rectangle_test_suite.c
+    include/types/gumball_vector2_test_suite.h
+    source/types/gumball_vector2_test_suite.c
     source/gumball_test_main.c
 )
 
+add_library(GumballHeaderCompileC OBJECT
+    compile/gumball_inputsystem_compile.c
+)
+target_link_libraries(GumballHeaderCompileC PRIVATE libGumball)
+
 add_executable(GumballTests ${GUMBALL_TEST_SOURCES})
 target_link_libraries(GumballTests PRIVATE libGumball)
-target_include_directories(GumballTests PRIVATE include)
+target_include_directories(GumballTests PRIVATE
+    include
+    ${PROJECT_SOURCE_DIR}/lib/src
+)
 target_compile_definitions(GumballTests PRIVATE GUM_TEST_BACKEND_${GUM_BACKEND}=1)
 gum_enable_sanitizers(GumballTests)
 
@@ -36,6 +54,17 @@ if(GUM_BACKEND STREQUAL "SDL3")
 
     add_test(NAME GumballSDLRendererRecreation COMMAND GumballSDLRendererRecreation)
     set_tests_properties(GumballSDLRendererRecreation PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+elseif(GUM_BACKEND STREQUAL "RAYLIB")
+    add_executable(GumballRaylibResourceRestart
+        raylib/gumball_resource_restart_test.c
+    )
+    target_link_libraries(GumballRaylibResourceRestart PRIVATE libGumball)
+    gum_enable_sanitizers(GumballRaylibResourceRestart)
+
+    add_test(NAME GumballRaylibResourceRestart COMMAND GumballRaylibResourceRestart)
+    set_tests_properties(GumballRaylibResourceRestart PROPERTIES
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 endif()

@@ -1,3 +1,10 @@
+# Legacy TODO snapshot — June 2026
+
+Archived from the former root `todo.txt` during documentation cleanup. This list is **historical only** and must not be used as current project state.
+
+Original entries:
+
+```text
 (B) Finish documenting all TODOs left in header files @documentation
 (B) Tree widget @widgets
 (B) Table widget @widgets
@@ -15,3 +22,6 @@
 2026-06-14 GUM_Separator @widgets
 2026-06-14 GUM_Dialogue @widgets
 2026-06-14 GUM_Checkbox @widgets
+```
+
+Several entries were already completed by the time this file was archived, including ObjectViewer, animations, SDL3 support, and multiple widgets. Current work must come from root `CURRENT_STATE.md` and validated repository evidence, not this snapshot.

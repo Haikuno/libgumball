@@ -79,9 +79,10 @@ jobs:
         run: |
           set -o pipefail
           ctest --test-dir build-sdl3 --verbose 2>&1 | tee build-sdl3/test-output.log
-          ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-sdl3/test-output.log
-          ! grep -Fq "[Allocation Tracker] Attempt to realloc unknown pointer" build-sdl3/test-output.log
-          ! grep -Fiq "invalid pointer" build-sdl3/test-output.log
+          if grep -Fiq "invalid pointer" build-sdl3/test-output.log; then
+            echo "::error::Invalid pointer diagnostic detected in SDL3 test output"
+            exit 1
+          fi
 
       - name: Preserve SDL3 test failure output
         if: failure()
@@ -148,9 +149,10 @@ jobs:
         run: |
           set -o pipefail
           xvfb-run -a ctest --test-dir build-raylib --verbose 2>&1 | tee build-raylib/test-output.log
-          ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-raylib/test-output.log
-          ! grep -Fq "[Allocation Tracker] Attempt to realloc unknown pointer" build-raylib/test-output.log
-          ! grep -Fiq "invalid pointer" build-raylib/test-output.log
+          if grep -Fiq "invalid pointer" build-raylib/test-output.log; then
+            echo "::error::Invalid pointer diagnostic detected in raylib test output"
+            exit 1
+          fi
 
       - name: Preserve raylib test failure output
         if: failure()
@@ -257,9 +259,10 @@ jobs:
         run: |
           set -o pipefail
           ctest --test-dir build-sanitize --verbose 2>&1 | tee build-sanitize/test-output.log
-          ! grep -Fq "[Allocation Tracker] Attempt to free unknown pointer" build-sanitize/test-output.log
-          ! grep -Fq "[Allocation Tracker] Attempt to realloc unknown pointer" build-sanitize/test-output.log
-          ! grep -Fiq "invalid pointer" build-sanitize/test-output.log
+          if grep -Fiq "invalid pointer" build-sanitize/test-output.log; then
+            echo "::error::Invalid pointer diagnostic detected in sanitizer test output"
+            exit 1
+          fi
 
       - name: Preserve sanitizer test failure output
         if: ${{ failure() && steps.sanitizer_test.outcome == 'failure' }}
