@@ -1,6 +1,7 @@
 #include "gumball_sdl3_internal.h"
 #include "../../ifaces/gumball_iresource_.h"
 #include <gumball/core/gumball_backend.h>
+#include <math.h>
 
 GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) {
     if (!pFont || !pText) return (GUM_Vector2){ 0 };
@@ -40,7 +41,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* p
         return GBL_RESULT_ERROR_INTERNAL;
     }
 
-    const bool success = TTF_DrawRendererText(pSdlText, position.x, position.y);
+    const bool success = TTF_DrawRendererText(pSdlText, roundf(position.x), roundf(position.y));
     TTF_DestroyText(pSdlText);
 
     return success ? GBL_RESULT_SUCCESS : GBL_RESULT_ERROR_INTERNAL;
