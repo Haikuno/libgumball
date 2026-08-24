@@ -16,5 +16,6 @@ void        GUM_Root_drawOrderChanged_ (void);
 GBL_RESULT  GUM_Root_foreachDrawable_  (GUM_Root* pRoot, GUM_Root_WidgetIterFn_ pFnIter, void* pClosure);
 GBL_RESULT  GUM_Root_draw_             (GUM_Root* pRoot, GUM_Renderer* pRenderer);
 GUM_Widget* GUM_Root_pointerTargetAt_  (GUM_Root* pRoot, GUM_Vector2 position);
+GUM_Widget* GUM_Root_pointerHoverAt_   (GUM_Root* pRoot, GUM_Vector2 position);
 
 #endif // GUMBALL_ROOT_PRIVATE_H

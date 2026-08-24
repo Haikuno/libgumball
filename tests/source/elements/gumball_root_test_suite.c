@@ -2,6 +2,8 @@
 #include <gimbal/test/gimbal_test_macros.h>
 #include <gumball/gumball.h>
 
+#include "../../../lib/src/elements/gumball_root_.h"
+
 #define GUM_ROOT_PROBE_TYPE (GBL_TYPEID(GUM_RootProbe))
 #define GUM_ROOT_PROBE(self) (GBL_CAST(GUM_RootProbe, self))
 
@@ -369,6 +371,35 @@ GBL_TEST_CASE(drawMutation)
     GUM_unref(pA);
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(pointerTargets)
+    GUM_Container* pContainer = GUM_Container_create("x", 10.0f,
+                                                     "y", 10.0f,
+                                                     "w", 100.0f,
+                                                     "h", 100.0f,
+                                                     "alignWidgets", false,
+                                                     "resizeWidgets", false);
+    GUM_Button* pButton = GUM_Button_create("parent", pContainer,
+                                            "x", 20.0f,
+                                            "y", 20.0f,
+                                            "w", 20.0f,
+                                            "h", 20.0f);
+    GBL_TEST_VERIFY(pContainer && pButton);
+    GBL_TEST_VERIFY(!GUM_Widget_isActive(GUM_WIDGET(pContainer)));
+
+    const GUM_Vector2 containerPoint = { 80.0f, 80.0f };
+    GBL_TEST_COMPARE(GUM_Root_pointerTargetAt_(pFixture->pRoot, containerPoint), nullptr);
+    GBL_TEST_COMPARE(GUM_Root_pointerHoverAt_(pFixture->pRoot, containerPoint), GUM_WIDGET(pContainer));
+
+    const GUM_Vector2 buttonPoint = { 25.0f, 25.0f };
+    GBL_TEST_COMPARE(GUM_Root_pointerTargetAt_(pFixture->pRoot, buttonPoint), GUM_WIDGET(pButton));
+    GBL_TEST_COMPARE(GUM_Root_pointerHoverAt_(pFixture->pRoot, buttonPoint), GUM_WIDGET(pButton));
+
+    GBL_TEST_CALL(GUM_setProperty(pContainer, "isInteractive", false));
+    GBL_TEST_COMPARE(GUM_Root_pointerHoverAt_(pFixture->pRoot, containerPoint), nullptr);
+
+    GUM_unref(pContainer);
+GBL_TEST_CASE_END
+
 GBL_TEST_CASE(results)
     uint8_t order[2] = { 0 };
     size_t drawCount = 0;
@@ -399,4 +430,5 @@ GBL_TEST_REGISTER(singleRoot,
                   largeSubtree,
                   drawLifetime,
                   drawMutation,
+                  pointerTargets,
                   results)

@@ -673,8 +673,11 @@ static bool GUM_InputSystem_Mouse_update_(uint64_t generation) {
     bool current = GUM_InputSystem_generationCurrent_(generation) &&
                    GUM_InputSystem_Mouse_hitTest_(pMouse, generation);
 
-    if (current && !baseline && pHoveredWidget_) {
-        for (GblObject* pAncestor = GBL_OBJECT(pHoveredWidget_); pAncestor; pAncestor = GblObject_parent(pAncestor)) {
+    GUM_Widget* pScrollTarget = current && !baseline ?
+        GUM_Root_pointerHoverAt_(GUM_Root_active_(), GUM_POINTER(pMouse)->position) : nullptr;
+
+    if (pScrollTarget) {
+        for (GblObject* pAncestor = GBL_OBJECT(pScrollTarget); pAncestor; pAncestor = GblObject_parent(pAncestor)) {
             if (!GBL_TYPECHECK(GUM_Container, pAncestor)) continue;
             GUM_Container* pContainer = GUM_CONTAINER(pAncestor);
             if (!GUM_Container_scrollable(pContainer)) continue;

@@ -404,14 +404,16 @@ GBL_RESULT GUM_Root_draw_(GUM_Root* pRoot, GUM_Renderer* pRenderer) {
     return firstFailure;
 }
 
-GUM_Widget* GUM_Root_pointerTargetAt_(GUM_Root* pRoot, GUM_Vector2 position) {
+static GUM_Widget* GUM_Root_pointerWidgetAt_(GUM_Root* pRoot,
+                                             GUM_Vector2 position,
+                                             bool activeOnly) {
     if (!pRoot)
         return nullptr;
 
     for (GUM_Widget* pWidget = GUM_ROOT_(pRoot)->pDrawLast;
          pWidget;
          pWidget = GUM_WIDGET_(pWidget)->pDrawPrev) {
-        if (!pWidget->isInteractive || !GUM_Widget_isActive(pWidget))
+        if (!pWidget->isInteractive || (activeOnly && !GUM_Widget_isActive(pWidget)))
             continue;
 
         const GUM_Vector2 widgetPos  = GUM_get_absolute_position_(pWidget);
@@ -430,6 +432,14 @@ GUM_Widget* GUM_Root_pointerTargetAt_(GUM_Root* pRoot, GUM_Vector2 position) {
     }
 
     return nullptr;
+}
+
+GUM_Widget* GUM_Root_pointerTargetAt_(GUM_Root* pRoot, GUM_Vector2 position) {
+    return GUM_Root_pointerWidgetAt_(pRoot, position, true);
+}
+
+GUM_Widget* GUM_Root_pointerHoverAt_(GUM_Root* pRoot, GUM_Vector2 position) {
+    return GUM_Root_pointerWidgetAt_(pRoot, position, false);
 }
 
 GBL_RESULT GUM_Root_update(GUM_Root* pRoot) {
