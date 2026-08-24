@@ -19,14 +19,15 @@ The foundation branch is organized into a small subsystem-oriented history for m
 
 The housekeeping commit contains only build/test wiring, CI, documentation, and fixtures.
 
-Post-review manual SDL3 testing added two focused fixes:
+Post-review manual SDL3 testing added focused fixes:
 
 - SDL3 text draw positions are snapped to the pixel grid before `TTF_DrawRendererText`, eliminating the severe glyph-quality changes caused by fractional animated/scrolled positions. Manual testing confirmed the pixel snap fixes the reported text rendering issue.
 - Widget geometry property changes now refresh layout when `x`, `y`, `w`, `h`, relative positioning, border width, or border radius changes. Animated geometry therefore reflows parent/self Container layout on each applied value instead of waiting for an unrelated scroll/layout update. `Widget::animateLayout` covers child-size reflow and top-level Container self-reflow.
+- `GumballTests` no longer relies on the caller or CTest selecting the source `tests/` directory as its working directory. CMake stages `koslogo.png` and `gumball_test.ttf` under the build-tree test resources directory, and the test executable selects that directory itself before running suites. The explicit CTest source-working-directory override was removed.
 
 The pre-rewrite source checkpoint `9f548d37480f2d4f1ce4e26eacfdb523692ffa55` passed GitHub Actions run `32673141815` with SDL3/raylib full tests, C23 overload compilation, ASan/UBSan, backend restart tests, and exact rendering parity.
 
-Changes after that checkpoint, including hover scrolling, text pixel snapping, and animated-geometry relayout, have not received a new executable checkpoint on this branch. The branch intentionally does not auto-run hosted CI for source-only pushes, its CI wrapper only triggers on `devilution/full-game-ui`, and no local executable checkout is available in the connected environment.
+Changes after that checkpoint, including hover scrolling, text pixel snapping, animated-geometry relayout, and working-directory-independent `GumballTests`, have not received a new executable checkpoint on this branch. The branch intentionally does not auto-run hosted CI for source-only pushes, its CI wrapper only triggers on `devilution/full-game-ui`, and no local executable checkout is available in the connected environment.
 
 Pinned libGimbal: `4be883629d5d2b24f9b4fd790da142e2dd7ec964`.
 
@@ -34,8 +35,9 @@ Confirmed bugs owned by the unmodified pinned libGimbal dependency are non-block
 
 ## Next action
 
-Manually verify the current SDL3 nested-Container dev example:
+Manually verify:
 
+- `GumballTests` passes when launched directly from `build/tests` and from an unrelated working directory, not only from source `tests/`;
 - text remains consistently sharp while scrolling and while focus animations change Button width/height;
 - width/height animation continuously reflows affected Container layout rather than updating only after scrolling;
 - an exposed `pOuter` background scrolls `pOuter`;
