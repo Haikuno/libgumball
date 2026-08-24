@@ -6,8 +6,8 @@ GblType GUM_Event_Gamepad_type(void) {
     if (type == GBL_INVALID_TYPE) {
         type = GblType_register(GblQuark_internStatic("GUM_Event_Gamepad"),
                                 GUM_EVENT_INPUT_TYPE,
-                                &(static GblTypeInfo){.classSize       = sizeof(GUM_Event_GamepadClass),
-                                                      .instanceSize    = sizeof(GUM_Event_Gamepad)},
+                                &(static GblTypeInfo){ .classSize    = sizeof(GUM_Event_GamepadClass),
+                                                       .instanceSize = sizeof(GUM_Event_Gamepad) },
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC);
     }
 

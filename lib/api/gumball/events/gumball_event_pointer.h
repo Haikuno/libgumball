@@ -1,22 +1,22 @@
 #ifndef GUM_EVENT_POINTER_H
 #define GUM_EVENT_POINTER_H
 
-// View this file's documentation online: TODO: add link
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__event__pointer_8h.html
 
 /*!  \file
  *   \ref     GUM_Event_Pointer "GUM_Event_Pointer data structure and hierarchy graph"
  *   \ingroup events
  *
- *   Brief description
- *
- *   Extended
- *   Description.
+ *   Base input event for pointing devices. It snapshots pointer position and
+ *   relative motion at event creation so receivers do not have to read mutable
+ *   device-global state while handling the event.
  *
  *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License
 */
 
 #include <gumball/events/gumball_event_input.h>
+#include <gumball/types/gumball_vector2.h>
 
 /*! \name  Type System
  *  \brief Type UUID and cast operators
@@ -33,33 +33,17 @@
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Event_Pointer);
 
-/*!
- *    \struct  GUM_Event_PointerClass
- *    \extends GUM_Event_InputClass
- *    \brief   GUM_Event_Pointer structure
- *
- *    GUM_Event_PointerClass derives from GUM_Event_InputClass,
- *    TODO: description
-*/
-//! \cond
-GBL_CLASS_DERIVE(GUM_Event_Pointer, GUM_Event_Input)
-    //
-GBL_CLASS_END
-//! \endcond
-
-/*!
- *    \class   GUM_Event_Pointer
- *    \extends GUM_Event_Input
- *    \brief   TODO: brief description
-*/
+GBL_CLASS_DERIVE_EMPTY(GUM_Event_Pointer, GUM_Event_Input)
 
 GBL_INSTANCE_DERIVE(GUM_Event_Pointer, GUM_Event_Input)
-    //
+    GUM_Vector2 position; //!< Pointer position when the event was created.
+    GUM_Vector2 delta;    //!< Pointer motion delta when the event was created.
 GBL_INSTANCE_END
 
-//! \cond
 GblType GUM_Event_Pointer_type(void) GBL_NOEXCEPT;
-//! \endcond
+
+//! Returns a new zero-initialized pointer event.
+#define GUM_Event_Pointer_create() GUM_EVENT_POINTER(GblEvent_create(GUM_EVENT_POINTER_TYPE))
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

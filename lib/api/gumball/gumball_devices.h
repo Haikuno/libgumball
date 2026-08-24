@@ -12,6 +12,7 @@
 */
 
 #include "devices/gumball_inputdevice.h"
+#include "devices/gumball_pointer.h"
 #include "devices/gumball_mouse.h"
 #include "devices/gumball_gamepad.h"
 #include "devices/gumball_keyboard.h"

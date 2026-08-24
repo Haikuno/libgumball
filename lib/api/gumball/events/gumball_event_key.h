@@ -20,7 +20,7 @@
 */
 #define GUM_EVENT_KEY_TYPE            (GBL_TYPEID     (GUM_Event_Key))         //!< Returns the GUM_Event_Key Type UUID
 #define GUM_EVENT_KEY(self)           (GBL_CAST       (GUM_Event_Key, self))   //!< Casts an instance of a compatible event to a GUM_Event_Key
-#define GUM_EVENT_KEY_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event_Key, klass))  //!< Casts a  class    of a compatible event to a GUM_Event_KeyClass
+#define GUM_EVENT_KEY_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event_Key, klass))  //!< Casts a class of a compatible event to a GUM_Event_KeyClass
 #define GUM_EVENT_KEY_CLASSOF(self)   (GBL_CLASSOF    (GUM_Event_Key, self))   //!< Casts an instance of a compatible event to a GUM_Event_KeyClass
 //! @}
 
@@ -30,25 +30,24 @@ GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Event_Key);
 
 /*!  \struct  GUM_Event_KeyClass
- *   \extends GUM_EventClass
+ *   \extends GUM_Event_InputClass
  *   \brief   GUM_Event_Key structure
  *
- *   GUM_Event_KeyClass derives from GUM_EventClass, adding nothing new.
+ *   GUM_Event_KeyClass derives from GUM_Event_InputClass, adding nothing new.
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Event_Key, GUM_Event_Input);
 
 /*!  \class   GUM_Event_Key
- *   \extends GUM_Event
+ *   \extends GUM_Event_Input
  *   \brief   Key event
  *
  *   GUM_Event_Key represents any key event, such as pressing or releasing a key.
- *
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Event_Key, GUM_Event_Input)
 
 GblType GUM_Event_Key_type(void) GBL_NOEXCEPT;
 
-//! Returns a new GUM_Event_Key
+//! Returns a new GUM_Event_Key.
 #define GUM_Event_Key_create() GUM_EVENT_KEY(GblEvent_create(GUM_EVENT_KEY_TYPE))
 
 GBL_DECLS_END
