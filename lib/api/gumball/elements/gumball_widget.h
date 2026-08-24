@@ -13,7 +13,6 @@
  *   holding variables that are common to all drawable elements, such as position, size, and color.
  *
  *   \todo
- *       - Make variables private
  *       - Separate isRelative into position and size
  *       - Add GUM_Vector2 position and size as properties
  *       - Make border highlight configurable (color, thickness)
@@ -34,14 +33,13 @@
 #include <gumball/types/gumball_animator.h>
 #include <gumball/gumball_events.h>
 
-
 /*! \name  Type System
  *  \brief Type UUID and cast operators
  *  @{
 */
 #define GUM_WIDGET_TYPE             (GBL_TYPEID     (GUM_Widget))           //!< Returns the GUM_Widget Type UUID
 #define GUM_WIDGET(self)            (GBL_CAST       (GUM_Widget, self))     //!< Casts an instance of a compatible element to a GUM_Widget
-#define GUM_WIDGET_CLASS(klass)     (GBL_CLASS_CAST (GUM_Widget, klass))    //!< Casts a  class    of a compatible element to a GUM_WidgetClass
+#define GUM_WIDGET_CLASS(klass)     (GBL_CLASS_CAST (GUM_Widget, klass))    //!< Casts a class of a compatible element to a GUM_WidgetClass
 #define GUM_WIDGET_CLASSOF(self)    (GBL_CLASSOF    (GUM_Widget, self))     //!< Casts an instance of a compatible element to a GUM_WidgetClass
 //! @}
 
@@ -55,8 +53,7 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Widget);
  *    \extends GblObjectClass
  *    \brief   GUM_Widget structure
  *
- *    GUM_WidgetClass derives from GblObjectClass,
- *    adding additional virtual functions to handle activating, deactivating, updating, drawing elements, and handling input events.
+ *    Adds virtual functions for activation, deactivation, updating, drawing, and input events.
 */
 //! \cond
 GBL_CLASS_DERIVE(GUM_Widget, GblObject)
@@ -95,18 +92,14 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     uint8_t            border_b;                 //!< Blue component of the border color.                                            Default value is 0
     uint8_t            border_a;                 //!< Alpha component of the border color.                                           Default value is 0
     uint8_t            border_width;             //!< Width of the border, in pixels.                                                Default value is 4
-    float              border_radius;            //!< Radius of the border. Range is from 0.0f to 1.0f.                              Default value is 0
+    float              border_radius;            //!< Radius of the border. Property writes clamp to 0.0f..1.0f.                     Default value is 0
     bool               border_highlight;         //!< If the border should be highlighted.                                           Default value is false
     bool               isRelative;               //!< If the widget's position and size should be relative to its parent.            Default value is false
     bool               isSelectable;             //!< If the widget is visible to the navigation system.                             Default value is false
     bool               isSelectedByDefault;      //!< If the widget should be selected by default when no other is focused.          Default value is false
     bool               isInteractive;            //!< If the widget is eligible for input events.                                    Default value is true
-    bool               isActive;                 //!< If the widget can accept input events, and fire signals accordingly.           Default value is false
     bool               shouldUpdate;             //!< If the widget should be updated.                                               Default value is true
-    GblStringRef*      label;                    //!< Optional text label of the widget.                                             Default value is nullptr
-    GUM_Font*          font;                     //!< Optional font for the widget's label. If not set, the default font is used.    Default value is nullptr
     GUM_TextAlignment  textAlignment;            //!< Alignment of the widget's label.                                               Default value is GUM_TEXT_ALIGN_CENTER
-    GUM_Texture*       texture;                  //!< Optional texture for rendering inside the widget.                              Default value is nullptr
     uint8_t            font_size;                //!< Font size of the widget's label.                                               Default value is 22
     uint8_t            font_r;                   //!< Red component of the font color.                                               Default value is 255
     uint8_t            font_g;                   //!< Green component of the font color.                                             Default value is 255
@@ -117,14 +110,8 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     uint8_t            font_border_b;            //!< Blue component of the font border color.                                       Default value is 0
     uint8_t            font_border_a;            //!< Alpha component of the font border color.                                      Default value is 0
     uint8_t            font_border_thickness;    //!< Width of the font border, in pixels.                                           Default value is 1
-    uint8_t            z_index;                  //!< Z-index of the widget. The higher the value, the higher the priority.          Default value is 50
-    uint8_t            focusCount;               //!< Number of input devices currently focusing this widget                         Default value is 0
-    GUM_Rectangle      clipRect;                 // TODO: this should be a private variable
 GBL_INSTANCE_END
 //! @}
-
-//! True if at least one input device currently has navigation focus on this widget.
-#define GUM_Widget_isFocused(self) (GUM_WIDGET(self)->focusCount > 0)
 
 GBL_PROPERTIES(GUM_Widget,
     (x,                     GBL_GENERIC, (READ, WRITE),          GBL_FLOAT_TYPE         ),
@@ -170,23 +157,39 @@ GBL_PROPERTIES(GUM_Widget,
 )
 
 GBL_SIGNALS(GUM_Widget,
-    (onPress,           (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
-    (onRelease,         (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
-    (onPressConfirm,    (GBL_INSTANCE_TYPE, pReceiver)),
-    (onPressCancel,     (GBL_INSTANCE_TYPE, pReceiver)),
-    (onPressUnbound,    (GBL_INSTANCE_TYPE, pReceiver)),
-    (onReleaseConfirm,  (GBL_INSTANCE_TYPE, pReceiver)),
-    (onReleaseCancel,   (GBL_INSTANCE_TYPE, pReceiver)),
-    (onReleaseUnbound,  (GBL_INSTANCE_TYPE, pReceiver)),
-    (onFocusGained,     (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice)), //!< Emitted when a device navigates focus onto this widget
-    (onFocusLost,       (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice))  //!< Emitted when a device navigates focus away from this widget
+    (onPress,             (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
+    (onRelease,           (GBL_INSTANCE_TYPE, pReceiver), (GUM_EVENT_INPUT_TYPE, pEvent)),
+    (onPressConfirm,      (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressCancel,       (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressMoveUp,       (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressMoveDown,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressMoveLeft,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressMoveRight,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onPressUnbound,      (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseConfirm,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseCancel,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseMoveUp,     (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseMoveDown,   (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseMoveLeft,   (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseMoveRight,  (GBL_INSTANCE_TYPE, pReceiver)),
+    (onReleaseUnbound,    (GBL_INSTANCE_TYPE, pReceiver)),
+    (onActivate,          (GBL_INSTANCE_TYPE, pReceiver)),
+    (onDeactivate,        (GBL_INSTANCE_TYPE, pReceiver)),
+    (onFocusGained,       (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice)), //!< Emitted when a device navigates focus onto this widget
+    (onFocusLost,         (GBL_INSTANCE_TYPE, pReceiver), (GUM_INPUTDEVICE_TYPE, pDevice))  //!< Emitted when a device navigates focus away from this widget
 )
 
 GblType GUM_Widget_type(void) GBL_NOEXCEPT;
 
-//! \cond
-GUM_Vector2 GUM_get_absolute_position_(GBL_SELF);
-//! \endcond
+/*! \name Runtime state
+ *  @{ */
+GBL_EXPORT GblBool       GUM_Widget_isActive  (const GUM_Widget* pSelf) GBL_NOEXCEPT; //!< Current active state.
+GBL_EXPORT GblBool       GUM_Widget_isFocused (const GUM_Widget* pSelf) GBL_NOEXCEPT; //!< True if focused by any input device.
+GBL_EXPORT uint8_t       GUM_Widget_zIndex    (const GUM_Widget* pSelf) GBL_NOEXCEPT; //!< Current z-index.
+GBL_EXPORT GblStringRef* GUM_Widget_label     (const GUM_Widget* pSelf) GBL_NOEXCEPT; //!< Borrowed label.
+GBL_EXPORT GUM_Font*     GUM_Widget_font      (const GUM_Widget* pSelf) GBL_NOEXCEPT; //!< Borrowed font.
+GBL_EXPORT GUM_Texture*  GUM_Widget_texture   (const GUM_Widget* pSelf) GBL_NOEXCEPT; //!< Borrowed texture.
+//! @}
 
 //! Returns a new GUM_Widget. Optionally takes in a list of Name/Value pairs for properties
 #define GUM_Widget_create(/* property_name, property_value */...) GBL_NEW(GUM_Widget __VA_OPT__(,) __VA_ARGS__)
@@ -195,25 +198,18 @@ GUM_Vector2 GUM_get_absolute_position_(GBL_SELF);
 typedef void (*GUM_Widget_doneFn)(GUM_Widget* pSelf);
 
 /*!  \name  Animation
- *   \brief One-call API for easing any of this widget's readable/writable properties
- *          (position, size, color channels, border radius, etc.) toward a target float value,
- *          without declaring or updating a GUM_Animator yourself.
+ *   \brief Eases readable/writable Widget properties that can be converted to/from float.
  *   @{
 */
 //! Eases pProperty toward target, using a built-in curve
 GBL_EXPORT void GUM_Widget_animate      (GUM_Widget* pSelf, const char* pProperty, float target, float duration, GUM_EasingType easing) GBL_NOEXCEPT;
 //! Eases pProperty toward target, using a custom curve
 GBL_EXPORT void GUM_Widget_animateCustom(GUM_Widget* pSelf, const char* pProperty, float target, float duration, GUM_EasingFn pFnEase)  GBL_NOEXCEPT;
-//! Fires pFnDone when pProperty's in-use tween settles.
+//! Fires pFnDone when pProperty's current tween settles.
 GBL_EXPORT void GUM_Widget_animateOnDone(GUM_Widget* pSelf, const char* pProperty, GUM_Widget_doneFn pFnDone)                           GBL_NOEXCEPT;
-//! Cancels pProperty's in-use tween, freezing it at its current value
+//! Cancels pProperty's active tween, freezing it at its current value
 GBL_EXPORT void GUM_Widget_animateCancel(GUM_Widget* pSelf, const char* pProperty) GBL_NOEXCEPT;
 //! @}
-
-//! \cond GRUGLESS
-void GUM_Widget_animate_update_(void)                 GBL_NOEXCEPT; //!< Advances every widget's active property tweens by one frame. Called by GUM_update()
-void GUM_Widget_animate_widgetDestroyed_(GUM_Widget*) GBL_NOEXCEPT; //!< Frees any in-use tweens belonging to pSelf. Called from its destructor
-//! \endcond
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE
