@@ -21,56 +21,64 @@
 
 GBL_DECLS_BEGIN
 
-//! Overrides the library's logger with libGumball's logger
+//! Advances backend state once per GUM_update().
+void        GUM_Backend_update                           (void);
+//! Releases backend runtime state without invalidating caller-owned resources.
+void        GUM_Backend_deinit                           (void);
+
+//! Returns the resource type handled by the active backend for pPath, or GBL_INVALID_TYPE.
+GblType     GUM_Backend_resourceType                     (GblStringRef* pPath);
+
+//! Installs the backend log bridge when the host logger can later be restored.
 void        GUM_Backend_setLogger                        (void);
-//! Resets the library's logger back to the default
+//! Restores logging state previously replaced by GUM_Backend_setLogger().
 void        GUM_Backend_resetLogger                      (void);
 
-//! Returns the current timestamp in miliseconds since the program started
+//! Returns the current timestamp in milliseconds since the program started.
 uint32_t    GUM_Backend_timestamp                        (void);
-//! Returns the last frame's draw time in seconds
+//! Returns the last frame's draw time in seconds.
 float       GUM_Backend_frametime                        (void);
 
-//! Returns the current screen size
+//! Returns the current screen size.
 GUM_Vector2 GUM_Backend_screenSize                       (void);
-//! Draws a rectangle, can optionally berounded
+//! Draws a rectangle, optionally rounded.
 GBL_RESULT  GUM_Backend_rectangleDraw                    (GUM_Renderer* pRenderer, GUM_Rectangle rectangle, float roundness, GUM_Color color);
-//! Draws a rectangle outline, can optionally be rounded
+//! Draws a rectangle outline, optionally rounded.
 GBL_RESULT  GUM_Backend_rectangleLinesDraw               (GUM_Renderer* pRenderer, GUM_Rectangle rectangle, float roundness, float border_width, GUM_Color color);
-//! Begins scissor mode
+//! Begins scissor mode.
 GBL_RESULT  GUM_Backend_beginScissor                     (GUM_Renderer* pRenderer, GUM_Rectangle clipRect);
-//! Ends scissor mode
+//! Ends scissor mode.
 GBL_RESULT  GUM_Backend_endScissor                       (GUM_Renderer* pRenderer);
 
-//! Loads a texture
+//! Loads a texture.
 GBL_RESULT  GUM_Backend_Texture_load                     (GUM_IResource* pResource, GblStringRef* pPath);
-//! Unloads a texture
+//! Unloads a texture.
 GBL_RESULT  GUM_Backend_Texture_unload                   (GUM_IResource* pResource);
-//! Draws a texture
-GBL_RESULT  GUM_Backend_Texture_draw                     (GUM_Renderer*  pRenderer, GUM_Texture* pTexture, GUM_Rectangle rectangle, GUM_Color color);
+//! Draws a texture.
+GBL_RESULT  GUM_Backend_Texture_draw                     (GUM_Renderer* pRenderer, GUM_Texture* pTexture, GUM_Rectangle rectangle, GUM_Color color);
 
-//! Loads a font
+//! Loads a font.
 GBL_RESULT   GUM_Backend_Font_load                       (GUM_IResource* pResource, GblStringRef* pPath);
-//! Unloads a font
+//! Unloads a font.
 GBL_RESULT   GUM_Backend_Font_unload                     (GUM_IResource* pResource);
-//! Draws text
-GBL_RESULT   GUM_Backend_Font_draw                       (GUM_Renderer*  pRenderer, GUM_Font* pFont, GblStringRef* pText, GUM_Vector2 position, GUM_Color color, int fontSize, float spacing);
-//! Returns the size of the passed text, given the font and font size
+//! Draws text.
+GBL_RESULT   GUM_Backend_Font_draw                       (GUM_Renderer* pRenderer, GUM_Font* pFont, GblStringRef* pText, GUM_Vector2 position, GUM_Color color, int fontSize, float spacing);
+//! Returns the size of the passed text for the given font and font size.
 GUM_Vector2  GUM_Backend_Font_measureText                (GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize);
-//! Returns a pointer to the default font
+//! Returns the active default font as a borrowed pointer.
 GUM_Font*    GUM_Backend_Font_default                    (void);
 
-//! Updates the mouse state, sending events when needed
+//! Updates the mouse state.
 void         GUM_Backend_Mouse_update                    (GUM_Mouse* pMouse);
 
-//! Updates the keyboard's state, sending events when needed
+//! Updates the keyboard state.
 void         GUM_Backend_Keyboard_update                 (GUM_Keyboard* pKeyboard);
 
-//! Checks if the Nth gamepad is connected
+//! Checks whether the indexed gamepad is connected.
 bool         GUM_Backend_Gamepad_isConnected             (int index);
-//! Gets the Nth gamepad name
+//! Returns the indexed gamepad's name.
 const char*  GUM_Backend_Gamepad_name                    (int index);
-//! Updates the gamepad's state, sending events when eneded
+//! Updates the gamepad state.
 void         GUM_Backend_Gamepad_update                  (GUM_Gamepad* pGamepad);
 
 GBL_DECLS_END
