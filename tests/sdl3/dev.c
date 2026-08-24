@@ -4,17 +4,17 @@
 
 void onPressCallback(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
     GblType deviceType = GBL_TYPEOF(pEvent->pInputDevice);
-    GUM_LOG_INFO("Button with label %s pressed   by a %s", GUM_Widget_label(pSelf), deviceType == GUM_MOUSE_TYPE    ? "mouse" :
-                                                                                   deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
-                                                                                   deviceType == GUM_GAMEPAD_TYPE  ? "gamepad" :
+    GUM_LOG_INFO("Button with label %s pressed   by a %s", GUM_Widget_label(pSelf), deviceType == GUM_MOUSE_TYPE    ? "mouse"    :
+                                                                                    deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
+                                                                                    deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
                                                                                    "unknown device type");
 }
 
 void onFocusGainedCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
     GblType deviceType = GBL_TYPEOF(pDevice);
-    GUM_LOG_INFO("Button with label %s focused   by a %s", GUM_Widget_label(pSelf), deviceType == GUM_MOUSE_TYPE    ? "mouse" :
-                                                                                   deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
-                                                                                   deviceType == GUM_GAMEPAD_TYPE  ? "gamepad" :
+    GUM_LOG_INFO("Button with label %s focused   by a %s", GUM_Widget_label(pSelf), deviceType == GUM_MOUSE_TYPE    ? "mouse"    :
+                                                                                    deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
+                                                                                    deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
                                                                                    "unknown device type");
     GUM_Widget_animate(pSelf, "w", 250.0f, 0.25, GUM_EASE_SINE_IN_OUT);
     GUM_Widget_animate(pSelf, "h", 350.0f, 0.25, GUM_EASE_SINE_IN_OUT);
@@ -22,17 +22,17 @@ void onFocusGainedCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
 
 void onReleaseCallback(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
     GblType deviceType = GBL_TYPEOF(pEvent->pInputDevice);
-    GUM_LOG_INFO("Button with label %s released  by a %s", GUM_Widget_label(pSelf), deviceType == GUM_MOUSE_TYPE    ? "mouse" :
+    GUM_LOG_INFO("Button with label %s released  by a %s", GUM_Widget_label(pSelf),  deviceType == GUM_MOUSE_TYPE    ? "mouse"    :
                                                                                      deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
-                                                                                     deviceType == GUM_GAMEPAD_TYPE  ? "gamepad" :
+                                                                                     deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
                                                                                      "unknown device type");
 }
 
 void onFocusLostCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
     GblType deviceType = GBL_TYPEOF(pDevice);
-    GUM_LOG_INFO("Button with label %s unfocused by a %s", GUM_Widget_label(pSelf), deviceType == GUM_MOUSE_TYPE    ? "mouse" :
+    GUM_LOG_INFO("Button with label %s unfocused by a %s", GUM_Widget_label(pSelf),  deviceType == GUM_MOUSE_TYPE    ? "mouse"    :
                                                                                      deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
-                                                                                     deviceType == GUM_GAMEPAD_TYPE  ? "gamepad" :
+                                                                                     deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
                                                                                      "unknown device type");
     if (!GUM_Widget_isFocused(pSelf)) {
         GUM_Widget_animate(pSelf, "w", 200.0f, 0.25, GUM_EASE_SINE_IN_OUT);
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     if (!pRenderer) return 1;
 
     GUM_Root* pRoot = GUM_Root_create();
-    auto pFont = GUM_Manager_load("../../lib/resources/fonts/default.ttf");
+    auto pFont = GUM_Manager_load("../lib/resources/fonts/default.ttf");
     GUM_Font_setDefault(GUM_FONT(pFont));
 
 
