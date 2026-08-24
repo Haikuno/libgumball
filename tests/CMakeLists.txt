@@ -26,6 +26,11 @@ set(GUMBALL_TEST_SOURCES
     source/gumball_test_main.c
 )
 
+set(GUMBALL_TEST_RESOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/resources")
+file(MAKE_DIRECTORY "${GUMBALL_TEST_RESOURCE_DIR}")
+configure_file(koslogo.png "${GUMBALL_TEST_RESOURCE_DIR}/koslogo.png" COPYONLY)
+configure_file(gumball_test.ttf "${GUMBALL_TEST_RESOURCE_DIR}/gumball_test.ttf" COPYONLY)
+
 add_library(GumballHeaderCompileC OBJECT
     compile/gumball_inputsystem_compile.c
 )
@@ -37,13 +42,13 @@ target_include_directories(GumballTests PRIVATE
     include
     ${PROJECT_SOURCE_DIR}/lib/src
 )
-target_compile_definitions(GumballTests PRIVATE GUM_TEST_BACKEND_${GUM_BACKEND}=1)
+target_compile_definitions(GumballTests PRIVATE
+    GUM_TEST_BACKEND_${GUM_BACKEND}=1
+    "GUM_TEST_RESOURCE_DIR=\"${GUMBALL_TEST_RESOURCE_DIR}\""
+)
 gum_enable_sanitizers(GumballTests)
 
 add_test(NAME GumballTests COMMAND GumballTests)
-set_tests_properties(GumballTests PROPERTIES
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
 
 if(GUM_BACKEND STREQUAL "SDL3")
     add_executable(GumballSDLRendererRecreation

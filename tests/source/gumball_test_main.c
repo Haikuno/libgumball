@@ -13,6 +13,29 @@
 #include "types/gumball_rectangle_test_suite.h"
 #include "types/gumball_vector2_test_suite.h"
 
+#include <stdio.h>
+
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
+
+static bool testResourceDirectoryInit_(void) {
+#ifdef _WIN32
+    const int result = _chdir(GUM_TEST_RESOURCE_DIR);
+#else
+    const int result = chdir(GUM_TEST_RESOURCE_DIR);
+#endif
+
+    if (result == 0)
+        return true;
+
+    fprintf(stderr, "Failed to enter libGumball test resource directory: %s\n",
+            GUM_TEST_RESOURCE_DIR);
+    return false;
+}
+
 #if defined(GUM_TEST_BACKEND_SDL3)
 #include <SDL3/SDL.h>
 
@@ -50,6 +73,7 @@ static void backendDeinit_(void) {
 #endif
 
 int main(int argc, const char* pArgv[]) {
+    if (!testResourceDirectoryInit_()) return 1;
     if (!backendInit_()) return 1;
 
     GblTestScenario* pScenario = GblTestScenario_create("libGumballTests");
