@@ -295,7 +295,7 @@ GBL_TEST_FINAL()
     GUM_unref(pFixture->pRoot);
 GBL_TEST_CASE_END
 
-GBL_TEST_CASE(modelIndexAndObjectTree)
+GBL_TEST_CASE(objectTreeModel)
     countersReset_();
 
     GblObject* pRoot = GBL_NEW(GblObject, "name", "root");
@@ -335,6 +335,12 @@ GBL_TEST_CASE(modelIndexAndObjectTree)
     GBL_TEST_COMPARE(strcmp(GblVariant_string(&value), "child"), 0);
     GblVariant_destruct(&value);
 
+    // Models that do not override displayData inherit their typed data unchanged.
+    GBL_VARIANT(displayValue);
+    GBL_TEST_CALL(GUM_IItemModel_displayData(pItemModel, childIndex, &displayValue));
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&displayValue), "child"), 0);
+    GblVariant_destruct(&displayValue);
+
     GBL_VARIANT(foreignValue);
     GBL_TEST_VERIFY(!GBL_RESULT_SUCCESS(GUM_IItemModel_data(pOtherItemModel,
                                                             childIndex,
@@ -370,15 +376,37 @@ GBL_TEST_CASE_END
 GBL_TEST_CASE(propertyModel)
     countersReset_();
 
-    GUM_Widget* pWidget = GUM_Widget_create("x", 11.0f, "label", "target");
+    GUM_Widget* pWidget = GUM_Widget_create("x", 11.0f,
+                                            "label", "target",
+                                            "color", 0x1234ABCDu);
     GUM_Widget* pReplacement = GUM_Widget_create("x", 5.0f);
     GBL_TEST_VERIFY(pWidget && pReplacement);
+
+    GblObject* pPropertyChild = GBL_NEW(GblObject, "name", "property child");
+    GBL_TEST_VERIFY(pPropertyChild);
+    GblObject_addChild(GBL_OBJECT(pWidget), pPropertyChild);
 
     GUM_PropertyModel* pModel = GUM_PropertyModel_create(GBL_OBJECT(pWidget));
     GBL_TEST_VERIFY(pModel);
     GUM_IItemModel* pItemModel = GUM_IITEMMODEL(pModel);
     GBL_TEST_COMPARE(GUM_IItemModel_columnCount(pItemModel, GUM_MODEL_INDEX_INVALID), 2u);
 
+    // Internal collection payloads are hidden by default, but the caller may opt in.
+    GBL_TEST_VERIFY(!GUM_PropertyModel_propertyVisible(pModel, "children"));
+    GBL_TEST_VERIFY(!GUM_ModelIndex_valid(findProperty_(pModel, "children", 1)));
+    GBL_TEST_CALL(GUM_PropertyModel_setPropertyVisible(pModel, "children", GBL_TRUE));
+    GBL_TEST_VERIFY(GUM_PropertyModel_propertyVisible(pModel, "children"));
+    const GUM_ModelIndex childrenValue = findProperty_(pModel, "children", 1);
+    GBL_TEST_VERIFY(GUM_ModelIndex_valid(childrenValue));
+    GBL_VARIANT(childrenDisplay);
+    GBL_TEST_CALL(GUM_IItemModel_displayData(pItemModel, childrenValue, &childrenDisplay));
+    GBL_TEST_COMPARE(GblVariant_size(&childrenDisplay), 1u);
+    GblVariant_destruct(&childrenDisplay);
+    GBL_TEST_CALL(GUM_PropertyModel_setPropertyVisible(pModel, "children", GBL_FALSE));
+    GBL_TEST_VERIFY(!GUM_PropertyModel_propertyVisible(pModel, "children"));
+    GBL_TEST_VERIFY(!GUM_ModelIndex_valid(findProperty_(pModel, "children", 1)));
+
+    // Acquire indices after the visibility changes, which structurally invalidate old indices.
     const GUM_ModelIndex xName = findProperty_(pModel, "x", 0);
     const GUM_ModelIndex xValue = findProperty_(pModel, "x", 1);
     const GUM_ModelIndex writeOnly = findProperty_(pModel, "labelAcquire", 0);
@@ -394,6 +422,29 @@ GBL_TEST_CASE(propertyModel)
     GBL_TEST_CALL(GUM_IItemModel_data(pItemModel, xValue, &value));
     GBL_TEST_COMPARE(GblVariant_float(&value), 11.0f);
     GblVariant_destruct(&value);
+
+    // Display formatting never changes the typed edit value.
+    const GUM_ModelIndex colorValue = findProperty_(pModel, "color", 1);
+    GBL_TEST_VERIFY(GUM_ModelIndex_valid(colorValue));
+    GBL_VARIANT(rawColor);
+    GBL_TEST_CALL(GUM_IItemModel_data(pItemModel, colorValue, &rawColor));
+    GBL_TEST_COMPARE(GblVariant_uint32(&rawColor), (uint32_t)0x1234ABCDu);
+    GblVariant_destruct(&rawColor);
+
+    GBL_VARIANT(colorDisplay);
+    GBL_TEST_CALL(GUM_IItemModel_displayData(pItemModel, colorValue, &colorDisplay));
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&colorDisplay), "0x1234ABCD"), 0);
+    GblVariant_destruct(&colorDisplay);
+
+    const GUM_ModelIndex textureValue = findProperty_(pModel, "texture", 1);
+    GBL_TEST_VERIFY(GUM_ModelIndex_valid(textureValue));
+    GBL_VARIANT(textureDisplay);
+    GBL_TEST_CALL(GUM_IItemModel_displayData(pItemModel, textureValue, &textureDisplay));
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&textureDisplay), "(null)"), 0);
+    GblVariant_destruct(&textureDisplay);
+
+    GBL_TEST_VERIFY(GblVariant_canConvert(GUM_FONT_TYPE, GBL_STRING_TYPE));
+    GBL_TEST_VERIFY(GblVariant_canConvert(GUM_TEXTURE_TYPE, GBL_STRING_TYPE));
 
     // Effective reflected names must be unique.
     const size_t rows = GUM_IItemModel_rowCount(pItemModel, GUM_MODEL_INDEX_INVALID);
@@ -450,6 +501,7 @@ GBL_TEST_CASE(propertyModel)
     GBL_TEST_CALL(GUM_PropertyModel_setObject(pModel, GBL_OBJECT(pReplacement)));
     GBL_TEST_COMPARE(modelStructureChangedCount_, 1u);
     GBL_TEST_VERIFY(GUM_PropertyModel_object(pModel) == GBL_OBJECT(pReplacement));
+    GBL_TEST_VERIFY(!GUM_PropertyModel_propertyVisible(pModel, "children"));
 
     GBL_VARIANT(oldValue);
     GBL_TEST_CALL(GblVariant_setFloat(&oldValue, 44.0f));
@@ -518,6 +570,7 @@ GBL_TEST_CASE(treeView)
     GUM_ObjectTreeModel* pModel = GUM_ObjectTreeModel_create(pRoot);
     GUM_Tree* pTree = GUM_Tree_create("h", 48.0f);
     GBL_TEST_VERIFY(pModel && pTree);
+    GBL_TEST_VERIFY(GUM_Widget_isActive(GUM_WIDGET(pTree)));
     GBL_TEST_CALL(GUM_Tree_setModel(pTree, GUM_IITEMMODEL(pModel)));
 
     GBL_TEST_CALL(GblSignal_connect(GBL_INSTANCE(pTree),
@@ -563,6 +616,32 @@ GBL_TEST_CASE(treeView)
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(refreshedRoot));
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(refreshedFirstChild));
     GBL_TEST_VERIFY(GUM_Tree_expanded(pTree, refreshedRoot));
+
+    GUM_Event_Mouse* pDisclosure = GUM_Event_Mouse_create();
+    GBL_TEST_VERIFY(pDisclosure);
+    GUM_EVENT_POINTER(pDisclosure)->position = (GUM_Vector2){ 8.0f, 12.0f };
+    GUM_EVENT_INPUT(pDisclosure)->button = GUM_MOUSE_BUTTON_LEFT;
+    GUM_EVENT_INPUT(pDisclosure)->state = GUM_INPUTSTATE_PRESS;
+    GUM_EVENT_INPUT(pDisclosure)->action = GUM_INPUTACTION_CONFIRM;
+    GBL_TEST_CALL(GUM_WIDGET_CLASSOF(pTree)->pFnInputEvent(GUM_WIDGET(pTree),
+                                                           GUM_EVENT_INPUT(pDisclosure)));
+    GBL_TEST_VERIFY(!GUM_Tree_expanded(pTree, refreshedRoot));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Tree_selection(pTree), refreshedRoot));
+    GBL_TEST_COMPARE(GblEvent_state(GBL_EVENT(pDisclosure)), GBL_EVENT_STATE_ACCEPTED);
+    GBL_UNREF(pDisclosure);
+
+    GBL_TEST_CALL(GUM_Tree_setExpanded(pTree, refreshedRoot, GBL_TRUE));
+    GUM_Event_Mouse* pRowClick = GUM_Event_Mouse_create();
+    GBL_TEST_VERIFY(pRowClick);
+    GUM_EVENT_POINTER(pRowClick)->position = (GUM_Vector2){ 40.0f, 36.0f };
+    GUM_EVENT_INPUT(pRowClick)->button = GUM_MOUSE_BUTTON_LEFT;
+    GUM_EVENT_INPUT(pRowClick)->state = GUM_INPUTSTATE_PRESS;
+    GUM_EVENT_INPUT(pRowClick)->action = GUM_INPUTACTION_CONFIRM;
+    GBL_TEST_CALL(GUM_WIDGET_CLASSOF(pTree)->pFnInputEvent(GUM_WIDGET(pTree),
+                                                           GUM_EVENT_INPUT(pRowClick)));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Tree_selection(pTree), refreshedFirstChild));
+    GBL_TEST_COMPARE(GblEvent_state(GBL_EVENT(pRowClick)), GBL_EVENT_STATE_ACCEPTED);
+    GBL_UNREF(pRowClick);
 
     GBL_TEST_CALL(GUM_Tree_select(pTree, refreshedRoot));
     GBL_TEST_CALL(GUM_Tree_setExpanded(pTree, refreshedRoot, GBL_FALSE));
@@ -615,6 +694,7 @@ GBL_TEST_CASE(tableView)
     GUM_PropertyModel* pModel = GUM_PropertyModel_create(GBL_OBJECT(pWidget));
     GUM_Table* pTable = GUM_Table_create("h", 48.0f);
     GBL_TEST_VERIFY(pModel && pTable);
+    GBL_TEST_VERIFY(GUM_Widget_isActive(GUM_WIDGET(pTable)));
     GBL_TEST_CALL(GUM_Table_setModel(pTable, GUM_IITEMMODEL(pModel)));
 
     GBL_TEST_CALL(GblSignal_connect(GBL_INSTANCE(pTable),
@@ -622,6 +702,42 @@ GBL_TEST_CASE(tableView)
                                     GBL_INSTANCE(pFixture->pRoot),
                                     (GblFnPtr)selectionChanged_,
                                     nullptr));
+
+    GUM_IItemModel* pItemModel = GUM_IITEMMODEL(pModel);
+    const GUM_ModelIndex firstName = GUM_IItemModel_index(pItemModel,
+                                                          0,
+                                                          0,
+                                                          GUM_MODEL_INDEX_INVALID);
+    const GUM_ModelIndex firstValue = GUM_IItemModel_index(pItemModel,
+                                                           0,
+                                                           1,
+                                                           GUM_MODEL_INDEX_INVALID);
+    GBL_TEST_VERIFY(GUM_ModelIndex_valid(firstName));
+    GBL_TEST_VERIFY(GUM_ModelIndex_valid(firstValue));
+
+    GUM_Event_Mouse* pNameClick = GUM_Event_Mouse_create();
+    GBL_TEST_VERIFY(pNameClick);
+    GUM_EVENT_POINTER(pNameClick)->position = (GUM_Vector2){ 10.0f, 12.0f };
+    GUM_EVENT_INPUT(pNameClick)->button = GUM_MOUSE_BUTTON_LEFT;
+    GUM_EVENT_INPUT(pNameClick)->state = GUM_INPUTSTATE_PRESS;
+    GUM_EVENT_INPUT(pNameClick)->action = GUM_INPUTACTION_CONFIRM;
+    GBL_TEST_CALL(GUM_WIDGET_CLASSOF(pTable)->pFnInputEvent(GUM_WIDGET(pTable),
+                                                            GUM_EVENT_INPUT(pNameClick)));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Table_selection(pTable), firstName));
+    GBL_TEST_COMPARE(GblEvent_state(GBL_EVENT(pNameClick)), GBL_EVENT_STATE_ACCEPTED);
+    GBL_UNREF(pNameClick);
+
+    GUM_Event_Mouse* pValueClick = GUM_Event_Mouse_create();
+    GBL_TEST_VERIFY(pValueClick);
+    GUM_EVENT_POINTER(pValueClick)->position = (GUM_Vector2){ 150.0f, 12.0f };
+    GUM_EVENT_INPUT(pValueClick)->button = GUM_MOUSE_BUTTON_LEFT;
+    GUM_EVENT_INPUT(pValueClick)->state = GUM_INPUTSTATE_PRESS;
+    GUM_EVENT_INPUT(pValueClick)->action = GUM_INPUTACTION_CONFIRM;
+    GBL_TEST_CALL(GUM_WIDGET_CLASSOF(pTable)->pFnInputEvent(GUM_WIDGET(pTable),
+                                                            GUM_EVENT_INPUT(pValueClick)));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Table_selection(pTable), firstValue));
+    GBL_TEST_COMPARE(GblEvent_state(GBL_EVENT(pValueClick)), GBL_EVENT_STATE_ACCEPTED);
+    GBL_UNREF(pValueClick);
 
     const GUM_ModelIndex xValue = findProperty_(pModel, "x", 1);
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(xValue));
@@ -694,7 +810,7 @@ GBL_TEST_CASE(largeHierarchy)
     GUM_IItemModel_unref(pItemModel);
 GBL_TEST_CASE_END
 
-GBL_TEST_REGISTER(modelIndexAndObjectTree,
+GBL_TEST_REGISTER(objectTreeModel,
                   propertyModel,
                   propertyOverride,
                   treeView,

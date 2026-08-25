@@ -228,6 +228,7 @@ static GBL_RESULT GUM_Tree_init_(GblInstance* pInstance) {
     pSelf_->selection  = GUM_MODEL_INDEX_INVALID;
     GUM_ScrollViewport_init_(&pSelf_->viewport);
 
+    GUM_Widget_initActive_(GUM_WIDGET(pSelf), true);
     GUM_WIDGET(pSelf)->a = 0;
     GUM_WIDGET(pSelf)->isSelectable = true;
 
@@ -339,6 +340,53 @@ static GBL_RESULT GUM_Tree_drawDisclosure_(GUM_Tree* pSelf,
                                      color);
 }
 
+static GBL_RESULT GUM_Tree_drawText_(GUM_Tree* pSelf,
+                                     GUM_Renderer* pRenderer,
+                                     GUM_ModelIndex index,
+                                     GUM_Vector2 position) {
+    GBL_VARIANT(value);
+    GBL_RESULT result = GUM_IItemModel_displayData(GUM_TREE_(pSelf)->pModel, index, &value);
+    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
+        GblVariant_destruct(&value);
+        return result;
+    }
+
+    GBL_VARIANT(text);
+    GblStringRef* pText = nullptr;
+    const GblType valueType = GblVariant_typeOf(&value);
+
+    if (GblType_check(valueType, GBL_STRING_TYPE)) {
+        pText = GblVariant_string(&value);
+    } else if (GblVariant_canConvert(valueType, GBL_STRING_TYPE)) {
+        result = GblVariant_constructString(&text, "");
+        if (GBL_RESULT_SUCCESS(result)) {
+            result = GblVariant_convert(&value, &text);
+            if (GBL_RESULT_SUCCESS(result))
+                pText = GblVariant_string(&text);
+        }
+    } else {
+        pText = (GblStringRef*)GblVariant_typeName(&value);
+    }
+
+    if (GBL_RESULT_SUCCESS(result) && pText) {
+        GUM_Widget* pWidget = GUM_WIDGET(pSelf);
+        result = GUM_Backend_Font_draw(pRenderer,
+                                       GUM_Widget_font(pWidget),
+                                       pText,
+                                       position,
+                                       (GUM_Color){ pWidget->font_r,
+                                                    pWidget->font_g,
+                                                    pWidget->font_b,
+                                                    pWidget->font_a },
+                                       pWidget->font_size,
+                                       1.2f);
+    }
+
+    GblVariant_destruct(&text);
+    GblVariant_destruct(&value);
+    return result;
+}
+
 static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree* pSelf,
                                      GUM_Renderer* pRenderer,
                                      GUM_ModelIndex parent,
@@ -376,26 +424,12 @@ static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree* pSelf,
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                 return result;
 
-            GBL_VARIANT(value);
-            result = GUM_IItemModel_data(pSelf_->pModel, index, &value);
-            if (GBL_RESULT_SUCCESS(result)) {
-                GblStringRef* pText = GblVariant_toString(&value);
-                if (pText) {
-                    result = GUM_Backend_Font_draw(
-                        pRenderer,
-                        GUM_Widget_font(GUM_WIDGET(pSelf)),
-                        pText,
-                        (GUM_Vector2){ nodeX + 13.0f,
-                                       y + (pSelf->rowHeight - GUM_WIDGET(pSelf)->font_size) * 0.5f },
-                        (GUM_Color){ GUM_WIDGET(pSelf)->font_r,
-                                     GUM_WIDGET(pSelf)->font_g,
-                                     GUM_WIDGET(pSelf)->font_b,
-                                     GUM_WIDGET(pSelf)->font_a },
-                        GUM_WIDGET(pSelf)->font_size,
-                        1.2f);
-                }
-            }
-            GblVariant_destruct(&value);
+            result = GUM_Tree_drawText_(pSelf,
+                                        pRenderer,
+                                        index,
+                                        (GUM_Vector2){ nodeX + 13.0f,
+                                                       y + (pSelf->rowHeight
+                                                          - GUM_WIDGET(pSelf)->font_size) * 0.5f });
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                 return result;
         }

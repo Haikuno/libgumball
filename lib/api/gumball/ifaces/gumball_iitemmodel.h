@@ -46,6 +46,7 @@ GBL_INTERFACE_DERIVE(GUM_IItemModel)
     GUM_ModelIndex (*pFnIndex)      (GBL_CSELF, size_t row, size_t column, GUM_ModelIndex parent);
     GUM_ModelIndex (*pFnParent)     (GBL_CSELF, GUM_ModelIndex index);
     GBL_RESULT     (*pFnData)       (GBL_CSELF, GUM_ModelIndex index, GblVariant* pValue);
+    GBL_RESULT     (*pFnDisplayData)(GBL_CSELF, GUM_ModelIndex index, GblVariant* pValue);
     GBL_RESULT     (*pFnSetData)    (GBL_SELF, GUM_ModelIndex index, GblVariant* pValue);
     GblFlags       (*pFnFlags)      (GBL_CSELF, GUM_ModelIndex index);
 GBL_INTERFACE_END
@@ -68,6 +69,8 @@ GBL_EXPORT size_t          GUM_IItemModel_rowCount             (GBL_CSELF, GUM_M
 GBL_EXPORT GUM_ModelIndex  GUM_IItemModel_index                (GBL_CSELF, size_t row, size_t column, GUM_ModelIndex parent) GBL_NOEXCEPT;
 GBL_EXPORT GUM_ModelIndex  GUM_IItemModel_parent               (GBL_CSELF, GUM_ModelIndex index) GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT      GUM_IItemModel_data                 (GBL_CSELF, GUM_ModelIndex index, GblVariant* pValue) GBL_NOEXCEPT;
+//! Returns data formatted for display. Defaults to data().
+GBL_EXPORT GBL_RESULT      GUM_IItemModel_displayData          (GBL_CSELF, GUM_ModelIndex index, GblVariant* pValue) GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT      GUM_IItemModel_setData              (GBL_SELF, GUM_ModelIndex index, GblVariant* pValue) GBL_NOEXCEPT;
 GBL_EXPORT GblFlags        GUM_IItemModel_flags                (GBL_CSELF, GUM_ModelIndex index) GBL_NOEXCEPT;
 

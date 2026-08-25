@@ -70,6 +70,19 @@ GBL_EXPORT GBL_RESULT GUM_IItemModel_data(const GUM_IItemModel* pSelf,
     return GUM_IITEMMODEL_CLASSOF(pSelf)->pFnData(pSelf, index, pValue);
 }
 
+GBL_EXPORT GBL_RESULT GUM_IItemModel_displayData(const GUM_IItemModel* pSelf,
+                                                 GUM_ModelIndex index,
+                                                 GblVariant* pValue) {
+    if (!pSelf || !pValue)
+        return GBL_RESULT_ERROR_INVALID_POINTER;
+    if (!GUM_ModelIndex_belongs(index, pSelf))
+        return GBL_RESULT_ERROR_INVALID_ARG;
+
+    GUM_IItemModelClass* pClass = GUM_IITEMMODEL_CLASSOF(pSelf);
+    return pClass->pFnDisplayData ? pClass->pFnDisplayData(pSelf, index, pValue)
+                                  : pClass->pFnData(pSelf, index, pValue);
+}
+
 GBL_EXPORT GBL_RESULT GUM_IItemModel_setData(GUM_IItemModel* pSelf,
                                              GUM_ModelIndex index,
                                              GblVariant* pValue) {
@@ -134,6 +147,12 @@ static GBL_RESULT GUM_IItemModel_data_(const GUM_IItemModel* pSelf,
     return GBL_RESULT_UNIMPLEMENTED;
 }
 
+static GBL_RESULT GUM_IItemModel_displayData_(const GUM_IItemModel* pSelf,
+                                              GUM_ModelIndex index,
+                                              GblVariant* pValue) {
+    return GUM_IITEMMODEL_CLASSOF(pSelf)->pFnData(pSelf, index, pValue);
+}
+
 static GBL_RESULT GUM_IItemModel_setData_(GUM_IItemModel* pSelf,
                                           GUM_ModelIndex index,
                                           GblVariant* pValue) {
@@ -164,6 +183,7 @@ static GBL_RESULT GUM_IItemModelClass_init_(GblClass* pClass, const void* pData)
     pSelf->pFnIndex       = GUM_IItemModel_index_;
     pSelf->pFnParent      = GUM_IItemModel_parent_;
     pSelf->pFnData        = GUM_IItemModel_data_;
+    pSelf->pFnDisplayData = GUM_IItemModel_displayData_;
     pSelf->pFnSetData     = GUM_IItemModel_setData_;
     pSelf->pFnFlags       = GUM_IItemModel_flags_;
     return GBL_RESULT_SUCCESS;
