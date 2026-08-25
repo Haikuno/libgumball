@@ -57,4 +57,4 @@ Agustín Bellagamba ([Haikuno](https://github.com/Haikuno))
 
 ## Optional Dependencies ##
 - Backend: [raylib](https://github.com/raysan5/raylib)
-- Backend: [SDL](https://github.com/libsdl-org/SDL) and [SDL_ttf](https://github.com/libsdl-org/SDL_ttf)
+- Backend: [SDL3](https://github.com/libsdl-org/SDL) and SDL3_ttf
