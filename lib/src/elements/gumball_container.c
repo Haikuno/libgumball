@@ -686,6 +686,16 @@ static GBL_RESULT GUM_Container_inputEvent_(GUM_Widget* pSelf, GUM_Event_Input* 
     GUM_Container* pContainer = GUM_CONTAINER(pSelf);
     GUM_Event_Mouse* pMouseEvent = GBL_AS(GUM_Event_Mouse, pEvent);
 
+    if (pMouseEvent && GUM_Container_scrollable(pContainer) && GUM_Container_scrollRange(pContainer) > 0.0f) {
+        const GUM_Direction axis = GUM_Container_direction(pContainer);
+        const float delta = (axis == GUM_DIRECTION_HORIZONTAL ? pMouseEvent->wheel.x : pMouseEvent->wheel.y) * -70.0f;
+        if (delta) {
+            GUM_Container_scrollBy_(pContainer, axis, delta);
+            GblEvent_accept(GBL_EVENT(pEvent));
+            return GBL_RESULT_SUCCESS;
+        }
+    }
+
     if (pMouseEvent && pEvent->button == GUM_MOUSE_BUTTON_LEFT) {
         if (pEvent->state == GUM_INPUTSTATE_PRESS) {
             const GBL_RESULT result = GUM_Container_scrollbarPress_(pContainer,

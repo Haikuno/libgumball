@@ -9,7 +9,6 @@
 
 #include "gumball_inputsystem_.h"
 #include "../devices/gumball_inputdevice_.h"
-#include "../elements/gumball_container_.h"
 #include "../elements/gumball_root_.h"
 #include "../elements/gumball_widget_.h"
 
@@ -596,6 +595,22 @@ static void GUM_InputSystem_dispatchButton_(GUM_InputDevice* pDevice, void* pCon
     GblBox_unref(GBL_BOX(pDevice));
 }
 
+static GblBool GUM_InputSystem_NavDevice_navigate_(GUM_InputDevice* pDevice,
+                                                   GUM_InputAction action) {
+    GUM_Widget* pWidget = GUM_InputDevice_focusedWidget(pDevice);
+    if (!pWidget)
+        return GBL_FALSE;
+
+    GUM_WidgetClass* pClass = GUM_WIDGET_CLASSOF(pWidget);
+    if (!pClass->pFnNavigate)
+        return GBL_FALSE;
+
+    GblBox_ref(GBL_BOX(pWidget));
+    const GblBool handled = pClass->pFnNavigate(pWidget, action);
+    GblBox_unref(GBL_BOX(pWidget));
+    return handled;
+}
+
 static void GUM_InputSystem_NavDevice_dispatchEvent_(void* pContext,
                                                      GblFlags button,
                                                      GUM_InputState state) {
@@ -619,7 +634,12 @@ static void GUM_InputSystem_NavDevice_dispatchEvent_(void* pContext,
         !GUM_InputDevice_baselinePending_(pDevice) &&
         state == GUM_INPUTSTATE_PRESS &&
         pEvent->action >= GUM_INPUTACTION_MOVE_UP && pEvent->action <= GUM_INPUTACTION_MOVE_RIGHT) {
-        GUM_Nav_move(pDevice, pEvent->action);
+        const GblBool handled = GUM_InputSystem_NavDevice_navigate_(pDevice, pEvent->action);
+        if (GUM_InputSystem_generationCurrent_(pDispatch->generation) &&
+            GUM_InputSystem_deviceEnabled(pDevice) &&
+            !GUM_InputDevice_baselinePending_(pDevice) &&
+            !handled)
+            GUM_Nav_move(pDevice, pEvent->action);
     }
 
     GBL_UNREF(pEvent);
@@ -652,6 +672,23 @@ static void GUM_InputSystem_Mouse_dispatchEvent_(void* pContext, GblFlags button
     GBL_UNREF(pEvent);
 }
 
+static void GUM_InputSystem_Mouse_dispatchWheel_(GUM_InputSystem_MouseDispatch_* pDispatch,
+                                                 GUM_Widget* pTarget) {
+    if (!pTarget || (!pDispatch->pMouse->wheel.x && !pDispatch->pMouse->wheel.y))
+        return;
+
+    GUM_Event_Mouse* pEvent = GUM_Event_Mouse_createFrom(pDispatch->pMouse);
+    if (!pEvent)
+        return;
+
+    GblBox_ref(GBL_BOX(pTarget));
+    if (GUM_InputSystem_generationCurrent_(pDispatch->generation) &&
+        GUM_InputSystem_deviceEnabled(GUM_INPUTDEVICE(pDispatch->pMouse)))
+        GblObject_notifyEvent(GBL_OBJECT(pTarget), GBL_EVENT(pEvent));
+    GblBox_unref(GBL_BOX(pTarget));
+    GBL_UNREF(pEvent);
+}
+
 static bool GUM_InputSystem_Mouse_update_(uint64_t generation) {
     GUM_Mouse* pMouse = pMouse_;
     if (!pMouse)
@@ -673,38 +710,26 @@ static bool GUM_InputSystem_Mouse_update_(uint64_t generation) {
     bool current = GUM_InputSystem_generationCurrent_(generation) &&
                    GUM_InputSystem_Mouse_hitTest_(pMouse, generation);
 
-    GUM_Widget* pScrollTarget = current && !baseline ?
+    GUM_InputSystem_MouseDispatch_ dispatch = {
+        .pMouse = pMouse,
+        .generation = generation
+    };
+
+    GUM_Widget* pWheelTarget = current && !baseline ?
         GUM_Root_pointerHoverAt_(GUM_Root_active_(), GUM_POINTER(pMouse)->position) : nullptr;
+    if (pWheelTarget)
+        GUM_InputSystem_Mouse_dispatchWheel_(&dispatch, pWheelTarget);
 
-    if (pScrollTarget) {
-        for (GblObject* pAncestor = GBL_OBJECT(pScrollTarget); pAncestor; pAncestor = GblObject_parent(pAncestor)) {
-            if (!GBL_TYPECHECK(GUM_Container, pAncestor)) continue;
-            GUM_Container* pContainer = GUM_CONTAINER(pAncestor);
-            if (!GUM_Container_scrollable(pContainer)) continue;
+    current = current &&
+              GUM_InputSystem_generationCurrent_(generation) &&
+              GUM_InputSystem_deviceEnabled(pDevice) &&
+              !GUM_InputDevice_baselinePending_(pDevice);
 
-            const GUM_Direction axis = GUM_Container_direction(pContainer);
-            if (axis != GUM_DIRECTION_HORIZONTAL && axis != GUM_DIRECTION_VERTICAL)
-                continue;
-
-            const float delta = (axis == GUM_DIRECTION_HORIZONTAL ? pMouse->wheel.x : pMouse->wheel.y) * -70.0f;
-            if (!delta)
-                continue;
-
-            GUM_Container_scrollBy_(pContainer, axis, delta);
-            break;
-        }
-    }
-
-    if (current && !baseline && GUM_InputSystem_generationCurrent_(generation)) {
-        GUM_InputSystem_MouseDispatch_ dispatch = {
-            .pMouse = pMouse,
-            .generation = generation
-        };
+    if (current && !baseline)
         GUM_InputSystem_dispatchButton_(pDevice,
                                         &dispatch,
                                         GUM_InputSystem_Mouse_dispatchEvent_,
                                         generation);
-    }
 
     GblBox_unref(GBL_BOX(pMouse));
     return GUM_InputSystem_generationCurrent_(generation);

@@ -288,6 +288,8 @@ static GBL_RESULT GUM_Widget_childSnapshot_(GblObject* pParent,
 }
 
 static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject* pSelf) {
+    GBL_RESULT firstFailure = GBL_RESULT_SUCCESS;
+
     if (!GblObject_parent(pSelf)) {
         GUM_Root* pRoot = GUM_Root_active_();
         if GBL_UNLIKELY (!pRoot) {
@@ -298,28 +300,36 @@ static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject* pSelf) {
     }
 
     GUM_Widget* pWidget = GUM_WIDGET(pSelf);
-    GBL_RESULT firstFailure = GUM_Widget_hierarchyChanged_(pWidget,
-                                                            nullptr,
-                                                            GblObject_parent(pSelf));
+    firstFailure = GUM_Widget_hierarchyChanged_(pWidget,
+                                                nullptr,
+                                                GblObject_parent(pSelf));
 
     // Child layout callbacks may mutate the construction-time child list.
     GUM_WidgetChildSnapshot_ snapshot;
     GBL_RESULT result = GUM_Widget_childSnapshot_(pSelf, &snapshot);
-    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
-        return GBL_RESULT_SUCCESS(firstFailure) ? result : firstFailure;
+    if GBL_LIKELY (GBL_RESULT_SUCCESS(result)) {
+        const size_t count = GblArrayList_size(&snapshot.widgets);
+        for (size_t i = 0; i < count; ++i) {
+            GUM_Widget* pChildWidget = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
+            if (GblObject_parent(GBL_OBJECT(pChildWidget)) != pSelf)
+                continue;
 
-    const size_t count = GblArrayList_size(&snapshot.widgets);
-    for (size_t i = 0; i < count; ++i) {
-        GUM_Widget* pChildWidget = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
-        if (GblObject_parent(GBL_OBJECT(pChildWidget)) != pSelf)
-            continue;
-
-        result = GUM_Widget_hierarchyChanged_(pChildWidget, nullptr, pSelf);
-        if (GBL_RESULT_SUCCESS(firstFailure) && !GBL_RESULT_SUCCESS(result))
-            firstFailure = result;
+            result = GUM_Widget_hierarchyChanged_(pChildWidget, nullptr, pSelf);
+            if (GBL_RESULT_SUCCESS(firstFailure) && !GBL_RESULT_SUCCESS(result))
+                firstFailure = result;
+        }
+        GUM_Widget_childSnapshotRelease_(&snapshot);
+    } else if (GBL_RESULT_SUCCESS(firstFailure)) {
+        firstFailure = result;
     }
 
-    GUM_Widget_childSnapshotRelease_(&snapshot);
+    // Preserve GblObject's lifecycle contract: construction-time property writes stay
+    // silent until Widget setup is complete, then ordinary writes emit propertyChange.
+    GblObjectClass* pObjectClass = GBL_OBJECT_CLASS(GblClass_weakRefDefault(GBL_OBJECT_TYPE));
+    result = pObjectClass->pFnInstantiated(pSelf);
+    if (GBL_RESULT_SUCCESS(firstFailure) && !GBL_RESULT_SUCCESS(result))
+        firstFailure = result;
+
     return firstFailure;
 }
 

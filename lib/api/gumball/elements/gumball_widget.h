@@ -54,7 +54,7 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Widget);
  *    \brief   GUM_Widget structure
  *
  *    GUM_WidgetClass derives from GblObjectClass,
- *    adding virtual functions for activating, deactivating, updating, drawing and input events.
+ *    adding virtual functions for activating, deactivating, updating, drawing, input events and navigation.
 */
 //! \cond
 GBL_CLASS_DERIVE(GUM_Widget, GblObject)
@@ -63,6 +63,7 @@ GBL_CLASS_DERIVE(GUM_Widget, GblObject)
     GBL_RESULT (*pFnUpdate)      (GBL_SELF);
     GBL_RESULT (*pFnDraw)        (GBL_SELF, GUM_Renderer*    pRenderer);
     GBL_RESULT (*pFnInputEvent)  (GBL_SELF, GUM_Event_Input* pEvent);
+    GblBool    (*pFnNavigate)    (GBL_SELF, GUM_InputAction  action);
 GBL_CLASS_END
 //! \endcond
 
@@ -105,7 +106,7 @@ GBL_INSTANCE_DERIVE(GUM_Widget, GblObject)
     uint8_t            font_r;                   //!< Red component of the font color.                                               Default value is 255
     uint8_t            font_g;                   //!< Green component of the font color.                                             Default value is 255
     uint8_t            font_b;                   //!< Blue component of the font color.                                              Default value is 255
-    uint8_t            font_a;                   //!< Alpha component of the font color.                                             Default value is 255
+    uint8_t            font_a;                   //!< Alpha component of the font color.                                              Default value is 255
     uint8_t            font_border_r;            //!< Red component of the font border color.                                        Default value is 0
     uint8_t            font_border_g;            //!< Green component of the font border color.                                      Default value is 0
     uint8_t            font_border_b;            //!< Blue component of the font border color.                                       Default value is 0

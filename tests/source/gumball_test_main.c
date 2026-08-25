@@ -6,7 +6,7 @@
 #include "elements/gumball_common_test_suite.h"
 #include "elements/gumball_container_test_suite.h"
 #include "elements/gumball_hierarchy_test_suite.h"
-#include "elements/gumball_objectviewer_test_suite.h"
+#include "elements/gumball_modelview_test_suite.h"
 #include "elements/gumball_root_test_suite.h"
 #include "elements/gumball_widget_test_suite.h"
 #include "types/gumball_animator_test_suite.h"
@@ -103,7 +103,7 @@ int main(int argc, const char* pArgv[]) {
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_CONTAINER_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
-                                 GblTestSuite_create(GUM_OBJECTVIEWER_TEST_SUITE_TYPE));
+                                 GblTestSuite_create(GUM_MODELVIEW_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_NAVIGATION_TEST_SUITE_TYPE));
     GblTestScenario_enqueueSuite(pScenario,

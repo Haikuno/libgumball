@@ -18,6 +18,7 @@
 #include "gumball_events.h"
 #include "gumball_types.h"
 #include "gumball_ifaces.h"
+#include "gumball_models.h"
 #include "gumball_core.h"
 
 #endif // GUMBALL_H

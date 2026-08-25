@@ -11,8 +11,8 @@ set(GUMBALL_TEST_SOURCES
     source/elements/gumball_container_test_suite.c
     include/elements/gumball_hierarchy_test_suite.h
     source/elements/gumball_hierarchy_test_suite.c
-    include/elements/gumball_objectviewer_test_suite.h
-    source/elements/gumball_objectviewer_test_suite.c
+    include/elements/gumball_modelview_test_suite.h
+    source/elements/gumball_modelview_test_suite.c
     include/elements/gumball_root_test_suite.h
     source/elements/gumball_root_test_suite.c
     include/elements/gumball_widget_test_suite.h
