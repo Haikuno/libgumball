@@ -1,16 +1,13 @@
 #ifndef GUM_GAMEPAD_H
 #define GUM_GAMEPAD_H
 
-// View this file's documentation online: TODO: add link
+// View this file's documentation online: https://libgumball.psyops.studio/gumball__gamepad_8h.html
 
 /*!  \file
  *   \ref     GUM_Gamepad "GUM_Gamepad data structure and hierarchy graph"
- *   \ingroup elements
+ *   \ingroup devices
  *
- *   Brief description
- *
- *   Extended
- *   Description.
+ *   Gamepad input device.
  *
  *   \author       2026 Agustín Bellagamba
  *   \copyright    MIT License
@@ -36,15 +33,13 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Gamepad);
 /*!
  *    \struct  GUM_GamepadClass
  *    \extends GUM_InputDeviceClass
- *    \brief   GUM_Gamepad structure
- *
- *    GUM_GamepadClass derives from GUM_InputDeviceClass,
- *    TODO: description
+ *    \brief   GUM_Gamepad class structure
 */
 //! \cond
 GBL_CLASS_DERIVE_EMPTY(GUM_Gamepad, GUM_InputDevice)
 //! \endcond
 
+//! Bitmask of gamepad buttons used by libGumball input bindings and navigation.
 GBL_FLAGS(GUM_GAMEPAD_FLAGS,
     (GUM_GAMEPAD_BUTTON_A,      "GUM_gamepad_a",      0b00000000'00000001),
     (GUM_GAMEPAD_BUTTON_B,      "GUM_gamepad_b",      0b00000000'00000010),
@@ -63,11 +58,11 @@ GBL_FLAGS(GUM_GAMEPAD_FLAGS,
 /*!
  *    \class   GUM_Gamepad
  *    \extends GUM_InputDevice
- *    \brief   TODO: brief description
+ *    \brief   Connected gamepad input device
 */
 GBL_INSTANCE_DERIVE(GUM_Gamepad, GUM_InputDevice)
-    uint8_t index;    //!> User-facing controller index.                             Default value is 0
-    uint8_t rawIndex; //!> Physical slot this gamepad occupies, used in the backend. Default value is 0
+    uint8_t index;    //!< Stable user-facing gamepad index.                            Default value is 0.
+    uint8_t rawIndex; //!< Physical input slot used to identify and poll this gamepad.  Default value is 0.
 GBL_INSTANCE_END
 
 GBL_PROPERTIES(GUM_Gamepad,
@@ -77,8 +72,8 @@ GBL_PROPERTIES(GUM_Gamepad,
 
 GblType GUM_Gamepad_type(void) GBL_NOEXCEPT;
 
-//! Returns a new GUM_Gamepad. Optionally takes in a list of Name/Value pairs for properties
-#define GUM_Gamepad_create(/* propertyName, propertyValue */ ...) GBL_NEW(GUM_Gamepad __VA_OPT__(,) __VA_ARGS__)
+//! Returns a new GUM_Gamepad. Optionally takes Name/Value property pairs.
+#define GUM_Gamepad_create(/* property_name, property_value */ ...) GBL_NEW(GUM_Gamepad __VA_OPT__(,) __VA_ARGS__)
 
 GBL_DECLS_END
 
