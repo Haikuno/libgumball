@@ -49,5 +49,6 @@ target_include_directories(libGumball
 )
 target_compile_definitions(libGumball PRIVATE
     GUM_SNAPSHOT_INLINE_CAPACITY=64
+    "GUM_DEFAULT_FONT_PATH=\"${GUM_DEFAULT_FONT_RUNTIME_PATH}\""
 )
 gum_enable_sanitizers(libGumball)

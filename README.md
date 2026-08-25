@@ -12,7 +12,7 @@
 
 # Overview #
 libGumball is a modern UI library written in C23, built on top of libGimbal to provide an ergonomic way to create user interfaces in pure C.
-Designed primarily for video game development, it leverages libGimbal's powerful property system, dynamic type system, and other capabilities to make UI building intuitive, efficient, and performant.
+Designed primarily for video game development, it leverages libGimbal's property system, dynamic type system, and other capabilities to make UI building intuitive, efficient, and performant.
 
 # Building #
 First, ensure submodules are installed with:
@@ -48,6 +48,9 @@ Then, in your CMakeLists.txt file, add the following:
 add_subdirectory(libgumball)
 target_link_libraries(yourproject libGumball)
 ```
+
+libGumball includes `lib/resources/fonts/default.ttf` as its default font. `GUM_Font_setDefault()` can be used to override it.
+If assets are installed somewhere else, `GUM_DEFAULT_FONT_RUNTIME_PATH` can be set to the installed `default.ttf` path.
 
 # Credits #
 ## Author ##

@@ -50,6 +50,19 @@ gum_enable_sanitizers(GumballTests)
 
 add_test(NAME GumballTests COMMAND GumballTests)
 
+add_executable(GumballDefaultFont
+    integration/gumball_default_font_test.c
+)
+target_link_libraries(GumballDefaultFont PRIVATE libGumball)
+target_compile_definitions(GumballDefaultFont PRIVATE
+    GUM_TEST_BACKEND_${GUM_BACKEND}=1
+    "GUM_TEST_DEFAULT_FONT_PATH=\"${GUM_DEFAULT_FONT_RUNTIME_PATH}\""
+    "GUM_TEST_CUSTOM_FONT_PATH=\"${GUMBALL_TEST_RESOURCE_DIR}/gumball_test.ttf\""
+)
+gum_enable_sanitizers(GumballDefaultFont)
+
+add_test(NAME GumballDefaultFont COMMAND GumballDefaultFont)
+
 if(GUM_BACKEND STREQUAL "SDL3")
     add_executable(GumballSDLRendererRecreation
         sdl3/gumball_renderer_recreation_test.c

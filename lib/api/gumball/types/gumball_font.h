@@ -58,9 +58,9 @@ GBL_ENUM(GUM_TextAlignment,
     (GUM_TEXT_ALIGN_LEFT,   "Left",   4)
 )
 
-//! Returns the current default font, or nullptr if none is set.
+//! Returns the current default font override, or nullptr if none is set.
 GUM_Font* GUM_Font_default    (void) GBL_NOEXCEPT;
-//! Sets the default font. Passing nullptr clears it.
+//! Sets the default font override. Passing nullptr restores the bundled font.
 void      GUM_Font_setDefault (GUM_Font* pFont) GBL_NOEXCEPT;
 
 //! \cond

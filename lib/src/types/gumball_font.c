@@ -1,10 +1,17 @@
 #include <gumball/types/gumball_font.h>
 #include <gumball/core/gumball_backend.h>
+#include <gumball/core/gumball_logger.h>
+#include <gumball/core/gumball_manager.h>
 #include <gimbal/meta/instances/gimbal_box.h>
 
 #include "../ifaces/gumball_iresource_.h"
 
+#ifndef GUM_DEFAULT_FONT_PATH
+#error "GUM_DEFAULT_FONT_PATH must be provided by the build system"
+#endif
+
 static GUM_Font* pDefaultFont_ = nullptr;
+static bool defaultFontFailureLogged_ = false;
 
 static GBL_RESULT GUM_Font_load_(GUM_IResource* pResource, GblStringRef* pPath) {
     GBL_RESULT result = GUM_Backend_Font_load(pResource, pPath);
@@ -58,6 +65,30 @@ void GUM_Font_setDefault(GUM_Font* pFont) {
 
     if (pPrevious)
         GUM_IResource_unref(GUM_IRESOURCE(pPrevious));
+}
+
+GUM_Font* GUM_Backend_Font_default(void) {
+    GUM_Font* pDefault = GUM_Font_default();
+    if (pDefault)
+        return pDefault;
+
+    GUM_IResource* pResource = nullptr;
+    const GBL_RESULT result = GUM_Manager_loadEx(GUM_DEFAULT_FONT_PATH, &pResource);
+    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
+        if (!defaultFontFailureLogged_) {
+            GUM_LOG_ERROR("Failed to load bundled default font '%s': %s",
+                          GUM_DEFAULT_FONT_PATH,
+                          gblResultString(result));
+            defaultFontFailureLogged_ = true;
+        }
+        return nullptr;
+    }
+
+    defaultFontFailureLogged_ = false;
+    GUM_Font* pFont = GUM_FONT(pResource);
+    // Manager keeps the cache reference; the resolved default is borrowed.
+    GUM_IResource_unref(pResource);
+    return pFont;
 }
 
 GblType GUM_Font_type(void) {

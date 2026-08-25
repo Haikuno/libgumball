@@ -3,8 +3,6 @@
 #include <raylib.h>
 #include <stdlib.h>
 
-static GUM_Font* defaultFont_ = nullptr;
-
 static bool GUM_Raylib_Font_isDefault_(Font font) {
     const Font fallback = GetFontDefault();
     return font.texture.id == fallback.texture.id &&
@@ -67,40 +65,9 @@ GBL_RESULT GUM_Backend_Font_unload(GUM_IResource* pSelf) {
     Font* pFont = GUM_IResource_data_(pSelf);
     if (!pFont) return GBL_RESULT_SUCCESS;
 
-    if (!GUM_Raylib_Font_isDefault_(*pFont))
-        UnloadFont(*pFont);
-
+    UnloadFont(*pFont);
     free(pFont);
     GUM_IResource_setData_(pSelf, nullptr);
 
     return GBL_RESULT_SUCCESS;
-}
-
-GUM_Font* GUM_Backend_Font_default(void) {
-    GUM_Font* pDefault = GUM_Font_default();
-    if (pDefault) return pDefault;
-    if (defaultFont_) return defaultFont_;
-
-    Font* pRayFont = malloc(sizeof(*pRayFont));
-    if (!pRayFont) return nullptr;
-    *pRayFont = GetFontDefault();
-
-    GUM_Font* pWrapper = GUM_FONT(GblBox_create(GUM_Font_type()));
-    if (!pWrapper) {
-        free(pRayFont);
-        return nullptr;
-    }
-
-    GUM_IResource_setData_(GUM_IRESOURCE(pWrapper), pRayFont);
-    defaultFont_ = pWrapper;
-    return defaultFont_;
-}
-
-void GUM_Raylib_Font_deinit(void) {
-    if (!defaultFont_) return;
-
-    // Other owners may retain the wrapper across Roots.
-    GUM_Font* pDefault = defaultFont_;
-    defaultFont_ = nullptr;
-    GBL_UNREF(pDefault);
 }

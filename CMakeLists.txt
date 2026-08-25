@@ -21,6 +21,24 @@ else()
     message(FATAL_ERROR "Unsupported libGumball backend: ${GUM_BACKEND}")
 endif()
 
+set(GUM_DEFAULT_FONT_BUILD_PATH "${CMAKE_CURRENT_BINARY_DIR}/lib/resources/fonts/default.ttf")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib/resources/fonts")
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/resources/fonts/default.ttf"
+    "${GUM_DEFAULT_FONT_BUILD_PATH}"
+    COPYONLY
+)
+
+set(GUM_DEFAULT_FONT_RUNTIME_PATH "" CACHE FILEPATH
+    "Target-visible absolute path to libGumball's bundled default.ttf")
+if(GUM_DEFAULT_FONT_RUNTIME_PATH)
+    if(NOT IS_ABSOLUTE "${GUM_DEFAULT_FONT_RUNTIME_PATH}")
+        message(FATAL_ERROR "GUM_DEFAULT_FONT_RUNTIME_PATH must be absolute")
+    endif()
+else()
+    set(GUM_DEFAULT_FONT_RUNTIME_PATH "${GUM_DEFAULT_FONT_BUILD_PATH}")
+endif()
+
 function(gum_enable_sanitizers target)
     if(NOT GUM_ENABLE_SANITIZERS)
         return()

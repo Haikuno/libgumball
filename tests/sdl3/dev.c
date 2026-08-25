@@ -49,9 +49,6 @@ int main(int argc, char* argv[]) {
     if (!pRenderer) return 1;
 
     GUM_Root* pRoot = GUM_Root_create();
-    auto pFont = GUM_Manager_load("../lib/resources/fonts/default.ttf");
-    GUM_Font_setDefault(GUM_FONT(pFont));
-
 
     GUM_Container* pOuter = GUM_Container_create("x", 20.0f, "y", 40.0f,
                                                  "w", 800.0f, "h", 1000.0f,
