@@ -10,14 +10,17 @@
  *   common to all elements in libGumball.
  *
  *   \author    2025, 2026 Agustín Bellagamba
- *   \copyright MIT License
+ *   \copyright  MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
 #include <gimbal/containers/gimbal_ring_list.h>
 #include <gumball/types/gumball_renderer.h>
 
-//! Updates all the UI elements
+//! Passes a backend event to libGumball.
+GBL_EXPORT void GUM_processEvent(const void* pEvent) GBL_NOEXCEPT;
+
+//! Updates all UI elements
 #define GUM_update()                   ((GUM_update)())
 
 //! Disables updating for a given element
@@ -32,15 +35,13 @@
 //! Enables updating for a given element and all of its children
 #define GUM_update_enableAll(element)  ((GUM_update_enableAll)  (GBL_OBJECT(element)))
 
-/*!  \brief Draws all the UI elements in the draw queue
+/*!  \brief Draws all UI elements below the active Root
  *
- *   Drawable elements are added to the draw queue when they are created
- *   Elements are drawn from z-index 0 to z-index 255, with 255 being the front
- *   If two elements have the same z-index, they are drawn in the order they were created (or enabled!)
+ *   Elements are ordered by z-index, hierarchy depth, then Root order.
+ *   Draw-order changes made while drawing take effect on the next draw.
  *   Optionally takes in a GUM_Renderer if your backend needs one (defaults to nullptr)
 */
 #define GUM_draw(/* renderer=nullptr */...) GUM_draw_(__VA_OPT__(__VA_ARGS__,) nullptr)
-
 
 //! Disables drawing for a given element
 #define GUM_draw_disable(obj)         ((GUM_draw_disable)    (GBL_OBJECT(obj)))
@@ -54,11 +55,11 @@
 //! Enables drawing for a given element and all of its children
 #define GUM_draw_enableAll(obj)       ((GUM_draw_enableAll)  (GBL_OBJECT(obj)))
 
-//! Takes in two UI elements, adds the second one as a child of the first.
-#define GUM_add_child(self, child)    (GblObject_addChild(GBL_OBJECT(self), GBL_OBJECT(child)))
+//! Adds the second element as a child of the first and updates its layout.
+#define GUM_add_child(self, child)    ((GUM_add_child)    (GBL_OBJECT(self), GBL_OBJECT(child)))
 
-//! Takes in two UI elements, removes the second one as a child of the first.
-#define GUM_remove_child(self, child) (GblObject_removeChild(GBL_OBJECT(self), GBL_OBJECT(child)))
+//! Removes the second element as a child of the first and updates its layout.
+#define GUM_remove_child(self, child) ((GUM_remove_child) (GBL_OBJECT(self), GBL_OBJECT(child)))
 
 /*!
  *  Takes in a UI element and an index, returns the child of that element at that index as a
@@ -69,11 +70,10 @@
 */
 #define GUM_get_child_at(self, index) (GblObject_findChildByIndex(GBL_OBJECT(self), index))
 
-//! Incerements the reference count of a UI element, returning a pointer to it.
+//! Increments the reference count of a UI element, returning a pointer to it.
 #define GUM_ref(obj)                  ((GUM_ref)(GBL_OBJECT(obj)))
 
-//! Decrements the reference count of a UI element, freeing it if it reaches zero.
-//! Also recursively unrefs all of its children.
+//! Decrements the reference count of an element and its children.
 #define GUM_unref(obj)                ((GUM_unref)(GBL_OBJECT(obj)))
 
 /*!  Connects an element's signal to a callback.
@@ -98,11 +98,12 @@
 //! Looks up the property of an element by name, storing its value in the pointer passed as a variadic argument
 #define GUM_property(obj, name, /*value*/ ...) (GblObject_property(GBL_OBJECT(obj), name, __VA_ARGS__))
 
-//! Sets the property with the given name to the value given by the pointer passed through the variadic argument list
-#define GUM_setProperty(obj, name, /*value*/...) (GblObject_setProperty(GBL_OBJECT(obj), name, __VA_ARGS__))
+//! Sets the property with the given name. Setting parent also updates libGumball's hierarchy.
+#define GUM_setProperty(obj, name, /*value*/...) ((GUM_setProperty)(GBL_OBJECT(obj), name __VA_OPT__(,) __VA_ARGS__))
 
-//! Creates a list that you can pass to the \p children property, takes in any number of comma-separated elements.
-#define GUM_childrenList(child1, /*child2, child3, */ ...) (GblRingList_create(child1 __VA_OPT__(,) __VA_ARGS__))
+//! Creates a NULL-terminated list that can be passed to the inherited children property.
+#define GUM_childrenList(child1, /*child2, child3, */ ...) \
+    (GblRingList_create(child1 __VA_OPT__(,) __VA_ARGS__, nullptr))
 
 ////////// Implementation details, Grugs please ignore
 //!\cond GRUGLESS
@@ -146,18 +147,21 @@
     GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
     GUM_CONNECT_PAIRS__18(emitter, __VA_ARGS__)
 
-GBL_EXPORT GBL_RESULT (GUM_draw)              (GUM_Renderer* pRenderer) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update)            (void)                    GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update_disable)    (GblObject* pSelf)        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update_enable)     (GblObject* pSelf)        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update_disableAll) (GblObject* pSelf)        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update_enableAll)  (GblObject* pSelf)        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_draw_enable)       (GblObject* pSelf)        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_draw_disable)      (GblObject* pSelf)        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)    (GblObject* pSelf)        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)   (GblObject* pSelf)        GBL_NOEXCEPT;
-GBL_EXPORT GblObject* (GUM_ref)               (GblObject* pSelf)        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_unref)             (GblObject* pSelf)        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw)              (GUM_Renderer* pRenderer)                  GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update)            (void)                                    GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_disable)    (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_enable)     (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_disableAll) (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_enableAll)  (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_enable)       (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_disable)      (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)    (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)   (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_setProperty)       (GblObject* pSelf, const char* pName, ...) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_add_child)         (GblObject* pSelf, GblObject* pChild)     GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_remove_child)      (GblObject* pSelf, GblObject* pChild)     GBL_NOEXCEPT;
+GBL_EXPORT GblObject* (GUM_ref)               (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_unref)             (GblObject* pSelf)                        GBL_NOEXCEPT;
 //!\endcond
 
 #endif
