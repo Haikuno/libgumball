@@ -11,6 +11,7 @@
 
 #include <gimbal/gimbal_containers.h>
 
+#include "gumball_container_.h"
 #include "gumball_root_.h"
 #include "gumball_widget_.h"
 
@@ -404,6 +405,20 @@ GBL_RESULT GUM_Root_draw_(GUM_Root* pRoot, GUM_Renderer* pRenderer) {
     return firstFailure;
 }
 
+static bool GUM_Root_scrollbarHit_(GUM_Widget* pWidget, GUM_Vector2 position) {
+    GUM_Container* pContainer = GBL_AS(GUM_Container, pWidget);
+    if (!pContainer)
+        return false;
+
+    GUM_Rectangle track;
+    GUM_Rectangle thumb;
+    if (!GUM_Container_scrollbarGeometry_(pContainer, &track, &thumb))
+        return false;
+
+    return position.x >= track.x && position.x < track.x + track.width &&
+           position.y >= track.y && position.y < track.y + track.height;
+}
+
 static GUM_Widget* GUM_Root_pointerWidgetAt_(GUM_Root* pRoot,
                                              GUM_Vector2 position,
                                              bool activeOnly) {
@@ -413,7 +428,9 @@ static GUM_Widget* GUM_Root_pointerWidgetAt_(GUM_Root* pRoot,
     for (GUM_Widget* pWidget = GUM_ROOT_(pRoot)->pDrawLast;
          pWidget;
          pWidget = GUM_WIDGET_(pWidget)->pDrawPrev) {
-        if (!pWidget->isInteractive || (activeOnly && !GUM_Widget_isActive(pWidget)))
+        if (!pWidget->isInteractive)
+            continue;
+        if (activeOnly && !GUM_Widget_isActive(pWidget) && !GUM_Root_scrollbarHit_(pWidget, position))
             continue;
 
         const GUM_Vector2 widgetPos  = GUM_get_absolute_position_(pWidget);
