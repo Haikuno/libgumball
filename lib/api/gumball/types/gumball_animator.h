@@ -12,7 +12,7 @@
  *   easing curve or a custom one of your own.
  *
  *   \author     2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
@@ -43,6 +43,7 @@ typedef float (*GUM_EasingFn)(float t);
 
 /*!  \struct GUM_Animator
  *   \brief  GUM_Animator structure
+ *   \note   pOnDone is owned; do not shallow-copy an animator while it is non-null.
 */
 typedef struct {
     float          from;     //!< Value eased from
@@ -52,7 +53,7 @@ typedef struct {
     float          elapsed;  //!< Time elapsed since the last GUM_Animator_set()
     GUM_EasingType easing;   //!< Built-in curve used to shape progress over time
     GUM_EasingFn   pFnEase;  //!< Custom curve, only used when easing == GUM_EASE_CUSTOM
-    GblClosure*    pOnDone;  //!< Optional closure invoked once settled. May be nullptr
+    GblClosure*    pOnDone;  //!< Optional owned closure. May be nullptr
 } GUM_Animator;
 
 #define GUM_ANIMATOR_TYPE (GBL_TYPEID(GUM_Animator)) //!< Returns the GUM_Animator Type UUID
@@ -65,12 +66,12 @@ GblType GUM_Animator_type(void) GBL_NOEXCEPT;
  *   \brief Methods for creating, retargeting, and advancing an animator
  *   @{
 */
-GBL_EXPORT GUM_Animator GUM_Animator_make      (float value, float duration, GUM_EasingType easing) GBL_NOEXCEPT; //!< Returns a new animator sitting at rest on value, using a built-in curve
-GBL_EXPORT GUM_Animator GUM_Animator_makeCustom(float value, float duration, GUM_EasingFn pFnEase)  GBL_NOEXCEPT; //!< Returns a new animator sitting at rest on value, using a custom curve
+GBL_EXPORT GUM_Animator GUM_Animator_make      (float value, float duration, GUM_EasingType easing) GBL_NOEXCEPT; //!< Returns a settled animator; invalid easing falls back to linear.
+GBL_EXPORT GUM_Animator GUM_Animator_makeCustom(float value, float duration, GUM_EasingFn pFnEase)  GBL_NOEXCEPT; //!< Returns a settled custom animator; nullptr easing falls back to linear.
 GBL_EXPORT void         GUM_Animator_set       (GUM_Animator* pSelf, float target)                  GBL_NOEXCEPT; //!< Retargets the animator, easing from its current value
-GBL_EXPORT bool         GUM_Animator_update    (GUM_Animator* pSelf, float dt)                      GBL_NOEXCEPT; //!< Advances current toward target. Returns true if it moved. Does NOT invoke pOnDone -- check GUM_Animator_settled() and invoke it yourself after you're done using pSelf
+GBL_EXPORT bool         GUM_Animator_update    (GUM_Animator* pSelf, float dt)                      GBL_NOEXCEPT; //!< Advances current toward target. Does not invoke pOnDone.
 GBL_EXPORT bool         GUM_Animator_settled   (const GUM_Animator* pSelf)                          GBL_NOEXCEPT; //!< Returns true if current has reached target
-GBL_EXPORT void         GUM_Animator_setOnDone (GUM_Animator* pSelf, GblClosure* pClosure)          GBL_NOEXCEPT; //!< Sets (or replaces) the closure invoked when the animator settles
+GBL_EXPORT void         GUM_Animator_setOnDone (GUM_Animator* pSelf, GblClosure* pClosure)          GBL_NOEXCEPT; //!< Owns pClosure; nullptr clears the current closure.
 //! @}
 
 /*!  \name  Built-in Easing Curves
