@@ -715,7 +715,7 @@ GBL_TEST_CASE(treeView)
     GUM_unref(pTree);
     GUM_unref(pKeyboard);
     GUM_unref(pPanelTable);
-    GUM_unref(pPanelModel);
+    GUM_IItemModel_unref(GUM_IITEMMODEL(pPanelModel));
     GUM_IItemModel_unref(pItemModel);
     GBL_UNREF(pRoot);
 GBL_TEST_CASE_END
