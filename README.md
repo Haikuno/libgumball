@@ -12,7 +12,7 @@
 
 # Overview #
 libGumball is a modern UI library written in C23, built on top of libGimbal to provide an ergonomic way to create user interfaces in pure C.
-Designed primarily for video game development, it leverages libGimbal's powerful property system, dynamic type system, and other capabilities to make UI building intuitive, efficient, and performant.
+Designed primarily for video game development, it leverages libGimbal's property system, dynamic type system, and other capabilities to make UI building intuitive, efficient, and performant.
 
 # Building #
 First, ensure submodules are installed with:
@@ -22,18 +22,28 @@ git submodule update --init --recursive
 
 To build the project from the command-line, you can do the following:
 ```
-mkdir -P build
+mkdir -p build
 cmake -S . -B build
 cmake --build build --parallel
 ```
 
 You can optionally pass `-DGUM_BUILD_EXAMPLES=ON` if you wish to build the examples, like so:
 ```
-mkdir -P build
+mkdir -p build
 cmake -S . -B build -DGUM_BUILD_EXAMPLES=ON
 cmake --build build --parallel
 ```
 The resulting example programs will be under `build/examples/`
+
+To run the cross-backend parity check through CTest, first build the parity
+executable for both backends. Then configure a test build with their paths:
+```
+cmake -S . -B build-parity \
+  -DGUM_BUILD_TESTS=ON \
+  -DGUM_PARITY_SDL3_EXECUTABLE="$PWD/build-sdl3/tests/GumballBackendParity" \
+  -DGUM_PARITY_RAYLIB_EXECUTABLE="$PWD/build-raylib/tests/GumballBackendParity"
+ctest --test-dir build-parity -R GumballBackendParityCompare --output-on-failure
+```
 
 # Using #
 This library is meant to be included as a submodule of your own project.
@@ -49,6 +59,9 @@ add_subdirectory(libgumball)
 target_link_libraries(yourproject libGumball)
 ```
 
+libGumball includes `lib/resources/fonts/default.ttf` as its default font. `GUM_Font_setDefault()` can be used to override it.
+If assets are installed somewhere else, `GUM_DEFAULT_FONT_RUNTIME_PATH` can be set to the installed `default.ttf` path.
+
 # Credits #
 ## Author ##
 Agustín Bellagamba ([Haikuno](https://github.com/Haikuno))
@@ -57,4 +70,4 @@ Agustín Bellagamba ([Haikuno](https://github.com/Haikuno))
 
 ## Optional Dependencies ##
 - Backend: [raylib](https://github.com/raysan5/raylib)
-- Backend: [SDL](https://github.com/libsdl-org/SDL) and [SDL_ttf](https://github.com/libsdl-org/SDL_ttf)
+- Backend: [SDL3](https://github.com/libsdl-org/SDL) and SDL3_ttf

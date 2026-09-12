@@ -7,9 +7,9 @@
  *   \ref     GUM_Texture "GUM_Texture data structure and hierarchy graph"
  *   \ingroup types
  *
- *   GUM_Texture is the backend-agnostic type that represents a texture
+ *   GUM_Texture is the backend-agnostic type that represents a texture.
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
@@ -23,7 +23,7 @@
 */
 #define GUM_TEXTURE_TYPE          (GBL_TYPEID     (GUM_Texture))           //!< Returns the GUM_Texture Type UUID
 #define GUM_TEXTURE(self)         (GBL_CAST       (GUM_Texture, self))     //!< Casts an instance of a compatible resource to a GUM_Texture
-#define GUM_TEXTURE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Texture, klass))    //!< Casts a  class    of a compatible resource to a GUM_TextureClass
+#define GUM_TEXTURE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Texture, klass))    //!< Casts a class of a compatible resource to a GUM_TextureClass
 #define GUM_TEXTURE_CLASSOF(self) (GBL_CLASSOF    (GUM_Texture, self))     //!< Casts an instance of a compatible resource to a GUM_TextureClass
 //! @}
 
@@ -44,7 +44,7 @@ GBL_CLASS_DERIVE_EMPTY(GUM_Texture, GblBox, GUM_IResource)
 
 /*!  \class   GUM_Texture
  *   \extends GblBox
- *   \brief   Backend agnostic texture type
+ *   \brief   Backend-agnostic texture type
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Texture, GblBox)
 
@@ -52,11 +52,8 @@ GBL_INSTANCE_DERIVE_EMPTY(GUM_Texture, GblBox)
 GblType GUM_Texture_type(void) GBL_NOEXCEPT;
 //! \endcond
 
-//! Returns the size of the texture as a GUM_Vector2
+//! Returns the texture dimensions in pixels.
 GUM_Vector2 GUM_Texture_size(GBL_SELF);
-
-//! Returns a void pointer to the underlying backend specific texture
-void* GUM_Texture_getTexture(GBL_SELF);
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

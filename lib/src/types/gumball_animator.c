@@ -15,6 +15,18 @@ static const GUM_EasingFn s_easingFns_[GUM_EASE_COUNT] = {
     [GUM_EASE_CUSTOM]       = nullptr // resolved to pSelf->pFnEase instead
 };
 
+static GUM_EasingType GUM_Animator_builtinEasing_(GUM_EasingType easing) {
+    return easing >= GUM_EASE_LINEAR && easing < GUM_EASE_CUSTOM ? easing : GUM_EASE_LINEAR;
+}
+
+static GUM_EasingFn GUM_Animator_easingFn_(const GUM_Animator* pSelf) {
+    if (pSelf->easing == GUM_EASE_CUSTOM && pSelf->pFnEase)
+        return pSelf->pFnEase;
+
+    const GUM_EasingType easing = GUM_Animator_builtinEasing_(pSelf->easing);
+    return s_easingFns_[easing];
+}
+
 GblType GUM_Animator_type(void) {
     static GblType type = GBL_INVALID_TYPE;
 
@@ -26,16 +38,22 @@ GblType GUM_Animator_type(void) {
 }
 
 GBL_EXPORT GUM_Animator GUM_Animator_make(float value, float duration, GUM_EasingType easing) {
+    duration = GBL_MAX(duration, 0.0f);
+    easing = GUM_Animator_builtinEasing_(easing);
     return (GUM_Animator){ .from     = value,
                            .to       = value,
                            .current  = value,
                            .duration = duration,
+                           .elapsed  = duration,
                            .easing   = easing};
 }
 
 GBL_EXPORT GUM_Animator GUM_Animator_makeCustom(float value, float duration, GUM_EasingFn pFnEase) {
-    GUM_Animator animator = GUM_Animator_make(value, duration, GUM_EASE_CUSTOM);
-    animator.pFnEase = pFnEase;
+    GUM_Animator animator = GUM_Animator_make(value, duration, GUM_EASE_LINEAR);
+    if (pFnEase) {
+        animator.easing = GUM_EASE_CUSTOM;
+        animator.pFnEase = pFnEase;
+    }
     return animator;
 }
 
@@ -43,21 +61,24 @@ GBL_EXPORT void GUM_Animator_set(GUM_Animator* pSelf, float target) {
     pSelf->from    = pSelf->current;
     pSelf->to      = target;
     pSelf->elapsed = 0.0f;
+
+    if (pSelf->duration <= 0.0f)
+        pSelf->current = target;
 }
 
 GBL_EXPORT bool GUM_Animator_update(GUM_Animator* pSelf, float dt) {
-    if (GUM_Animator_settled(pSelf))
+    if (GUM_Animator_settled(pSelf) || dt <= 0.0f)
         return false;
 
+    const float previous = pSelf->current;
     pSelf->elapsed = GBL_MIN(pSelf->elapsed + dt, pSelf->duration);
 
-    const float        t       = pSelf->duration > 0.0f ? pSelf->elapsed / pSelf->duration : 1.0f;
-    const GUM_EasingFn pFnEase = pSelf->easing == GUM_EASE_CUSTOM ? pSelf->pFnEase
-                                                                  : s_easingFns_[pSelf->easing];
+    const float t = pSelf->duration > 0.0f ? pSelf->elapsed / pSelf->duration : 1.0f;
+    const GUM_EasingFn pFnEase = GUM_Animator_easingFn_(pSelf);
 
     pSelf->current = pSelf->from + (pSelf->to - pSelf->from) * pFnEase(t);
 
-    return true;
+    return pSelf->current != previous;
 }
 
 GBL_EXPORT bool GUM_Animator_settled(const GUM_Animator* pSelf) {
@@ -65,10 +86,14 @@ GBL_EXPORT bool GUM_Animator_settled(const GUM_Animator* pSelf) {
 }
 
 GBL_EXPORT void GUM_Animator_setOnDone(GUM_Animator* pSelf, GblClosure* pClosure) {
+    /* Acquire before releasing so assigning the already-installed closure is safe
+     * even when the Animator owns its final reference. */
+    GblClosure* pReplacement = pClosure ? GblClosure_ref(pClosure) : nullptr;
+
     if (pSelf->pOnDone)
         GblClosure_unref(pSelf->pOnDone);
 
-    pSelf->pOnDone = pClosure ? GblClosure_ref(pClosure) : nullptr;
+    pSelf->pOnDone = pReplacement;
 }
 
 // NOTE: these functions use Robert Penner's constants, so if you don't like them blame him not me :mink:
@@ -130,4 +155,3 @@ GBL_EXPORT float GUM_Ease_elasticOut(float t) {
     const float p = 0.3f;
     return powf(2.0f, -10.0f * t) * sinf((t - p / 4.0f) * (2.0f * GBL_F_PI) / p) + 1.0f;
 }
-

@@ -1,61 +1,70 @@
 #include <gumball/ifaces/gumball_iresource.h>
-#include <gumball/core/gumball_logger.h>
 
-#define GUM_IRESOURCE_QUARK_FIELD_NAME "GUM_IResource_quark"
-#define GUM_IRESOURCE_VALUE_FIELD_NAME "GUM_IResource_value"
+#include "gumball_iresource_.h"
+
+#include <string.h>
+
+static GBL_RESULT GUM_IResource_pathDtor_(const GblArrayMap* pMap,
+                                          uintptr_t key,
+                                          void* pValue) {
+    GBL_UNUSED(pMap, key);
+    GblStringRef_unref(pValue);
+    return GBL_RESULT_SUCCESS;
+}
 
 GBL_EXPORT GUM_IResource* GUM_IResource_ref(GUM_IResource* pResource) {
-    return GUM_IRESOURCE(GBL_REF(pResource));
+    return pResource ? GUM_IRESOURCE(GBL_REF(pResource)) : nullptr;
 }
 
 GBL_EXPORT GblRefCount GUM_IResource_unref(GUM_IResource* pResource) {
-    GUM_LOG_DEBUG_SCOPE("GUM_IResource_unref() called...") {
-        if (!pResource) {
-            GBL_SCOPE_EXIT;
-        }
+    return pResource ? GBL_UNREF(pResource) : 0;
+}
 
-        if (GblBox_refCount(GBL_BOX(pResource)) <= 1) {
-            GUM_LOG_ERROR("Tried to unref a resource that is not being used!");
-            GUM_LOG_ERROR("Use GUM_Manager_unload() instead.");
-        }
+GBL_RESULT GUM_IResource_setPath_(GUM_IResource* pResource, GblStringRef* pPath) {
+    if (!pResource)
+        return GBL_RESULT_ERROR_INVALID_POINTER;
 
-        GUM_LOG_DEBUG("Resource unreffed!");
+    const GblQuark key = GblQuark_fromStatic(GUM_IRESOURCE_PATH_FIELD_NAME_);
+    if (!pPath) {
+        GblBox_clearField(GBL_BOX(pResource), key);
+        return GBL_RESULT_SUCCESS;
     }
 
-    return GBL_UNREF(pResource);
+    GblStringRef* pNewPath = GblStringRef_create(pPath);
+    if (!pNewPath)
+        return GBL_RESULT_ERROR_MEM_ALLOC;
+
+    const GBL_RESULT result = GblBox_setField(GBL_BOX(pResource),
+                                              key,
+                                              (uintptr_t)pNewPath,
+                                              GUM_IResource_pathDtor_);
+    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
+        GblStringRef_unref(pNewPath);
+    return result;
 }
 
-GBL_EXPORT void* GUM_IResource_data(const GUM_IResource* pResource) {
-    return (void*)GblBox_field(GBL_BOX(pResource), GblQuark_fromStatic(GUM_IRESOURCE_VALUE_FIELD_NAME));
-}
+GBL_RESULT GUM_IResource_convertString_(const GblVariant* pValue, GblVariant* pString) {
+    if (!pValue || !pString)
+        return GBL_RESULT_ERROR_INVALID_POINTER;
 
-GBL_EXPORT void GUM_IResource_setData(GUM_IResource* pResource, void* pValue) {
-    GblBox_setField(GBL_BOX(pResource), GblQuark_fromStatic(GUM_IRESOURCE_VALUE_FIELD_NAME), (uintptr_t)pValue);
-}
+    GblBox* pBox = GblVariant_boxPeek(pValue);
+    if (!pBox)
+        return GblVariant_setString(pString, "(null)");
 
-static GBL_RESULT GUM_IResource_setValue_(GUM_IResource* pResource, void* pValue) {
-    GblBox_setField(GBL_BOX(pResource), GblQuark_fromStatic(GUM_IRESOURCE_VALUE_FIELD_NAME), (uintptr_t)pValue);
-    return GBL_RESULT_SUCCESS;
-}
+    GUM_IResource* pResource = GUM_IRESOURCE(pBox);
+    const char* pName = GUM_IResource_path_(pResource);
+    if (pName) {
+        const char* pSlash = strrchr(pName, '/');
+        const char* pBackslash = strrchr(pName, '\\');
+        if (!pSlash || (pBackslash && pBackslash > pSlash))
+            pSlash = pBackslash;
+        if (pSlash && pSlash[1])
+            pName = pSlash + 1;
+    }
 
-static GBL_RESULT GUM_IResource_quark_(const GUM_IResource* pResource, GblQuark* pQuark) {
-    *pQuark = (GblQuark)GblBox_field(GBL_BOX(pResource), GblQuark_fromStatic(GUM_IRESOURCE_QUARK_FIELD_NAME));
-    return GBL_RESULT_SUCCESS;
-}
-
-static GBL_RESULT GUM_IResource_setQuark_(GUM_IResource* pResource, GblQuark pQuark) {
-    GblBox_setField(GBL_BOX(pResource), GblQuark_fromStatic(GUM_IRESOURCE_QUARK_FIELD_NAME), (uintptr_t)pQuark);
-    return GBL_RESULT_SUCCESS;
-}
-
-static GBL_RESULT GUM_IResourceClass_init_(GblClass* pClass, const void* pData) {
-    GBL_UNUSED(pData);
-
-    GUM_IRESOURCE_CLASS(pClass)->pFnSetValue   = GUM_IResource_setValue_;
-    GUM_IRESOURCE_CLASS(pClass)->pFnQuark      = GUM_IResource_quark_;
-    GUM_IRESOURCE_CLASS(pClass)->pFnSetQuark = GUM_IResource_setQuark_;
-
-    return GBL_RESULT_SUCCESS;
+    return GblVariant_setString(pString,
+                                pName && pName[0] ? pName
+                                                  : GblType_name(GblVariant_typeOf(pValue)));
 }
 
 GblType GUM_IResource_type(void) {
@@ -64,13 +73,12 @@ GblType GUM_IResource_type(void) {
 
     if GBL_UNLIKELY (type == GBL_INVALID_TYPE) {
         dependencies[0] = GBL_BOX_TYPE;
-        type            = GblType_register(GblQuark_internStatic("GUM_IResource"),
-                                           GBL_INTERFACE_TYPE,
-                                           &(static GblTypeInfo){.classSize       = sizeof(GUM_IResourceClass),
-                                                                 .pFnClassInit    = GUM_IResourceClass_init_,
-                                                                 .pDependencies   = dependencies,
-                                                                 .dependencyCount = 1},
-                                           GBL_TYPE_FLAG_TYPEINFO_STATIC);
+        type = GblType_register(GblQuark_internStatic("GUM_IResource"),
+                                GBL_INTERFACE_TYPE,
+                                &(static GblTypeInfo){ .classSize        = sizeof(GUM_IResourceClass),
+                                                       .pDependencies    = dependencies,
+                                                       .dependencyCount = 1 },
+                                GBL_TYPE_FLAG_TYPEINFO_STATIC);
     }
 
     return type;

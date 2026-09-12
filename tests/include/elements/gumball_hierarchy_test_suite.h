@@ -1,0 +1,17 @@
+#ifndef GUMBALL_HIERARCHY_TEST_SUITE_H
+#define GUMBALL_HIERARCHY_TEST_SUITE_H
+
+#include <gimbal/test/gimbal_test_suite.h>
+
+#define GUM_HIERARCHY_TEST_SUITE_TYPE (GBL_TYPEID(GUM_HierarchyTestSuite))
+
+GBL_DECLS_BEGIN
+
+GBL_CLASS_DERIVE_EMPTY(GUM_HierarchyTestSuite, GblTestSuite)
+GBL_INSTANCE_DERIVE_EMPTY(GUM_HierarchyTestSuite, GblTestSuite)
+
+GblType GUM_HierarchyTestSuite_type(void) GBL_NOEXCEPT;
+
+GBL_DECLS_END
+
+#endif // GUMBALL_HIERARCHY_TEST_SUITE_H

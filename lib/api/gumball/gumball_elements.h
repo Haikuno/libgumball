@@ -20,8 +20,9 @@
 #include "elements/gumball_widget.h"
 #include "elements/gumball_button.h"
 #include "elements/gumball_container.h"
+#include "elements/gumball_tree.h"
+#include "elements/gumball_table.h"
 #include "elements/gumball_common.h"
-#include "elements/gumball_objectviewer.h"
 
 /*!  \defgroup elements Elements
  *   \brief    Element types

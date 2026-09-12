@@ -7,16 +7,15 @@
  *   \brief      Interfaces module-wide include
  *   \ingroup    ifaces
  *
- *   \author     2025 Agustín Bellagamba
+ *   \author     2025, 2026 Agustín Bellagamba
  *   \copyright  MIT License
 */
 
 #include "ifaces/gumball_iresource.h"
-
+#include "ifaces/gumball_iitemmodel.h"
 
 /*!  \defgroup ifaces Interfaces
  *   \brief    Interfaces
- *
  *
  *   libGumball interfaces that can be implemented by types
 */

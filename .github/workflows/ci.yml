@@ -1,0 +1,307 @@
+name: CI
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sdl3:
+    name: SDL3 build and tests
+    runs-on: ubuntu-latest
+    env:
+      SDL_VIDEODRIVER: dummy
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install SDL3 host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf autoconf-archive automake libtool \
+            ninja-build pkg-config \
+            xorg-dev libgl1-mesa-dev libglu1-mesa-dev \
+            libwayland-dev libxkbcommon-dev libegl1-mesa-dev
+
+      - name: Restore vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v3-png
+
+      - name: Prepare vcpkg
+        run: |
+          git clone --branch 2026.07.29 --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
+          "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+
+      - name: Install SDL3
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
+
+      - name: Preserve SDL3 vcpkg failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdl3-vcpkg-failure
+          path: |
+            ${{ runner.temp }}/vcpkg/buildtrees/sdl3/**/*.log
+            ${{ runner.temp }}/vcpkg/installed/vcpkg/issue_body.md
+          if-no-files-found: warn
+
+      - name: Install SDL3_image with PNG support
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3-image[png]'
+
+      - name: Install SDL3_ttf
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
+
+      - name: Configure SDL3
+        run: |
+          cmake -S . -B build-sdl3 -G Ninja \
+            -DGUM_BACKEND=SDL3 \
+            -DGUM_BUILD_TESTS=ON \
+            -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Build SDL3
+        run: cmake --build build-sdl3 --parallel
+
+      - name: Test SDL3
+        run: |
+          set -o pipefail
+          ctest --test-dir build-sdl3 --verbose 2>&1 | tee build-sdl3/test-output.log
+          if grep -Fiq "invalid pointer" build-sdl3/test-output.log; then
+            echo "::error::Invalid pointer diagnostic detected in SDL3 test output"
+            exit 1
+          fi
+
+      - name: Preserve SDL3 test failure output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdl3-test-failure
+          path: build-sdl3/test-output.log
+          if-no-files-found: warn
+
+      - name: Render SDL3 parity scene
+        if: success()
+        run: |
+          mkdir -p parity-output
+          build-sdl3/tests/GumballBackendParity parity-output/backend-parity-sdl3.png
+
+      - name: Upload SDL3 parity image
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-parity-sdl3
+          path: parity-output/backend-parity-sdl3.png
+
+  raylib:
+    name: raylib build and tests
+    runs-on: ubuntu-latest
+    env:
+      LIBGL_ALWAYS_SOFTWARE: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install raylib host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build xvfb pkg-config \
+            xorg-dev libgl1-mesa-dev libglu1-mesa-dev
+
+      - name: Restore vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-2026.07.29-raylib
+
+      - name: Install raylib dependencies
+        run: |
+          git clone --branch 2026.07.29 --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
+          "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'raylib[core]'
+
+      - name: Configure raylib
+        run: |
+          cmake -S . -B build-raylib -G Ninja \
+            -DGUM_BACKEND=RAYLIB \
+            -DGUM_BUILD_TESTS=ON \
+            -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Build raylib
+        run: cmake --build build-raylib --parallel
+
+      - name: Test raylib
+        run: |
+          set -o pipefail
+          xvfb-run -a ctest --test-dir build-raylib --verbose 2>&1 | tee build-raylib/test-output.log
+          if grep -Fiq "invalid pointer" build-raylib/test-output.log; then
+            echo "::error::Invalid pointer diagnostic detected in raylib test output"
+            exit 1
+          fi
+
+      - name: Preserve raylib test failure output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raylib-test-failure
+          path: build-raylib/test-output.log
+          if-no-files-found: warn
+
+      - name: Render raylib parity scene
+        if: success()
+        run: |
+          mkdir -p parity-output
+          xvfb-run -a build-raylib/tests/GumballBackendParity parity-output/backend-parity-raylib.png
+
+      - name: Upload raylib parity image
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-parity-raylib
+          path: parity-output/backend-parity-raylib.png
+
+  sanitizer:
+    name: SDL3 ASan and UBSan
+    runs-on: ubuntu-latest
+    env:
+      SDL_VIDEODRIVER: dummy
+      ASAN_OPTIONS: detect_leaks=1:halt_on_error=1:fast_unwind_on_malloc=0
+      LSAN_OPTIONS: suppressions=${{ github.workspace }}/tests/lsan.supp:print_suppressions=1
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install SDL3 host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf autoconf-archive automake libtool \
+            ninja-build pkg-config \
+            xorg-dev libgl1-mesa-dev libglu1-mesa-dev \
+            libwayland-dev libxkbcommon-dev libegl1-mesa-dev
+
+      - name: Restore vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-2026.07.29-sdl3-v3-png
+
+      - name: Prepare vcpkg
+        run: |
+          git clone --branch 2026.07.29 --depth 1 https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
+          "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+
+      - name: Install SDL3
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3[core,x11,wayland]'
+
+      - name: Preserve SDL3 sanitizer vcpkg failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdl3-sanitizer-vcpkg-failure
+          path: |
+            ${{ runner.temp }}/vcpkg/buildtrees/sdl3/**/*.log
+            ${{ runner.temp }}/vcpkg/installed/vcpkg/issue_body.md
+          if-no-files-found: warn
+
+      - name: Install SDL3_image with PNG support
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install 'sdl3-image[png]'
+
+      - name: Install SDL3_ttf
+        run: |
+          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
+
+      - name: Configure sanitizers
+        run: |
+          cmake -S . -B build-sanitize -G Ninja \
+            -DGUM_BACKEND=SDL3 \
+            -DGUM_BUILD_TESTS=ON \
+            -DGUM_ENABLE_SANITIZERS=ON \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Build sanitizers
+        id: sanitizer_build
+        run: |
+          set -o pipefail
+          cmake --build build-sanitize --parallel 2>&1 | tee build-sanitize/build-output.log
+
+      - name: Preserve sanitizer build failure output
+        if: ${{ failure() && steps.sanitizer_build.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-build-failure
+          path: build-sanitize/build-output.log
+          if-no-files-found: error
+
+      - name: Test sanitizers
+        id: sanitizer_test
+        run: |
+          set -o pipefail
+          ctest --test-dir build-sanitize --verbose 2>&1 | tee build-sanitize/test-output.log
+          if grep -Fiq "invalid pointer" build-sanitize/test-output.log; then
+            echo "::error::Invalid pointer diagnostic detected in sanitizer test output"
+            exit 1
+          fi
+
+      - name: Preserve sanitizer test failure output
+        if: ${{ failure() && steps.sanitizer_test.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-test-failure
+          path: build-sanitize/test-output.log
+          if-no-files-found: error
+
+  parity:
+    name: Backend pixel parity
+    needs: [sdl3, raylib]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install parity tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pil
+
+      - name: Download SDL3 parity image
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-parity-sdl3
+          path: parity-output
+
+      - name: Download raylib parity image
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-parity-raylib
+          path: parity-output
+
+      - name: Compare backend output
+        run: python3 tests/parity/compare_images.py parity-output/backend-parity-sdl3.png parity-output/backend-parity-raylib.png parity-output/backend-parity-diff.png
+
+      - name: Upload parity failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-parity-diff
+          path: parity-output/backend-parity-diff.png
+          if-no-files-found: ignore

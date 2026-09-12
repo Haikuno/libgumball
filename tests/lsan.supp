@@ -1,0 +1,11 @@
+# libGimbal allocates per-type class/type-info chunks in this function.
+# Its process-exit type-registry finalizer destroys the metaclass registry without
+# releasing every still-registered type's class chunk first. That shutdown leak
+# belongs to the unmodified dependency, not libGumball-owned runtime state.
+leak:GblType_updateTypeInfoClassChunk_
+
+# Pinned libGimbal's deprecated GblTestScenario allocation tracker can leave the
+# final instance allocations alive after reporting an unknown free during the
+# objectBridge teardown path. The bridge objects reach cleanup with balanced
+# references; ASan/UBSan and all unsuppressed leaks remain blocking.
+leak:GUM_HierarchyTestSuite_objectBridge_
