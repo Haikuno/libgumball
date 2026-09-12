@@ -45,22 +45,6 @@ static GblBool resourceComparator_(const GblHashSet* pSet, const void* pEntry1, 
     return pLeft->hash == pRight->hash && strcmp(pLeft->pPath, pRight->pPath) == 0;
 }
 
-static void resourceWarnExternalRefs_(const GUM_HashSetEntry* pEntry, const char* pAction) {
-    if (!pEntry || !pEntry->pResource || !pAction)
-        return;
-
-    const GblRefCount refCount = GblBox_refCount(GBL_BOX(pEntry->pResource));
-    if (refCount <= 2)
-        return;
-
-    const unsigned externalRefs = (unsigned)(refCount - 1);
-    GUM_LOG_WARN("%s resource '%s' with %u external reference%s remaining.",
-                 pAction,
-                 pEntry->pPath ? pEntry->pPath : "(unknown)",
-                 externalRefs,
-                 externalRefs == 1 ? "" : "s");
-}
-
 static void resourceDestructor_(const GblHashSet* pSet, void* pItem) {
     GBL_UNUSED(pSet);
     GUM_HashSetEntry* pEntry = pItem;
@@ -427,13 +411,6 @@ static GBL_RESULT GUM_Manager_GblModule_unload_(GblModule* pModule) {
     if (pManager->unloading)
         return GBL_RESULT_SUCCESS;
 
-    const size_t bucketCount = GblHashSet_bucketCount(&pManager->resources);
-    for (size_t i = 0; i < bucketCount; ++i) {
-        GUM_HashSetEntry* pEntry = GblHashSet_probe(&pManager->resources, i);
-        if (pEntry)
-            resourceWarnExternalRefs_(pEntry, "Manager shutdown is releasing");
-    }
-
     pManager->unloading   = true;
     pManager->initialized = false;
 
@@ -539,8 +516,6 @@ GBL_EXPORT GBL_RESULT GUM_Manager_evict(GUM_IResource* pResource) {
     GUM_HashSetEntry* pCached = resourceFindByPointer_(pManager, pResource);
     if (!pCached)
         return GBL_RESULT_NOT_FOUND;
-
-    resourceWarnExternalRefs_(pCached, "Evicting");
 
     const GUM_HashSetEntry key = {
         .pPath = pCached->pPath,

@@ -177,8 +177,10 @@ static GUM_Widget* GUM_Nav_findSelectableByPosition_(GUM_Widget* pCurrent,
 
 static GUM_Widget* GUM_Nav_moveCursor_(GblObject* pSelf, GUM_InputAction direction) {
     GblObject* pParent = GblObject_parent(pSelf);
-    if (!pParent || !GBL_TYPECHECK(GUM_Container, pParent))
+    if (!pParent)
         return nullptr;
+    if (!GBL_TYPECHECK(GUM_Container, pParent))
+        return GUM_Nav_findSelectableByPosition_(GUM_WIDGET(pSelf), direction);
 
     const GUM_Direction parentDirection = GUM_Container_direction(GUM_CONTAINER(pParent));
     GblObject* pGrandParent = GblObject_parent(pParent);
@@ -193,7 +195,7 @@ static GUM_Widget* GUM_Nav_moveCursor_(GblObject* pSelf, GUM_InputAction directi
                           direction == GUM_INPUTACTION_MOVE_DOWN;
 
     if (axis != parentDirection && axis != grandParentDirection)
-        return nullptr;
+        return GUM_Nav_findSelectableByPosition_(GUM_WIDGET(pSelf), direction);
 
     const size_t childIndex = GblObject_childIndex(pSelf);
 

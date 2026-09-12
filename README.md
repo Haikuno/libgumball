@@ -22,18 +22,28 @@ git submodule update --init --recursive
 
 To build the project from the command-line, you can do the following:
 ```
-mkdir -P build
+mkdir -p build
 cmake -S . -B build
 cmake --build build --parallel
 ```
 
 You can optionally pass `-DGUM_BUILD_EXAMPLES=ON` if you wish to build the examples, like so:
 ```
-mkdir -P build
+mkdir -p build
 cmake -S . -B build -DGUM_BUILD_EXAMPLES=ON
 cmake --build build --parallel
 ```
 The resulting example programs will be under `build/examples/`
+
+To run the cross-backend parity check through CTest, first build the parity
+executable for both backends. Then configure a test build with their paths:
+```
+cmake -S . -B build-parity \
+  -DGUM_BUILD_TESTS=ON \
+  -DGUM_PARITY_SDL3_EXECUTABLE="$PWD/build-sdl3/tests/GumballBackendParity" \
+  -DGUM_PARITY_RAYLIB_EXECUTABLE="$PWD/build-raylib/tests/GumballBackendParity"
+ctest --test-dir build-parity -R GumballBackendParityCompare --output-on-failure
+```
 
 # Using #
 This library is meant to be included as a submodule of your own project.

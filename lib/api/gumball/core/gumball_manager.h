@@ -59,7 +59,7 @@ GBL_EXPORT GBL_RESULT      GUM_Manager_setBasePath (GblStringRef* pPath) GBL_NOE
 //! Returns the current base path.
 GBL_EXPORT GblStringRef*   GUM_Manager_basePath    (void) GBL_NOEXCEPT;
 
-//! Deinitializes the resource manager and clears its cache.
+//! Deinitializes the resource manager and clears its cache. Existing references remain valid.
 GBL_EXPORT void            GUM_Manager_deinit      (void) GBL_NOEXCEPT;
 
 GBL_DECLS_END

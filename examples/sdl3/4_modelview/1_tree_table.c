@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
     GBL_UNUSED(argc, argv);
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) return 1;
 
-    SDL_Window* pWindow = SDL_CreateWindow("Model/View - Tree + Table", 1200, 680, 0);
+    SDL_Window* pWindow = SDL_CreateWindow("Model/View - Tree + Table", 1300, 600, 0);
     SDL_Renderer* pSdlRenderer = pWindow ? SDL_CreateRenderer(pWindow, nullptr) : nullptr;
     GUM_Renderer* pRenderer = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
     if (!pRenderer) return 1;
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
                       "label", "Hierarchy",
                       "isInteractive", false);
 
-    GUM_Widget_create("x", 340.0f, "y", 18.0f,
+    GUM_Widget_create("x", 360.0f, "y", 18.0f,
                       "w", 440.0f, "h", 30.0f,
                       "color", 0x00000000u,
                       "font_color", 0x202020FFu,
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
                       "label", "Properties",
                       "isInteractive", false);
 
-    GUM_Widget_create("x", 800.0f, "y", 18.0f,
+    GUM_Widget_create("x", 900.0f, "y", 18.0f,
                       "w", 380.0f, "h", 30.0f,
                       "color", 0x00000000u,
                       "font_color", 0x202020FFu,
@@ -53,8 +53,8 @@ int main(int argc, char* argv[]) {
                                       "border_width", 1,
                                       "isSelectedByDefault", true);
 
-    GUM_Table* pTable = GUM_Table_create("x", 340.0f, "y", 55.0f,
-                                         "w", 440.0f, "h", 500.0f,
+    GUM_Table* pTable = GUM_Table_create("x", 350.0f, "y", 55.0f,
+                                         "w", 520.0f, "h", 500.0f,
                                          "rowHeight", 24.0f,
                                          "color", 0xF7F7F7FFu,
                                          "font_color", 0x202020FFu,
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
                                          "border_width", 1);
 
     GUM_Container* pPreview = GUM_Container_create("name", "Preview",
-                                                   "x", 800.0f, "y", 55.0f,
+                                                   "x", 900.0f, "y", 55.0f,
                                                    "w", 380.0f, "h", 500.0f,
                                                    "padding", 8.0f,
                                                    "margin", 4.0f,
@@ -111,14 +111,6 @@ int main(int argc, char* argv[]) {
                       "font_color", 0x204020FFu,
                       "border_color", 0xA0A0A0FFu,
                       "border_width", 1,
-                      "isInteractive", false);
-
-    GUM_Widget_create("x", 20.0f, "y", 575.0f,
-                      "w", 1160.0f, "h", 70.0f,
-                      "color", 0x00000000u,
-                      "font_color", 0x303030FFu,
-                      "font_size", 14,
-                      "label", "Select a hierarchy row to inspect that live object. Mouse wheel scrolls the hierarchy, property table, and preview content. Click disclosure markers or use the arrow keys to collapse and expand branches.",
                       "isInteractive", false);
 
     GUM_ObjectTreeModel* pTreeModel = GUM_ObjectTreeModel_create(GBL_OBJECT(pPreview));

@@ -102,3 +102,19 @@ add_executable(GumballBackendParity
 target_link_libraries(GumballBackendParity PRIVATE libGumball)
 target_include_directories(GumballBackendParity PRIVATE parity)
 gum_enable_sanitizers(GumballBackendParity)
+
+if(GUM_PARITY_SDL3_EXECUTABLE AND GUM_PARITY_RAYLIB_EXECUTABLE)
+    find_program(PYTHON_EXECUTABLE NAMES python3 python)
+    if(NOT PYTHON_EXECUTABLE)
+        message(FATAL_ERROR "Cross-backend parity testing requires Python 3")
+    endif()
+    add_test(NAME GumballBackendParityCompare
+        COMMAND ${CMAKE_COMMAND}
+            -DSDL3_EXECUTABLE=${GUM_PARITY_SDL3_EXECUTABLE}
+            -DRAYLIB_EXECUTABLE=${GUM_PARITY_RAYLIB_EXECUTABLE}
+            -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+            -DCOMPARE_SCRIPT=${CMAKE_CURRENT_SOURCE_DIR}/parity/compare_images.py
+            -DOUTPUT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/parity-output
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/parity/run_backend_parity.cmake
+    )
+endif()

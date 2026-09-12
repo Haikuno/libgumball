@@ -1,6 +1,7 @@
 #include <gumball/models/gumball_propertymodel.h>
 
 #include <gimbal/gimbal_containers.h>
+#include <gimbal/strings/gimbal_string_buffer.h>
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -124,6 +125,42 @@ static size_t GUM_PropertyModel_columnCount_(const GUM_IItemModel* pModel,
     return GUM_ModelIndex_valid(parent) ? 0 : 2;
 }
 
+static GBL_RESULT GUM_PropertyModel_childrenDisplay_(const GblObject* pObject,
+                                                     GblVariant* pValue) {
+    GblStringBuffer buffer;
+    GBL_RESULT result = GblStringBuffer_construct(&buffer);
+    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
+        return result;
+
+    result = GblStringBuffer_append(&buffer, "[");
+    size_t childIndex = 0;
+    if (GBL_RESULT_SUCCESS(result)) {
+        GblObject_foreachChild((GblObject*)pObject, pChild) {
+            if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
+                break;
+
+            if (childIndex++)
+                result = GblStringBuffer_append(&buffer, ", ");
+
+            if (GBL_RESULT_SUCCESS(result)) {
+                const char* pChildName = GblObject_name(pChild);
+                result = GblStringBuffer_append(&buffer,
+                                                pChildName && pChildName[0]
+                                              ? pChildName
+                                              : GblType_name(GBL_TYPEOF(pChild)));
+            }
+        }
+    }
+
+    if (GBL_RESULT_SUCCESS(result))
+        result = GblStringBuffer_append(&buffer, "]");
+    if (GBL_RESULT_SUCCESS(result))
+        result = GblVariant_setString(pValue, GblStringBuffer_cString(&buffer));
+
+    GblStringBuffer_destruct(&buffer);
+    return result;
+}
+
 static size_t GUM_PropertyModel_rowCount_(const GUM_IItemModel* pModel,
                                           GUM_ModelIndex parent) {
     return GUM_ModelIndex_valid(parent)
@@ -177,8 +214,16 @@ static GBL_RESULT GUM_PropertyModel_displayData_(const GUM_IItemModel* pModel,
     if (index.column == 0)
         return GblVariant_setString(pValue, pName);
 
+    if (pName && !strcmp(pName, "name")) {
+        const char* pObjectName = GblObject_name(pSelf_->pObject);
+        return GblVariant_setString(pValue,
+                                    pObjectName && pObjectName[0]
+                                  ? pObjectName
+                                  : GblType_name(GBL_TYPEOF(pSelf_->pObject)));
+    }
+
     if (pName && !strcmp(pName, "children"))
-        return GblVariant_setSize(pValue, GblObject_childCount(pSelf_->pObject));
+        return GUM_PropertyModel_childrenDisplay_(pSelf_->pObject, pValue);
 
     GBL_RESULT result = GblObject_propertyVariantByQuark(pSelf_->pObject,
                                                           pProperty->name,
@@ -282,13 +327,7 @@ static GBL_RESULT GUM_PropertyModel_init_(GblInstance* pInstance) {
         return result;
     }
 
-    const GblQuark children = GblQuark_fromStatic("children");
-    result = GblArrayList_pushBack(&pSelf_->hidden, &children);
-    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
-        GblArrayList_destruct(&pSelf_->hidden);
-        GblArrayList_destruct(&pSelf_->properties);
-    }
-    return result;
+    return GBL_RESULT_SUCCESS;
 }
 
 static GBL_RESULT GUM_PropertyModel_GblBox_destructor_(GblBox* pBox) {

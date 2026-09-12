@@ -383,24 +383,24 @@ GBL_TEST_CASE(propertyModel)
     GBL_TEST_VERIFY(pWidget && pReplacement);
 
     GblObject* pPropertyChild = GBL_NEW(GblObject, "name", "property child");
-    GBL_TEST_VERIFY(pPropertyChild);
+    GblObject* pSecondPropertyChild = GBL_NEW(GblObject, "name", "second child");
+    GBL_TEST_VERIFY(pPropertyChild && pSecondPropertyChild);
     GblObject_addChild(GBL_OBJECT(pWidget), pPropertyChild);
+    GblObject_addChild(GBL_OBJECT(pWidget), pSecondPropertyChild);
 
     GUM_PropertyModel* pModel = GUM_PropertyModel_create(GBL_OBJECT(pWidget));
     GBL_TEST_VERIFY(pModel);
     GUM_IItemModel* pItemModel = GUM_IITEMMODEL(pModel);
     GBL_TEST_COMPARE(GUM_IItemModel_columnCount(pItemModel, GUM_MODEL_INDEX_INVALID), 2u);
 
-    // Internal collection payloads are hidden by default, but the caller may opt in.
-    GBL_TEST_VERIFY(!GUM_PropertyModel_propertyVisible(pModel, "children"));
-    GBL_TEST_VERIFY(!GUM_ModelIndex_valid(findProperty_(pModel, "children", 1)));
-    GBL_TEST_CALL(GUM_PropertyModel_setPropertyVisible(pModel, "children", GBL_TRUE));
+    // Children are visible by default, but the caller may still hide the collection.
     GBL_TEST_VERIFY(GUM_PropertyModel_propertyVisible(pModel, "children"));
     const GUM_ModelIndex childrenValue = findProperty_(pModel, "children", 1);
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(childrenValue));
     GBL_VARIANT(childrenDisplay);
     GBL_TEST_CALL(GUM_IItemModel_displayData(pItemModel, childrenValue, &childrenDisplay));
-    GBL_TEST_COMPARE(GblVariant_size(&childrenDisplay), 1u);
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&childrenDisplay),
+                            "[property child, second child]"), 0);
     GblVariant_destruct(&childrenDisplay);
     GBL_TEST_CALL(GUM_PropertyModel_setPropertyVisible(pModel, "children", GBL_FALSE));
     GBL_TEST_VERIFY(!GUM_PropertyModel_propertyVisible(pModel, "children"));
@@ -409,9 +409,11 @@ GBL_TEST_CASE(propertyModel)
     // Acquire indices after the visibility changes, which structurally invalidate old indices.
     const GUM_ModelIndex xName = findProperty_(pModel, "x", 0);
     const GUM_ModelIndex xValue = findProperty_(pModel, "x", 1);
+    const GUM_ModelIndex objectNameValue = findProperty_(pModel, "name", 1);
     const GUM_ModelIndex writeOnly = findProperty_(pModel, "labelAcquire", 0);
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(xName));
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(xValue));
+    GBL_TEST_VERIFY(GUM_ModelIndex_valid(objectNameValue));
     GBL_TEST_VERIFY(!GUM_ModelIndex_valid(writeOnly));
     GBL_TEST_VERIFY(GUM_ModelIndex_equal((GUM_ModelIndex){ xValue.pModel, xValue.pHandle, 0 }, xName));
     GBL_TEST_VERIFY(GUM_IItemModel_flags(pItemModel, xName) & GUM_ITEM_SELECTABLE);
@@ -422,6 +424,11 @@ GBL_TEST_CASE(propertyModel)
     GBL_TEST_CALL(GUM_IItemModel_data(pItemModel, xValue, &value));
     GBL_TEST_COMPARE(GblVariant_float(&value), 11.0f);
     GblVariant_destruct(&value);
+
+    GBL_VARIANT(objectNameDisplay);
+    GBL_TEST_CALL(GUM_IItemModel_displayData(pItemModel, objectNameValue, &objectNameDisplay));
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&objectNameDisplay), "GUM_Widget"), 0);
+    GblVariant_destruct(&objectNameDisplay);
 
     // Display formatting never changes the typed edit value.
     const GUM_ModelIndex colorValue = findProperty_(pModel, "color", 1);
@@ -655,9 +662,19 @@ GBL_TEST_CASE(treeView)
                                                            GUM_INPUTACTION_MOVE_LEFT));
     GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Tree_selection(pTree), refreshedRoot));
 
-    // Right on an expanded branch enters its first selectable child.
+    // Right on an expanded branch is left for global focus navigation;
+    // Down enters the branch instead.
+    GBL_TEST_VERIFY(!GUM_WIDGET_CLASSOF(pTree)->pFnNavigate(GUM_WIDGET(pTree),
+                                                            GUM_INPUTACTION_MOVE_RIGHT));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Tree_selection(pTree), refreshedRoot));
+    GBL_TEST_CALL(GUM_Tree_setExpanded(pTree, refreshedRoot, GBL_FALSE));
+    GBL_TEST_VERIFY(!GUM_WIDGET_CLASSOF(pTree)->pFnNavigate(GUM_WIDGET(pTree),
+                                                            GUM_INPUTACTION_MOVE_LEFT));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Tree_selection(pTree), refreshedRoot));
     GBL_TEST_VERIFY(GUM_WIDGET_CLASSOF(pTree)->pFnNavigate(GUM_WIDGET(pTree),
                                                            GUM_INPUTACTION_MOVE_RIGHT));
+    GBL_TEST_VERIFY(GUM_WIDGET_CLASSOF(pTree)->pFnNavigate(GUM_WIDGET(pTree),
+                                                           GUM_INPUTACTION_MOVE_DOWN));
     GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Tree_selection(pTree), refreshedFirstChild));
 
     GBL_TEST_CALL(GUM_WIDGET_CLASSOF(pTree)->pFnUpdate(GUM_WIDGET(pTree)));
@@ -675,11 +692,30 @@ GBL_TEST_CASE(treeView)
     GBL_TEST_CALL(GUM_WIDGET_CLASSOF(pTree)->pFnUpdate(GUM_WIDGET(pTree)));
     GBL_TEST_COMPARE(GUM_Tree_scrollRange(pTree), 0.0f);
 
+    GUM_PropertyModel* pPanelModel = GUM_PropertyModel_create(pRoot);
+    GUM_Table* pPanelTable = GUM_Table_create("x", 350.0f,
+                                              "y", 0.0f,
+                                              "w", 520.0f,
+                                              "h", 500.0f);
+    GUM_Keyboard* pKeyboard = GUM_Keyboard_create();
+    GBL_TEST_VERIFY(pPanelModel && pPanelTable && pKeyboard);
+    GBL_TEST_CALL(GUM_Table_setModel(pPanelTable, GUM_IITEMMODEL(pPanelModel)));
+    GBL_TEST_CALL(GUM_Tree_setExpanded(pTree, refreshedRoot, GBL_TRUE));
+    GBL_TEST_CALL(GUM_Tree_select(pTree, refreshedRoot));
+    GBL_TEST_CALL(GUM_Root_update(pFixture->pRoot));
+    GUM_Nav_focus(GUM_INPUTDEVICE(pKeyboard), GUM_WIDGET(pTree));
+    GUM_Nav_move(GUM_INPUTDEVICE(pKeyboard), GUM_INPUTACTION_MOVE_RIGHT);
+    GBL_TEST_COMPARE(GUM_InputDevice_focusedWidget(GUM_INPUTDEVICE(pKeyboard)),
+                     GUM_WIDGET(pPanelTable));
+
     GBL_TEST_CALL(GUM_Tree_setModel(pTree, nullptr));
     GBL_TEST_VERIFY(!GUM_Tree_model(pTree));
     GBL_TEST_VERIFY(!GUM_ModelIndex_valid(GUM_Tree_selection(pTree)));
 
     GUM_unref(pTree);
+    GUM_unref(pKeyboard);
+    GUM_unref(pPanelTable);
+    GUM_unref(pPanelModel);
     GUM_IItemModel_unref(pItemModel);
     GBL_UNREF(pRoot);
 GBL_TEST_CASE_END

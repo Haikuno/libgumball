@@ -222,6 +222,8 @@ GBL_TEST_CASE(nonContainerAncestor)
                      GUM_WIDGET(pRight));
 
     GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), nullptr);
+
+    GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), nullptr);
     GUM_unref(pWrapper);
 GBL_TEST_CASE_END
 

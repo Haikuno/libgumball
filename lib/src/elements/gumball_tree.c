@@ -168,17 +168,6 @@ static GblBool GUM_Tree_selectParent_(GUM_Tree* pSelf, GUM_ModelIndex index) {
     return GBL_FALSE;
 }
 
-static GblBool GUM_Tree_selectFirstChild_(GUM_Tree* pSelf, GUM_ModelIndex parent) {
-    GUM_IItemModel* pModel = GUM_TREE_(pSelf)->pModel;
-    const size_t rows = GUM_IItemModel_rowCount(pModel, parent);
-    for (size_t row = 0; row < rows; ++row) {
-        const GUM_ModelIndex child = GUM_IItemModel_index(pModel, row, 0, parent);
-        if (GUM_Tree_selectable_(pSelf, child))
-            return GBL_RESULT_SUCCESS(GUM_Tree_select(pSelf, child));
-    }
-    return GBL_FALSE;
-}
-
 static void GUM_Tree_revealSelection_(GUM_Tree* pSelf) {
     GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
     if (!pSelf_->pModel || !GUM_ModelIndex_valid(pSelf_->selection))
@@ -584,8 +573,6 @@ static GblBool GUM_Tree_navigate_(GUM_Widget* pWidget, GUM_InputAction action) {
                     handled = GBL_RESULT_SUCCESS(GUM_Tree_setExpanded(pSelf,
                                                                        pSelf_->selection,
                                                                        GBL_TRUE));
-                else
-                    handled = GUM_Tree_selectFirstChild_(pSelf, pSelf_->selection);
             }
             break;
 
