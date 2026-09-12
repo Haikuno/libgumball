@@ -1,7 +1,12 @@
 #include "../../ifaces/gumball_iresource_.h"
 #include <gumball/core/gumball_backend.h>
+#include <gimbal/strings/gimbal_string_view.h>
 #include <raylib.h>
 #include <stdlib.h>
+
+static bool GUM_Raylib_Font_isBitmap_(const char* pPath) {
+    return GblStringView_endsWithIgnoreCase(GBL_STRV(pPath), ".fnt");
+}
 
 static bool GUM_Raylib_Font_isDefault_(Font font) {
     const Font fallback = GetFontDefault();
@@ -46,9 +51,12 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
     Font* pFont = malloc(sizeof(*pFont));
     if (!pFont) return GBL_RESULT_ERROR_MEM_ALLOC;
 
-    const Font loaded = LoadFontEx(pPath, 22, nullptr, 0);
+    // Keep TrueType/OpenType loading aligned with SDL_ttf's 22px base size.
+    const Font loaded = GUM_Raylib_Font_isBitmap_(pPath)
+        ? LoadFont(pPath)
+        : LoadFontEx(pPath, 22, nullptr, 0);
     if (loaded.texture.id == 0 || !loaded.glyphs || !loaded.recs || GUM_Raylib_Font_isDefault_(loaded)) {
-        // LoadFontEx falls back to the default font on failure.
+        // Raylib's font loaders fall back to the default font on failure.
         free(pFont);
         return GBL_RESULT_ERROR_FILE_READ;
     }
