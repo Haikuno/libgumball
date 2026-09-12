@@ -31,6 +31,25 @@ file(MAKE_DIRECTORY "${GUMBALL_TEST_RESOURCE_DIR}")
 configure_file(koslogo.png "${GUMBALL_TEST_RESOURCE_DIR}/koslogo.png" COPYONLY)
 configure_file(gumball_test.ttf "${GUMBALL_TEST_RESOURCE_DIR}/gumball_test.ttf" COPYONLY)
 
+if(GUM_BACKEND STREQUAL "RAYLIB")
+    # raylib's TTF parser does not safely handle the intentionally tiny test
+    # font. Use the bundled production font under a distinct resource path so
+    # the override still exercises a separate manager entry.
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/lib/resources/fonts/default.ttf"
+        "${GUMBALL_TEST_RESOURCE_DIR}/raylib_test.ttf"
+        COPYONLY
+    )
+    set(GUM_TEST_CUSTOM_FONT_RUNTIME_PATH
+        "${GUMBALL_TEST_RESOURCE_DIR}/raylib_test.ttf")
+else()
+    set(GUM_TEST_CUSTOM_FONT_RUNTIME_PATH
+        "${GUMBALL_TEST_RESOURCE_DIR}/gumball_test.ttf")
+endif()
+
+set(GUM_TEST_BITMAP_FONT_RUNTIME_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/../examples/resources/Nimbus.fnt")
+
 add_library(GumballHeaderCompileC OBJECT
     compile/gumball_inputsystem_compile.c
 )
@@ -45,6 +64,7 @@ target_include_directories(GumballTests PRIVATE
 target_compile_definitions(GumballTests PRIVATE
     GUM_TEST_BACKEND_${GUM_BACKEND}=1
     "GUM_TEST_RESOURCE_DIR=\"${GUMBALL_TEST_RESOURCE_DIR}\""
+    "GUM_TEST_BITMAP_FONT_PATH=\"${GUM_TEST_BITMAP_FONT_RUNTIME_PATH}\""
 )
 gum_enable_sanitizers(GumballTests)
 
@@ -57,7 +77,7 @@ target_link_libraries(GumballDefaultFont PRIVATE libGumball)
 target_compile_definitions(GumballDefaultFont PRIVATE
     GUM_TEST_BACKEND_${GUM_BACKEND}=1
     "GUM_TEST_DEFAULT_FONT_PATH=\"${GUM_DEFAULT_FONT_RUNTIME_PATH}\""
-    "GUM_TEST_CUSTOM_FONT_PATH=\"${GUMBALL_TEST_RESOURCE_DIR}/gumball_test.ttf\""
+    "GUM_TEST_CUSTOM_FONT_PATH=\"${GUM_TEST_CUSTOM_FONT_RUNTIME_PATH}\""
 )
 gum_enable_sanitizers(GumballDefaultFont)
 
@@ -79,6 +99,9 @@ elseif(GUM_BACKEND STREQUAL "RAYLIB")
         raylib/gumball_resource_restart_test.c
     )
     target_link_libraries(GumballRaylibResourceRestart PRIVATE libGumball)
+    target_compile_definitions(GumballRaylibResourceRestart PRIVATE
+        "GUM_TEST_BITMAP_FONT_PATH=\"${GUM_TEST_BITMAP_FONT_RUNTIME_PATH}\""
+    )
     gum_enable_sanitizers(GumballRaylibResourceRestart)
 
     add_test(NAME GumballRaylibResourceRestart COMMAND GumballRaylibResourceRestart)

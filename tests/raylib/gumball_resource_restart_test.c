@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef GUM_TEST_BITMAP_FONT_PATH
+#define GUM_TEST_BITMAP_FONT_PATH "../examples/resources/Nimbus.fnt"
+#endif
+
 static int hostTraceCount_ = 0;
 
 static void hostTraceLog_(int logLevel, const char* pText, va_list args) {
@@ -120,7 +124,7 @@ int main(void) {
 
     pRootA = GUM_Root_create();
     pTexture = pRootA ? GUM_TEXTURE(GUM_Manager_load("koslogo.png")) : nullptr;
-    pFont = pRootA ? GUM_FONT(GUM_Manager_load("../examples/resources/Nimbus.fnt")) : nullptr;
+    pFont = pRootA ? GUM_FONT(GUM_Manager_load(GUM_TEST_BITMAP_FONT_PATH)) : nullptr;
     pDefaultA = GUM_Backend_Font_default();
     if (pDefaultA)
         GUM_IResource_ref(GUM_IRESOURCE(pDefaultA));

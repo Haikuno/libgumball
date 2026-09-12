@@ -48,7 +48,7 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
 
     const Font loaded = LoadFontEx(pPath, 22, nullptr, 0);
     if (loaded.texture.id == 0 || !loaded.glyphs || !loaded.recs || GUM_Raylib_Font_isDefault_(loaded)) {
-        // LoadFont falls back to the default font on failure.
+        // LoadFontEx falls back to the default font on failure.
         free(pFont);
         return GBL_RESULT_ERROR_FILE_READ;
     }
