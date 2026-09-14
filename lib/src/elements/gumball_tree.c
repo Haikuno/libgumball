@@ -7,6 +7,7 @@
 #include "../core/gumball_marshal_.h"
 #include "gumball_scrollviewport_.h"
 #include "gumball_widget_.h"
+#include "gumball_itemview_.h"
 
 #include <stdint.h>
 
@@ -333,47 +334,11 @@ static GBL_RESULT GUM_Tree_drawText_(GUM_Tree* pSelf,
                                      GUM_Renderer* pRenderer,
                                      GUM_ModelIndex index,
                                      GUM_Vector2 position) {
-    GBL_VARIANT(value);
-    GBL_RESULT result = GUM_IItemModel_displayData(GUM_TREE_(pSelf)->pModel, index, &value);
-    if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
-        GblVariant_destruct(&value);
-        return result;
-    }
-
-    GBL_VARIANT(text);
-    GblStringRef* pText = nullptr;
-    const GblType valueType = GblVariant_typeOf(&value);
-
-    if (GblType_check(valueType, GBL_STRING_TYPE)) {
-        pText = GblVariant_string(&value);
-    } else if (GblVariant_canConvert(valueType, GBL_STRING_TYPE)) {
-        result = GblVariant_constructString(&text, "");
-        if (GBL_RESULT_SUCCESS(result)) {
-            result = GblVariant_convert(&value, &text);
-            if (GBL_RESULT_SUCCESS(result))
-                pText = GblVariant_string(&text);
-        }
-    } else {
-        pText = (GblStringRef*)GblVariant_typeName(&value);
-    }
-
-    if (GBL_RESULT_SUCCESS(result) && pText) {
-        GUM_Widget* pWidget = GUM_WIDGET(pSelf);
-        result = GUM_Backend_Font_draw(pRenderer,
-                                       GUM_Widget_font(pWidget),
-                                       pText,
-                                       position,
-                                       (GUM_Color){ pWidget->font_r,
-                                                    pWidget->font_g,
-                                                    pWidget->font_b,
-                                                    pWidget->font_a },
-                                       pWidget->font_size,
-                                       1.2f);
-    }
-
-    GblVariant_destruct(&text);
-    GblVariant_destruct(&value);
-    return result;
+    return GUM_ItemView_drawText_(GUM_WIDGET(pSelf),
+                                  pRenderer,
+                                  GUM_TREE_(pSelf)->pModel,
+                                  index,
+                                  position);
 }
 
 static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree* pSelf,
@@ -618,6 +583,7 @@ static GBL_RESULT GUM_TreeClass_init_(GblClass* pClass, const void* pData) {
 }
 
 static GBL_RESULT GUM_TreeClass_final_(GblClass* pClass, const void* pClassData) {
+    GBL_UNUSED(pClass);
     GBL_UNUSED(pClassData);
 
     if (!GblType_classRefCount(GUM_TREE_TYPE)) {

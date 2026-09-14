@@ -69,8 +69,8 @@ static GBL_RESULT GUM_Widget_init_(GblInstance* pInstance) {
     GUM_Widget*  pSelf  = GUM_WIDGET(pInstance);
     GUM_Widget_* pSelf_ = GUM_WIDGET_(pSelf);
 
-    pSelf_->pDrawPrev        = nullptr;
-    pSelf_->pDrawNext        = nullptr;
+    GblDoublyLinkedList_init(&pSelf_->drawNode);
+    pSelf_->pWidget          = pSelf;
     pSelf_->pLabel           = nullptr;
     pSelf_->pFont            = GUM_Backend_Font_default();
     pSelf_->pTexture         = nullptr;
@@ -739,7 +739,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
     const float margin   = 3.0f;
 
     if (GblStringRef_length(pSelf_->pLabel)) {
-        textSize = GUM_Backend_Font_measureText(pSelf_->pFont, pSelf_->pLabel, pSelf->font_size);
+        textSize = GUM_Backend_Font_measureText(pSelf_->pFont, pSelf_->pLabel, pSelf->font_size, 1.0f);
 
         switch (pSelf->textAlignment) {
             case GUM_TEXT_ALIGN_CENTER:
@@ -775,7 +775,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
                                                   (GUM_Vector2){ .x = textPos.x + dx, .y = textPos.y + dy },
                                                   (GUM_Color){ pSelf->font_border_r, pSelf->font_border_g,
                                                                pSelf->font_border_b, pSelf->font_border_a },
-                                                  pSelf->font_size, 1.2f);
+                                                  pSelf->font_size, 1.0f);
                     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                         goto cleanup;
                 }
@@ -785,7 +785,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
         result = GUM_Backend_Font_draw(pRenderer, pSelf_->pFont, pSelf_->pLabel,
                                        textPos,
                                        (GUM_Color){ pSelf->font_r, pSelf->font_g, pSelf->font_b, pSelf->font_a },
-                                       pSelf->font_size, 1.2f);
+                                       pSelf->font_size, 1.0f);
         if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
             goto cleanup;
     }
@@ -890,7 +890,7 @@ static void GUM_Widget_applyTweenValue_(GUM_WidgetTween_* pTween) {
 
 static void GUM_Widget_animateStart_(GUM_Widget* pSelf, const char* pProperty, float target,
                                      float duration, GUM_EasingType easing, GUM_EasingFn pFnEase) {
-    if (!pSelf || !pProperty || !pProperty[0] || easing < GUM_EASE_LINEAR || easing >= GUM_EASE_COUNT)
+    if (!pSelf || !pProperty || !pProperty[0] || easing >= GUM_EASE_COUNT)
         return;
     if (easing == GUM_EASE_CUSTOM && !pFnEase)
         return;
@@ -1103,6 +1103,7 @@ static GBL_RESULT GUM_WidgetClass_init_(GblClass* pClass, const void* pData) {
 }
 
 static GBL_RESULT GUM_WidgetClass_final_(GblClass* pClass, const void* pClassData) {
+    GBL_UNUSED(pClass);
     GBL_UNUSED(pClassData);
 
     if (!GblType_classRefCount(GUM_WIDGET_TYPE)) {
@@ -1151,7 +1152,7 @@ GblType GUM_Widget_type(void) {
     return type;
 }
 
-GUM_Vector2 GUM_get_absolute_position_(GUM_Widget* pWidget) {
+GUM_Vector2 GUM_get_absolute_position_(const GUM_Widget* pWidget) {
     GUM_Vector2 pos = { pWidget->x, pWidget->y };
     if (!pWidget->isRelative)
         return pos;

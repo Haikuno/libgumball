@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.21)
 project(LibGumball LANGUAGES C)
 
 set(CMAKE_C_STANDARD 23)
@@ -8,6 +8,7 @@ option(GUM_BUILD_DOCS        "Build docs"       OFF)
 option(GUM_BUILD_EXAMPLES    "Build examples"   OFF)
 option(GUM_BUILD_TESTS       "Build unit tests" OFF)
 option(GUM_ENABLE_SANITIZERS "Instrument libGumball targets with ASan/UBSan" OFF)
+option(GUM_ENABLE_WARNINGS    "Enable strict libGumball compiler warnings" OFF)
 
 set(GUM_PARITY_SDL3_EXECUTABLE "" CACHE FILEPATH
     "Built SDL3 parity executable used by the optional cross-backend CTest")

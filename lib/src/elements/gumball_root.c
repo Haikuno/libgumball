@@ -21,8 +21,7 @@
 
 typedef struct GUM_Root_ {
     GblLogger*  pLogger;
-    GUM_Widget* pDrawFirst;
-    GUM_Widget* pDrawLast;
+    GblDoublyLinkedListNode drawOrder;
     GUM_Vector2 lastScreenSize;
     uint64_t    nextEnableOrder;
 } GUM_Root_;
@@ -65,76 +64,43 @@ static int GUM_Root_widgetCmp_(const GUM_Widget* pA, const GUM_Widget* pB) {
 }
 
 static void GUM_Root_linkBefore_(GUM_Root* pRoot, GUM_Widget* pBefore, GUM_Widget* pWidget) {
-    GUM_Root_*   pRoot_   = GUM_ROOT_(pRoot);
-    GUM_Widget_* pWidget_ = GUM_WIDGET_(pWidget);
-
-    if (!pBefore) {
-        pWidget_->pDrawPrev = pRoot_->pDrawLast;
-        pWidget_->pDrawNext = nullptr;
-
-        if (pRoot_->pDrawLast)
-            GUM_WIDGET_(pRoot_->pDrawLast)->pDrawNext = pWidget;
-        else
-            pRoot_->pDrawFirst = pWidget;
-
-        pRoot_->pDrawLast = pWidget;
-        return;
-    }
-
-    GUM_Widget_* pBefore_ = GUM_WIDGET_(pBefore);
-    pWidget_->pDrawPrev = pBefore_->pDrawPrev;
-    pWidget_->pDrawNext = pBefore;
-
-    if (pBefore_->pDrawPrev)
-        GUM_WIDGET_(pBefore_->pDrawPrev)->pDrawNext = pWidget;
-    else
-        pRoot_->pDrawFirst = pWidget;
-
-    pBefore_->pDrawPrev = pWidget;
+    GblDoublyLinkedListNode* pNode = pBefore ? &GUM_WIDGET_(pBefore)->drawNode
+                                             : &GUM_ROOT_(pRoot)->drawOrder;
+    GblDoublyLinkedList_insertBefore(pNode, &GUM_WIDGET_(pWidget)->drawNode);
 }
 
 static void GUM_Root_insertOrdered_(GUM_Root* pRoot, GUM_Widget* pWidget) {
     GUM_Root_* pRoot_ = GUM_ROOT_(pRoot);
-    GUM_Widget* pIt   = pRoot_->pDrawFirst;
+    GUM_Widget* pIt   = nullptr;
 
-    while (pIt && GUM_Root_widgetCmp_(pIt, pWidget) <= 0)
-        pIt = GUM_WIDGET_(pIt)->pDrawNext;
+    for (GblDoublyLinkedListNode* pNode = pRoot_->drawOrder.pNext;
+         pNode != &pRoot_->drawOrder;
+         pNode = pNode->pNext) {
+        pIt = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_Widget_, drawNode)->pWidget;
+        if (GUM_Root_widgetCmp_(pIt, pWidget) > 0)
+            break;
+        pIt = nullptr;
+    }
 
     GUM_Root_linkBefore_(pRoot, pIt, pWidget);
 }
 
 static void GUM_Root_unlink_(GUM_Root* pRoot, GUM_Widget* pWidget) {
-    GUM_Root_*   pRoot_   = GUM_ROOT_(pRoot);
-    GUM_Widget_* pWidget_ = GUM_WIDGET_(pWidget);
-
-    if (pWidget_->pDrawPrev)
-        GUM_WIDGET_(pWidget_->pDrawPrev)->pDrawNext = pWidget_->pDrawNext;
-    else
-        pRoot_->pDrawFirst = pWidget_->pDrawNext;
-
-    if (pWidget_->pDrawNext)
-        GUM_WIDGET_(pWidget_->pDrawNext)->pDrawPrev = pWidget_->pDrawPrev;
-    else
-        pRoot_->pDrawLast = pWidget_->pDrawPrev;
-
-    pWidget_->pDrawPrev = nullptr;
-    pWidget_->pDrawNext = nullptr;
+    GBL_UNUSED(pRoot);
+    GblDoublyLinkedList_remove(&GUM_WIDGET_(pWidget)->drawNode);
 }
 
 static void GUM_Root_resort_(GUM_Root* pRoot) {
     GUM_Root_* pRoot_ = GUM_ROOT_(pRoot);
-    GUM_Widget* pIt   = pRoot_->pDrawFirst;
+    GblDoublyLinkedListNode oldOrder;
+    GblDoublyLinkedList_init(&oldOrder);
+    GblDoublyLinkedList_move(&oldOrder, &pRoot_->drawOrder);
 
-    pRoot_->pDrawFirst = nullptr;
-    pRoot_->pDrawLast  = nullptr;
-
-    while (pIt) {
-        GUM_Widget_* pIt_ = GUM_WIDGET_(pIt);
-        GUM_Widget* pNext = pIt_->pDrawNext;
-        pIt_->pDrawPrev = nullptr;
-        pIt_->pDrawNext = nullptr;
-        GUM_Root_insertOrdered_(pRoot, pIt);
-        pIt = pNext;
+    while (!GblDoublyLinkedList_empty(&oldOrder)) {
+        GblDoublyLinkedListNode* pNode = GblDoublyLinkedList_popFront(&oldOrder);
+        GUM_Widget* pWidget = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_Widget_, drawNode)->pWidget;
+        GblDoublyLinkedList_remove(pNode);
+        GUM_Root_insertOrdered_(pRoot, pWidget);
     }
 }
 
@@ -158,9 +124,10 @@ static GBL_RESULT GUM_Root_snapshot_(GUM_Root* pRoot, GUM_RootSnapshot_* pSnapsh
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
-    for (GUM_Widget* pIt = GUM_ROOT_(pRoot)->pDrawFirst;
-         pIt;
-         pIt = GUM_WIDGET_(pIt)->pDrawNext) {
+    for (GblDoublyLinkedListNode* pNode = GUM_ROOT_(pRoot)->drawOrder.pNext;
+         pNode != &GUM_ROOT_(pRoot)->drawOrder;
+         pNode = pNode->pNext) {
+        GUM_Widget* pIt = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_Widget_, drawNode)->pWidget;
         GUM_Widget* pRetained = GUM_WIDGET(GblBox_ref(GBL_BOX(pIt)));
         result = GblArrayList_pushBack(&pSnapshot->widgets, &pRetained);
 
@@ -229,8 +196,7 @@ static GBL_RESULT GUM_Root_init_(GblInstance* pInstance) {
     GUM_Root*  pSelf  = GUM_ROOT(pInstance);
     GUM_Root_* pSelf_ = GUM_ROOT_(pSelf);
 
-    pSelf_->pDrawFirst      = nullptr;
-    pSelf_->pDrawLast       = nullptr;
+    GblDoublyLinkedList_init(&pSelf_->drawOrder);
     pSelf_->nextEnableOrder = 0;
 
     pSelf_->pLogger = GblLogger_create(GBL_LOGGER_TYPE, sizeof(GblLogger), nullptr);
@@ -359,7 +325,7 @@ GBL_RESULT GUM_Root_foreachDrawable_(GUM_Root* pRoot,
     if (!pRoot || !pFnIter)
         return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    if (!GUM_ROOT_(pRoot)->pDrawFirst)
+    if (GblDoublyLinkedList_empty(&GUM_ROOT_(pRoot)->drawOrder))
         return GBL_RESULT_PARTIAL;
 
     GUM_RootSnapshot_ snapshot;
@@ -382,7 +348,7 @@ GBL_RESULT GUM_Root_draw_(GUM_Root* pRoot, GUM_Renderer* pRenderer) {
     if (!pRoot)
         return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    if (!GUM_ROOT_(pRoot)->pDrawFirst)
+    if (GblDoublyLinkedList_empty(&GUM_ROOT_(pRoot)->drawOrder))
         return GBL_RESULT_PARTIAL;
 
     GUM_RootSnapshot_ snapshot;
@@ -425,9 +391,10 @@ static GUM_Widget* GUM_Root_pointerWidgetAt_(GUM_Root* pRoot,
     if (!pRoot)
         return nullptr;
 
-    for (GUM_Widget* pWidget = GUM_ROOT_(pRoot)->pDrawLast;
-         pWidget;
-         pWidget = GUM_WIDGET_(pWidget)->pDrawPrev) {
+    for (GblDoublyLinkedListNode* pNode = GUM_ROOT_(pRoot)->drawOrder.pPrev;
+         pNode != &GUM_ROOT_(pRoot)->drawOrder;
+         pNode = pNode->pPrev) {
+        GUM_Widget* pWidget = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_Widget_, drawNode)->pWidget;
         if (!pWidget->isInteractive)
             continue;
         if (activeOnly && !GUM_Widget_isActive(pWidget) && !GUM_Root_scrollbarHit_(pWidget, position))

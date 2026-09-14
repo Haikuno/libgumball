@@ -51,4 +51,7 @@ target_compile_definitions(libGumball PRIVATE
     GUM_SNAPSHOT_INLINE_CAPACITY=64
     "GUM_DEFAULT_FONT_PATH=\"${GUM_DEFAULT_FONT_RUNTIME_PATH}\""
 )
+if(GUM_ENABLE_WARNINGS AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(libGumball PRIVATE -Wall -Wextra -Werror)
+endif()
 gum_enable_sanitizers(libGumball)

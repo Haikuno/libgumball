@@ -63,8 +63,8 @@ GBL_RESULT   GUM_Backend_Font_load                       (GUM_IResource* pResour
 GBL_RESULT   GUM_Backend_Font_unload                     (GUM_IResource* pResource);
 //! Draws text.
 GBL_RESULT   GUM_Backend_Font_draw                       (GUM_Renderer* pRenderer, GUM_Font* pFont, GblStringRef* pText, GUM_Vector2 position, GUM_Color color, int fontSize, float spacing);
-//! Returns the size of the passed text for the given font and font size.
-GUM_Vector2  GUM_Backend_Font_measureText                (GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize);
+//! Returns the size of the passed text for the given font, font size, and character spacing.
+GUM_Vector2  GUM_Backend_Font_measureText                (GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize, float spacing);
 //! Returns the default font.
 GUM_Font*    GUM_Backend_Font_default                    (void);
 

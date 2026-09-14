@@ -2,33 +2,19 @@
 #include "../../ifaces/gumball_iresource_.h"
 #include <SDL3_image/SDL_image.h>
 #include <gumball/core/gumball_backend.h>
-#include <ctype.h>
 #include <stdlib.h>
-#include <string.h>
+#include <gimbal/strings/gimbal_string_view.h>
+#include <gimbal/containers/gimbal_doubly_linked_list.h>
 
 typedef struct GUM_SDL3_Texture_ {
     SDL_Surface*              pSurface;
     SDL_Texture*              pTexture;
     SDL_Renderer*             pRenderer;
-    struct GUM_SDL3_Texture_* pPrev;
-    struct GUM_SDL3_Texture_* pNext;
+    GblDoublyLinkedListNode textureNode;
 } GUM_SDL3_Texture_;
 
-static GUM_SDL3_Texture_* pTextures_ = nullptr;
-
-static bool GUM_SDL3_suffixEqualsIgnoreCase_(const char* pPath, const char* pSuffix) {
-    const size_t pathLen = strlen(pPath);
-    const size_t suffixLen = strlen(pSuffix);
-    if (suffixLen > pathLen)
-        return false;
-
-    const char* pCandidate = pPath + pathLen - suffixLen;
-    for (size_t i = 0; i < suffixLen; ++i) {
-        if (tolower((unsigned char)pCandidate[i]) != tolower((unsigned char)pSuffix[i]))
-            return false;
-    }
-    return true;
-}
+static GblDoublyLinkedListNode textures_;
+static bool texturesInitialized_ = false;
 
 GblType GUM_Backend_resourceType(GblStringRef* pPath) {
     if (!pPath || !pPath[0])
@@ -44,41 +30,37 @@ GblType GUM_Backend_resourceType(GblStringRef* pPath) {
     };
 
     for (size_t i = 0; textureExtensions[i]; ++i) {
-        if (GUM_SDL3_suffixEqualsIgnoreCase_(pPath, textureExtensions[i]))
+        if (GblStringView_endsWithIgnoreCase(GBL_STRV(pPath), textureExtensions[i]))
             return GUM_TEXTURE_TYPE;
     }
     for (size_t i = 0; fontExtensions[i]; ++i) {
-        if (GUM_SDL3_suffixEqualsIgnoreCase_(pPath, fontExtensions[i]))
+        if (GblStringView_endsWithIgnoreCase(GBL_STRV(pPath), fontExtensions[i]))
             return GUM_FONT_TYPE;
     }
     return GBL_INVALID_TYPE;
 }
 
 static void GUM_SDL3_Texture_register_(GUM_SDL3_Texture_* pSelf) {
-    pSelf->pPrev = nullptr;
-    pSelf->pNext = pTextures_;
-    if (pTextures_)
-        pTextures_->pPrev = pSelf;
-    pTextures_ = pSelf;
+    if (!texturesInitialized_) {
+        GblDoublyLinkedList_init(&textures_);
+        texturesInitialized_ = true;
+    }
+    GblDoublyLinkedList_init(&pSelf->textureNode);
+    GblDoublyLinkedList_pushFront(&textures_, &pSelf->textureNode);
 }
 
 static void GUM_SDL3_Texture_unregister_(GUM_SDL3_Texture_* pSelf) {
-    if (pSelf->pPrev)
-        pSelf->pPrev->pNext = pSelf->pNext;
-    else if (pTextures_ == pSelf)
-        pTextures_ = pSelf->pNext;
-
-    if (pSelf->pNext)
-        pSelf->pNext->pPrev = pSelf->pPrev;
-
-    pSelf->pPrev = nullptr;
-    pSelf->pNext = nullptr;
+    GblDoublyLinkedList_remove(&pSelf->textureNode);
 }
 
 void GUM_SDL3_Texture_rendererDestroyed_(SDL_Renderer* pRenderer) {
-    if (!pRenderer) return;
+    if (!pRenderer || !texturesInitialized_)
+        return;
 
-    for (GUM_SDL3_Texture_* pTexture = pTextures_; pTexture; pTexture = pTexture->pNext) {
+    for (GblDoublyLinkedListNode* pNode = textures_.pNext;
+         pNode != &textures_;
+         pNode = pNode->pNext) {
+        GUM_SDL3_Texture_* pTexture = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_SDL3_Texture_, textureNode);
         if (pTexture->pRenderer != pRenderer)
             continue;
 

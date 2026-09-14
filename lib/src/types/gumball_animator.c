@@ -16,7 +16,7 @@ static const GUM_EasingFn s_easingFns_[GUM_EASE_COUNT] = {
 };
 
 static GUM_EasingType GUM_Animator_builtinEasing_(GUM_EasingType easing) {
-    return easing >= GUM_EASE_LINEAR && easing < GUM_EASE_CUSTOM ? easing : GUM_EASE_LINEAR;
+    return easing < GUM_EASE_CUSTOM ? easing : GUM_EASE_LINEAR;
 }
 
 static GUM_EasingFn GUM_Animator_easingFn_(const GUM_Animator* pSelf) {

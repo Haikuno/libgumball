@@ -190,6 +190,7 @@ static GBL_RESULT GUM_IItemModelClass_init_(GblClass* pClass, const void* pData)
 }
 
 static GBL_RESULT GUM_IItemModelClass_final_(GblClass* pClass, const void* pClassData) {
+    GBL_UNUSED(pClass);
     GBL_UNUSED(pClassData);
 
     if (!GblType_classRefCount(GUM_IITEMMODEL_TYPE)) {

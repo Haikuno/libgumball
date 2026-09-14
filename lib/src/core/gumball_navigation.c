@@ -3,6 +3,7 @@
 #include <gumball/core/gumball_logger.h>
 #include <gumball/gumball_elements.h>
 #include <gumball/gumball_types.h>
+#include <gimbal/containers/gimbal_array_deque.h>
 
 #include "gumball_inputsystem_.h"
 #include "../devices/gumball_inputdevice_.h"
@@ -227,25 +228,22 @@ static GUM_Widget* GUM_Nav_findSelectableDescendant_(GblObject* pSelf, bool defa
         return nullptr;
 
     GUM_Widget* pResult = nullptr;
-    struct {
-        GblArrayList array;
-        char stackData[GUM_SNAPSHOT_INLINE_CAPACITY * sizeof(GblObject*)];
-    } stack;
+    GblArrayDeque deque;
 
-    if (!GBL_RESULT_SUCCESS(GblArrayList_construct(&stack.array,
-                                                   sizeof(GblObject*),
-                                                   0,
-                                                   nullptr,
-                                                   sizeof(stack)))) {
+    if (!GBL_RESULT_SUCCESS(GblArrayDeque_construct(&deque,
+                                                    sizeof(GblObject*),
+                                                    0,
+                                                    0,
+                                                    nullptr,
+                                                    nullptr))) {
         return nullptr;
     }
 
-    if (!GBL_RESULT_SUCCESS(GblArrayList_pushBack(&stack.array, &pSelf)))
+    if (!GBL_RESULT_SUCCESS(GblArrayDeque_pushBack(&deque, &pSelf)))
         goto done;
 
-    while (GblArrayList_size(&stack.array)) {
-        GblObject* pObject;
-        GblArrayList_popFront(&stack.array, &pObject);
+    while (GblArrayDeque_size(&deque)) {
+        GblObject* pObject = *(GblObject**)GblArrayDeque_popFront(&deque);
 
         GblObject_foreachChild(pObject, pChild) {
             GUM_Widget* pWidget = GUM_Nav_asSelectable_(pChild);
@@ -254,13 +252,13 @@ static GUM_Widget* GUM_Nav_findSelectableDescendant_(GblObject* pSelf, bool defa
                 goto done;
             }
 
-            if (!GBL_RESULT_SUCCESS(GblArrayList_pushBack(&stack.array, &pChild)))
+            if (!GBL_RESULT_SUCCESS(GblArrayDeque_pushBack(&deque, &pChild)))
                 goto done;
         }
     }
 
 done:
-    GblArrayList_destruct(&stack.array);
+    GblArrayDeque_destruct(&deque);
     return pResult;
 }
 

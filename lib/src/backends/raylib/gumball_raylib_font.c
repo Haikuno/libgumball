@@ -15,14 +15,14 @@ static bool GUM_Raylib_Font_isDefault_(Font font) {
            font.recs       == fallback.recs;
 }
 
-GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) {
+GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize, float spacing) {
     if (!pFont || !pText) return (GUM_Vector2){ 0 };
 
     Font* pRayFont = GUM_IResource_data_(GUM_IRESOURCE(pFont));
     if (!pRayFont) return (GUM_Vector2){ 0 };
 
     GUM_Vector2 size    = { 0, 0 };
-    Vector2     raySize = MeasureTextEx(*pRayFont, pText, fontSize, 1.2f);
+    Vector2     raySize = MeasureTextEx(*pRayFont, pText, fontSize, spacing);
     size.x              = raySize.x;
     size.y              = raySize.y;
     return size;

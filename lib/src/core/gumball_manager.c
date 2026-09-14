@@ -582,6 +582,7 @@ GBL_EXPORT void GUM_Manager_deinit(void) {
         return;
 
     const GBL_RESULT unregisterResult = GblModule_unregister(pModule);
+    GBL_UNUSED(unregisterResult);
     GBL_ASSERT(GBL_RESULT_SUCCESS(unregisterResult));
 }
 

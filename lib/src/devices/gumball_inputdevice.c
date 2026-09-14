@@ -3,6 +3,7 @@
 #include <gumball/core/gumball_logger.h>
 
 #include <gimbal/containers/gimbal_array_list.h>
+#include <gimbal/containers/gimbal_doubly_linked_list.h>
 
 #include "../elements/gumball_widget_.h"
 #include "gumball_inputdevice_.h"
@@ -10,8 +11,8 @@
 #define GUM_INPUTDEVICE_(self) (GBL_PRIVATE(GUM_InputDevice, self))
 
 typedef struct GUM_InputDevice_ {
-    GUM_InputDevice* pPrev;
-    GUM_InputDevice* pNext;
+    GUM_InputDevice*          pDevice;
+    GblDoublyLinkedListNode deviceNode;
     GblStringRef*    pDeviceName;
     GUM_Widget*      pFocusedWidget;
     bool             enabled;
@@ -20,7 +21,8 @@ typedef struct GUM_InputDevice_ {
     bool             focusTransition;
 } GUM_InputDevice_;
 
-static GUM_InputDevice* pFirstDevice_ = nullptr;
+static GblDoublyLinkedListNode devices_;
+static bool devicesInitialized_ = false;
 
 GBL_EXPORT GblStringRef* GUM_InputDevice_name(const GUM_InputDevice* pSelf) {
     return pSelf ? GUM_INPUTDEVICE_(pSelf)->pDeviceName : nullptr;
@@ -106,8 +108,10 @@ GBL_RESULT GUM_InputDevice_foreach_(GblType deviceType,
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
-    for (GUM_InputDevice* pDevice = pFirstDevice_; pDevice;
-         pDevice = GUM_INPUTDEVICE_(pDevice)->pNext) {
+    for (GblDoublyLinkedListNode* pNode = devices_.pNext;
+         pNode != &devices_;
+         pNode = pNode->pNext) {
+        GUM_InputDevice* pDevice = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_InputDevice_, deviceNode)->pDevice;
         if (GblBox_isFinalizing(GBL_BOX(pDevice)) ||
             !GblType_check(GBL_TYPEOF(pDevice), deviceType))
             continue;
@@ -206,8 +210,10 @@ void GUM_InputDevice_widgetDestroyed_(GUM_Widget* pWidget) {
     if (!pWidget)
         return;
 
-    for (GUM_InputDevice* pDevice = pFirstDevice_; pDevice;
-         pDevice = GUM_INPUTDEVICE_(pDevice)->pNext) {
+    for (GblDoublyLinkedListNode* pNode = devices_.pNext;
+         pNode != &devices_;
+         pNode = pNode->pNext) {
+        GUM_InputDevice* pDevice = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_InputDevice_, deviceNode)->pDevice;
         GUM_InputDevice_* pDevice_ = GUM_INPUTDEVICE_(pDevice);
         if (pDevice_->pFocusedWidget != pWidget)
             continue;
@@ -221,8 +227,12 @@ static GBL_RESULT GUM_InputDevice_init_(GblInstance* pInstance) {
     GUM_InputDevice*  pSelf  = GUM_INPUTDEVICE(pInstance);
     GUM_InputDevice_* pSelf_ = GUM_INPUTDEVICE_(pSelf);
 
-    pSelf_->pPrev             = nullptr;
-    pSelf_->pNext             = pFirstDevice_;
+    if (!devicesInitialized_) {
+        GblDoublyLinkedList_init(&devices_);
+        devicesInitialized_ = true;
+    }
+    pSelf_->pDevice            = pSelf;
+    GblDoublyLinkedList_init(&pSelf_->deviceNode);
     pSelf_->pDeviceName       = GblStringRef_create("UNKNOWN");
     pSelf_->pFocusedWidget    = nullptr;
     pSelf_->enabled           = true;
@@ -230,9 +240,7 @@ static GBL_RESULT GUM_InputDevice_init_(GblInstance* pInstance) {
     pSelf_->baselinePending   = false;
     pSelf_->focusTransition   = false;
 
-    if (pFirstDevice_)
-        GUM_INPUTDEVICE_(pFirstDevice_)->pPrev = pSelf;
-    pFirstDevice_ = pSelf;
+    GblDoublyLinkedList_pushFront(&devices_, &pSelf_->deviceNode);
 
     pSelf->buttons      = 0;
     pSelf->buttonsPrev  = 0;
@@ -252,16 +260,7 @@ static GBL_RESULT GUM_InputDevice_GblBox_destructor_(GblBox* pBox) {
     pSelf_->focusTransition = true;
     GUM_InputDevice_focusRelease_(pSelf);
 
-    if (pSelf_->pPrev)
-        GUM_INPUTDEVICE_(pSelf_->pPrev)->pNext = pSelf_->pNext;
-    else
-        pFirstDevice_ = pSelf_->pNext;
-
-    if (pSelf_->pNext)
-        GUM_INPUTDEVICE_(pSelf_->pNext)->pPrev = pSelf_->pPrev;
-
-    pSelf_->pPrev = nullptr;
-    pSelf_->pNext = nullptr;
+    GblDoublyLinkedList_remove(&pSelf_->deviceNode);
 
     GblStringRef_unref(pSelf_->pDeviceName);
     pSelf_->pDeviceName = nullptr;

@@ -117,7 +117,8 @@ int main(void) {
 
     const GUM_Vector2 defaultSize = GUM_Backend_Font_measureText(pDefaultA,
                                                                  "Bundled default",
-                                                                 18);
+                                                                 18,
+                                                                 1.0f);
     if (defaultSize.x <= 0.0f || defaultSize.y <= 0.0f) {
         fprintf(stderr, "Bundled default font is not measurable\n");
         goto cleanup;
@@ -196,7 +197,8 @@ int main(void) {
 
     const GUM_Vector2 retainedSize = GUM_Backend_Font_measureText(pDefaultA,
                                                                   "retained",
-                                                                  18);
+                                                                  18,
+                                                                  1.0f);
     if (retainedSize.x <= 0.0f || retainedSize.y <= 0.0f) {
         fprintf(stderr, "Caller-retained bundled font was unloaded during Root teardown\n");
         goto cleanup;

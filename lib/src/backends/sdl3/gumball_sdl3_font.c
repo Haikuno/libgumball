@@ -3,7 +3,7 @@
 #include <gumball/core/gumball_backend.h>
 #include <math.h>
 
-GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize) {
+GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRef* pText, uint8_t fontSize, float spacing) {
     if (!pFont || !pText) return (GUM_Vector2){ 0 };
 
     TTF_Font* pSdlFont = GUM_IResource_data_(GUM_IRESOURCE(pFont));
@@ -11,6 +11,13 @@ GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRe
 
     if (!TTF_SetFontSize(pSdlFont, fontSize))
         return (GUM_Vector2){ 0 };
+
+#if SDL_TTF_VERSION_ATLEAST(3, 4, 0)
+    if (!TTF_SetFontCharSpacing(pSdlFont, (int)roundf(spacing)))
+        return (GUM_Vector2){ 0 };
+#else
+    GBL_UNUSED(spacing);
+#endif
 
     int width  = 0;
     int height = 0;
@@ -24,14 +31,19 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* p
                                             GUM_Vector2 position, GUM_Color color, int fontSize, float spacing) {
     if (!pFont || !pText) return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    GBL_UNUSED(spacing);
-
     TTF_TextEngine* pTextEngine = GUM_SDL3_textEngine_(pRenderer);
     TTF_Font* pSdlFont = GUM_IResource_data_(GUM_IRESOURCE(pFont));
     if (!pTextEngine || !pSdlFont) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     if (!TTF_SetFontSize(pSdlFont, (float)fontSize))
         return GBL_RESULT_ERROR_INTERNAL;
+
+#if SDL_TTF_VERSION_ATLEAST(3, 4, 0)
+    if (!TTF_SetFontCharSpacing(pSdlFont, (int)roundf(spacing)))
+        return GBL_RESULT_ERROR_INTERNAL;
+#else
+    GBL_UNUSED(spacing);
+#endif
 
     TTF_Text* pSdlText = TTF_CreateText(pTextEngine, pSdlFont, pText, 0);
     if (!pSdlText) return GBL_RESULT_ERROR_INTERNAL;

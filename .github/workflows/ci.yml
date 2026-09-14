@@ -61,13 +61,23 @@ jobs:
 
       - name: Install SDL3_ttf
         run: |
-          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
+          "$RUNNER_TEMP/vcpkg/vcpkg" install freetype
+          git clone --branch release-3.4.0 --depth 1 https://github.com/libsdl-org/SDL_ttf.git "$RUNNER_TEMP/SDL_ttf"
+          cmake -S "$RUNNER_TEMP/SDL_ttf" -B "$RUNNER_TEMP/SDL_ttf-build" -G Ninja \
+            -DSDLTTF_VENDORED=OFF \
+            -DSDLTTF_SAMPLES=OFF \
+            -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/sdl3-ttf" \
+            -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          cmake --build "$RUNNER_TEMP/SDL_ttf-build" --parallel
+          cmake --install "$RUNNER_TEMP/SDL_ttf-build"
 
       - name: Configure SDL3
         run: |
           cmake -S . -B build-sdl3 -G Ninja \
             -DGUM_BACKEND=SDL3 \
             -DGUM_BUILD_TESTS=ON \
+            -DGUM_ENABLE_WARNINGS=ON \
+            -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/sdl3-ttf" \
             -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build SDL3
@@ -138,6 +148,7 @@ jobs:
           cmake -S . -B build-raylib -G Ninja \
             -DGUM_BACKEND=RAYLIB \
             -DGUM_BUILD_TESTS=ON \
+            -DGUM_ENABLE_WARNINGS=ON \
             -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build raylib
@@ -227,7 +238,15 @@ jobs:
 
       - name: Install SDL3_ttf
         run: |
-          "$RUNNER_TEMP/vcpkg/vcpkg" install sdl3-ttf
+          "$RUNNER_TEMP/vcpkg/vcpkg" install freetype
+          git clone --branch release-3.4.0 --depth 1 https://github.com/libsdl-org/SDL_ttf.git "$RUNNER_TEMP/SDL_ttf"
+          cmake -S "$RUNNER_TEMP/SDL_ttf" -B "$RUNNER_TEMP/SDL_ttf-build" -G Ninja \
+            -DSDLTTF_VENDORED=OFF \
+            -DSDLTTF_SAMPLES=OFF \
+            -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/sdl3-ttf" \
+            -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          cmake --build "$RUNNER_TEMP/SDL_ttf-build" --parallel
+          cmake --install "$RUNNER_TEMP/SDL_ttf-build"
 
       - name: Configure sanitizers
         run: |
@@ -235,7 +254,9 @@ jobs:
             -DGUM_BACKEND=SDL3 \
             -DGUM_BUILD_TESTS=ON \
             -DGUM_ENABLE_SANITIZERS=ON \
+            -DGUM_ENABLE_WARNINGS=ON \
             -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/sdl3-ttf" \
             -DCMAKE_TOOLCHAIN_FILE="$RUNNER_TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build sanitizers

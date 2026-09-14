@@ -102,6 +102,21 @@ int main(void) {
     }
 
     pRootA = GUM_Root_create();
+    pSurfaceA = SDL_CreateSurface(64, 64, SDL_PIXELFORMAT_RGBA32);
+    pSdlRendererA = pSurfaceA ? SDL_CreateSoftwareRenderer(pSurfaceA) : nullptr;
+    pRendererA = pSdlRendererA ? GUM_Renderer_create(pSdlRendererA) : nullptr;
+    if (!pRootA || !pRendererA) {
+        fprintf(stderr, "Failed to create renderer without loaded textures: %s\n", SDL_GetError());
+        goto cleanup;
+    }
+
+    GUM_Renderer_destroy(pRendererA);
+    pRendererA = nullptr;
+    SDL_DestroyRenderer(pSdlRendererA);
+    pSdlRendererA = nullptr;
+    SDL_DestroySurface(pSurfaceA);
+    pSurfaceA = nullptr;
+
     pTexture = pRootA ? GUM_TEXTURE(GUM_Manager_load("koslogo.png")) : nullptr;
     pFont = pRootA ? GUM_FONT(GUM_Manager_load("gumball_test.ttf")) : nullptr;
     if (!pRootA || !pTexture || !pFont) {
