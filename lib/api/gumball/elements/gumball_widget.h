@@ -207,9 +207,9 @@ typedef void (*GUM_Widget_doneFn)(GUM_Widget* pSelf);
 GBL_EXPORT void GUM_Widget_animate      (GUM_Widget* pSelf, const char* pProperty, float target, float duration, GUM_EasingType easing) GBL_NOEXCEPT;
 //! Eases pProperty toward target, using a custom curve
 GBL_EXPORT void GUM_Widget_animateCustom(GUM_Widget* pSelf, const char* pProperty, float target, float duration, GUM_EasingFn pFnEase)  GBL_NOEXCEPT;
-//! Fires pFnDone when pProperty's current tween settles.
+//! Calls pFnDone when pProperty's active tween settles. nullptr clears the callback.
 GBL_EXPORT void GUM_Widget_animateOnDone(GUM_Widget* pSelf, const char* pProperty, GUM_Widget_doneFn pFnDone)                           GBL_NOEXCEPT;
-//! Cancels pProperty's active tween, freezing it at its current value
+//! Cancels pProperty's active tween at its current value, without calling its completion callback
 GBL_EXPORT void GUM_Widget_animateCancel(GUM_Widget* pSelf, const char* pProperty)                                                      GBL_NOEXCEPT;
 //! @}
 

@@ -64,9 +64,9 @@ GBL_ENUM(GUM_TextAlignment,
 GblType GUM_Font_type(void) GBL_NOEXCEPT;
 //! \endcond
 
-//! Returns the current default font override, or nullptr if none is set.
+//! Returns the current default font override, or nullptr. Do not unref it.
 GUM_Font* GUM_Font_default   (void)            GBL_NOEXCEPT;
-//! Sets the default font override. Passing nullptr restores the bundled font.
+//! Sets the default font override, keeping a reference. nullptr restores the bundled font.
 void      GUM_Font_setDefault(GUM_Font* pFont) GBL_NOEXCEPT;
 
 GBL_DECLS_END

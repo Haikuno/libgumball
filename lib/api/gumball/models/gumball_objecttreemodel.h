@@ -36,9 +36,13 @@ GBL_INSTANCE_DERIVE_EMPTY(GUM_ObjectTreeModel, GblBox)
 
 GBL_EXPORT GblType GUM_ObjectTreeModel_type(void) GBL_NOEXCEPT;
 
+//! Returns a new model, keeping a reference to pRoot. nullptr creates an empty model.
 GBL_EXPORT GUM_ObjectTreeModel* GUM_ObjectTreeModel_create (GblObject* pRoot)                             GBL_NOEXCEPT;
+//! Returns the current root, or nullptr. Do not unref it.
 GBL_EXPORT GblObject*           GUM_ObjectTreeModel_root   (const GUM_ObjectTreeModel* pSelf)             GBL_NOEXCEPT;
+//! Sets the root and emits structureChanged. Keeps a reference; nullptr clears it.
 GBL_EXPORT GBL_RESULT           GUM_ObjectTreeModel_setRoot(GUM_ObjectTreeModel* pSelf, GblObject* pRoot) GBL_NOEXCEPT;
+//! Emits structureChanged after an external hierarchy change, invalidating existing indices.
 GBL_EXPORT GBL_RESULT           GUM_ObjectTreeModel_refresh(GUM_ObjectTreeModel* pSelf)                   GBL_NOEXCEPT;
 
 GBL_DECLS_END

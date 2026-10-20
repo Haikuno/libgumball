@@ -22,19 +22,19 @@ typedef struct GUM_InputBinding {
 
 GBL_DECLS_BEGIN
 
-// Initializes the input system
+//! Initializes the input system
 GBL_RESULT GUM_InputSystem_init  (void);
 
-// Deinitializes the input system
+//! Deinitializes the input system
 void       GUM_InputSystem_deinit(void);
 
-// Updates the input system
+//! Updates the input system
 void       GUM_InputSystem_update(void);
 
-// Given a device type, binds an action to the passed button.
+//! Given a device type, binds an action to the passed button.
 GBL_RESULT GUM_InputSystem_bind  (GblType deviceType, GUM_InputAction action, GblFlags button);
 
-// Unbinds an action previously associated with the passed device/button pair.
+//! Unbinds an action previously associated with the passed device/button pair.
 GBL_RESULT GUM_InputSystem_unbind(GblType deviceType, GUM_InputAction action, GblFlags button);
 
 //! Returns true if input is currently enabled for pDevice.

@@ -54,7 +54,7 @@ GblType GUM_Manager_type(void) GBL_NOEXCEPT;
 GBL_EXPORT GBL_RESULT     GUM_Manager_loadEx     (GblStringRef* pPath,
                                                   GUM_IResource** ppResource) GBL_NOEXCEPT;
 
-//! Loads a resource, returning nullptr on failure.
+//! Loads a resource, returning a new reference or nullptr on failure.
 GBL_EXPORT GUM_IResource* GUM_Manager_load       (GblStringRef* pPath)        GBL_NOEXCEPT;
 
 //! Removes a resource from the cache. Existing references remain valid.
@@ -63,7 +63,7 @@ GBL_EXPORT GBL_RESULT     GUM_Manager_evict      (GUM_IResource* pResource)   GB
 //! Sets the base path used for relative resource paths.
 GBL_EXPORT GBL_RESULT     GUM_Manager_setBasePath(GblStringRef* pPath)        GBL_NOEXCEPT;
 
-//! Returns the current base path.
+//! Returns the current base path. Do not unref it.
 GBL_EXPORT GblStringRef*  GUM_Manager_basePath   (void)                       GBL_NOEXCEPT;
 
 //! Deinitializes the resource manager and clears its cache. Existing references remain valid.

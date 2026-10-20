@@ -35,9 +35,9 @@ void        GUM_Backend_setLogger          (void);
 //! Restores the previous logger.
 void        GUM_Backend_resetLogger        (void);
 
-//! Returns the current timestamp in milliseconds since the program started.
+//! Returns the backend's millisecond clock.
 uint32_t    GUM_Backend_timestamp          (void);
-//! Returns the last frame's draw time in seconds.
+//! Returns the last frame's duration in seconds.
 float       GUM_Backend_frametime          (void);
 
 //! Returns the current screen size.

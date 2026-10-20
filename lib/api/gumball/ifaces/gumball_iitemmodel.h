@@ -37,6 +37,7 @@ typedef struct GUM_ModelIndex {
     size_t      column;           //!< Column inside the row.
 } GUM_ModelIndex;
 
+//! An invalid index. Also used as the parent of top-level rows.
 #define GUM_MODEL_INDEX_INVALID ((GUM_ModelIndex){ 0 })
 
 typedef enum GUM_ItemFlag {
@@ -63,21 +64,33 @@ GBL_SIGNALS(GUM_IItemModel,
 
 GBL_EXPORT GblType GUM_IItemModel_type(void) GBL_NOEXCEPT;
 
+//! Returns a new reference to the model.
 GBL_EXPORT GUM_IItemModel* GUM_IItemModel_ref  (GBL_SELF) GBL_NOEXCEPT;
+//! Releases a model reference and returns the remaining reference count.
 GBL_EXPORT GblRefCount     GUM_IItemModel_unref(GBL_SELF) GBL_NOEXCEPT;
 
+//! Returns true if index has a model and row handle. Does not detect stale indices.
 GBL_EXPORT GblBool GUM_ModelIndex_valid  (GUM_ModelIndex index)                   GBL_NOEXCEPT;
+//! Returns true if both indices have the same model, row handle, and column.
 GBL_EXPORT GblBool GUM_ModelIndex_equal  (GUM_ModelIndex lhs, GUM_ModelIndex rhs) GBL_NOEXCEPT;
+//! Returns true if index is valid and belongs to this model.
 GBL_EXPORT GblBool GUM_ModelIndex_belongs(GUM_ModelIndex index, GBL_CSELF)        GBL_NOEXCEPT;
 
+//! Returns the number of columns below parent.
 GBL_EXPORT size_t         GUM_IItemModel_columnCount(GBL_CSELF, GUM_ModelIndex parent)                            GBL_NOEXCEPT;
+//! Returns the number of rows below parent.
 GBL_EXPORT size_t         GUM_IItemModel_rowCount   (GBL_CSELF, GUM_ModelIndex parent)                            GBL_NOEXCEPT;
+//! Returns the index at row and column below parent, or GUM_MODEL_INDEX_INVALID.
 GBL_EXPORT GUM_ModelIndex GUM_IItemModel_index      (GBL_CSELF, size_t row, size_t column, GUM_ModelIndex parent) GBL_NOEXCEPT;
+//! Returns the parent of index, or GUM_MODEL_INDEX_INVALID for a top-level row.
 GBL_EXPORT GUM_ModelIndex GUM_IItemModel_parent     (GBL_CSELF, GUM_ModelIndex index)                             GBL_NOEXCEPT;
+//! Reads the value at index into pValue.
 GBL_EXPORT GBL_RESULT     GUM_IItemModel_data       (GBL_CSELF, GUM_ModelIndex index, GblVariant* pValue)         GBL_NOEXCEPT;
 //! Returns data formatted for display. Defaults to data().
 GBL_EXPORT GBL_RESULT     GUM_IItemModel_displayData(GBL_CSELF, GUM_ModelIndex index, GblVariant* pValue)         GBL_NOEXCEPT;
+//! Writes pValue to index. The model must support editing that item.
 GBL_EXPORT GBL_RESULT     GUM_IItemModel_setData    (GBL_SELF, GUM_ModelIndex index, GblVariant* pValue)          GBL_NOEXCEPT;
+//! Returns the selection and editing flags for index.
 GBL_EXPORT GblFlags       GUM_IItemModel_flags      (GBL_CSELF, GUM_ModelIndex index)                             GBL_NOEXCEPT;
 
 //! Emits a data change without invalidating indices.

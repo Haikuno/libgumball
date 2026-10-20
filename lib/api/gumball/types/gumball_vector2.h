@@ -35,9 +35,9 @@ GBL_EXPORT GUM_Vector2 GUM_Vector2_subtract     (GUM_Vector2 a, GUM_Vector2 b)  
 GBL_EXPORT GUM_Vector2 GUM_Vector2_scale        (GUM_Vector2 a, float scalar )                      GBL_NOEXCEPT; //!< Returns the product of a vector and a scalar
 GBL_EXPORT float       GUM_Vector2_distance     (GUM_Vector2 a, GUM_Vector2 b)                      GBL_NOEXCEPT; //!< Returns the distance between two vectors
 GBL_EXPORT float       GUM_Vector2_length       (GUM_Vector2 a)                                     GBL_NOEXCEPT; //!< Returns the length of a vector
-GBL_EXPORT float       GUM_Vector2_angle        (GUM_Vector2 a, GUM_Vector2 b)                      GBL_NOEXCEPT; //!< Returns the angle of (b - a). Range (-pi, pi)
-GBL_EXPORT float       GUM_Vector2_angleTo      (GUM_Vector2 from, GUM_Vector2 to, GUM_Vector2 dir) GBL_NOEXCEPT; //!< Returns the unsigned angle between dir and (to - from). Range (0, pi)
-GBL_EXPORT float       GUM_Vector2_signedAngleTo(GUM_Vector2 from, GUM_Vector2 to, GUM_Vector2 dir) GBL_NOEXCEPT; //!< Returns the signed angle from dir to (to - from). Range (-pi, pi)
+GBL_EXPORT float       GUM_Vector2_angle        (GUM_Vector2 a, GUM_Vector2 b)                      GBL_NOEXCEPT; //!< Returns the angle of (b - a). Range [-pi, pi], in radians.
+GBL_EXPORT float       GUM_Vector2_angleTo      (GUM_Vector2 from, GUM_Vector2 to, GUM_Vector2 dir) GBL_NOEXCEPT; //!< Returns the unsigned angle between dir and (to - from). Range [0, pi], in radians.
+GBL_EXPORT float       GUM_Vector2_signedAngleTo(GUM_Vector2 from, GUM_Vector2 to, GUM_Vector2 dir) GBL_NOEXCEPT; //!< Returns the signed angle from dir to (to - from). Range [-pi, pi], in radians.
 GBL_EXPORT float       GUM_Vector2_dot          (GUM_Vector2 a, GUM_Vector2 b)                      GBL_NOEXCEPT; //!< Returns the dot product of two vectors
 GBL_EXPORT float       GUM_Vector2_cross        (GUM_Vector2 a, GUM_Vector2 b)                      GBL_NOEXCEPT; //!< Returns the cross product of two vectors
 

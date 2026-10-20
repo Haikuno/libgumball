@@ -18,7 +18,7 @@
 
 #include <gumball/types/gumball_renderer.h>
 
-//! Passes a backend event to libGumball.
+//! Passes a backend event to libGumball. As of now, this is only used for SDL.
 GBL_EXPORT void GUM_processEvent(const void* pEvent) GBL_NOEXCEPT;
 
 //! Updates all UI elements
@@ -74,25 +74,23 @@ GBL_EXPORT void GUM_processEvent(const void* pEvent) GBL_NOEXCEPT;
 //! Increments the reference count of a UI element, returning a pointer to it.
 #define GUM_ref(obj)                  ((GUM_ref)(GBL_OBJECT(obj)))
 
-//! Decrements the reference count of an element and its children.
+//! Detaches the element and its descendants, then releases a reference to each.
 #define GUM_unref(obj)                ((GUM_unref)(GBL_OBJECT(obj)))
 
 /*!  Connects an element's signal to a callback.
- *   The callback should take in a pointer to the element that emits the signal, and return void.
- *   Some signals also include a pointer to the emitting input device. (e.g. onPress, onRelease)
- *   See GUM_Widget for signal names
+ *   The callback returns void and takes the emitting element, followed by the signal's arguments.
+ *   onPress and onRelease pass a GUM_Event_Input* after the element.
  *
  *   \code {.c}
  *       void buttonCallback(GUM_Widget* pSelf) {
- *           printf("Button pressed!\n");
- *           printf("UserData: %i\n", *(int*)ud);
+ *           printf("Button %s pressed!\n", GUM_Widget_label(pSelf));
  *       }
  *
  *       auto pButton = GUM_Button_create();
- *       GUM_connect(pButton, "onPressConfirm", buttonCallback, &data);
+ *       GUM_connect(pButton, "onPressConfirm", buttonCallback);
  *   \endcode
  *
- *   \note You can also pass multiple signals at once, with the pattern: "signalName", callbackFn
+ *   \note You can pass multiple "signalName", callbackFn pairs. Returns the emitting element.
 */
 #define GUM_connect(...) GUM_connect_(__VA_ARGS__)
 
@@ -102,7 +100,7 @@ GBL_EXPORT void GUM_processEvent(const void* pEvent) GBL_NOEXCEPT;
 //! Sets the property with the given name. Setting parent also updates libGumball's hierarchy.
 #define GUM_setProperty(obj, name, /*value*/...) ((GUM_setProperty)(GBL_OBJECT(obj), name __VA_OPT__(,) __VA_ARGS__))
 
-//! Creates a NULL-terminated list that can be passed to the inherited children property.
+//! Creates a null-terminated child list for the inherited children property.
 #define GUM_childrenList(child1, /*child2, child3, */ ...) \
     (GblRingList_create(child1 __VA_OPT__(,) __VA_ARGS__, nullptr))
 

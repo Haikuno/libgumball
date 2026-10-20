@@ -88,7 +88,7 @@ GBL_EXPORT GblType GUM_Container_type(void) GBL_NOEXCEPT;
 
 GBL_EXPORT float               GUM_Container_padding              (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Padding between the border and its children. Default: 5.
 GBL_EXPORT float               GUM_Container_margin               (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Spacing between children. Default: 2.
-GBL_EXPORT float               GUM_Container_minChildSize         (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Minimum child size. Default: 0.15.
+GBL_EXPORT float               GUM_Container_minChildSize         (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Minimum child size as a fraction of the container size. Default: 0.15.
 GBL_EXPORT GUM_Direction       GUM_Container_direction            (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Current layout direction.
 GBL_EXPORT GblBool             GUM_Container_resizeWidgets        (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< If children should be resized automatically.
 GBL_EXPORT GblBool             GUM_Container_alignWidgets         (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< If children should be aligned automatically.
@@ -100,11 +100,11 @@ GBL_EXPORT float               GUM_Container_scrollbarMinThumbSize(const GUM_Con
 GBL_EXPORT float               GUM_Container_scrollbarRoundness   (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Scrollbar roundness. Default: 1.
 GBL_EXPORT uint32_t            GUM_Container_scrollbarTrackColor  (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Scrollbar track color.
 GBL_EXPORT uint32_t            GUM_Container_scrollbarThumbColor  (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Scrollbar thumb color.
-GBL_EXPORT float               GUM_Container_scrollPosition       (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Current scroll position.
-GBL_EXPORT float               GUM_Container_scrollRange          (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Maximum scroll position.
+GBL_EXPORT float               GUM_Container_scrollPosition       (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Current scroll offset along direction, in pixels.
+GBL_EXPORT float               GUM_Container_scrollRange          (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< Maximum scroll offset along direction, in pixels.
 GBL_EXPORT GblBool             GUM_Container_scrollbarVisible     (const GUM_Container* pSelf)           GBL_NOEXCEPT; //!< If the scrollbar is visible.
-GBL_EXPORT void                GUM_Container_scrollTo             (GUM_Container* pSelf, float position) GBL_NOEXCEPT; //!< Scrolls to an absolute position.
-GBL_EXPORT void                GUM_Container_scrollBy             (GUM_Container* pSelf, float delta)    GBL_NOEXCEPT; //!< Scrolls by a relative amount.
+GBL_EXPORT void                GUM_Container_scrollTo             (GUM_Container* pSelf, float position) GBL_NOEXCEPT; //!< Eases toward an offset in pixels, clamped to the scroll range.
+GBL_EXPORT void                GUM_Container_scrollBy             (GUM_Container* pSelf, float delta)    GBL_NOEXCEPT; //!< Adds delta pixels to the scroll target, clamped to the scroll range.
 
 //! Returns a new GUM_Container. Optionally takes a list of Name/Value pairs for properties.
 #define GUM_Container_create(/* propertyName, propertyValue */ ...) GBL_NEW(GUM_Container __VA_OPT__(,) __VA_ARGS__)

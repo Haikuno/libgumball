@@ -62,7 +62,7 @@ GBL_PROPERTIES(GUM_InputDevice,
 
 GblType GUM_InputDevice_type(void) GBL_NOEXCEPT;
 
-//! Returns the device name.
+//! Returns the device name. Do not unref it.
 GBL_EXPORT GblStringRef* GUM_InputDevice_name         (const GUM_InputDevice* pSelf) GBL_NOEXCEPT;
 
 //! Returns the Widget currently focused by this device, or nullptr.

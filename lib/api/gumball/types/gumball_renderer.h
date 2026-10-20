@@ -24,9 +24,9 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Renderer);
 GblType GUM_Renderer_type(void) GBL_NOEXCEPT;
 //! \endcond
 
-//! Returns a new GUM_Renderer. pRenderer must remain valid until the wrapper is destroyed.
+//! Wraps an SDL_Renderer. It must outlive the wrapper. Returns nullptr with raylib.
 GUM_Renderer* GUM_Renderer_create (void* pRenderer);
-//! Destroys a GUM_Renderer.
+//! Destroys the wrapper, leaving the SDL_Renderer intact.
 void          GUM_Renderer_destroy(GUM_Renderer* pSelf);
 
 GBL_DECLS_END

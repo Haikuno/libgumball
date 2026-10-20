@@ -36,10 +36,13 @@ GBL_INSTANCE_DERIVE_EMPTY(GUM_PropertyModel, GblBox)
 
 GBL_EXPORT GblType GUM_PropertyModel_type(void) GBL_NOEXCEPT;
 
+//! Returns a new model, keeping a reference to pObject. nullptr creates an empty model.
 GBL_EXPORT GUM_PropertyModel* GUM_PropertyModel_create            (GblObject* pObject)                                           GBL_NOEXCEPT;
+//! Returns the object whose properties are shown, or nullptr. Do not unref it.
 GBL_EXPORT GblObject*         GUM_PropertyModel_object            (const GUM_PropertyModel* pSelf)                               GBL_NOEXCEPT;
+//! Sets the object and emits structureChanged. Keeps a reference; nullptr clears it.
 GBL_EXPORT GBL_RESULT         GUM_PropertyModel_setObject         (GUM_PropertyModel* pSelf, GblObject* pObject)                 GBL_NOEXCEPT;
-//! Returns whether the given property is visible.
+//! Returns whether pName is not hidden, even if the property does not exist.
 GBL_EXPORT GblBool            GUM_PropertyModel_propertyVisible   (const GUM_PropertyModel* pSelf, const char* pName)            GBL_NOEXCEPT;
 //! Sets whether the given property is visible.
 GBL_EXPORT GBL_RESULT         GUM_PropertyModel_setPropertyVisible(GUM_PropertyModel* pSelf, const char* pName, GblBool visible) GBL_NOEXCEPT;

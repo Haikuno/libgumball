@@ -66,25 +66,25 @@ GblType GUM_Animator_type(void) GBL_NOEXCEPT;
 GBL_EXPORT GUM_Animator GUM_Animator_make      (float value, float duration, GUM_EasingType easing) GBL_NOEXCEPT; //!< Returns a settled animator; invalid easing falls back to linear.
 GBL_EXPORT GUM_Animator GUM_Animator_makeCustom(float value, float duration, GUM_EasingFn pFnEase)  GBL_NOEXCEPT; //!< Returns a settled custom animator; nullptr easing falls back to linear.
 GBL_EXPORT void         GUM_Animator_set       (GUM_Animator* pSelf, float target)                  GBL_NOEXCEPT; //!< Retargets the animator, easing from its current value
-GBL_EXPORT bool         GUM_Animator_update    (GUM_Animator* pSelf, float dt)                      GBL_NOEXCEPT; //!< Advances current toward target. Does not invoke pOnDone.
-GBL_EXPORT bool         GUM_Animator_settled   (const GUM_Animator* pSelf)                          GBL_NOEXCEPT; //!< Returns true if current has reached target
-GBL_EXPORT void         GUM_Animator_setOnDone (GUM_Animator* pSelf, GblClosure* pClosure)          GBL_NOEXCEPT; //!< Owns pClosure; nullptr clears the current closure.
+GBL_EXPORT bool         GUM_Animator_update    (GUM_Animator* pSelf, float dt)                      GBL_NOEXCEPT; //!< Advances by dt seconds, returning true if current changes. Does not invoke pOnDone.
+GBL_EXPORT bool         GUM_Animator_settled   (const GUM_Animator* pSelf)                          GBL_NOEXCEPT; //!< Returns true once the animation's duration has elapsed
+GBL_EXPORT void         GUM_Animator_setOnDone (GUM_Animator* pSelf, GblClosure* pClosure)          GBL_NOEXCEPT; //!< Keeps a reference to pClosure; nullptr clears it.
 //! @}
 
 /*!  \name  Built-in Easing Curves
- *   \brief   Stateless curve functions
+ *   \brief   Stateless curve functions. t is progress in [0, 1]; elastic easing may overshoot.
  *   @{
 */
-GBL_EXPORT float GUM_Ease_linear    (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_quadIn    (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_quadOut   (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_quadInOut (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_cubicIn   (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_cubicOut  (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_cubicInOut(float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_sineInOut (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_bounceOut (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_elasticOut(float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_linear    (float t) GBL_NOEXCEPT; //!< Linear easing.
+GBL_EXPORT float GUM_Ease_quadIn    (float t) GBL_NOEXCEPT; //!< Quadratic ease-in.
+GBL_EXPORT float GUM_Ease_quadOut   (float t) GBL_NOEXCEPT; //!< Quadratic ease-out.
+GBL_EXPORT float GUM_Ease_quadInOut (float t) GBL_NOEXCEPT; //!< Quadratic ease-in/out.
+GBL_EXPORT float GUM_Ease_cubicIn   (float t) GBL_NOEXCEPT; //!< Cubic ease-in.
+GBL_EXPORT float GUM_Ease_cubicOut  (float t) GBL_NOEXCEPT; //!< Cubic ease-out.
+GBL_EXPORT float GUM_Ease_cubicInOut(float t) GBL_NOEXCEPT; //!< Cubic ease-in/out.
+GBL_EXPORT float GUM_Ease_sineInOut (float t) GBL_NOEXCEPT; //!< Sinusoidal ease-in/out.
+GBL_EXPORT float GUM_Ease_bounceOut (float t) GBL_NOEXCEPT; //!< Ease-out with a bounce.
+GBL_EXPORT float GUM_Ease_elasticOut(float t) GBL_NOEXCEPT; //!< Ease-out with elastic overshoot.
 //! @}
 
 GBL_DECLS_END
