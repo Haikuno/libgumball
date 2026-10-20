@@ -4,10 +4,10 @@
 // View this file's documentation online: https://libgumball.psyops.studio/gumball__events_8h.html
 
 /*!  \file
- *   \brief      Events module-wide include
- *   \ingroup    events
+ *   \brief   Events module-wide include
+ *   \ingroup events
  *
- *   \author     2025, 2026 Agustín Bellagamba
+ *   \author    2025, 2026 Agustín Bellagamba
  *   \copyright MIT License
 */
 
@@ -19,7 +19,7 @@
 #include "events/gumball_event_mouse.h"
 
 /*!  \defgroup events Events
- *   \brief    Input and application event types
+ *   \brief   Input and application event types
 */
 
 #endif // GUM_EVENTS_H

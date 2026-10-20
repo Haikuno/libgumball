@@ -6,7 +6,7 @@ GUM_Event_Mouse* GUM_Event_Mouse_createFrom(GUM_Mouse* pMouse) {
     if (!pEvent || !pMouse)
         return pEvent;
 
-    GUM_Pointer* pPointer = GUM_POINTER(pMouse);
+    GUM_Pointer*       pPointer      = GUM_POINTER(pMouse);
     GUM_Event_Pointer* pPointerEvent = GUM_EVENT_POINTER(pEvent);
 
     pPointerEvent->position = pPointer->position;

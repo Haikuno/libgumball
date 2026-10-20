@@ -38,8 +38,8 @@ static GBL_RESULT GUM_update_snapshotAppend_(GblObject* pObject, GUM_UpdateSnaps
     GblObject_foreachChild(pObject, pChild) {
         GUM_Widget* pWidget = GBL_AS(GUM_Widget, pChild);
         if (pWidget) {
-            GUM_Widget* pRetained = GUM_WIDGET(GblBox_ref(GBL_BOX(pWidget)));
-            const GBL_RESULT result = GblArrayList_pushBack(&pSnapshot->widgets, &pRetained);
+            GUM_Widget*      pRetained = GUM_WIDGET(GblBox_ref(GBL_BOX(pWidget)));
+            const GBL_RESULT result    = GblArrayList_pushBack(&pSnapshot->widgets, &pRetained);
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
                 GblBox_unref(GBL_BOX(pRetained));
                 return result;
@@ -107,8 +107,8 @@ static GBL_RESULT GUM_reparent_(GblObject* pChild, GblObject* pParent) {
 
     GblObject_setParent(pChild, pParent);
     const GBL_RESULT result = GUM_hierarchyChanged_(pChild,
-                                                     pOldParent,
-                                                     GblObject_parent(pChild));
+                                                    pOldParent,
+                                                    GblObject_parent(pChild));
 
     if (pOldParent)
         GblBox_unref(GBL_BOX(pOldParent));
@@ -151,9 +151,9 @@ GBL_EXPORT GBL_RESULT (GUM_update)(void) {
         return result;
     }
 
-    GBL_RESULT firstFailure = GBL_RESULT_SUCCESS;
-    const size_t count = GblArrayList_size(&snapshot.widgets);
-    bool rootActive = true;
+    GBL_RESULT   firstFailure = GBL_RESULT_SUCCESS;
+    const size_t count        = GblArrayList_size(&snapshot.widgets);
+    bool         rootActive   = true;
 
     for (size_t i = 0; i < count; ++i) {
         GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
@@ -294,7 +294,7 @@ GBL_EXPORT GBL_RESULT (GUM_setProperty)(GblObject* pSelf, const char* pName, ...
     if GBL_UNLIKELY (!pSelf || !pName)
         return GBL_RESULT_ERROR_INVALID_POINTER;
 
-    GblObject* pOldParent = nullptr;
+    GblObject* pOldParent     = nullptr;
     const bool parentMutation = strcmp(pName, "parent") == 0;
     if (parentMutation) {
         pOldParent = GblObject_parent(pSelf);

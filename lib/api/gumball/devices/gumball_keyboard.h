@@ -19,13 +19,13 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_KEYBOARD_TYPE            (GBL_TYPEID    (GUM_Keyboard))
-#define GUM_KEYBOARD(self)           (GBL_CAST      (GUM_Keyboard, self))
-#define GUM_KEYBOARD_CLASS(klass)    (GBL_CLASS_CAST(GUM_Keyboard, klass))
-#define GUM_KEYBOARD_CLASSOF(self)   (GBL_CLASSOF   (GUM_Keyboard, self))
+#define GUM_KEYBOARD_TYPE          (GBL_TYPEID     (GUM_Keyboard))           //!< Returns the GUM_Keyboard Type UUID
+#define GUM_KEYBOARD(self)         (GBL_CAST       (GUM_Keyboard, self))     //!< Casts an instance of a compatible device to a GUM_Keyboard
+#define GUM_KEYBOARD_CLASS(klass)  (GBL_CLASS_CAST (GUM_Keyboard, klass))    //!< Casts a class     of a compatible device to a GUM_KeyboardClass
+#define GUM_KEYBOARD_CLASSOF(self) (GBL_CLASSOF    (GUM_Keyboard, self))     //!< Casts an instance of a compatible device to a GUM_KeyboardClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Keyboard
+#define GBL_SELF_TYPE                GUM_Keyboard
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Keyboard);
@@ -66,7 +66,6 @@ GblType GUM_Keyboard_type(void) GBL_NOEXCEPT;
 #define GUM_Keyboard_create(/* property_name, property_value */...) GBL_NEW(GUM_Keyboard __VA_OPT__(,) __VA_ARGS__)
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_KEYBOARD_H

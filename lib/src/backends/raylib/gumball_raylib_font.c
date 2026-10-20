@@ -23,8 +23,8 @@ GBL_EXPORT GUM_Vector2 GUM_Backend_Font_measureText(GUM_Font* pFont, GblStringRe
 
     GUM_Vector2 size    = { 0, 0 };
     Vector2     raySize = MeasureTextEx(*pRayFont, pText, fontSize, spacing);
-    size.x              = raySize.x;
-    size.y              = raySize.y;
+    size.x = raySize.x;
+    size.y = raySize.y;
     return size;
 }
 

@@ -4,6 +4,8 @@
 #include <gimbal/containers/gimbal_hash_set.h>
 #include <gimbal/strings/gimbal_string_ref.h>
 
+#include "../ifaces/gumball_iresource_.h"
+
 #include <errno.h>
 #include <limits.h>
 #include <stdint.h>
@@ -17,7 +19,7 @@
 #include <unistd.h>
 #endif
 
-#define GUM_MANAGER_(self) (GBL_PRIVATE(GUM_Manager, self))
+#define GUM_MANAGER_(self)      (GBL_PRIVATE(GUM_Manager, self))
 #define GUM_MANAGER_MODULE_NAME "GUM_Manager"
 
 typedef struct GUM_HashSetEntry {
@@ -47,8 +49,8 @@ static GblBool resourceComparator_(const GblHashSet* pSet, const void* pEntry1, 
 
 static void resourceDestructor_(const GblHashSet* pSet, void* pItem) {
     GBL_UNUSED(pSet);
-    GUM_HashSetEntry* pEntry = pItem;
-    const GUM_HashSetEntry entry = *pEntry;
+    GUM_HashSetEntry*      pEntry = pItem;
+    const GUM_HashSetEntry entry  = *pEntry;
     *pEntry = (GUM_HashSetEntry){ 0 };
 
     GUM_IResource_unref(entry.pResource);
@@ -56,8 +58,8 @@ static void resourceDestructor_(const GblHashSet* pSet, void* pItem) {
 }
 
 static GUM_HashSetEntry* resourceFind_(GUM_Manager_* pManager,
-                                       const char* pPath,
-                                       GblHash hash) {
+                                       const char*   pPath,
+                                       GblHash       hash) {
     if (!pManager || !pManager->initialized || !pPath)
         return nullptr;
 
@@ -66,20 +68,6 @@ static GUM_HashSetEntry* resourceFind_(GUM_Manager_* pManager,
         .hash  = hash
     };
     return GblHashSet_get(&pManager->resources, &key);
-}
-
-static GUM_HashSetEntry* resourceFindByPointer_(GUM_Manager_* pManager,
-                                                const GUM_IResource* pResource) {
-    if (!pManager || !pManager->initialized || !pResource)
-        return nullptr;
-
-    const size_t bucketCount = GblHashSet_bucketCount(&pManager->resources);
-    for (size_t i = 0; i < bucketCount; ++i) {
-        GUM_HashSetEntry* pEntry = GblHashSet_probe(&pManager->resources, i);
-        if (pEntry && pEntry->pResource == pResource)
-            return pEntry;
-    }
-    return nullptr;
 }
 
 static GBL_RESULT currentPath_(char** ppPath) {
@@ -112,8 +100,6 @@ static GBL_RESULT currentPath_(char** ppPath) {
         free(pPath);
         if (error != ERANGE)
             return error == ENOMEM ? GBL_RESULT_ERROR_MEM_ALLOC : GBL_RESULT_ERROR_INTERNAL;
-        if (capacity > SIZE_MAX / 2)
-            return GBL_RESULT_ERROR_MEM_ALLOC;
         capacity *= 2;
     }
 }
@@ -121,7 +107,7 @@ static GBL_RESULT currentPath_(char** ppPath) {
 #ifndef _WIN32
 static GBL_RESULT normalizePosixPath_(const char* pBasePath,
                                       const char* pPath,
-                                      char** ppNormalized) {
+                                      char**      ppNormalized) {
     if (!ppNormalized)
         return GBL_RESULT_ERROR_INVALID_POINTER;
     *ppNormalized = nullptr;
@@ -131,47 +117,37 @@ static GBL_RESULT normalizePosixPath_(const char* pBasePath,
     const bool   absolute = pPath[0] == '/';
     const size_t baseLen  = absolute ? 0 : strlen(pBasePath);
     const size_t pathLen  = strlen(pPath);
-    if (baseLen > SIZE_MAX - pathLen - 2)
-        return GBL_RESULT_ERROR_MEM_ALLOC;
 
-    const size_t joinedCapacity = baseLen + pathLen + 2;
-    char* pJoined = malloc(joinedCapacity);
-    if (!pJoined)
+    char* pNormalized = malloc(baseLen + pathLen + 2);
+    if (!pNormalized)
         return GBL_RESULT_ERROR_MEM_ALLOC;
 
     if (absolute)
-        memcpy(pJoined, pPath, pathLen + 1);
+        memcpy(pNormalized, pPath, pathLen + 1);
     else {
-        memcpy(pJoined, pBasePath, baseLen);
-        pJoined[baseLen] = '/';
-        memcpy(pJoined + baseLen + 1, pPath, pathLen + 1);
-    }
-
-    const size_t joinedLen = strlen(pJoined);
-    char* pNormalized = malloc(joinedLen + 2);
-    if (!pNormalized) {
-        free(pJoined);
-        return GBL_RESULT_ERROR_MEM_ALLOC;
+        memcpy(pNormalized, pBasePath, baseLen);
+        pNormalized[baseLen] = '/';
+        memcpy(pNormalized + baseLen + 1, pPath, pathLen + 1);
     }
 
     size_t read  = 0;
     size_t write = 0;
     pNormalized[write++] = '/';
 
-    while (pJoined[read] == '/')
+    while (pNormalized[read] == '/')
         ++read;
 
-    while (pJoined[read]) {
+    while (pNormalized[read]) {
         const size_t segmentStart = read;
-        while (pJoined[read] && pJoined[read] != '/')
+        while (pNormalized[read] && pNormalized[read] != '/')
             ++read;
         const size_t segmentLen = read - segmentStart;
 
-        if (segmentLen == 1 && pJoined[segmentStart] == '.') {
+        if (segmentLen == 1 && pNormalized[segmentStart] == '.') {
             /* lexical no-op */
         } else if (segmentLen == 2
-                && pJoined[segmentStart]     == '.'
-                && pJoined[segmentStart + 1] == '.') {
+                   && pNormalized[segmentStart]     == '.'
+                   && pNormalized[segmentStart + 1] == '.') {
             if (write > 1) {
                 while (write > 1 && pNormalized[write - 1] != '/')
                     --write;
@@ -181,16 +157,15 @@ static GBL_RESULT normalizePosixPath_(const char* pBasePath,
         } else if (segmentLen) {
             if (write > 1)
                 pNormalized[write++] = '/';
-            memcpy(pNormalized + write, pJoined + segmentStart, segmentLen);
+            memmove(pNormalized + write, pNormalized + segmentStart, segmentLen);
             write += segmentLen;
         }
 
-        while (pJoined[read] == '/')
+        while (pNormalized[read] == '/')
             ++read;
     }
 
     pNormalized[write] = '\0';
-    free(pJoined);
     *ppNormalized = pNormalized;
     return GBL_RESULT_SUCCESS;
 }
@@ -236,7 +211,7 @@ static GBL_RESULT windowsFullPath_(const char* pPath, char** ppNormalized) {
 
 static GBL_RESULT normalizeWindowsPath_(const char* pBasePath,
                                         const char* pPath,
-                                        char** ppNormalized) {
+                                        char**      ppNormalized) {
     if (!ppNormalized)
         return GBL_RESULT_ERROR_INVALID_POINTER;
     *ppNormalized = nullptr;
@@ -251,8 +226,6 @@ static GBL_RESULT normalizeWindowsPath_(const char* pBasePath,
 
     const size_t baseLen = strlen(pBasePath);
     const size_t pathLen = strlen(pPath);
-    if (baseLen > SIZE_MAX - pathLen - 2)
-        return GBL_RESULT_ERROR_MEM_ALLOC;
 
     char* pJoined = malloc(baseLen + pathLen + 2);
     if (!pJoined)
@@ -275,8 +248,8 @@ static GBL_RESULT normalizeBasePath_(const char* pPath, char** ppNormalized) {
     if (!pPath || !pPath[0])
         return GBL_RESULT_ERROR_INVALID_ARG;
 
-    char* pCurrentPath = nullptr;
-    GBL_RESULT result = currentPath_(&pCurrentPath);
+    char*      pCurrentPath = nullptr;
+    GBL_RESULT result       = currentPath_(&pCurrentPath);
     if (!GBL_RESULT_SUCCESS(result))
         return result;
 
@@ -291,8 +264,8 @@ static GBL_RESULT normalizeBasePath_(const char* pPath, char** ppNormalized) {
 }
 
 static GBL_RESULT normalizedPath_(const GUM_Manager_* pManager,
-                                  const char* pPath,
-                                  char** ppNormalized) {
+                                  const char*         pPath,
+                                  char**              ppNormalized) {
     if (!ppNormalized)
         return GBL_RESULT_ERROR_INVALID_POINTER;
     *ppNormalized = nullptr;
@@ -438,8 +411,8 @@ GBL_EXPORT GBL_RESULT GUM_Manager_loadEx(GblStringRef* pPath, GUM_IResource** pp
     if (!GBL_RESULT_SUCCESS(result))
         return result;
 
-    GUM_Manager_* pManager = GUM_MANAGER_(pManagerObject);
-    char* pNormalizedPath = nullptr;
+    GUM_Manager_* pManager        = GUM_MANAGER_(pManagerObject);
+    char*         pNormalizedPath = nullptr;
     result = normalizedPath_(pManager, pPath, &pNormalizedPath);
     if (!GBL_RESULT_SUCCESS(result))
         return result;
@@ -450,12 +423,12 @@ GBL_EXPORT GBL_RESULT GUM_Manager_loadEx(GblStringRef* pPath, GUM_IResource** pp
         return GBL_RESULT_UNSUPPORTED;
     }
 
-    const GblHash pathHash = gblHash(pNormalizedPath, strlen(pNormalizedPath));
-    GUM_HashSetEntry* pCached = resourceFind_(pManager, pNormalizedPath, pathHash);
+    const GblHash     pathHash = gblHash(pNormalizedPath, strlen(pNormalizedPath));
+    GUM_HashSetEntry* pCached  = resourceFind_(pManager, pNormalizedPath, pathHash);
     if (pCached) {
         *ppResource = GUM_IResource_ref(pCached->pResource);
         free(pNormalizedPath);
-        return *ppResource ? GBL_RESULT_SUCCESS : GBL_RESULT_ERROR_INTERNAL;
+        return GBL_RESULT_SUCCESS;
     }
 
     GUM_IResource* pResource = GUM_IRESOURCE(GblBox_create(resourceType));
@@ -466,19 +439,14 @@ GBL_EXPORT GBL_RESULT GUM_Manager_loadEx(GblStringRef* pPath, GUM_IResource** pp
 
     result = GUM_IRESOURCE_CLASSOF(pResource)->pFnLoad(pResource, pNormalizedPath);
     if (GBL_RESULT_SUCCESS(result)) {
-        GblStringRef* pCachedPath = GblStringRef_create(pNormalizedPath);
-        if (!pCachedPath) {
+        const GUM_HashSetEntry entry = {
+            .pResource = pResource,
+            .pPath     = GblStringRef_ref(GUM_IResource_path_(pResource)),
+            .hash      = pathHash
+        };
+        if (!GblHashSet_insert(&pManager->resources, &entry)) {
+            GblStringRef_unref(entry.pPath);
             result = GBL_RESULT_ERROR_MEM_ALLOC;
-        } else {
-            const GUM_HashSetEntry entry = {
-                .pResource = pResource,
-                .pPath     = pCachedPath,
-                .hash      = pathHash
-            };
-            if (!GblHashSet_insert(&pManager->resources, &entry)) {
-                GblStringRef_unref(pCachedPath);
-                result = GBL_RESULT_ERROR_MEM_ALLOC;
-            }
         }
     }
 
@@ -492,8 +460,8 @@ GBL_EXPORT GBL_RESULT GUM_Manager_loadEx(GblStringRef* pPath, GUM_IResource** pp
 }
 
 GBL_EXPORT GUM_IResource* GUM_Manager_load(GblStringRef* pPath) {
-    GUM_IResource* pResource = nullptr;
-    const GBL_RESULT result = GUM_Manager_loadEx(pPath, &pResource);
+    GUM_IResource*   pResource = nullptr;
+    const GBL_RESULT result    = GUM_Manager_loadEx(pPath, &pResource);
     if (!GBL_RESULT_SUCCESS(result))
         GUM_LOG_ERROR("Failed to load resource '%s': %s", pPath ? pPath : "(null)", gblResultString(result));
     return pResource;
@@ -513,8 +481,13 @@ GBL_EXPORT GBL_RESULT GUM_Manager_evict(GUM_IResource* pResource) {
         return GBL_RESULT_NOT_READY;
     }
 
-    GUM_HashSetEntry* pCached = resourceFindByPointer_(pManager, pResource);
-    if (!pCached)
+    GblStringRef* pPath = GUM_IResource_path_(pResource);
+    if (!pPath)
+        return GBL_RESULT_NOT_FOUND;
+
+    const GblHash     pathHash = gblHash(pPath, GblStringRef_length(pPath));
+    GUM_HashSetEntry* pCached  = resourceFind_(pManager, pPath, pathHash);
+    if (!pCached || pCached->pResource != pResource)
         return GBL_RESULT_NOT_FOUND;
 
     const GUM_HashSetEntry key = {
@@ -552,8 +525,8 @@ GBL_EXPORT GBL_RESULT GUM_Manager_setBasePath(GblStringRef* pPath) {
 }
 
 GBL_EXPORT GblStringRef* GUM_Manager_basePath(void) {
-    GUM_Manager* pManager = nullptr;
-    const GBL_RESULT result = GUM_Manager_start_(&pManager);
+    GUM_Manager*     pManager = nullptr;
+    const GBL_RESULT result   = GUM_Manager_start_(&pManager);
     if (!GBL_RESULT_SUCCESS(result)) {
         GUM_LOG_ERROR("Failed to get Manager base path: %s", gblResultString(result));
         return nullptr;
@@ -567,7 +540,7 @@ GBL_EXPORT void GUM_Manager_deinit(void) {
     if (!pManager)
         return;
 
-    GblModule* pModule = GBL_MODULE(pManager);
+    GblModule*        pModule  = GBL_MODULE(pManager);
     const GblRefCount useCount = GblModule_useCount(pModule);
     if (!GblModule_isLoaded(pModule) || useCount != 1) {
         GUM_LOG_ERROR("Manager shutdown invariant violated: expected exactly one framework-owned module use, got %u.",

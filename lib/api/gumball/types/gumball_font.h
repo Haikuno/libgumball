@@ -4,32 +4,34 @@
 // View this file's documentation online: https://libgumball.psyops.studio/gumball__font_8h.html
 
 /*!  \file
- *   \ref        GUM_Font "GUM_Font data structure and hierarchy graph"
- *   \ingroup    types
+ *   \ref     GUM_Font "GUM_Font data structure and hierarchy graph"
+ *   \ingroup types
  *
  *   GUM_Font is the backend-agnostic font type used in libGumball.
  *
  *   \todo
  *       - Replace text alignments with flags for TOP, RIGHT, BOTTOM, LEFT, CENTER
  *
- *   \author     2025, 2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
+
 #include <gimbal/gimbal_meta.h>
+
 #include <gumball/types/gumball_vector2.h>
 #include <gumball/ifaces/gumball_iresource.h>
 
-/*!  \name  Type System
- *   \brief Type UUID and cast operators
- *   @{
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
 */
-#define GUM_FONT_TYPE           (GBL_TYPEID      (GUM_Font))         //!< Returns the GUM_Font Type UUID
-#define GUM_FONT(self)          (GBL_CAST        (GUM_Font, self))   //!< Casts an instance of a compatible resource to a GUM_Font
-#define GUM_FONT_CLASS(klass)   (GBL_CLASS_CAST  (GUM_Font, klass))  //!< Casts a class of a compatible resource to a GUM_FontClass
-#define GUM_FONT_CLASSOF(self)  (GBL_CLASSOF     (GUM_Font, self))   //!< Casts an instance of a compatible resource to a GUM_FontClass
-
-#define GUM_TEXT_ALIGNMENT_TYPE (GBL_TYPEID(GUM_TextAlignment))      //!< Returns the GUM_TextAlignment Type UUID
+#define GUM_FONT_TYPE          (GBL_TYPEID     (GUM_Font))           //!< Returns the GUM_Font Type UUID
+#define GUM_FONT(self)         (GBL_CAST       (GUM_Font, self))     //!< Casts an instance of a compatible type to a GUM_Font
+#define GUM_FONT_CLASS(klass)  (GBL_CLASS_CAST (GUM_Font, klass))    //!< Casts a class     of a compatible type to a GUM_FontClass
+#define GUM_FONT_CLASSOF(self) (GBL_CLASSOF    (GUM_Font, self))     //!< Casts an instance of a compatible type to a GUM_FontClass
 //! @}
+
+#define GUM_TEXT_ALIGNMENT_TYPE (GBL_TYPEID(GUM_TextAlignment)) //!< Returns the GUM_TextAlignment Type UUID
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Font);
@@ -44,9 +46,9 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Font);
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_Font, GblBox, GUM_IResource)
 
-/*!  \struct     GUM_Font
- *   \extends    GblBox
- *   \brief      Backend-agnostic font type
+/*!  \struct  GUM_Font
+ *   \extends GblBox
+ *   \brief   Backend-agnostic font type
 */
 GBL_INSTANCE_DERIVE_EMPTY(GUM_Font, GblBox)
 
@@ -58,14 +60,14 @@ GBL_ENUM(GUM_TextAlignment,
     (GUM_TEXT_ALIGN_LEFT,   "Left",   4)
 )
 
-//! Returns the current default font override, or nullptr if none is set.
-GUM_Font* GUM_Font_default    (void) GBL_NOEXCEPT;
-//! Sets the default font override. Passing nullptr restores the bundled font.
-void      GUM_Font_setDefault (GUM_Font* pFont) GBL_NOEXCEPT;
-
 //! \cond
 GblType GUM_Font_type(void) GBL_NOEXCEPT;
 //! \endcond
+
+//! Returns the current default font override, or nullptr if none is set.
+GUM_Font* GUM_Font_default   (void)            GBL_NOEXCEPT;
+//! Sets the default font override. Passing nullptr restores the bundled font.
+void      GUM_Font_setDefault(GUM_Font* pFont) GBL_NOEXCEPT;
 
 GBL_DECLS_END
 

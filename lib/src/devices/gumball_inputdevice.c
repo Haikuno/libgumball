@@ -11,45 +11,45 @@
 #define GUM_INPUTDEVICE_(self) (GBL_PRIVATE(GUM_InputDevice, self))
 
 typedef struct GUM_InputDevice_ {
-    GUM_InputDevice*          pDevice;
+    GUM_InputDevice* pDevice;
     GblDoublyLinkedListNode deviceNode;
-    GblStringRef*    pDeviceName;
-    GUM_Widget*      pFocusedWidget;
-    bool             enabled;
-    bool             focusRingEnabled;
-    bool             baselinePending;
-    bool             focusTransition;
+    GblStringRef* pDeviceName;
+    GUM_Widget*   pFocusedWidget;
+    bool          enabled;
+    bool          focusRingEnabled;
+    bool          baselinePending;
+    bool          focusTransition;
 } GUM_InputDevice_;
 
 static GblDoublyLinkedListNode devices_;
 static bool devicesInitialized_ = false;
 
 GBL_EXPORT GblStringRef* GUM_InputDevice_name(const GUM_InputDevice* pSelf) {
-    return pSelf ? GUM_INPUTDEVICE_(pSelf)->pDeviceName : nullptr;
+    return GUM_INPUTDEVICE_(pSelf)->pDeviceName;
 }
 
 GBL_EXPORT GUM_Widget* GUM_InputDevice_focusedWidget(const GUM_InputDevice* pSelf) {
-    return pSelf ? GUM_INPUTDEVICE_(pSelf)->pFocusedWidget : nullptr;
+    return GUM_INPUTDEVICE_(pSelf)->pFocusedWidget;
 }
 
 bool GUM_InputDevice_enabled_(const GUM_InputDevice* pDevice) {
-    return pDevice && GUM_INPUTDEVICE_(pDevice)->enabled;
+    return GUM_INPUTDEVICE_(pDevice)->enabled;
 }
 
 bool GUM_InputDevice_focusRingEnabled_(const GUM_InputDevice* pDevice) {
-    return pDevice && GUM_INPUTDEVICE_(pDevice)->focusRingEnabled;
+    return GUM_INPUTDEVICE_(pDevice)->focusRingEnabled;
 }
 
 bool GUM_InputDevice_baselinePending_(const GUM_InputDevice* pDevice) {
-    return pDevice && GUM_INPUTDEVICE_(pDevice)->baselinePending;
+    return GUM_INPUTDEVICE_(pDevice)->baselinePending;
 }
 
 bool GUM_InputDevice_takeBaseline_(GUM_InputDevice* pDevice) {
     if (!pDevice)
         return false;
 
-    GUM_InputDevice_* pSelf_ = GUM_INPUTDEVICE_(pDevice);
-    const bool pending = pSelf_->baselinePending;
+    GUM_InputDevice_* pSelf_  = GUM_INPUTDEVICE_(pDevice);
+    const bool        pending = pSelf_->baselinePending;
     pSelf_->baselinePending = false;
     return pending;
 }
@@ -73,7 +73,7 @@ void GUM_InputDevice_resetTransient_(GUM_InputDevice* pDevice) {
     if (!pDevice)
         return;
 
-    pDevice->buttons = 0;
+    pDevice->buttons     = 0;
     pDevice->buttonsPrev = 0;
 }
 
@@ -101,10 +101,10 @@ GBL_RESULT GUM_InputDevice_foreach_(GblType deviceType,
 
     GUM_InputDeviceSnapshot_ snapshot;
     GBL_RESULT result = GblArrayList_construct(&snapshot.devices,
-                                               sizeof(GUM_InputDevice*),
-                                               0,
-                                               nullptr,
-                                               sizeof(snapshot));
+                                                               sizeof(GUM_InputDevice*),
+                                                               0,
+                                                               nullptr,
+                                                               sizeof(snapshot));
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
@@ -148,8 +148,8 @@ GBL_RESULT GUM_InputDevice_setName_(GUM_InputDevice* pDevice, const char* pName)
     if (!pNewName)
         return GBL_RESULT_ERROR_MEM_ALLOC;
 
-    GUM_InputDevice_* pSelf_ = GUM_INPUTDEVICE_(pDevice);
-    GblStringRef* pOldName = pSelf_->pDeviceName;
+    GUM_InputDevice_* pSelf_   = GUM_INPUTDEVICE_(pDevice);
+    GblStringRef*     pOldName = pSelf_->pDeviceName;
     pSelf_->pDeviceName = pNewName;
     GblStringRef_unref(pOldName);
     return GBL_RESULT_SUCCESS;
@@ -174,8 +174,8 @@ void GUM_InputDevice_focusTransitionEnd_(GUM_InputDevice* pDevice) {
     if (!pDevice)
         return;
 
-    GUM_InputDevice_* pSelf_ = GUM_INPUTDEVICE_(pDevice);
-    GUM_Widget* pWidget = pSelf_->pFocusedWidget;
+    GUM_InputDevice_* pSelf_  = GUM_INPUTDEVICE_(pDevice);
+    GUM_Widget*       pWidget = pSelf_->pFocusedWidget;
     if (pWidget)
         GblBox_unref(GBL_BOX(pWidget));
 
@@ -213,7 +213,7 @@ void GUM_InputDevice_widgetDestroyed_(GUM_Widget* pWidget) {
     for (GblDoublyLinkedListNode* pNode = devices_.pNext;
          pNode != &devices_;
          pNode = pNode->pNext) {
-        GUM_InputDevice* pDevice = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_InputDevice_, deviceNode)->pDevice;
+        GUM_InputDevice*  pDevice  = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_InputDevice_, deviceNode)->pDevice;
         GUM_InputDevice_* pDevice_ = GUM_INPUTDEVICE_(pDevice);
         if (pDevice_->pFocusedWidget != pWidget)
             continue;
@@ -233,17 +233,17 @@ static GBL_RESULT GUM_InputDevice_init_(GblInstance* pInstance) {
     }
     pSelf_->pDevice            = pSelf;
     GblDoublyLinkedList_init(&pSelf_->deviceNode);
-    pSelf_->pDeviceName       = GblStringRef_create("UNKNOWN");
-    pSelf_->pFocusedWidget    = nullptr;
-    pSelf_->enabled           = true;
-    pSelf_->focusRingEnabled  = true;
-    pSelf_->baselinePending   = false;
-    pSelf_->focusTransition   = false;
+    pSelf_->pDeviceName      = GblStringRef_create("UNKNOWN");
+    pSelf_->pFocusedWidget   = nullptr;
+    pSelf_->enabled          = true;
+    pSelf_->focusRingEnabled = true;
+    pSelf_->baselinePending  = false;
+    pSelf_->focusTransition  = false;
 
     GblDoublyLinkedList_pushFront(&devices_, &pSelf_->deviceNode);
 
-    pSelf->buttons      = 0;
-    pSelf->buttonsPrev  = 0;
+    pSelf->buttons     = 0;
+    pSelf->buttonsPrev = 0;
     pSelf->highlight_r = 255;
     pSelf->highlight_g = 255;
     pSelf->highlight_b = 255;
@@ -277,7 +277,7 @@ static GBL_RESULT GUM_InputDevice_GblObject_setProperty_(GblObject* pObject, con
             pSelf->highlight_r = (color >> 24) & 0xFF;
             pSelf->highlight_g = (color >> 16) & 0xFF;
             pSelf->highlight_b = (color >> 8)  & 0xFF;
-            pSelf->highlight_a =  color        & 0xFF;
+            pSelf->highlight_a = color        & 0xFF;
             break;
         }
         case GUM_InputDevice_Property_Id_highlight_r:
@@ -303,9 +303,9 @@ static GBL_RESULT GUM_InputDevice_GblObject_property_(const GblObject* pObject, 
     switch (pProp->id) {
         case GUM_InputDevice_Property_Id_highlight_color:
             GblVariant_setUint32(pValue, (uint32_t)pSelf->highlight_r << 24 |
-                                         (uint32_t)pSelf->highlight_g << 16 |
-                                         (uint32_t)pSelf->highlight_b << 8  |
-                                         (uint32_t)pSelf->highlight_a);
+                                 (uint32_t)pSelf->highlight_g << 16 |
+                                 (uint32_t)pSelf->highlight_b << 8  |
+                                 (uint32_t)pSelf->highlight_a);
             break;
         case GUM_InputDevice_Property_Id_highlight_r:
             GblVariant_setUint8(pValue, pSelf->highlight_r);

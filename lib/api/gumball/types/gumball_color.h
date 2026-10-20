@@ -8,11 +8,13 @@
  *
  *   GUM_Color is a simple RGBA color structure
  *
- *   \author     2025 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
+
+#define GUM_COLOR_TYPE (GBL_TYPEID(GUM_Color)) //!< Returns the GUM_Color Type UUID
 
 GBL_DECLS_BEGIN
 
@@ -25,8 +27,6 @@ typedef struct {
     uint8_t b; //!< Blue component
     uint8_t a; //!< Alpha component
 } GUM_Color;
-
-#define GUM_COLOR_TYPE (GBL_TYPEID(GUM_Color)) //!< Returns the GUM_Color Type UUID
 
 //!  \cond
 GblType GUM_Color_type(void) GBL_NOEXCEPT;

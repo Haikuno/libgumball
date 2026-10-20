@@ -3,8 +3,8 @@
 #include <gumball/core/gumball_logger.h>
 
 static SDL_LogOutputFunction pPreviousLogger_ = nullptr;
-static void*                 pPreviousLoggerData_ = nullptr;
-static bool                  loggerInstalled_ = false;
+static void* pPreviousLoggerData_ = nullptr;
+static bool  loggerInstalled_     = false;
 
 static void SDLCALL GUM_SDL3_log_(void* pUserdata, int category, SDL_LogPriority priority, const char* pMessage) {
     GBL_UNUSED(pUserdata, category);

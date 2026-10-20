@@ -7,10 +7,10 @@ constexpr int GUM_SDL3_PERIMETER_POINTS_ = 4 * (GUM_SDL3_ROUNDED_SEGMENTS_ + 1);
 
 typedef struct {
     SDL_BlendMode blendMode;
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
-    Uint8 a;
+    Uint8         r;
+    Uint8         g;
+    Uint8         b;
+    Uint8         a;
 } GUM_SDL3_DrawState_;
 
 static SDL_FColor GUM_SDL3_color_(GUM_Color color) {
@@ -51,7 +51,7 @@ static float GUM_SDL3_radius_(GUM_Rectangle rectangle, float roundness) {
 
 static int GUM_SDL3_perimeter_(GUM_Rectangle rectangle, float radius, SDL_FPoint* pPoints) {
     static const float startAngles[] = { -GBL_F_PI / 2.0f, 0.0f, GBL_F_PI / 2.0f, GBL_F_PI };
-    const SDL_FPoint centers[] = {
+    const SDL_FPoint   centers[]     = {
         { rectangle.x + rectangle.width  - radius, rectangle.y + radius },
         { rectangle.x + rectangle.width  - radius, rectangle.y + rectangle.height - radius },
         { rectangle.x + radius, rectangle.y + rectangle.height - radius },
@@ -75,9 +75,9 @@ GBL_EXPORT GUM_Vector2 GUM_Backend_screenSize(void) {
     SDL_Renderer* pRenderer = GUM_SDL3_nativeRenderer_(nullptr);
     if (!pRenderer) return (GUM_Vector2){ 0 };
 
+    SDL_RendererLogicalPresentation mode = SDL_LOGICAL_PRESENTATION_DISABLED;
     int width  = 0;
     int height = 0;
-    SDL_RendererLogicalPresentation mode = SDL_LOGICAL_PRESENTATION_DISABLED;
 
     if (SDL_GetRenderLogicalPresentation(pRenderer, &width, &height, &mode) &&
         mode != SDL_LOGICAL_PRESENTATION_DISABLED && width > 0 && height > 0)
@@ -100,24 +100,24 @@ GBL_EXPORT GBL_RESULT GUM_Backend_rectangleDraw(GUM_Renderer* pRenderer, GUM_Rec
     if (!GUM_SDL3_setDrawColor_(pSdlRenderer, color))
         return GUM_SDL3_finishDraw_(pSdlRenderer, state, GBL_RESULT_ERROR_INTERNAL);
 
-    GBL_RESULT result;
+    GBL_RESULT  result;
     const float radius = GUM_SDL3_radius_(rectangle, roundness);
     if (radius <= 0.0f) {
         const SDL_FRect rect = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
         result = GUM_SDL3_result_(SDL_RenderFillRect(pSdlRenderer, &rect));
     } else {
-        SDL_FPoint points[GUM_SDL3_PERIMETER_POINTS_];
-        const int count = GUM_SDL3_perimeter_(rectangle, radius, points);
-        SDL_Vertex vertices[1 + GUM_SDL3_PERIMETER_POINTS_];
-        int indices[GUM_SDL3_PERIMETER_POINTS_ * 3];
         const SDL_FColor vertexColor = GUM_SDL3_color_(color);
+        SDL_FPoint points[GUM_SDL3_PERIMETER_POINTS_];
+        const int  count = GUM_SDL3_perimeter_(rectangle, radius, points);
+        SDL_Vertex vertices[1 + GUM_SDL3_PERIMETER_POINTS_];
+        int        indices[GUM_SDL3_PERIMETER_POINTS_ * 3];
 
         vertices[0] = (SDL_Vertex){ .position = { rectangle.x + rectangle.width / 2.0f,
                                                    rectangle.y + rectangle.height / 2.0f },
                                     .color = vertexColor };
 
         for (int i = 0; i < count; ++i) {
-            vertices[i + 1] = (SDL_Vertex){ .position = points[i], .color = vertexColor };
+            vertices[i + 1]    = (SDL_Vertex){ .position = points[i], .color = vertexColor };
             indices[i * 3 + 0] = 0;
             indices[i * 3 + 1] = i + 1;
             indices[i * 3 + 2] = (i + 1) % count + 1;
@@ -142,10 +142,10 @@ GBL_EXPORT GBL_RESULT GUM_Backend_rectangleLinesDraw(GUM_Renderer* pRenderer, GU
     if (!GUM_SDL3_setDrawColor_(pSdlRenderer, color))
         return GUM_SDL3_finishDraw_(pSdlRenderer, state, GBL_RESULT_ERROR_INTERNAL);
 
-    GBL_RESULT result;
+    GBL_RESULT  result;
     const float radius = GUM_SDL3_radius_(rectangle, roundness);
     if (radius <= 0.0f) {
-        const float t = GBL_MIN(border_width, GBL_MIN(rectangle.width, rectangle.height) / 2.0f);
+        const float     t       = GBL_MIN(border_width, GBL_MIN(rectangle.width, rectangle.height) / 2.0f);
         const SDL_FRect rects[] = {
             { rectangle.x, rectangle.y, rectangle.width, t },
             { rectangle.x, rectangle.y + rectangle.height - t, rectangle.width, t },
@@ -165,12 +165,12 @@ GBL_EXPORT GBL_RESULT GUM_Backend_rectangleLinesDraw(GUM_Renderer* pRenderer, GU
 
         SDL_FPoint outerPoints[GUM_SDL3_PERIMETER_POINTS_];
         SDL_FPoint innerPoints[GUM_SDL3_PERIMETER_POINTS_];
-        const int count = GUM_SDL3_perimeter_(rectangle, radius, outerPoints);
+        const int  count = GUM_SDL3_perimeter_(rectangle, radius, outerPoints);
         GUM_SDL3_perimeter_(inner, GBL_MAX(radius - border_width, 0.0f), innerPoints);
 
-        SDL_Vertex vertices[GUM_SDL3_PERIMETER_POINTS_ * 2];
-        int indices[GUM_SDL3_PERIMETER_POINTS_ * 6];
         const SDL_FColor vertexColor = GUM_SDL3_color_(color);
+        SDL_Vertex vertices[GUM_SDL3_PERIMETER_POINTS_ * 2];
+        int        indices[GUM_SDL3_PERIMETER_POINTS_ * 6];
 
         for (int i = 0; i < count; ++i) {
             const int next = (i + 1) % count;
@@ -199,16 +199,16 @@ GBL_EXPORT GBL_RESULT GUM_Backend_beginScissor(GUM_Renderer* pRenderer, GUM_Rect
 
     GUM_SDL3_ClipState_ state = {
         .enabled = SDL_RenderClipEnabled(pGumRenderer->pRenderer),
-        .rect = { 0 }
+        .rect    = { 0 }
     };
     if (state.enabled && !SDL_GetRenderClipRect(pGumRenderer->pRenderer, &state.rect))
         return GBL_RESULT_ERROR_INTERNAL;
 
-    const int x = (int)floorf(clipRect.x);
-    const int y = (int)floorf(clipRect.y);
-    const int right = (int)ceilf(clipRect.x + clipRect.width);
-    const int bottom = (int)ceilf(clipRect.y + clipRect.height);
-    const SDL_Rect rect = { x, y, right - x, bottom - y };
+    const int      x      = (int)floorf(clipRect.x);
+    const int      y      = (int)floorf(clipRect.y);
+    const int      right  = (int)ceilf(clipRect.x + clipRect.width);
+    const int      bottom = (int)ceilf(clipRect.y + clipRect.height);
+    const SDL_Rect rect   = { x, y, right - x, bottom - y };
     if (!SDL_SetRenderClipRect(pGumRenderer->pRenderer, &rect))
         return GBL_RESULT_ERROR_INTERNAL;
 

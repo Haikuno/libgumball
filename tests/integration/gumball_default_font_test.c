@@ -14,9 +14,9 @@ static bool backendInit_(void) {
     if (!SDL_Init(SDL_INIT_VIDEO))
         return false;
 
-    pSurface_ = SDL_CreateSurface(320, 160, SDL_PIXELFORMAT_RGBA32);
+    pSurface_     = SDL_CreateSurface(320, 160, SDL_PIXELFORMAT_RGBA32);
     pSdlRenderer_ = pSurface_ ? SDL_CreateSoftwareRenderer(pSurface_) : nullptr;
-    pRenderer_ = pSdlRenderer_ ? GUM_Renderer_create(pSdlRenderer_) : nullptr;
+    pRenderer_    = pSdlRenderer_ ? GUM_Renderer_create(pSdlRenderer_) : nullptr;
     return pRenderer_ != nullptr;
 }
 
@@ -77,14 +77,14 @@ static bool defaultResourceName_(GUM_Font* pFont) {
 }
 
 int main(void) {
-    bool passed = false;
-    bool defaultARetained = false;
-    GUM_Root* pRootA = nullptr;
-    GUM_Root* pRootB = nullptr;
-    GUM_Font* pDefaultA = nullptr;
-    GUM_IResource* pBundledA = nullptr;
-    GUM_IResource* pBundledB = nullptr;
-    GUM_IResource* pCustom = nullptr;
+    bool           passed           = false;
+    bool           defaultARetained = false;
+    GUM_Root*      pRootA           = nullptr;
+    GUM_Root*      pRootB           = nullptr;
+    GUM_Font*      pDefaultA        = nullptr;
+    GUM_IResource* pBundledA        = nullptr;
+    GUM_IResource* pBundledB        = nullptr;
+    GUM_IResource* pCustom          = nullptr;
 
     if (!backendInit_()) {
         fprintf(stderr, "Backend initialization failed for default-font test\n");
@@ -227,7 +227,7 @@ int main(void) {
     pBundledB = nullptr;
     GUM_IResource_unref(GUM_IRESOURCE(pDefaultA));
     defaultARetained = false;
-    passed = true;
+    passed           = true;
 
 cleanup:
     GUM_Font_setDefault(nullptr);

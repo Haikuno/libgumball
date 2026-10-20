@@ -7,9 +7,9 @@
 #include <gimbal/containers/gimbal_doubly_linked_list.h>
 
 typedef struct GUM_SDL3_Texture_ {
-    SDL_Surface*              pSurface;
-    SDL_Texture*              pTexture;
-    SDL_Renderer*             pRenderer;
+    SDL_Surface*            pSurface;
+    SDL_Texture*            pTexture;
+    SDL_Renderer*           pRenderer;
     GblDoublyLinkedListNode textureNode;
 } GUM_SDL3_Texture_;
 
@@ -71,7 +71,7 @@ void GUM_SDL3_Texture_rendererDestroyed_(SDL_Renderer* pRenderer) {
 }
 
 GBL_EXPORT GUM_Vector2 GUM_Texture_size(GUM_Texture* pSelf) {
-    GUM_Vector2 size = { 0 };
+    GUM_Vector2        size     = { 0 };
     GUM_SDL3_Texture_* pTexture = GUM_IResource_data_(GUM_IRESOURCE(pSelf));
 
     if (pTexture && pTexture->pSurface)
@@ -92,7 +92,7 @@ static SDL_Texture* GUM_SDL3_Texture_prepare_(GUM_SDL3_Texture_* pSelf, SDL_Rend
 
     if (pSelf->pTexture && !SDL_SetTextureBlendMode(pSelf->pTexture, SDL_BLENDMODE_BLEND)) {
         SDL_DestroyTexture(pSelf->pTexture);
-        pSelf->pTexture = nullptr;
+        pSelf->pTexture  = nullptr;
         pSelf->pRenderer = nullptr;
     }
 

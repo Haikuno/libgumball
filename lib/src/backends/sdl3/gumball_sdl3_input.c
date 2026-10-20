@@ -20,8 +20,8 @@ static bool GUM_SDL3_gamepadPresent_(const SDL_JoystickID* pIds, int count, SDL_
 }
 
 void GUM_SDL3_gamepadsUpdate_(void) {
-    int count = 0;
-    SDL_JoystickID* pIds = SDL_GetGamepads(&count);
+    int             count = 0;
+    SDL_JoystickID* pIds  = SDL_GetGamepads(&count);
 
     /* SDL documents NULL as enumeration failure, not as the empty-list value.
      * Preserve the last known slots on failure rather than interpreting a failed
@@ -99,7 +99,7 @@ void GUM_Backend_Mouse_update(GUM_Mouse* pMouse) {
     float y;
     const SDL_MouseButtonFlags buttons = SDL_GetMouseState(&x, &y);
     SDL_Renderer* pRenderer = GUM_SDL3_nativeRenderer_(nullptr);
-    GUM_Pointer* pPointer = GUM_POINTER(pMouse);
+    GUM_Pointer*  pPointer  = GUM_POINTER(pMouse);
 
     if (pRenderer) {
         float renderX = x;

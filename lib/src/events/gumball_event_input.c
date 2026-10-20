@@ -3,9 +3,9 @@
 static GBL_RESULT GUM_Event_Input_init_(GblInstance* pInstance) {
     GUM_Event_Input* pSelf = GUM_EVENT_INPUT(pInstance);
     pSelf->pInputDevice = nullptr;
-    pSelf->button = 0;
-    pSelf->state  = GUM_INPUTSTATE_NULL;
-    pSelf->action = GUM_INPUTACTION_NULL;
+    pSelf->button       = 0;
+    pSelf->state        = GUM_INPUTSTATE_NULL;
+    pSelf->action       = GUM_INPUTACTION_NULL;
     return GBL_RESULT_SUCCESS;
 }
 

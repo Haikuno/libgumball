@@ -30,8 +30,8 @@ static bool colorEquals_(Color actual, Color expected) {
 
 static bool nestedScissorRestores_(void) {
     const Color background = { 12, 18, 24, 255 };
-    const Color inner = { 180, 60, 40, 255 };
-    const Color outer = { 40, 180, 80, 255 };
+    const Color inner      = { 180, 60, 40, 255 };
+    const Color outer      = { 40, 180, 80, 255 };
 
     BeginDrawing();
     ClearBackground(background);
@@ -62,7 +62,7 @@ static bool nestedScissorRestores_(void) {
         return false;
     }
 
-    const Color insideOuter = GetImageColor(image, 16, 16);
+    const Color insideOuter  = GetImageColor(image, 16, 16);
     const Color outsideOuter = GetImageColor(image, 48, 48);
     UnloadImage(image);
 
@@ -102,12 +102,12 @@ static bool drawResources_(GUM_Texture* pTexture, GUM_Font* pFont, GUM_Font* pDe
 }
 
 int main(void) {
-    bool passed = false;
-    GUM_Root* pRootA = nullptr;
-    GUM_Root* pRootB = nullptr;
-    GUM_Texture* pTexture = nullptr;
-    GUM_Font* pFont = nullptr;
-    GUM_Font* pDefaultA = nullptr;
+    bool         passed    = false;
+    GUM_Root*    pRootA    = nullptr;
+    GUM_Root*    pRootB    = nullptr;
+    GUM_Texture* pTexture  = nullptr;
+    GUM_Font*    pFont     = nullptr;
+    GUM_Font*    pDefaultA = nullptr;
 
     SetConfigFlags(FLAG_WINDOW_HIDDEN);
     InitWindow(64, 64, "libGumball resource restart");
@@ -122,9 +122,9 @@ int main(void) {
         goto cleanup;
     }
 
-    pRootA = GUM_Root_create();
-    pTexture = pRootA ? GUM_TEXTURE(GUM_Manager_load("koslogo.png")) : nullptr;
-    pFont = pRootA ? GUM_FONT(GUM_Manager_load(GUM_TEST_BITMAP_FONT_PATH)) : nullptr;
+    pRootA    = GUM_Root_create();
+    pTexture  = pRootA ? GUM_TEXTURE(GUM_Manager_load("koslogo.png")) : nullptr;
+    pFont     = pRootA ? GUM_FONT(GUM_Manager_load(GUM_TEST_BITMAP_FONT_PATH)) : nullptr;
     pDefaultA = GUM_Backend_Font_default();
     if (pDefaultA)
         GUM_IResource_ref(GUM_IRESOURCE(pDefaultA));
@@ -167,7 +167,7 @@ int main(void) {
     pFont = nullptr;
     GUM_IResource_unref(GUM_IRESOURCE(pTexture));
     pTexture = nullptr;
-    passed = true;
+    passed   = true;
 
 cleanup:
     if (pDefaultA) GUM_IResource_unref(GUM_IRESOURCE(pDefaultA));

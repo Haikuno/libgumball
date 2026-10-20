@@ -48,7 +48,7 @@ GBL_TEST_FIXTURE {
 };
 
 GBL_TEST_INIT()
-    drawCount_ = 0;
+    drawCount_      = 0;
     pFixture->pRoot = GUM_Root_create();
     GBL_TEST_VERIFY(pFixture->pRoot);
 GBL_TEST_CASE_END
@@ -77,8 +77,8 @@ GBL_TEST_CASE(childrenList)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(objectBridge)
-    GUM_Widget* pOuter = GUM_Widget_create();
-    GblObject* pBridge = GBL_NEW(GblObject);
+    GUM_Widget*         pOuter  = GUM_Widget_create();
+    GblObject*          pBridge = GBL_NEW(GblObject);
     GUM_HierarchyProbe* pNested = GBL_NEW(GUM_HierarchyProbe);
     GBL_TEST_VERIFY(pOuter && pBridge && pNested);
 

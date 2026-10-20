@@ -20,13 +20,13 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_TABLE_TYPE          (GBL_TYPEID     (GUM_Table))
-#define GUM_TABLE(self)         (GBL_CAST       (GUM_Table, self))
-#define GUM_TABLE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Table, klass))
-#define GUM_TABLE_CLASSOF(self) (GBL_CLASSOF    (GUM_Table, self))
+#define GUM_TABLE_TYPE          (GBL_TYPEID     (GUM_Table))           //!< Returns the GUM_Table Type UUID
+#define GUM_TABLE(self)         (GBL_CAST       (GUM_Table, self))     //!< Casts an instance of a compatible element to a GUM_Table
+#define GUM_TABLE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Table, klass))    //!< Casts a class     of a compatible element to a GUM_TableClass
+#define GUM_TABLE_CLASSOF(self) (GBL_CLASSOF    (GUM_Table, self))     //!< Casts an instance of a compatible element to a GUM_TableClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Table
+#define GBL_SELF_TYPE                GUM_Table
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Table);
@@ -42,20 +42,20 @@ GBL_PROPERTIES(GUM_Table,
 )
 
 GBL_SIGNALS(GUM_Table,
-    (selectionChanged, (GBL_INSTANCE_TYPE, pReceiver),
-                       (GBL_POINTER_TYPE,  pHandle),
-                       (GBL_SIZE_TYPE,     column))
+    (selectionChanged, (GBL_POINTER_TYPE, pHandle),
+                       (GBL_SIZE_TYPE,    column))
 )
 
-GBL_EXPORT GblType         GUM_Table_type           (void) GBL_NOEXCEPT;
-GBL_EXPORT GUM_IItemModel* GUM_Table_model          (const GUM_Table* pSelf) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT      GUM_Table_setModel       (GUM_Table* pSelf, GUM_IItemModel* pModel) GBL_NOEXCEPT;
-GBL_EXPORT GUM_ModelIndex  GUM_Table_selection      (const GUM_Table* pSelf) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT      GUM_Table_select         (GUM_Table* pSelf, GUM_ModelIndex index) GBL_NOEXCEPT;
-GBL_EXPORT float           GUM_Table_scrollPosition (const GUM_Table* pSelf) GBL_NOEXCEPT;
-GBL_EXPORT float           GUM_Table_scrollRange    (const GUM_Table* pSelf) GBL_NOEXCEPT;
-GBL_EXPORT void            GUM_Table_scrollTo       (GUM_Table* pSelf, float position) GBL_NOEXCEPT;
-GBL_EXPORT void            GUM_Table_scrollBy       (GUM_Table* pSelf, float delta) GBL_NOEXCEPT;
+GBL_EXPORT GblType GUM_Table_type(void) GBL_NOEXCEPT;
+
+GBL_EXPORT GUM_IItemModel* GUM_Table_model         (const GUM_Table* pSelf)                   GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT      GUM_Table_setModel      (GUM_Table* pSelf, GUM_IItemModel* pModel) GBL_NOEXCEPT;
+GBL_EXPORT GUM_ModelIndex  GUM_Table_selection     (const GUM_Table* pSelf)                   GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT      GUM_Table_select        (GUM_Table* pSelf, GUM_ModelIndex index)   GBL_NOEXCEPT;
+GBL_EXPORT float           GUM_Table_scrollPosition(const GUM_Table* pSelf)                   GBL_NOEXCEPT;
+GBL_EXPORT float           GUM_Table_scrollRange   (const GUM_Table* pSelf)                   GBL_NOEXCEPT;
+GBL_EXPORT void            GUM_Table_scrollTo      (GUM_Table* pSelf, float position)         GBL_NOEXCEPT;
+GBL_EXPORT void            GUM_Table_scrollBy      (GUM_Table* pSelf, float delta)            GBL_NOEXCEPT;
 
 //! Returns a new GUM_Table. Optionally takes a list of Name/Value pairs for properties.
 #define GUM_Table_create(/* propertyName, propertyValue */ ...) GBL_NEW(GUM_Table __VA_OPT__(,) __VA_ARGS__)

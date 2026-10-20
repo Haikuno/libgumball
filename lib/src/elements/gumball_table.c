@@ -2,7 +2,6 @@
 #include <gumball/core/gumball_backend.h>
 #include <gumball/events/gumball_event_mouse.h>
 
-#include "../core/gumball_marshal_.h"
 #include "gumball_scrollviewport_.h"
 #include "gumball_widget_.h"
 #include "gumball_itemview_.h"
@@ -16,8 +15,8 @@ typedef struct GUM_Table_ {
 } GUM_Table_;
 
 static void GUM_Table_structureChanged_(GblInstance* pReceiver) {
-    GUM_Table* pSelf = GUM_TABLE(pReceiver);
-    GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
+    GUM_Table*    pSelf        = GUM_TABLE(pReceiver);
+    GUM_Table_*   pSelf_       = GUM_TABLE_(pSelf);
     const GblBool hadSelection = GUM_ModelIndex_valid(pSelf_->selection);
 
     pSelf_->selection = GUM_MODEL_INDEX_INVALID;
@@ -28,7 +27,7 @@ static void GUM_Table_structureChanged_(GblInstance* pReceiver) {
 }
 
 static GBL_RESULT GUM_Table_init_(GblInstance* pInstance) {
-    GUM_Table* pSelf = GUM_TABLE(pInstance);
+    GUM_Table*  pSelf  = GUM_TABLE(pInstance);
     GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
 
     pSelf->rowHeight  = 24.0f;
@@ -42,7 +41,7 @@ static GBL_RESULT GUM_Table_init_(GblInstance* pInstance) {
 }
 
 static GBL_RESULT GUM_Table_GblBox_destructor_(GblBox* pBox) {
-    GUM_Table* pSelf = GUM_TABLE(pBox);
+    GUM_Table*  pSelf  = GUM_TABLE(pBox);
     GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
 
     if (pSelf_->pModel) {
@@ -57,9 +56,9 @@ static GBL_RESULT GUM_Table_GblBox_destructor_(GblBox* pBox) {
     return GBL_BOX_CLASS(GblClass_weakRefDefault(GUM_WIDGET_TYPE))->pFnDestructor(pBox);
 }
 
-static GBL_RESULT GUM_Table_GblObject_setProperty_(GblObject* pObject,
-                                                    const GblProperty* pProp,
-                                                    GblVariant* pValue) {
+static GBL_RESULT GUM_Table_GblObject_setProperty_(GblObject*         pObject,
+                                                   const GblProperty* pProp,
+                                                   GblVariant*        pValue) {
     if (pProp->id != GUM_Table_Property_Id_rowHeight)
         return GBL_RESULT_ERROR_INVALID_PROPERTY;
 
@@ -67,9 +66,9 @@ static GBL_RESULT GUM_Table_GblObject_setProperty_(GblObject* pObject,
     return GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_Table_GblObject_property_(const GblObject* pObject,
-                                                 const GblProperty* pProp,
-                                                 GblVariant* pValue) {
+static GBL_RESULT GUM_Table_GblObject_property_(const GblObject*   pObject,
+                                                const GblProperty* pProp,
+                                                GblVariant*        pValue) {
     if (pProp->id != GUM_Table_Property_Id_rowHeight)
         return GBL_RESULT_ERROR_INVALID_PROPERTY;
 
@@ -89,8 +88,8 @@ static size_t GUM_Table_columnCount_(const GUM_Table* pSelf) {
 }
 
 static GblBool GUM_Table_rowForIndex_(const GUM_Table* pSelf,
-                                      GUM_ModelIndex target,
-                                      size_t* pRow) {
+                                      GUM_ModelIndex   target,
+                                      size_t*          pRow) {
     const GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
     if (!pSelf_->pModel || !GUM_ModelIndex_belongs(target, pSelf_->pModel))
         return GBL_FALSE;
@@ -111,9 +110,9 @@ static GblBool GUM_Table_rowForIndex_(const GUM_Table* pSelf,
 }
 
 static void GUM_Table_revealRow_(GUM_Table* pSelf, size_t row) {
-    GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
-    const float top = (float)row * pSelf->rowHeight;
-    const float bottom = top + pSelf->rowHeight;
+    GUM_Table_* pSelf_   = GUM_TABLE_(pSelf);
+    const float top      = (float)row * pSelf->rowHeight;
+    const float bottom   = top + pSelf->rowHeight;
     const float position = GUM_ScrollViewport_position_(&pSelf_->viewport, GUM_SCROLL_AXIS_Y);
     const float viewport = GBL_MAX(GUM_WIDGET(pSelf)->h, 0.0f);
 
@@ -126,9 +125,9 @@ static void GUM_Table_revealRow_(GUM_Table* pSelf, size_t row) {
 }
 
 static GUM_ModelIndex GUM_Table_firstSelectable_(const GUM_Table* pSelf) {
-    const GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
-    const size_t rows = GUM_Table_rowCount_(pSelf);
-    const size_t columns = GUM_Table_columnCount_(pSelf);
+    const GUM_Table_* pSelf_  = GUM_TABLE_(pSelf);
+    const size_t      rows    = GUM_Table_rowCount_(pSelf);
+    const size_t      columns = GUM_Table_columnCount_(pSelf);
 
     for (size_t row = 0; row < rows; ++row) {
         for (size_t column = 0; column < columns; ++column) {
@@ -145,11 +144,11 @@ static GUM_ModelIndex GUM_Table_firstSelectable_(const GUM_Table* pSelf) {
 }
 
 static GUM_ModelIndex GUM_Table_moveVertical_(const GUM_Table* pSelf,
-                                              size_t row,
-                                              size_t column,
-                                              int direction) {
+                                              size_t           row,
+                                              size_t           column,
+                                              int              direction) {
     const GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
-    const size_t rows = GUM_Table_rowCount_(pSelf);
+    const size_t      rows   = GUM_Table_rowCount_(pSelf);
     if (!rows)
         return GUM_MODEL_INDEX_INVALID;
 
@@ -178,11 +177,11 @@ static GUM_ModelIndex GUM_Table_moveVertical_(const GUM_Table* pSelf,
 }
 
 static GUM_ModelIndex GUM_Table_moveHorizontal_(const GUM_Table* pSelf,
-                                                size_t row,
-                                                size_t column,
-                                                int direction) {
-    const GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
-    const size_t columns = GUM_Table_columnCount_(pSelf);
+                                                size_t           row,
+                                                size_t           column,
+                                                int              direction) {
+    const GUM_Table_* pSelf_  = GUM_TABLE_(pSelf);
+    const size_t      columns = GUM_Table_columnCount_(pSelf);
     if (!columns)
         return GUM_MODEL_INDEX_INVALID;
 
@@ -211,8 +210,8 @@ static GUM_ModelIndex GUM_Table_moveHorizontal_(const GUM_Table* pSelf,
 }
 
 static GBL_RESULT GUM_Table_update_(GUM_Widget* pWidget) {
-    GUM_Table* pSelf = GUM_TABLE(pWidget);
-    GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
+    GUM_Table*  pSelf         = GUM_TABLE(pWidget);
+    GUM_Table_* pSelf_        = GUM_TABLE_(pSelf);
     const float contentHeight = (float)GUM_Table_rowCount_(pSelf) * pSelf->rowHeight;
 
     GUM_ScrollViewport_setRange_(&pSelf_->viewport,
@@ -222,10 +221,10 @@ static GBL_RESULT GUM_Table_update_(GUM_Widget* pWidget) {
     return GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_Table_drawText_(GUM_Table* pSelf,
-                                      GUM_Renderer* pRenderer,
+static GBL_RESULT GUM_Table_drawText_(GUM_Table*     pSelf,
+                                      GUM_Renderer*  pRenderer,
                                       GUM_ModelIndex index,
-                                      GUM_Vector2 position) {
+                                      GUM_Vector2    position) {
     return GUM_ItemView_drawText_(GUM_WIDGET(pSelf),
                                   pRenderer,
                                   GUM_TABLE_(pSelf)->pModel,
@@ -236,19 +235,19 @@ static GBL_RESULT GUM_Table_drawText_(GUM_Table* pSelf,
 static GBL_RESULT GUM_Table_draw_(GUM_Widget* pWidget, GUM_Renderer* pRenderer) {
     GBL_RESULT result = GUM_WIDGET_CLASS(GblClass_weakRefDefault(GUM_WIDGET_TYPE))->pFnDraw(pWidget,
                                                                                             pRenderer);
-    GUM_Table* pSelf = GUM_TABLE(pWidget);
+    GUM_Table*  pSelf  = GUM_TABLE(pWidget);
     GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result) || !pSelf_->pModel)
         return result;
 
-    const size_t rows = GUM_Table_rowCount_(pSelf);
+    const size_t rows    = GUM_Table_rowCount_(pSelf);
     const size_t columns = GUM_Table_columnCount_(pSelf);
     if (!rows || !columns)
         return GBL_RESULT_SUCCESS;
 
-    const GUM_Vector2 position = GUM_get_absolute_position_(pWidget);
-    const GUM_Rectangle rec = { position.x, position.y, pWidget->w, pWidget->h };
-    const GUM_Rectangle clip = GUM_Rectangle_intersect(GUM_Widget_clipRect_(pWidget), rec);
+    const GUM_Vector2   position = GUM_get_absolute_position_(pWidget);
+    const GUM_Rectangle rec      = { position.x, position.y, pWidget->w, pWidget->h };
+    const GUM_Rectangle clip     = GUM_Rectangle_intersect(GUM_Widget_clipRect_(pWidget), rec);
     if (clip.width <= 0.0f || clip.height <= 0.0f)
         return GBL_RESULT_SUCCESS;
 
@@ -256,9 +255,9 @@ static GBL_RESULT GUM_Table_draw_(GUM_Widget* pWidget, GUM_Renderer* pRenderer) 
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
-    const float scroll = GUM_ScrollViewport_position_(&pSelf_->viewport, GUM_SCROLL_AXIS_Y);
-    const float columnWidth = columns ? rec.width / (float)columns : rec.width;
-    const size_t firstRow = pSelf->rowHeight > 0.0f ? (size_t)(scroll / pSelf->rowHeight) : 0;
+    const float  scroll      = GUM_ScrollViewport_position_(&pSelf_->viewport, GUM_SCROLL_AXIS_Y);
+    const float  columnWidth = columns ? rec.width / (float)columns : rec.width;
+    const size_t firstRow    = pSelf->rowHeight > 0.0f ? (size_t)(scroll / pSelf->rowHeight) : 0;
     const size_t visibleRows = pSelf->rowHeight > 0.0f
                              ? (size_t)(GBL_MAX(rec.height, 0.0f) / pSelf->rowHeight) + 2
                              : rows;
@@ -316,22 +315,22 @@ static GBL_RESULT GUM_Table_pointerPress_(GUM_Table* pSelf, GUM_Event_Mouse* pEv
         GUM_EVENT_INPUT(pEvent)->button != GUM_MOUSE_BUTTON_LEFT)
         return GBL_RESULT_PARTIAL;
 
-    const size_t rows = GUM_Table_rowCount_(pSelf);
+    const size_t rows    = GUM_Table_rowCount_(pSelf);
     const size_t columns = GUM_Table_columnCount_(pSelf);
     if (!rows || !columns || pSelf->rowHeight <= 0.0f || GUM_WIDGET(pSelf)->w <= 0.0f)
         return GBL_RESULT_PARTIAL;
 
     const GUM_Vector2 position = GUM_get_absolute_position_(GUM_WIDGET(pSelf));
-    const GUM_Vector2 pointer = GUM_EVENT_POINTER(pEvent)->position;
+    const GUM_Vector2 pointer  = GUM_EVENT_POINTER(pEvent)->position;
     if (pointer.x < position.x || pointer.x >= position.x + GUM_WIDGET(pSelf)->w ||
         pointer.y < position.y || pointer.y >= position.y + GUM_WIDGET(pSelf)->h)
         return GBL_RESULT_PARTIAL;
 
     const float localY = pointer.y - position.y
                        + GUM_ScrollViewport_position_(&pSelf_->viewport, GUM_SCROLL_AXIS_Y);
-    const size_t row = (size_t)(localY / pSelf->rowHeight);
-    const float columnWidth = GUM_WIDGET(pSelf)->w / (float)columns;
-    const size_t column = (size_t)((pointer.x - position.x) / columnWidth);
+    const size_t row         = (size_t)(localY / pSelf->rowHeight);
+    const float  columnWidth = GUM_WIDGET(pSelf)->w / (float)columns;
+    const size_t column      = (size_t)((pointer.x - position.x) / columnWidth);
     if (row >= rows || column >= columns)
         return GBL_RESULT_PARTIAL;
 
@@ -347,8 +346,8 @@ static GBL_RESULT GUM_Table_pointerPress_(GUM_Table* pSelf, GUM_Event_Mouse* pEv
 }
 
 static GBL_RESULT GUM_Table_inputEvent_(GUM_Widget* pWidget, GUM_Event_Input* pEvent) {
-    GUM_Table* pSelf = GUM_TABLE(pWidget);
-    GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
+    GUM_Table*       pSelf       = GUM_TABLE(pWidget);
+    GUM_Table_*      pSelf_      = GUM_TABLE_(pSelf);
     GUM_Event_Mouse* pMouseEvent = GBL_AS(GUM_Event_Mouse, pEvent);
 
     if (pMouseEvent && pSelf_->pModel &&
@@ -372,7 +371,7 @@ static GBL_RESULT GUM_Table_inputEvent_(GUM_Widget* pWidget, GUM_Event_Input* pE
 }
 
 static GblBool GUM_Table_navigate_(GUM_Widget* pWidget, GUM_InputAction action) {
-    GUM_Table* pSelf = GUM_TABLE(pWidget);
+    GUM_Table*  pSelf  = GUM_TABLE(pWidget);
     GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
     if (!pSelf_->pModel || !GUM_Table_rowCount_(pSelf) || !GUM_Table_columnCount_(pSelf))
         return GBL_FALSE;
@@ -426,9 +425,9 @@ static GBL_RESULT GUM_TableClass_init_(GblClass* pClass, const void* pData) {
     if (!GblType_classRefCount(GUM_TABLE_TYPE)) {
         GBL_PROPERTIES_REGISTER(GUM_Table);
 
-        GblSignal_install(GUM_TABLE_TYPE, "selectionChanged",
-                          GUM_Marshal_CClosure_VOID__INSTANCE_POINTER_SIZE_, 2,
-                          GBL_POINTER_TYPE, GBL_SIZE_TYPE);
+        const GBL_RESULT result = GBL_SIGNALS_REGISTER(GUM_Table);
+        if (!GBL_RESULT_SUCCESS(result))
+            return result;
     }
 
     GBL_BOX_CLASS(pClass)->pFnDestructor      = GUM_Table_GblBox_destructor_;
@@ -454,7 +453,7 @@ static GBL_RESULT GUM_TableClass_final_(GblClass* pClass, const void* pClassData
 }
 
 GBL_EXPORT GUM_IItemModel* GUM_Table_model(const GUM_Table* pSelf) {
-    return pSelf ? GUM_TABLE_(pSelf)->pModel : nullptr;
+    return GUM_TABLE_(pSelf)->pModel;
 }
 
 GBL_EXPORT GBL_RESULT GUM_Table_setModel(GUM_Table* pSelf, GUM_IItemModel* pModel) {
@@ -487,7 +486,7 @@ GBL_EXPORT GBL_RESULT GUM_Table_setModel(GUM_Table* pSelf, GUM_IItemModel* pMode
     }
 
     const GblBool hadSelection = GUM_ModelIndex_valid(pSelf_->selection);
-    pSelf_->pModel = pModel;
+    pSelf_->pModel    = pModel;
     pSelf_->selection = GUM_MODEL_INDEX_INVALID;
     GUM_ScrollViewport_reset_(&pSelf_->viewport);
 
@@ -496,7 +495,7 @@ GBL_EXPORT GBL_RESULT GUM_Table_setModel(GUM_Table* pSelf, GUM_IItemModel* pMode
 }
 
 GBL_EXPORT GUM_ModelIndex GUM_Table_selection(const GUM_Table* pSelf) {
-    return pSelf ? GUM_TABLE_(pSelf)->selection : GUM_MODEL_INDEX_INVALID;
+    return GUM_TABLE_(pSelf)->selection;
 }
 
 GBL_EXPORT GBL_RESULT GUM_Table_select(GUM_Table* pSelf, GUM_ModelIndex index) {
@@ -522,13 +521,11 @@ GBL_EXPORT GBL_RESULT GUM_Table_select(GUM_Table* pSelf, GUM_ModelIndex index) {
 }
 
 GBL_EXPORT float GUM_Table_scrollPosition(const GUM_Table* pSelf) {
-    return pSelf ? GUM_ScrollViewport_position_(&GUM_TABLE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y)
-                 : 0.0f;
+    return GUM_ScrollViewport_position_(&GUM_TABLE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y);
 }
 
 GBL_EXPORT float GUM_Table_scrollRange(const GUM_Table* pSelf) {
-    return pSelf ? GUM_ScrollViewport_range_(&GUM_TABLE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y)
-                 : 0.0f;
+    return GUM_ScrollViewport_range_(&GUM_TABLE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y);
 }
 
 GBL_EXPORT void GUM_Table_scrollTo(GUM_Table* pSelf, float position) {

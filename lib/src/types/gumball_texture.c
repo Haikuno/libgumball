@@ -23,9 +23,9 @@ static GBL_RESULT GUM_Texture_unload_(GUM_IResource* pResource) {
 
 static GBL_RESULT GUM_Texture_GblBox_destructor_(GblBox* pBox) {
     GUM_IResource* pResource = GUM_IRESOURCE(pBox);
-    GBL_RESULT result = GUM_IRESOURCE_CLASSOF(pResource)->pFnUnload(pResource);
+    GBL_RESULT     result    = GUM_IRESOURCE_CLASSOF(pResource)->pFnUnload(pResource);
 
-    GblBoxClass* pBoxClass = GBL_BOX_CLASS(GblClass_weakRefDefault(GBL_BOX_TYPE));
+    GblBoxClass*     pBoxClass    = GBL_BOX_CLASS(GblClass_weakRefDefault(GBL_BOX_TYPE));
     const GBL_RESULT parentResult = pBoxClass->pFnDestructor(pBox);
     return GBL_RESULT_SUCCESS(result) ? parentResult : result;
 }

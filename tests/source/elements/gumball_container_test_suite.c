@@ -54,7 +54,7 @@ GBL_TEST_FIXTURE {
 };
 
 GBL_TEST_INIT()
-    layoutFailure_ = false;
+    layoutFailure_  = false;
     pFixture->pRoot = GUM_Root_create();
     GBL_TEST_VERIFY(pFixture->pRoot);
 GBL_TEST_CASE_END
@@ -339,11 +339,11 @@ GBL_TEST_CASE(layoutFailure)
     const GBL_RESULT layoutResult     = GUM_CONTAINER_CLASSOF(pParent)->pFnUpdateContent(pParent);
     const GBL_RESULT propertyResult   = GUM_setProperty(pChild, "padding", 9.0f);
     const GBL_RESULT appearanceResult = GUM_setProperty(pChild, "scrollbarThumbColor", 0x12345678u);
-    const float padding               = GUM_Container_padding(GUM_CONTAINER(pChild));
+    const float      padding          = GUM_Container_padding(GUM_CONTAINER(pChild));
     const GBL_RESULT addResult        = GUM_add_child(pChild, pWidget);
-    const bool parentCommitted        = GblObject_parent(GBL_OBJECT(pWidget)) == GBL_OBJECT(pChild);
+    const bool       parentCommitted  = GblObject_parent(GBL_OBJECT(pWidget)) == GBL_OBJECT(pChild);
     const GBL_RESULT removeResult     = GUM_remove_child(pChild, pWidget);
-    const bool detachCommitted        = !GblObject_parent(GBL_OBJECT(pWidget));
+    const bool       detachCommitted  = !GblObject_parent(GBL_OBJECT(pWidget));
     layoutFailure_ = false;
 
     GUM_unref(pWidget);
@@ -361,7 +361,7 @@ GBL_TEST_CASE_END
 
 GBL_TEST_CASE(retainedChild)
     GUM_Container* pContainer = GUM_Container_create();
-    GUM_Widget* pChild = GUM_Widget_create("parent", pContainer);
+    GUM_Widget*    pChild     = GUM_Widget_create("parent", pContainer);
     GBL_TEST_VERIFY(pContainer && pChild);
     GUM_ref(pChild);
 

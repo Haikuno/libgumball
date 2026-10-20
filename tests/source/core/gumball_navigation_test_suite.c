@@ -13,11 +13,11 @@ GBL_TEST_FIXTURE {
     GUM_Button*    pThird;
 };
 
-static unsigned   inputSignalCount_       = 0;
-static unsigned   nestedFocusCount_       = 0;
-static unsigned   widgetUnrefCount_       = 0;
-static unsigned   deviceUnrefCount_       = 0;
-static GUM_Widget* pNestedFocusTarget_     = nullptr;
+static unsigned    inputSignalCount_   = 0;
+static unsigned    nestedFocusCount_   = 0;
+static unsigned    widgetUnrefCount_   = 0;
+static unsigned    deviceUnrefCount_   = 0;
+static GUM_Widget* pNestedFocusTarget_ = nullptr;
 
 static void onInput_(GUM_Widget* pWidget) {
     GBL_UNUSED(pWidget);
@@ -106,9 +106,9 @@ GBL_TEST_CASE_END
 
 GBL_TEST_CASE(focusReentry)
     GUM_InputDevice* pDevice = GUM_INPUTDEVICE(pFixture->pKeyboard);
-    GUM_Widget* pFirst  = GUM_WIDGET(pFixture->pFirst);
-    GUM_Widget* pSecond = GUM_WIDGET(pFixture->pSecond);
-    GUM_Widget* pThird  = GUM_WIDGET(pFixture->pThird);
+    GUM_Widget*      pFirst  = GUM_WIDGET(pFixture->pFirst);
+    GUM_Widget*      pSecond = GUM_WIDGET(pFixture->pSecond);
+    GUM_Widget*      pThird  = GUM_WIDGET(pFixture->pThird);
 
     GUM_Nav_focus(pDevice, pFirst);
     pNestedFocusTarget_ = pThird;
@@ -145,7 +145,7 @@ GBL_TEST_CASE_END
 
 GBL_TEST_CASE(focusLifetime)
     GUM_InputDevice* pDevice = GUM_INPUTDEVICE(pFixture->pKeyboard);
-    GUM_Widget* pFirst = GUM_WIDGET(pFixture->pFirst);
+    GUM_Widget*      pFirst  = GUM_WIDGET(pFixture->pFirst);
 
     GUM_Button* pVictim = GUM_Button_create();
     GBL_TEST_VERIFY(pVictim);
@@ -158,7 +158,7 @@ GBL_TEST_CASE(focusLifetime)
     GBL_TEST_COMPARE(GUM_InputDevice_focusedWidget(pDevice), pFirst);
 
     widgetUnrefCount_ = 0;
-    pVictim = GUM_Button_create();
+    pVictim           = GUM_Button_create();
     GBL_TEST_VERIFY(pVictim);
     GblObject_setParent(GBL_OBJECT(pVictim), nullptr);
     GUM_connect(pVictim, "onFocusGained", onWidgetUnref_);
@@ -188,8 +188,8 @@ GBL_TEST_CASE(focusLifetime)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(focusCount)
-    GUM_Widget* pWidget = GUM_WIDGET(pFixture->pSecond);
-    GUM_Keyboard* pOther = GUM_Keyboard_create();
+    GUM_Widget*   pWidget = GUM_WIDGET(pFixture->pSecond);
+    GUM_Keyboard* pOther  = GUM_Keyboard_create();
     GBL_TEST_VERIFY(pOther);
 
     GUM_Nav_focus(GUM_INPUTDEVICE(pFixture->pKeyboard), pWidget);
@@ -205,7 +205,7 @@ GBL_TEST_CASE(focusCount)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(nonContainerAncestor)
-    GUM_Widget* pWrapper = GUM_Widget_create("w", 200.0f, "h", 100.0f);
+    GUM_Widget*    pWrapper   = GUM_Widget_create("w", 200.0f, "h", 100.0f);
     GUM_Container* pContainer = GUM_Container_create("parent", pWrapper,
                                                      "w", 200.0f,
                                                      "h", 100.0f,
@@ -289,8 +289,8 @@ GBL_TEST_CASE(inputSignals)
     GBL_TEST_COMPARE(inputSignalCount_, 8u);
 
     pWidget->isInteractive = false;
-    pEvent->action = GUM_INPUTACTION_MOVE_RIGHT;
-    pEvent->state  = GUM_INPUTSTATE_PRESS;
+    pEvent->action         = GUM_INPUTACTION_MOVE_RIGHT;
+    pEvent->state          = GUM_INPUTSTATE_PRESS;
     GBL_TEST_COMPARE(GUM_WIDGET_CLASSOF(pWidget)->pFnInputEvent(pWidget, pEvent),
                      GBL_RESULT_SUCCESS);
     GBL_TEST_COMPARE(inputSignalCount_, 8u);

@@ -20,13 +20,13 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_POINTER_TYPE            (GBL_TYPEID(GUM_Pointer))
-#define GUM_POINTER(self)           (GBL_CAST(GUM_Pointer, self))
-#define GUM_POINTER_CLASS(klass)    (GBL_CLASS_CAST(GUM_Pointer, klass))
-#define GUM_POINTER_CLASSOF(self)   (GBL_CLASSOF(GUM_Pointer, self))
+#define GUM_POINTER_TYPE          (GBL_TYPEID     (GUM_Pointer))           //!< Returns the GUM_Pointer Type UUID
+#define GUM_POINTER(self)         (GBL_CAST       (GUM_Pointer, self))     //!< Casts an instance of a compatible device to a GUM_Pointer
+#define GUM_POINTER_CLASS(klass)  (GBL_CLASS_CAST (GUM_Pointer, klass))    //!< Casts a class     of a compatible device to a GUM_PointerClass
+#define GUM_POINTER_CLASSOF(self) (GBL_CLASSOF    (GUM_Pointer, self))     //!< Casts an instance of a compatible device to a GUM_PointerClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Pointer
+#define GBL_SELF_TYPE                GUM_Pointer
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Pointer);
@@ -44,7 +44,6 @@ GblType GUM_Pointer_type(void) GBL_NOEXCEPT;
 #define GUM_Pointer_create(/* property_name, property_value */...) GBL_NEW(GUM_Pointer __VA_OPT__(,) __VA_ARGS__)
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_POINTER_H

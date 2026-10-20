@@ -21,19 +21,14 @@ static size_t GUM_ObjectTreeModel_columnCount_(const GUM_IItemModel* pModel,
 static size_t GUM_ObjectTreeModel_rowCount_(const GUM_IItemModel* pModel,
                                             GUM_ModelIndex parent) {
     const GUM_ObjectTreeModel* pSelf = GUM_OBJECTTREEMODEL(pModel);
-    const GblObject* pRoot = GUM_OBJECTTREEMODEL_(pSelf)->pRoot;
+    const GblObject*           pRoot = GUM_OBJECTTREEMODEL_(pSelf)->pRoot;
     if (!pRoot)
         return 0;
 
     if (!GUM_ModelIndex_valid(parent))
         return 1;
 
-    size_t count = 0;
-    GblObject_foreachChild((GblObject*)parent.pHandle, pChild) {
-        GBL_UNUSED(pChild);
-        ++count;
-    }
-    return count;
+    return GblObject_childCount((const GblObject*)parent.pHandle);
 }
 
 static GUM_ModelIndex GUM_ObjectTreeModel_index_(const GUM_IItemModel* pModel,
@@ -52,18 +47,14 @@ static GUM_ModelIndex GUM_ObjectTreeModel_index_(const GUM_IItemModel* pModel,
         return row == 0 ? GUM_ObjectTreeModel_indexFor_(pModel, pRoot)
                         : GUM_MODEL_INDEX_INVALID;
 
-    size_t current = 0;
-    GblObject_foreachChild((GblObject*)parent.pHandle, pChild) {
-        if (current++ == row)
-            return GUM_ObjectTreeModel_indexFor_(pModel, pChild);
-    }
-    return GUM_MODEL_INDEX_INVALID;
+    return GUM_ObjectTreeModel_indexFor_(pModel,
+                                         GblObject_findChildByIndex((const GblObject*)parent.pHandle, row));
 }
 
 static GUM_ModelIndex GUM_ObjectTreeModel_parent_(const GUM_IItemModel* pModel,
                                                   GUM_ModelIndex index) {
     const GUM_ObjectTreeModel* pSelf = GUM_OBJECTTREEMODEL(pModel);
-    GblObject* pRoot = GUM_OBJECTTREEMODEL_(pSelf)->pRoot;
+    GblObject* pRoot   = GUM_OBJECTTREEMODEL_(pSelf)->pRoot;
     GblObject* pObject = (GblObject*)index.pHandle;
     if (!pRoot || pObject == pRoot)
         return GUM_MODEL_INDEX_INVALID;
@@ -83,8 +74,8 @@ static GBL_RESULT GUM_ObjectTreeModel_data_(const GUM_IItemModel* pModel,
 static GBL_RESULT GUM_ObjectTreeModel_setData_(GUM_IItemModel* pModel,
                                                GUM_ModelIndex index,
                                                GblVariant* pValue) {
-    GblObject* pObject = (GblObject*)index.pHandle;
-    const GBL_RESULT result = GblObject_setPropertyVariant(pObject, "name", pValue);
+    GblObject*       pObject = (GblObject*)index.pHandle;
+    const GBL_RESULT result  = GblObject_setPropertyVariant(pObject, "name", pValue);
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
     return GUM_IItemModel_emitDataChanged(pModel, index);
@@ -120,7 +111,7 @@ static GBL_RESULT GUM_ObjectTreeModelClass_init_(GblClass* pClass, const void* p
 }
 
 GBL_EXPORT GblObject* GUM_ObjectTreeModel_root(const GUM_ObjectTreeModel* pSelf) {
-    return pSelf ? GUM_OBJECTTREEMODEL_(pSelf)->pRoot : nullptr;
+    return GUM_OBJECTTREEMODEL_(pSelf)->pRoot;
 }
 
 GBL_EXPORT GBL_RESULT GUM_ObjectTreeModel_setRoot(GUM_ObjectTreeModel* pSelf,
@@ -165,13 +156,13 @@ GBL_EXPORT GUM_ObjectTreeModel* GUM_ObjectTreeModel_create(GblObject* pRoot) {
 }
 
 GblType GUM_ObjectTreeModel_type(void) {
-    static GblType type = GBL_INVALID_TYPE;
+    static GblType          type = GBL_INVALID_TYPE;
     static GblInterfaceImpl interfaces[1];
 
     if GBL_UNLIKELY (type == GBL_INVALID_TYPE) {
         interfaces[0] = (GblInterfaceImpl){
             .interfaceType = GUM_IITEMMODEL_TYPE,
-            .classOffset = offsetof(GUM_ObjectTreeModelClass, GUM_IItemModelImpl)
+            .classOffset   = offsetof(GUM_ObjectTreeModelClass, GUM_IItemModelImpl)
         };
         type = GblType_register(GblQuark_internStatic("GUM_ObjectTreeModel"),
                                 GBL_BOX_TYPE,

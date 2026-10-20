@@ -3,7 +3,15 @@
 
 #include <gimbal/test/gimbal_test_suite.h>
 
-#define GUM_ANIMATOR_TEST_SUITE_TYPE (GBL_TYPEID(GUM_AnimatorTestSuite))
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
+*/
+#define GUM_ANIMATOR_TEST_SUITE_TYPE          (GBL_TYPEID     (GUM_AnimatorTestSuite))           //!< Returns the GUM_AnimatorTestSuite Type UUID
+#define GUM_ANIMATOR_TEST_SUITE(self)         (GBL_CAST       (GUM_AnimatorTestSuite, self))     //!< Casts an instance of a compatible test suite to a GUM_AnimatorTestSuite
+#define GUM_ANIMATOR_TEST_SUITE_CLASS(klass)  (GBL_CLASS_CAST (GUM_AnimatorTestSuite, klass))    //!< Casts a class     of a compatible test suite to a GUM_AnimatorTestSuiteClass
+#define GUM_ANIMATOR_TEST_SUITE_CLASSOF(self) (GBL_CLASSOF    (GUM_AnimatorTestSuite, self))     //!< Casts an instance of a compatible test suite to a GUM_AnimatorTestSuiteClass
+//! @}
 
 GBL_DECLS_BEGIN
 

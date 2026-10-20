@@ -8,23 +8,23 @@
  *
  *   Event type used to represent keyboard key presses and releases.
  *
- *   \author     2025, 2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include "gumball_event_input.h"
 
-/*!  \name  Type System
- *   \brief Type UUID and Cast Operators
- *   @{
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
 */
-#define GUM_EVENT_KEY_TYPE            (GBL_TYPEID     (GUM_Event_Key))         //!< Returns the GUM_Event_Key Type UUID
-#define GUM_EVENT_KEY(self)           (GBL_CAST       (GUM_Event_Key, self))   //!< Casts an instance of a compatible event to a GUM_Event_Key
-#define GUM_EVENT_KEY_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event_Key, klass))  //!< Casts a class of a compatible event to a GUM_Event_KeyClass
-#define GUM_EVENT_KEY_CLASSOF(self)   (GBL_CLASSOF    (GUM_Event_Key, self))   //!< Casts an instance of a compatible event to a GUM_Event_KeyClass
+#define GUM_EVENT_KEY_TYPE          (GBL_TYPEID     (GUM_Event_Key))           //!< Returns the GUM_Event_Key Type UUID
+#define GUM_EVENT_KEY(self)         (GBL_CAST       (GUM_Event_Key, self))     //!< Casts an instance of a compatible event to a GUM_Event_Key
+#define GUM_EVENT_KEY_CLASS(klass)  (GBL_CLASS_CAST (GUM_Event_Key, klass))    //!< Casts a class     of a compatible event to a GUM_Event_KeyClass
+#define GUM_EVENT_KEY_CLASSOF(self) (GBL_CLASSOF    (GUM_Event_Key, self))     //!< Casts an instance of a compatible event to a GUM_Event_KeyClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Event_Key
+#define GBL_SELF_TYPE                GUM_Event_Key
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Event_Key);
@@ -53,4 +53,4 @@ GblType GUM_Event_Key_type(void) GBL_NOEXCEPT;
 GBL_DECLS_END
 #undef GBL_SELF_TYPE
 
-#endif
+#endif // GUM_EVENT_KEY_H

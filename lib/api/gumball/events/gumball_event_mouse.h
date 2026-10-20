@@ -20,13 +20,13 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_EVENT_MOUSE_TYPE            (GBL_TYPEID     (GUM_Event_Mouse))
-#define GUM_EVENT_MOUSE(self)           (GBL_CAST       (GUM_Event_Mouse, self))
-#define GUM_EVENT_MOUSE_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event_Mouse, klass))
-#define GUM_EVENT_MOUSE_CLASSOF(self)   (GBL_CLASSOF    (GUM_Event_Mouse, self))
+#define GUM_EVENT_MOUSE_TYPE          (GBL_TYPEID     (GUM_Event_Mouse))           //!< Returns the GUM_Event_Mouse Type UUID
+#define GUM_EVENT_MOUSE(self)         (GBL_CAST       (GUM_Event_Mouse, self))     //!< Casts an instance of a compatible event to a GUM_Event_Mouse
+#define GUM_EVENT_MOUSE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Event_Mouse, klass))    //!< Casts a class     of a compatible event to a GUM_Event_MouseClass
+#define GUM_EVENT_MOUSE_CLASSOF(self) (GBL_CLASSOF    (GUM_Event_Mouse, self))     //!< Casts an instance of a compatible event to a GUM_Event_MouseClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Event_Mouse
+#define GBL_SELF_TYPE                GUM_Event_Mouse
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Event_Mouse);

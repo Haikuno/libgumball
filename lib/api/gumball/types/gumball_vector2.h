@@ -8,11 +8,13 @@
  *
  *   GUM_Vector2 is a simple 2D vector structure
  *
- *   \author     2025 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
+
+#define GUM_VECTOR2_TYPE (GBL_TYPEID(GUM_Vector2)) //!< Returns the GUM_Vector2 Type UUID
 
 GBL_DECLS_BEGIN
 
@@ -23,8 +25,6 @@ typedef struct {
     float x;
     float y;
 } GUM_Vector2;
-
-#define GUM_VECTOR2_TYPE (GBL_TYPEID(GUM_Vector2)) //!< Returns the GUM_Vector2 Type UUID
 
 //! \cond
 GblType GUM_Vector2_type(void) GBL_NOEXCEPT;

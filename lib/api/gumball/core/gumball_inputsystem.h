@@ -4,14 +4,15 @@
 // View this file's documentation online: https://libgumball.psyops.studio/gumball__inputsystem_8h.html
 
 /*!  \file
- *   \brief     Input system
- *   \ingroup   core
+ *   \brief   Input system
+ *   \ingroup core
  *
  *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License
 */
 
 #include <gimbal/preprocessor/gimbal_macro_utils.h>
+
 #include <gumball/events/gumball_event_input.h>
 
 typedef struct GUM_InputBinding {
@@ -22,56 +23,56 @@ typedef struct GUM_InputBinding {
 GBL_DECLS_BEGIN
 
 // Initializes the input system
-GBL_RESULT GUM_InputSystem_init   (void);
+GBL_RESULT GUM_InputSystem_init  (void);
 
 // Deinitializes the input system
-void       GUM_InputSystem_deinit (void);
+void       GUM_InputSystem_deinit(void);
 
 // Updates the input system
-void       GUM_InputSystem_update (void);
+void       GUM_InputSystem_update(void);
 
 // Given a device type, binds an action to the passed button.
-GBL_RESULT GUM_InputSystem_bind   (GblType deviceType, GUM_InputAction action, GblFlags button);
+GBL_RESULT GUM_InputSystem_bind  (GblType deviceType, GUM_InputAction action, GblFlags button);
 
 // Unbinds an action previously associated with the passed device/button pair.
-GBL_RESULT GUM_InputSystem_unbind (GblType deviceType, GUM_InputAction action, GblFlags button);
+GBL_RESULT GUM_InputSystem_unbind(GblType deviceType, GUM_InputAction action, GblFlags button);
 
 //! Returns true if input is currently enabled for pDevice.
-GBL_EXPORT GblBool GUM_InputSystem_deviceEnabled        (const GUM_InputDevice* pDevice) GBL_NOEXCEPT;
+GBL_EXPORT GblBool GUM_InputSystem_deviceEnabled       (const GUM_InputDevice* pDevice) GBL_NOEXCEPT;
 
 /*! Returns true if input is enabled for deviceType after its type gates are applied.
  *  Per-device overrides are not included.
  */
-GBL_EXPORT GblBool GUM_InputSystem_deviceTypeEnabled    (GblType deviceType) GBL_NOEXCEPT;
+GBL_EXPORT GblBool GUM_InputSystem_deviceTypeEnabled   (GblType deviceType)             GBL_NOEXCEPT;
 
 //! Returns true if pDevice's focus ring is currently enabled.
-GBL_EXPORT GblBool GUM_InputSystem_focusRingEnabled     (const GUM_InputDevice* pDevice) GBL_NOEXCEPT;
+GBL_EXPORT GblBool GUM_InputSystem_focusRingEnabled    (const GUM_InputDevice* pDevice) GBL_NOEXCEPT;
 
 //! Returns true if focus rings are enabled for deviceType after its type gates are applied.
-GBL_EXPORT GblBool GUM_InputSystem_focusRingTypeEnabled (GblType deviceType) GBL_NOEXCEPT;
+GBL_EXPORT GblBool GUM_InputSystem_focusRingTypeEnabled(GblType deviceType)             GBL_NOEXCEPT;
 
 ////////// Implementation details, Grugs please ignore
 //! \cond GRUGLESS
-GBL_EXPORT GBL_RESULT GUM_InputSystem_enableDeviceInstance     (GUM_InputDevice* pDevice) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT GUM_InputSystem_disableDeviceInstance    (GUM_InputDevice* pDevice) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT GUM_InputSystem_enableDeviceType         (GblType deviceType)       GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT GUM_InputSystem_disableDeviceType        (GblType deviceType)       GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT GUM_InputSystem_enableFocusRingInstance  (GUM_InputDevice* pDevice) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT GUM_InputSystem_disableFocusRingInstance (GUM_InputDevice* pDevice) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT GUM_InputSystem_enableFocusRingType      (GblType deviceType)       GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT GUM_InputSystem_disableFocusRingType     (GblType deviceType)       GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT GUM_InputSystem_enableDeviceInstance    (GUM_InputDevice* pDevice) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT GUM_InputSystem_disableDeviceInstance   (GUM_InputDevice* pDevice) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT GUM_InputSystem_enableDeviceType        (GblType deviceType)       GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT GUM_InputSystem_disableDeviceType       (GblType deviceType)       GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT GUM_InputSystem_enableFocusRingInstance (GUM_InputDevice* pDevice) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT GUM_InputSystem_disableFocusRingInstance(GUM_InputDevice* pDevice) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT GUM_InputSystem_enableFocusRingType     (GblType deviceType)       GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT GUM_InputSystem_disableFocusRingType    (GblType deviceType)       GBL_NOEXCEPT;
 
 GBL_DECLS_END
 
-GBL_INLINE GBL_RESULT GUM_InputSystem_enableDevicePtr_(void* pDevice) {
+GBL_INLINE GBL_RESULT GUM_InputSystem_enableDevicePtr_    (void* pDevice) {
     return GUM_InputSystem_enableDeviceInstance(pDevice);
 }
 
-GBL_INLINE GBL_RESULT GUM_InputSystem_disableDevicePtr_(void* pDevice) {
+GBL_INLINE GBL_RESULT GUM_InputSystem_disableDevicePtr_   (void* pDevice) {
     return GUM_InputSystem_disableDeviceInstance(pDevice);
 }
 
-GBL_INLINE GBL_RESULT GUM_InputSystem_enableFocusRingPtr_(void* pDevice) {
+GBL_INLINE GBL_RESULT GUM_InputSystem_enableFocusRingPtr_ (void* pDevice) {
     return GUM_InputSystem_enableFocusRingInstance(pDevice);
 }
 

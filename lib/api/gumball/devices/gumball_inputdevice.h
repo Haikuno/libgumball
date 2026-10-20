@@ -19,13 +19,13 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_INPUTDEVICE_TYPE            (GBL_TYPEID     (GUM_InputDevice))
-#define GUM_INPUTDEVICE(self)           (GBL_CAST       (GUM_InputDevice, self))
-#define GUM_INPUTDEVICE_CLASS(klass)    (GBL_CLASS_CAST (GUM_InputDevice, klass))
-#define GUM_INPUTDEVICE_CLASSOF(self)   (GBL_CLASSOF    (GUM_InputDevice, self))
+#define GUM_INPUTDEVICE_TYPE          (GBL_TYPEID     (GUM_InputDevice))           //!< Returns the GUM_InputDevice Type UUID
+#define GUM_INPUTDEVICE(self)         (GBL_CAST       (GUM_InputDevice, self))     //!< Casts an instance of a compatible device to a GUM_InputDevice
+#define GUM_INPUTDEVICE_CLASS(klass)  (GBL_CLASS_CAST (GUM_InputDevice, klass))    //!< Casts a class     of a compatible device to a GUM_InputDeviceClass
+#define GUM_INPUTDEVICE_CLASSOF(self) (GBL_CLASSOF    (GUM_InputDevice, self))     //!< Casts an instance of a compatible device to a GUM_InputDeviceClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_InputDevice
+#define GBL_SELF_TYPE                GUM_InputDevice
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_InputDevice);
@@ -34,14 +34,14 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_Widget);
 /*!
  *    \struct  GUM_InputDeviceClass
  *    \extends GblObjectClass
- *    \brief   Input-device class structure
+ *    \brief   Input device class
 */
 GBL_CLASS_DERIVE_EMPTY(GUM_InputDevice, GblObject)
 
 /*!
  *    \class   GUM_InputDevice
  *    \extends GblObject
- *    \brief   Base input device state shared by keyboard, pointer, and gamepad devices
+ *    \brief   Base input device
 */
 GBL_INSTANCE_DERIVE(GUM_InputDevice, GblObject)
     GblFlags buttons;     //!< Current device button state.
@@ -63,13 +63,12 @@ GBL_PROPERTIES(GUM_InputDevice,
 GblType GUM_InputDevice_type(void) GBL_NOEXCEPT;
 
 //! Returns the device name.
-GBL_EXPORT GblStringRef* GUM_InputDevice_name(const GUM_InputDevice* pSelf) GBL_NOEXCEPT;
+GBL_EXPORT GblStringRef* GUM_InputDevice_name         (const GUM_InputDevice* pSelf) GBL_NOEXCEPT;
 
 //! Returns the Widget currently focused by this device, or nullptr.
-GBL_EXPORT GUM_Widget* GUM_InputDevice_focusedWidget(const GUM_InputDevice* pSelf) GBL_NOEXCEPT;
+GBL_EXPORT GUM_Widget*   GUM_InputDevice_focusedWidget(const GUM_InputDevice* pSelf) GBL_NOEXCEPT;
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_INPUTDEVICE_H

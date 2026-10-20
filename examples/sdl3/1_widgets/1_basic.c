@@ -5,12 +5,12 @@
 int main(int argc, char* argv[]) {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) return 1;
 
-    SDL_Window* pWindow = SDL_CreateWindow("Widgets - Basic", 640, 480, 0);
+    SDL_Window*   pWindow      = SDL_CreateWindow("Widgets - Basic", 640, 480, 0);
     SDL_Renderer* pSdlRenderer = pWindow ? SDL_CreateRenderer(pWindow, nullptr) : nullptr;
-    GUM_Renderer* pRenderer = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
+    GUM_Renderer* pRenderer    = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
     if (!pRenderer) return 1;
 
-    GUM_Root* pRoot = GUM_Root_create();
+    GUM_Root*   pRoot   = GUM_Root_create();
     GUM_Widget* pWidget = GUM_Widget_create();
 
     bool running = true;

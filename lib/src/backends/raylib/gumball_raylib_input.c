@@ -7,7 +7,7 @@ void GUM_Backend_Mouse_update(GUM_Mouse* pMouse) {
     const Vector2 position = GetMousePosition();
     const Vector2 delta    = GetMouseDelta();
     const Vector2 wheel    = GetMouseWheelMoveV();
-    GUM_Pointer* pPointer  = GUM_POINTER(pMouse);
+    GUM_Pointer*  pPointer = GUM_POINTER(pMouse);
 
     pPointer->position = (GUM_Vector2){ position.x, position.y };
     pPointer->delta    = (GUM_Vector2){ delta.x, delta.y };

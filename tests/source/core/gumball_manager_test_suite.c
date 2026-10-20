@@ -9,7 +9,7 @@
 #include <string.h>
 #endif
 
-#define GUM_DEFAULT_FONT_PROBE_TYPE (GBL_TYPEID(GUM_DefaultFontProbe))
+#define GUM_DEFAULT_FONT_PROBE_TYPE  (GBL_TYPEID(GUM_DefaultFontProbe))
 #define GUM_DEFAULT_FONT_PROBE(self) (GBL_CAST(GUM_DefaultFontProbe, self))
 
 GBL_FORWARD_DECLARE_STRUCT(GUM_DefaultFontProbe);
@@ -71,7 +71,7 @@ GBL_TEST_CASE(lifecycle)
     GBL_TEST_COMPARE(GUM_Manager_loadEx("resource.unsupported", &pOut), GBL_RESULT_UNSUPPORTED);
     GBL_TEST_VERIFY(!pOut);
 
-    GUM_Root* pRoot = GUM_Root_create();
+    GUM_Root*      pRoot    = GUM_Root_create();
     GUM_IResource* pTexture = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
     GBL_TEST_VERIFY(pRoot && pTexture);
 
@@ -102,7 +102,7 @@ GBL_TEST_CASE(basePath)
     GblStringRef* pInitialCopy = GblStringRef_create(pInitial);
     GBL_TEST_VERIFY(pInitialCopy);
 
-    GUM_Root* pRoot = GUM_Root_create();
+    GUM_Root*      pRoot  = GUM_Root_create();
     GUM_IResource* pFirst = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
     GBL_TEST_VERIFY(pRoot && pFirst);
 
@@ -130,7 +130,7 @@ GBL_TEST_CASE(resourceType)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(cache)
-    GUM_Root* pRoot = GUM_Root_create();
+    GUM_Root*      pRoot   = GUM_Root_create();
     GUM_IResource* pFirst  = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
     GUM_IResource* pSecond = pRoot ? GUM_Manager_load("./koslogo.png") : nullptr;
     GUM_IResource* pThird  = pRoot ? GUM_Manager_load("unused/../koslogo.png") : nullptr;
@@ -149,6 +149,11 @@ GBL_TEST_CASE(cache)
 
     GUM_IResource* pFresh = GUM_Manager_load("koslogo.png");
     GBL_TEST_VERIFY(pFresh && pFresh != pFirst);
+    GBL_TEST_COMPARE(GUM_Manager_evict(pFirst), GBL_RESULT_NOT_FOUND);
+
+    GUM_IResource* pCached = GUM_Manager_load("koslogo.png");
+    GBL_TEST_COMPARE(pCached, pFresh);
+    GUM_IResource_unref(pCached);
 
     GUM_IResource_unref(pFirst);
     GUM_IResource_unref(pSecond);
@@ -158,8 +163,8 @@ GBL_TEST_CASE(cache)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(restart)
-    GUM_Root* pRoot = GUM_Root_create();
-    GUM_IResource* pOld = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
+    GUM_Root*      pRoot = GUM_Root_create();
+    GUM_IResource* pOld  = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
     GBL_TEST_VERIFY(pRoot && pOld);
 
     const GUM_Vector2 size = GUM_Texture_size(GUM_TEXTURE(pOld));
@@ -198,7 +203,7 @@ GBL_TEST_CASE(defaultFont)
     GBL_TEST_VERIFY(!GUM_Font_default());
 
     pObservedFont_ = nullptr;
-    GUM_DefaultFontProbe* pRetiring = GUM_DEFAULT_FONT_PROBE(GblBox_create(GUM_DEFAULT_FONT_PROBE_TYPE));
+    GUM_DefaultFontProbe* pRetiring    = GUM_DEFAULT_FONT_PROBE(GblBox_create(GUM_DEFAULT_FONT_PROBE_TYPE));
     GUM_DefaultFontProbe* pReplacement = GUM_DEFAULT_FONT_PROBE(GblBox_create(GUM_DEFAULT_FONT_PROBE_TYPE));
     GBL_TEST_VERIFY(pRetiring && pReplacement);
 
@@ -216,7 +221,7 @@ GBL_TEST_CASE(defaultFont)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(rootRestart)
-    GUM_Root* pRoot = GUM_Root_create();
+    GUM_Root*      pRoot    = GUM_Root_create();
     GUM_IResource* pTexture = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
     GBL_TEST_VERIFY(pRoot && pTexture);
 
@@ -236,11 +241,11 @@ GBL_TEST_CASE_END
 
 #ifdef _WIN32
 GBL_TEST_CASE(windowsPath)
-    char* pOriginalCwd = _getcwd(nullptr, 0);
-    char* pAbsolute = _fullpath(nullptr, "koslogo.png", 0);
-    GUM_Root* pRoot = GUM_Root_create();
-    GUM_IResource* pRelative = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
-    GUM_IResource* pQualified = pAbsolute ? GUM_Manager_load(pAbsolute) : nullptr;
+    char*          pOriginalCwd = _getcwd(nullptr, 0);
+    char*          pAbsolute    = _fullpath(nullptr, "koslogo.png", 0);
+    GUM_Root*      pRoot        = GUM_Root_create();
+    GUM_IResource* pRelative    = pRoot ? GUM_Manager_load("koslogo.png") : nullptr;
+    GUM_IResource* pQualified   = pAbsolute ? GUM_Manager_load(pAbsolute) : nullptr;
     GBL_TEST_VERIFY(pOriginalCwd && pAbsolute && pRoot && pRelative && pQualified);
     GBL_TEST_COMPARE(pRelative, pQualified);
 

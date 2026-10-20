@@ -17,7 +17,7 @@ GBL_RESULT GUM_ItemView_drawText_(GUM_Widget* pWidget,
     }
 
     GBL_VARIANT(text);
-    GblStringRef* pText = nullptr;
+    GblStringRef* pText     = nullptr;
     const GblType valueType = GblVariant_typeOf(&value);
 
     if (GblType_check(valueType, GBL_STRING_TYPE)) {

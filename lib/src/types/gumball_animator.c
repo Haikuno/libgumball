@@ -39,7 +39,7 @@ GblType GUM_Animator_type(void) {
 
 GBL_EXPORT GUM_Animator GUM_Animator_make(float value, float duration, GUM_EasingType easing) {
     duration = GBL_MAX(duration, 0.0f);
-    easing = GUM_Animator_builtinEasing_(easing);
+    easing   = GUM_Animator_builtinEasing_(easing);
     return (GUM_Animator){ .from     = value,
                            .to       = value,
                            .current  = value,
@@ -51,7 +51,7 @@ GBL_EXPORT GUM_Animator GUM_Animator_make(float value, float duration, GUM_Easin
 GBL_EXPORT GUM_Animator GUM_Animator_makeCustom(float value, float duration, GUM_EasingFn pFnEase) {
     GUM_Animator animator = GUM_Animator_make(value, duration, GUM_EASE_LINEAR);
     if (pFnEase) {
-        animator.easing = GUM_EASE_CUSTOM;
+        animator.easing  = GUM_EASE_CUSTOM;
         animator.pFnEase = pFnEase;
     }
     return animator;
@@ -73,7 +73,7 @@ GBL_EXPORT bool GUM_Animator_update(GUM_Animator* pSelf, float dt) {
     const float previous = pSelf->current;
     pSelf->elapsed = GBL_MIN(pSelf->elapsed + dt, pSelf->duration);
 
-    const float t = pSelf->duration > 0.0f ? pSelf->elapsed / pSelf->duration : 1.0f;
+    const float        t       = pSelf->duration > 0.0f ? pSelf->elapsed / pSelf->duration : 1.0f;
     const GUM_EasingFn pFnEase = GUM_Animator_easingFn_(pSelf);
 
     pSelf->current = pSelf->from + (pSelf->to - pSelf->from) * pFnEase(t);

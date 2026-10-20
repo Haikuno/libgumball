@@ -6,22 +6,21 @@
 /*!  \file
  *   \ingroup types
  *
- *   GUM_Animator is a simple duration-based tween.
- *   It eases a float value from one value to another over a fixed
- *   amount of time, shaping its progress with either a built-in
- *   easing curve or a custom one of your own.
+ *   GUM_Animator eases a float value over time, using a built-in or custom curve.
  *
- *   \author     2026 Agustín Bellagamba
+ *   \author    2026 Agustín Bellagamba
  *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
 #include <gimbal/meta/signals/gimbal_closure.h>
 
+#define GUM_ANIMATOR_TYPE (GBL_TYPEID(GUM_Animator)) //!< Returns the GUM_Animator Type UUID
+
 GBL_DECLS_BEGIN
 
 /*!  \enum   GUM_EasingType
- *   \brief  Built-in easing curves for a GUM_Animator to ease with
+ *   \brief   Built-in easing curves for a GUM_Animator to ease with
 */
 GBL_ENUM(GUM_EasingType,
     (GUM_EASE_LINEAR,       "nick", 0),  //!< No easing, constant speed
@@ -56,14 +55,12 @@ typedef struct {
     GblClosure*    pOnDone;  //!< Optional owned closure. May be nullptr
 } GUM_Animator;
 
-#define GUM_ANIMATOR_TYPE (GBL_TYPEID(GUM_Animator)) //!< Returns the GUM_Animator Type UUID
-
 //! \cond
 GblType GUM_Animator_type(void) GBL_NOEXCEPT;
 //! \endcond
 
 /*!  \name  Lifetime & Playback
- *   \brief Methods for creating, retargeting, and advancing an animator
+ *   \brief   Methods for creating, retargeting, and advancing an animator
  *   @{
 */
 GBL_EXPORT GUM_Animator GUM_Animator_make      (float value, float duration, GUM_EasingType easing) GBL_NOEXCEPT; //!< Returns a settled animator; invalid easing falls back to linear.
@@ -75,19 +72,19 @@ GBL_EXPORT void         GUM_Animator_setOnDone (GUM_Animator* pSelf, GblClosure*
 //! @}
 
 /*!  \name  Built-in Easing Curves
- *   \brief Stateless curve functions
+ *   \brief   Stateless curve functions
  *   @{
 */
-GBL_EXPORT float GUM_Ease_linear      (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_quadIn      (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_quadOut     (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_quadInOut   (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_cubicIn     (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_cubicOut    (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_cubicInOut  (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_sineInOut   (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_bounceOut   (float t) GBL_NOEXCEPT;
-GBL_EXPORT float GUM_Ease_elasticOut  (float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_linear    (float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_quadIn    (float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_quadOut   (float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_quadInOut (float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_cubicIn   (float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_cubicOut  (float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_cubicInOut(float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_sineInOut (float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_bounceOut (float t) GBL_NOEXCEPT;
+GBL_EXPORT float GUM_Ease_elasticOut(float t) GBL_NOEXCEPT;
 //! @}
 
 GBL_DECLS_END

@@ -16,12 +16,17 @@
 
 #include <gumball/ifaces/gumball_iitemmodel.h>
 
-#define GUM_PROPERTYMODEL_TYPE          (GBL_TYPEID     (GUM_PropertyModel))
-#define GUM_PROPERTYMODEL(self)         (GBL_CAST       (GUM_PropertyModel, self))
-#define GUM_PROPERTYMODEL_CLASS(klass)  (GBL_CLASS_CAST (GUM_PropertyModel, klass))
-#define GUM_PROPERTYMODEL_CLASSOF(self) (GBL_CLASSOF    (GUM_PropertyModel, self))
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
+*/
+#define GUM_PROPERTYMODEL_TYPE          (GBL_TYPEID     (GUM_PropertyModel))           //!< Returns the GUM_PropertyModel Type UUID
+#define GUM_PROPERTYMODEL(self)         (GBL_CAST       (GUM_PropertyModel, self))     //!< Casts an instance of a compatible model to a GUM_PropertyModel
+#define GUM_PROPERTYMODEL_CLASS(klass)  (GBL_CLASS_CAST (GUM_PropertyModel, klass))    //!< Casts a class     of a compatible model to a GUM_PropertyModelClass
+#define GUM_PROPERTYMODEL_CLASSOF(self) (GBL_CLASSOF    (GUM_PropertyModel, self))     //!< Casts an instance of a compatible model to a GUM_PropertyModelClass
+//! @}
 
-#define GBL_SELF_TYPE GUM_PropertyModel
+#define GBL_SELF_TYPE                GUM_PropertyModel
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_PropertyModel);
@@ -29,14 +34,15 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_PropertyModel);
 GBL_CLASS_DERIVE_EMPTY(GUM_PropertyModel, GblBox, GUM_IItemModel)
 GBL_INSTANCE_DERIVE_EMPTY(GUM_PropertyModel, GblBox)
 
-GBL_EXPORT GblType            GUM_PropertyModel_type               (void) GBL_NOEXCEPT;
-GBL_EXPORT GUM_PropertyModel* GUM_PropertyModel_create             (GblObject* pObject) GBL_NOEXCEPT;
-GBL_EXPORT GblObject*         GUM_PropertyModel_object             (const GUM_PropertyModel* pSelf) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT         GUM_PropertyModel_setObject          (GUM_PropertyModel* pSelf, GblObject* pObject) GBL_NOEXCEPT;
+GBL_EXPORT GblType GUM_PropertyModel_type(void) GBL_NOEXCEPT;
+
+GBL_EXPORT GUM_PropertyModel* GUM_PropertyModel_create            (GblObject* pObject)                                           GBL_NOEXCEPT;
+GBL_EXPORT GblObject*         GUM_PropertyModel_object            (const GUM_PropertyModel* pSelf)                               GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT         GUM_PropertyModel_setObject         (GUM_PropertyModel* pSelf, GblObject* pObject)                 GBL_NOEXCEPT;
 //! Returns whether the given property is visible.
-GBL_EXPORT GblBool            GUM_PropertyModel_propertyVisible    (const GUM_PropertyModel* pSelf, const char* pName) GBL_NOEXCEPT;
+GBL_EXPORT GblBool            GUM_PropertyModel_propertyVisible   (const GUM_PropertyModel* pSelf, const char* pName)            GBL_NOEXCEPT;
 //! Sets whether the given property is visible.
-GBL_EXPORT GBL_RESULT         GUM_PropertyModel_setPropertyVisible (GUM_PropertyModel* pSelf, const char* pName, GblBool visible) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT         GUM_PropertyModel_setPropertyVisible(GUM_PropertyModel* pSelf, const char* pName, GblBool visible) GBL_NOEXCEPT;
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

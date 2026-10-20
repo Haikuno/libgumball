@@ -13,11 +13,11 @@ static GBL_RESULT GUM_IResource_pathDtor_(const GblArrayMap* pMap,
 }
 
 GBL_EXPORT GUM_IResource* GUM_IResource_ref(GUM_IResource* pResource) {
-    return pResource ? GUM_IRESOURCE(GBL_REF(pResource)) : nullptr;
+    return GUM_IRESOURCE(GBL_REF(pResource));
 }
 
 GBL_EXPORT GblRefCount GUM_IResource_unref(GUM_IResource* pResource) {
-    return pResource ? GBL_UNREF(pResource) : 0;
+    return GBL_UNREF(pResource);
 }
 
 GBL_RESULT GUM_IResource_setPath_(GUM_IResource* pResource, GblStringRef* pPath) {
@@ -52,9 +52,9 @@ GBL_RESULT GUM_IResource_convertString_(const GblVariant* pValue, GblVariant* pS
         return GblVariant_setString(pString, "(null)");
 
     GUM_IResource* pResource = GUM_IRESOURCE(pBox);
-    const char* pName = GUM_IResource_path_(pResource);
+    const char*    pName     = GUM_IResource_path_(pResource);
     if (pName) {
-        const char* pSlash = strrchr(pName, '/');
+        const char* pSlash     = strrchr(pName, '/');
         const char* pBackslash = strrchr(pName, '\\');
         if (!pSlash || (pBackslash && pBackslash > pSlash))
             pSlash = pBackslash;
@@ -64,7 +64,7 @@ GBL_RESULT GUM_IResource_convertString_(const GblVariant* pValue, GblVariant* pS
 
     return GblVariant_setString(pString,
                                 pName && pName[0] ? pName
-                                                  : GblType_name(GblVariant_typeOf(pValue)));
+                                : GblType_name(GblVariant_typeOf(pValue)));
 }
 
 GblType GUM_IResource_type(void) {
@@ -73,12 +73,12 @@ GblType GUM_IResource_type(void) {
 
     if GBL_UNLIKELY (type == GBL_INVALID_TYPE) {
         dependencies[0] = GBL_BOX_TYPE;
-        type = GblType_register(GblQuark_internStatic("GUM_IResource"),
-                                GBL_INTERFACE_TYPE,
-                                &(static GblTypeInfo){ .classSize        = sizeof(GUM_IResourceClass),
-                                                       .pDependencies    = dependencies,
+        type            = GblType_register(GblQuark_internStatic("GUM_IResource"),
+                                           GBL_INTERFACE_TYPE,
+                                           &(static GblTypeInfo){ .classSize        = sizeof(GUM_IResourceClass),
+                                                       .pDependencies   = dependencies,
                                                        .dependencyCount = 1 },
-                                GBL_TYPE_FLAG_TYPEINFO_STATIC);
+                                           GBL_TYPE_FLAG_TYPEINFO_STATIC);
     }
 
     return type;

@@ -9,8 +9,8 @@
  *
  *   Gamepad input device.
  *
- *   \author       2026 Agustín Bellagamba
- *   \copyright    MIT License
+ *   \author    2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gumball/devices/gumball_inputdevice.h>
@@ -19,13 +19,13 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_GAMEPAD_TYPE            (GBL_TYPEID     (GUM_Gamepad))
-#define GUM_GAMEPAD(self)           (GBL_CAST       (GUM_Gamepad, self))
-#define GUM_GAMEPAD_CLASS(klass)    (GBL_CLASS_CAST (GUM_Gamepad, klass))
-#define GUM_GAMEPAD_CLASSOF(self)   (GBL_CLASSOF    (GUM_Gamepad, self))
+#define GUM_GAMEPAD_TYPE          (GBL_TYPEID     (GUM_Gamepad))           //!< Returns the GUM_Gamepad Type UUID
+#define GUM_GAMEPAD(self)         (GBL_CAST       (GUM_Gamepad, self))     //!< Casts an instance of a compatible device to a GUM_Gamepad
+#define GUM_GAMEPAD_CLASS(klass)  (GBL_CLASS_CAST (GUM_Gamepad, klass))    //!< Casts a class     of a compatible device to a GUM_GamepadClass
+#define GUM_GAMEPAD_CLASSOF(self) (GBL_CLASSOF    (GUM_Gamepad, self))     //!< Casts an instance of a compatible device to a GUM_GamepadClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Gamepad
+#define GBL_SELF_TYPE                GUM_Gamepad
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Gamepad);
@@ -76,7 +76,6 @@ GblType GUM_Gamepad_type(void) GBL_NOEXCEPT;
 #define GUM_Gamepad_create(/* property_name, property_value */ ...) GBL_NEW(GUM_Gamepad __VA_OPT__(,) __VA_ARGS__)
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_GAMEPAD_H

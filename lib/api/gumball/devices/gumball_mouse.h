@@ -19,13 +19,13 @@
  *  \brief Type UUID and cast operators
  *  @{
 */
-#define GUM_MOUSE_TYPE            (GBL_TYPEID(GUM_Mouse))
-#define GUM_MOUSE(self)           (GBL_CAST(GUM_Mouse, self))
-#define GUM_MOUSE_CLASS(klass)    (GBL_CLASS_CAST(GUM_Mouse, klass))
-#define GUM_MOUSE_CLASSOF(self)   (GBL_CLASSOF(GUM_Mouse, self))
+#define GUM_MOUSE_TYPE          (GBL_TYPEID     (GUM_Mouse))           //!< Returns the GUM_Mouse Type UUID
+#define GUM_MOUSE(self)         (GBL_CAST       (GUM_Mouse, self))     //!< Casts an instance of a compatible device to a GUM_Mouse
+#define GUM_MOUSE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Mouse, klass))    //!< Casts a class     of a compatible device to a GUM_MouseClass
+#define GUM_MOUSE_CLASSOF(self) (GBL_CLASSOF    (GUM_Mouse, self))     //!< Casts an instance of a compatible device to a GUM_MouseClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Mouse
+#define GBL_SELF_TYPE                GUM_Mouse
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Mouse);
@@ -48,7 +48,6 @@ GblType GUM_Mouse_type(void) GBL_NOEXCEPT;
 #define GUM_Mouse_create(/* property_name, property_value */...) GBL_NEW(GUM_Mouse __VA_OPT__(,) __VA_ARGS__)
 
 GBL_DECLS_END
-
 #undef GBL_SELF_TYPE
 
 #endif // GUM_MOUSE_H

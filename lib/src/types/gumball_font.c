@@ -10,8 +10,8 @@
 #error "GUM_DEFAULT_FONT_PATH must be provided by the build system"
 #endif
 
-static GUM_Font* pDefaultFont_ = nullptr;
-static bool defaultFontFailureLogged_ = false;
+static GUM_Font* pDefaultFont_             = nullptr;
+static bool      defaultFontFailureLogged_ = false;
 
 static GBL_RESULT GUM_Font_load_(GUM_IResource* pResource, GblStringRef* pPath) {
     GBL_RESULT result = GUM_Backend_Font_load(pResource, pPath);
@@ -32,9 +32,9 @@ static GBL_RESULT GUM_Font_unload_(GUM_IResource* pResource) {
 
 static GBL_RESULT GUM_Font_GblBox_destructor_(GblBox* pBox) {
     GUM_IResource* pResource = GUM_IRESOURCE(pBox);
-    GBL_RESULT result = GUM_IRESOURCE_CLASSOF(pResource)->pFnUnload(pResource);
+    GBL_RESULT     result    = GUM_IRESOURCE_CLASSOF(pResource)->pFnUnload(pResource);
 
-    GblBoxClass* pBoxClass = GBL_BOX_CLASS(GblClass_weakRefDefault(GBL_BOX_TYPE));
+    GblBoxClass*     pBoxClass    = GBL_BOX_CLASS(GblClass_weakRefDefault(GBL_BOX_TYPE));
     const GBL_RESULT parentResult = pBoxClass->pFnDestructor(pBox);
     return GBL_RESULT_SUCCESS(result) ? parentResult : result;
 }
@@ -72,8 +72,8 @@ GUM_Font* GUM_Backend_Font_default(void) {
     if (pDefault)
         return pDefault;
 
-    GUM_IResource* pResource = nullptr;
-    const GBL_RESULT result = GUM_Manager_loadEx(GUM_DEFAULT_FONT_PATH, &pResource);
+    GUM_IResource*   pResource = nullptr;
+    const GBL_RESULT result    = GUM_Manager_loadEx(GUM_DEFAULT_FONT_PATH, &pResource);
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
         if (!defaultFontFailureLogged_) {
             GUM_LOG_ERROR("Failed to load bundled default font '%s': %s",

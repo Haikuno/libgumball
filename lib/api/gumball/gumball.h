@@ -4,7 +4,7 @@
 // View this file's documentation online: https://libgumball.psyops.studio/gumball_8h.html
 
 /*!  \file
- *   \brief Global include file for the entire library.
+ *   \brief   Global include file for the entire library.
  *
  *   This header includes the entirety of libGumball.
  *

@@ -17,11 +17,11 @@ static const char* outputPath_(int argc, char* pArgv[], char path[GUM_PARITY_PAT
     const char* pBasePath = GetApplicationDirectory();
     if (!pBasePath || !*pBasePath) return nullptr;
 
-    const size_t length = strlen(pBasePath);
-    const bool hasSeparator = pBasePath[length - 1] == '/' || pBasePath[length - 1] == '\\';
-    const int written = snprintf(path, GUM_PARITY_PATH_CAPACITY,
-                                 "%s%sbackend-parity-raylib.png",
-                                 pBasePath, hasSeparator ? "" : "/");
+    const size_t length       = strlen(pBasePath);
+    const bool   hasSeparator = pBasePath[length - 1] == '/' || pBasePath[length - 1] == '\\';
+    const int    written      = snprintf(path, GUM_PARITY_PATH_CAPACITY,
+                                         "%s%sbackend-parity-raylib.png",
+                                         pBasePath, hasSeparator ? "" : "/");
     return written >= 0 && written < GUM_PARITY_PATH_CAPACITY ? path : nullptr;
 }
 
@@ -30,7 +30,7 @@ int main(int argc, char* pArgv[]) {
     InitWindow(GUM_BACKEND_PARITY_WIDTH, GUM_BACKEND_PARITY_HEIGHT, "libGumball parity");
     if (!IsWindowReady()) return 1;
 
-    char outputPath[GUM_PARITY_PATH_CAPACITY];
+    char        outputPath[GUM_PARITY_PATH_CAPACITY];
     const char* pOutputPath = outputPath_(argc, pArgv, outputPath);
     if (!pOutputPath) {
         CloseWindow();
@@ -38,7 +38,7 @@ int main(int argc, char* pArgv[]) {
     }
 
     GUM_Root* pRoot = GUM_BackendParityScene_create();
-    Image image = { 0 };
+    Image     image = { 0 };
 
     BeginDrawing();
     ClearBackground((Color){ 24, 24, 24, 255 });

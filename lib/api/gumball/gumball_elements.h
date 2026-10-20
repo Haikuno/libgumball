@@ -4,16 +4,14 @@
 // View this file's documentation online: https://libgumball.psyops.studio/gumball__elements_8h.html
 
 /*!  \file
-     \brief      Elements module-wide include
-     \ingroup    elements
-
-     \todo
-         - GUM_Dialogue
-         - Animations
-         - GUM_Property_set/get
-
-     \author    2025, 2026 Agustín Bellagamba
-     \copyright MIT License
+ *   \brief   Elements module-wide include
+ *   \ingroup elements
+ *
+ *   \todo
+ *       - GUM_Dialogue
+ *
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include "elements/gumball_root.h"
@@ -25,7 +23,7 @@
 #include "elements/gumball_common.h"
 
 /*!  \defgroup elements Elements
- *   \brief    Element types
+ *   \brief   Element types
  *
  *   Elements are the fundamental objects of the library.
 */

@@ -4,7 +4,6 @@
 
 #include <gimbal/gimbal_containers.h>
 
-#include "../core/gumball_marshal_.h"
 #include "gumball_scrollviewport_.h"
 #include "gumball_widget_.h"
 #include "gumball_itemview_.h"
@@ -22,9 +21,10 @@ typedef struct GUM_Tree_ {
 
 static size_t GUM_Tree_collapsedIndex_(const GUM_Tree* pSelf, const void* pHandle) {
     const GblArrayList* pCollapsed = &GUM_TREE_(pSelf)->collapsed;
+    const void* const*  pHandles   = GblArrayList_data(pCollapsed);
     const size_t count = GblArrayList_size(pCollapsed);
     for (size_t i = 0; i < count; ++i) {
-        if (*(const void* const*)GblArrayList_at(pCollapsed, i) == pHandle)
+        if (pHandles[i] == pHandle)
             return i;
     }
     return SIZE_MAX;
@@ -52,8 +52,8 @@ static size_t GUM_Tree_visibleCount_(const GUM_Tree* pSelf, GUM_ModelIndex paren
     if (!pSelf_->pModel)
         return 0;
 
-    size_t count = 0;
-    const size_t rows = GUM_IItemModel_rowCount(pSelf_->pModel, parent);
+    size_t       count = 0;
+    const size_t rows  = GUM_IItemModel_rowCount(pSelf_->pModel, parent);
     for (size_t row = 0; row < rows; ++row) {
         const GUM_ModelIndex index = GUM_IItemModel_index(pSelf_->pModel, row, 0, parent);
         if (!GUM_ModelIndex_valid(index))
@@ -67,11 +67,11 @@ static size_t GUM_Tree_visibleCount_(const GUM_Tree* pSelf, GUM_ModelIndex paren
 }
 
 static GUM_ModelIndex GUM_Tree_visibleAt_(const GUM_Tree* pSelf,
-                                          GUM_ModelIndex parent,
-                                          size_t depth,
-                                          size_t target,
-                                          size_t* pCursor,
-                                          size_t* pDepth) {
+                                          GUM_ModelIndex  parent,
+                                          size_t          depth,
+                                          size_t          target,
+                                          size_t*         pCursor,
+                                          size_t*         pDepth) {
     const GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
     if (!pSelf_->pModel)
         return GUM_MODEL_INDEX_INVALID;
@@ -103,10 +103,10 @@ static GUM_ModelIndex GUM_Tree_visibleAt_(const GUM_Tree* pSelf,
 }
 
 static GblBool GUM_Tree_visibleRow_(const GUM_Tree* pSelf,
-                                    GUM_ModelIndex parent,
-                                    GUM_ModelIndex target,
-                                    size_t* pCursor,
-                                    size_t* pRow) {
+                                    GUM_ModelIndex  parent,
+                                    GUM_ModelIndex  target,
+                                    size_t*         pCursor,
+                                    size_t*         pRow) {
     const GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
     if (!pSelf_->pModel)
         return GBL_FALSE;
@@ -175,7 +175,7 @@ static void GUM_Tree_revealSelection_(GUM_Tree* pSelf) {
         return;
 
     size_t cursor = 0;
-    size_t row = 0;
+    size_t row    = 0;
     if (!GUM_Tree_visibleRow_(pSelf,
                               GUM_MODEL_INDEX_INVALID,
                               pSelf_->selection,
@@ -183,8 +183,8 @@ static void GUM_Tree_revealSelection_(GUM_Tree* pSelf) {
                               &row))
         return;
 
-    const float top = (float)row * pSelf->rowHeight;
-    const float bottom = top + pSelf->rowHeight;
+    const float top      = (float)row * pSelf->rowHeight;
+    const float bottom   = top + pSelf->rowHeight;
     const float position = GUM_ScrollViewport_position_(&pSelf_->viewport, GUM_SCROLL_AXIS_Y);
     const float viewport = GBL_MAX(GUM_WIDGET(pSelf)->h, 0.0f);
 
@@ -197,8 +197,8 @@ static void GUM_Tree_revealSelection_(GUM_Tree* pSelf) {
 }
 
 static void GUM_Tree_structureChanged_(GblInstance* pReceiver) {
-    GUM_Tree* pSelf = GUM_TREE(pReceiver);
-    GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
+    GUM_Tree*     pSelf        = GUM_TREE(pReceiver);
+    GUM_Tree_*    pSelf_       = GUM_TREE_(pSelf);
     const GblBool hadSelection = GUM_ModelIndex_valid(pSelf_->selection);
 
     pSelf_->selection = GUM_MODEL_INDEX_INVALID;
@@ -210,7 +210,7 @@ static void GUM_Tree_structureChanged_(GblInstance* pReceiver) {
 }
 
 static GBL_RESULT GUM_Tree_init_(GblInstance* pInstance) {
-    GUM_Tree* pSelf = GUM_TREE(pInstance);
+    GUM_Tree*  pSelf  = GUM_TREE(pInstance);
     GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
 
     pSelf->rowHeight   = 24.0f;
@@ -226,7 +226,7 @@ static GBL_RESULT GUM_Tree_init_(GblInstance* pInstance) {
 }
 
 static GBL_RESULT GUM_Tree_GblBox_destructor_(GblBox* pBox) {
-    GUM_Tree* pSelf = GUM_TREE(pBox);
+    GUM_Tree*  pSelf  = GUM_TREE(pBox);
     GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
 
     if (pSelf_->pModel) {
@@ -242,9 +242,9 @@ static GBL_RESULT GUM_Tree_GblBox_destructor_(GblBox* pBox) {
     return GBL_BOX_CLASS(GblClass_weakRefDefault(GUM_WIDGET_TYPE))->pFnDestructor(pBox);
 }
 
-static GBL_RESULT GUM_Tree_GblObject_setProperty_(GblObject* pObject,
-                                                   const GblProperty* pProp,
-                                                   GblVariant* pValue) {
+static GBL_RESULT GUM_Tree_GblObject_setProperty_(GblObject*         pObject,
+                                                  const GblProperty* pProp,
+                                                  GblVariant*        pValue) {
     GUM_Tree* pSelf = GUM_TREE(pObject);
     switch (pProp->id) {
         case GUM_Tree_Property_Id_rowHeight:
@@ -258,9 +258,9 @@ static GBL_RESULT GUM_Tree_GblObject_setProperty_(GblObject* pObject,
     }
 }
 
-static GBL_RESULT GUM_Tree_GblObject_property_(const GblObject* pObject,
-                                                const GblProperty* pProp,
-                                                GblVariant* pValue) {
+static GBL_RESULT GUM_Tree_GblObject_property_(const GblObject*   pObject,
+                                               const GblProperty* pProp,
+                                               GblVariant*        pValue) {
     const GUM_Tree* pSelf = GUM_TREE(pObject);
     switch (pProp->id) {
         case GUM_Tree_Property_Id_rowHeight:
@@ -273,8 +273,8 @@ static GBL_RESULT GUM_Tree_GblObject_property_(const GblObject* pObject,
 }
 
 static GBL_RESULT GUM_Tree_update_(GUM_Widget* pWidget) {
-    GUM_Tree* pSelf = GUM_TREE(pWidget);
-    GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
+    GUM_Tree*   pSelf         = GUM_TREE(pWidget);
+    GUM_Tree_*  pSelf_        = GUM_TREE_(pSelf);
     const float contentHeight = (float)GUM_Tree_visibleCount_(pSelf,
                                                               GUM_MODEL_INDEX_INVALID)
                               * pSelf->rowHeight;
@@ -286,11 +286,11 @@ static GBL_RESULT GUM_Tree_update_(GUM_Widget* pWidget) {
     return GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_Tree_drawDisclosure_(GUM_Tree* pSelf,
-                                           GUM_Renderer* pRenderer,
+static GBL_RESULT GUM_Tree_drawDisclosure_(GUM_Tree*      pSelf,
+                                           GUM_Renderer*  pRenderer,
                                            GUM_ModelIndex index,
-                                           float x,
-                                           float y) {
+                                           float          x,
+                                           float          y) {
     GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
     if (!GUM_IItemModel_rowCount(pSelf_->pModel, index))
         return GBL_RESULT_SUCCESS;
@@ -301,13 +301,13 @@ static GBL_RESULT GUM_Tree_drawDisclosure_(GUM_Tree* pSelf,
         GUM_WIDGET(pSelf)->font_b,
         GUM_WIDGET(pSelf)->font_a
     };
-    const float size = GBL_MIN(9.0f, GBL_MAX(pSelf->rowHeight - 8.0f, 3.0f));
-    const float top = y + (pSelf->rowHeight - size) * 0.5f;
-    GBL_RESULT result = GUM_Backend_rectangleLinesDraw(pRenderer,
-                                                       (GUM_Rectangle){ x, top, size, size },
-                                                       0.0f,
-                                                       1.0f,
-                                                       color);
+    const float size   = GBL_MIN(9.0f, GBL_MAX(pSelf->rowHeight - 8.0f, 3.0f));
+    const float top    = y + (pSelf->rowHeight - size) * 0.5f;
+    GBL_RESULT  result = GUM_Backend_rectangleLinesDraw(pRenderer,
+                                                        (GUM_Rectangle){ x, top, size, size },
+                                                        0.0f,
+                                                        1.0f,
+                                                        color);
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
@@ -330,10 +330,10 @@ static GBL_RESULT GUM_Tree_drawDisclosure_(GUM_Tree* pSelf,
                                      color);
 }
 
-static GBL_RESULT GUM_Tree_drawText_(GUM_Tree* pSelf,
-                                     GUM_Renderer* pRenderer,
+static GBL_RESULT GUM_Tree_drawText_(GUM_Tree*      pSelf,
+                                     GUM_Renderer*  pRenderer,
                                      GUM_ModelIndex index,
-                                     GUM_Vector2 position) {
+                                     GUM_Vector2    position) {
     return GUM_ItemView_drawText_(GUM_WIDGET(pSelf),
                                   pRenderer,
                                   GUM_TREE_(pSelf)->pModel,
@@ -341,15 +341,15 @@ static GBL_RESULT GUM_Tree_drawText_(GUM_Tree* pSelf,
                                   position);
 }
 
-static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree* pSelf,
-                                     GUM_Renderer* pRenderer,
+static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree*      pSelf,
+                                     GUM_Renderer*  pRenderer,
                                      GUM_ModelIndex parent,
-                                     size_t depth,
-                                     size_t* pRow,
-                                     GUM_Rectangle rec) {
-    GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
-    const float scroll = GUM_ScrollViewport_position_(&pSelf_->viewport, GUM_SCROLL_AXIS_Y);
-    const size_t rows = GUM_IItemModel_rowCount(pSelf_->pModel, parent);
+                                     size_t         depth,
+                                     size_t*        pRow,
+                                     GUM_Rectangle  rec) {
+    GUM_Tree_*   pSelf_ = GUM_TREE_(pSelf);
+    const float  scroll = GUM_ScrollViewport_position_(&pSelf_->viewport, GUM_SCROLL_AXIS_Y);
+    const size_t rows   = GUM_IItemModel_rowCount(pSelf_->pModel, parent);
 
     for (size_t row = 0; row < rows; ++row) {
         const GUM_ModelIndex index = GUM_IItemModel_index(pSelf_->pModel, row, 0, parent);
@@ -373,8 +373,8 @@ static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree* pSelf,
                     return result;
             }
 
-            const float nodeX = rec.x + 4.0f + (float)depth * pSelf->indentWidth;
-            GBL_RESULT result = GUM_Tree_drawDisclosure_(pSelf, pRenderer, index, nodeX, y);
+            const float nodeX  = rec.x + 4.0f + (float)depth * pSelf->indentWidth;
+            GBL_RESULT  result = GUM_Tree_drawDisclosure_(pSelf, pRenderer, index, nodeX, y);
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                 return result;
 
@@ -383,7 +383,7 @@ static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree* pSelf,
                                         index,
                                         (GUM_Vector2){ nodeX + 13.0f,
                                                        y + (pSelf->rowHeight
-                                                          - GUM_WIDGET(pSelf)->font_size) * 0.5f });
+                                                            - GUM_WIDGET(pSelf)->font_size) * 0.5f });
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                 return result;
         }
@@ -405,14 +405,14 @@ static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree* pSelf,
 static GBL_RESULT GUM_Tree_draw_(GUM_Widget* pWidget, GUM_Renderer* pRenderer) {
     GBL_RESULT result = GUM_WIDGET_CLASS(GblClass_weakRefDefault(GUM_WIDGET_TYPE))->pFnDraw(pWidget,
                                                                                             pRenderer);
-    GUM_Tree* pSelf = GUM_TREE(pWidget);
+    GUM_Tree*  pSelf  = GUM_TREE(pWidget);
     GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result) || !pSelf_->pModel)
         return result;
 
-    const GUM_Vector2 position = GUM_get_absolute_position_(pWidget);
-    const GUM_Rectangle rec = { position.x, position.y, pWidget->w, pWidget->h };
-    const GUM_Rectangle clip = GUM_Rectangle_intersect(GUM_Widget_clipRect_(pWidget), rec);
+    const GUM_Vector2   position = GUM_get_absolute_position_(pWidget);
+    const GUM_Rectangle rec      = { position.x, position.y, pWidget->w, pWidget->h };
+    const GUM_Rectangle clip     = GUM_Rectangle_intersect(GUM_Widget_clipRect_(pWidget), rec);
     if (clip.width <= 0.0f || clip.height <= 0.0f)
         return GBL_RESULT_SUCCESS;
 
@@ -439,8 +439,8 @@ static GBL_RESULT GUM_Tree_pointerPress_(GUM_Tree* pSelf, GUM_Event_Mouse* pEven
         return GBL_RESULT_PARTIAL;
 
     const GUM_Vector2 position = GUM_get_absolute_position_(GUM_WIDGET(pSelf));
-    const GUM_Vector2 pointer = GUM_EVENT_POINTER(pEvent)->position;
-    const float localY = pointer.y - position.y
+    const GUM_Vector2 pointer  = GUM_EVENT_POINTER(pEvent)->position;
+    const float       localY   = pointer.y - position.y
                        + GUM_ScrollViewport_position_(&pSelf_->viewport, GUM_SCROLL_AXIS_Y);
     if (localY < 0.0f || pSelf->rowHeight <= 0.0f)
         return GBL_RESULT_PARTIAL;
@@ -450,7 +450,7 @@ static GBL_RESULT GUM_Tree_pointerPress_(GUM_Tree* pSelf, GUM_Event_Mouse* pEven
         return GBL_RESULT_PARTIAL;
 
     size_t cursor = 0;
-    size_t depth = 0;
+    size_t depth  = 0;
     const GUM_ModelIndex index = GUM_Tree_visibleAt_(pSelf,
                                                      GUM_MODEL_INDEX_INVALID,
                                                      0,
@@ -460,7 +460,7 @@ static GBL_RESULT GUM_Tree_pointerPress_(GUM_Tree* pSelf, GUM_Event_Mouse* pEven
     if (!GUM_ModelIndex_valid(index))
         return GBL_RESULT_PARTIAL;
 
-    const float nodeX = position.x + 4.0f + (float)depth * pSelf->indentWidth;
+    const float   nodeX       = position.x + 4.0f + (float)depth * pSelf->indentWidth;
     const GblBool hasChildren = GUM_IItemModel_rowCount(pSelf_->pModel, index) > 0;
     if (hasChildren && pointer.x >= nodeX && pointer.x < nodeX + 13.0f) {
         const GBL_RESULT result = GUM_Tree_setExpanded(pSelf,
@@ -475,8 +475,8 @@ static GBL_RESULT GUM_Tree_pointerPress_(GUM_Tree* pSelf, GUM_Event_Mouse* pEven
 }
 
 static GBL_RESULT GUM_Tree_inputEvent_(GUM_Widget* pWidget, GUM_Event_Input* pEvent) {
-    GUM_Tree* pSelf = GUM_TREE(pWidget);
-    GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
+    GUM_Tree*        pSelf       = GUM_TREE(pWidget);
+    GUM_Tree_*       pSelf_      = GUM_TREE_(pSelf);
     GUM_Event_Mouse* pMouseEvent = GBL_AS(GUM_Event_Mouse, pEvent);
 
     if (pMouseEvent && pSelf_->pModel &&
@@ -500,7 +500,7 @@ static GBL_RESULT GUM_Tree_inputEvent_(GUM_Widget* pWidget, GUM_Event_Input* pEv
 }
 
 static GblBool GUM_Tree_navigate_(GUM_Widget* pWidget, GUM_InputAction action) {
-    GUM_Tree* pSelf = GUM_TREE(pWidget);
+    GUM_Tree*  pSelf  = GUM_TREE(pWidget);
     GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
     if (!pSelf_->pModel)
         return GBL_FALSE;
@@ -509,8 +509,8 @@ static GblBool GUM_Tree_navigate_(GUM_Widget* pWidget, GUM_InputAction action) {
     if (!visibleCount)
         return GBL_FALSE;
 
-    size_t cursor = 0;
-    size_t currentRow = 0;
+    size_t        cursor       = 0;
+    size_t        currentRow   = 0;
     const GblBool hasSelection = GUM_ModelIndex_valid(pSelf_->selection) &&
         GUM_Tree_visibleRow_(pSelf,
                              GUM_MODEL_INDEX_INVALID,
@@ -536,8 +536,8 @@ static GblBool GUM_Tree_navigate_(GUM_Widget* pWidget, GUM_InputAction action) {
             if (hasSelection && GUM_IItemModel_rowCount(pSelf_->pModel, pSelf_->selection) > 0) {
                 if (!GUM_Tree_expanded_(pSelf, pSelf_->selection))
                     handled = GBL_RESULT_SUCCESS(GUM_Tree_setExpanded(pSelf,
-                                                                       pSelf_->selection,
-                                                                       GBL_TRUE));
+                                                                      pSelf_->selection,
+                                                                      GBL_TRUE));
             }
             break;
 
@@ -545,8 +545,8 @@ static GblBool GUM_Tree_navigate_(GUM_Widget* pWidget, GUM_InputAction action) {
             if (hasSelection) {
                 if (GUM_Tree_expanded_(pSelf, pSelf_->selection))
                     handled = GBL_RESULT_SUCCESS(GUM_Tree_setExpanded(pSelf,
-                                                                       pSelf_->selection,
-                                                                       GBL_FALSE));
+                                                                      pSelf_->selection,
+                                                                      GBL_FALSE));
                 else
                     handled = GUM_Tree_selectParent_(pSelf, pSelf_->selection);
             }
@@ -567,12 +567,12 @@ static GBL_RESULT GUM_TreeClass_init_(GblClass* pClass, const void* pData) {
     if (!GblType_classRefCount(GUM_TREE_TYPE)) {
         GBL_PROPERTIES_REGISTER(GUM_Tree);
 
-        GblSignal_install(GUM_TREE_TYPE, "selectionChanged",
-                          GUM_Marshal_CClosure_VOID__INSTANCE_POINTER_SIZE_, 2,
-                          GBL_POINTER_TYPE, GBL_SIZE_TYPE);
+        const GBL_RESULT result = GBL_SIGNALS_REGISTER(GUM_Tree);
+        if (!GBL_RESULT_SUCCESS(result))
+            return result;
     }
 
-    GBL_BOX_CLASS(pClass)->pFnDestructor      = GUM_Tree_GblBox_destructor_;
+    GBL_BOX_CLASS(pClass)->pFnDestructor     = GUM_Tree_GblBox_destructor_;
     GBL_OBJECT_CLASS(pClass)->pFnSetProperty = GUM_Tree_GblObject_setProperty_;
     GBL_OBJECT_CLASS(pClass)->pFnProperty    = GUM_Tree_GblObject_property_;
     GUM_WIDGET_CLASS(pClass)->pFnUpdate      = GUM_Tree_update_;
@@ -595,7 +595,7 @@ static GBL_RESULT GUM_TreeClass_final_(GblClass* pClass, const void* pClassData)
 }
 
 GBL_EXPORT GUM_IItemModel* GUM_Tree_model(const GUM_Tree* pSelf) {
-    return pSelf ? GUM_TREE_(pSelf)->pModel : nullptr;
+    return GUM_TREE_(pSelf)->pModel;
 }
 
 GBL_EXPORT GBL_RESULT GUM_Tree_setModel(GUM_Tree* pSelf, GUM_IItemModel* pModel) {
@@ -628,7 +628,7 @@ GBL_EXPORT GBL_RESULT GUM_Tree_setModel(GUM_Tree* pSelf, GUM_IItemModel* pModel)
     }
 
     const GblBool hadSelection = GUM_ModelIndex_valid(pSelf_->selection);
-    pSelf_->pModel = pModel;
+    pSelf_->pModel    = pModel;
     pSelf_->selection = GUM_MODEL_INDEX_INVALID;
     GblArrayList_clear(&pSelf_->collapsed);
     GUM_ScrollViewport_reset_(&pSelf_->viewport);
@@ -638,7 +638,7 @@ GBL_EXPORT GBL_RESULT GUM_Tree_setModel(GUM_Tree* pSelf, GUM_IItemModel* pModel)
 }
 
 GBL_EXPORT GUM_ModelIndex GUM_Tree_selection(const GUM_Tree* pSelf) {
-    return pSelf ? GUM_TREE_(pSelf)->selection : GUM_MODEL_INDEX_INVALID;
+    return GUM_TREE_(pSelf)->selection;
 }
 
 GBL_EXPORT GBL_RESULT GUM_Tree_select(GUM_Tree* pSelf, GUM_ModelIndex index) {
@@ -662,12 +662,12 @@ GBL_EXPORT GBL_RESULT GUM_Tree_select(GUM_Tree* pSelf, GUM_ModelIndex index) {
 }
 
 GBL_EXPORT GblBool GUM_Tree_expanded(const GUM_Tree* pSelf, GUM_ModelIndex index) {
-    return pSelf ? GUM_Tree_expanded_(pSelf, index) : GBL_FALSE;
+    return GUM_Tree_expanded_(pSelf, index);
 }
 
-GBL_EXPORT GBL_RESULT GUM_Tree_setExpanded(GUM_Tree* pSelf,
+GBL_EXPORT GBL_RESULT GUM_Tree_setExpanded(GUM_Tree*      pSelf,
                                            GUM_ModelIndex index,
-                                           GblBool expanded) {
+                                           GblBool        expanded) {
     if (!pSelf || !GUM_ModelIndex_valid(index))
         return GBL_RESULT_ERROR_INVALID_ARG;
 
@@ -691,13 +691,11 @@ GBL_EXPORT GBL_RESULT GUM_Tree_setExpanded(GUM_Tree* pSelf,
 }
 
 GBL_EXPORT float GUM_Tree_scrollPosition(const GUM_Tree* pSelf) {
-    return pSelf ? GUM_ScrollViewport_position_(&GUM_TREE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y)
-                 : 0.0f;
+    return GUM_ScrollViewport_position_(&GUM_TREE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y);
 }
 
 GBL_EXPORT float GUM_Tree_scrollRange(const GUM_Tree* pSelf) {
-    return pSelf ? GUM_ScrollViewport_range_(&GUM_TREE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y)
-                 : 0.0f;
+    return GUM_ScrollViewport_range_(&GUM_TREE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y);
 }
 
 GBL_EXPORT void GUM_Tree_scrollTo(GUM_Tree* pSelf, float position) {

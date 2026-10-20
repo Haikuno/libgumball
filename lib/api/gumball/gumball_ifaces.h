@@ -4,18 +4,18 @@
 // View this file's documentation online: https://libgumball.psyops.studio/gumball__ifaces_8h.html
 
 /*!  \file
- *   \brief      Interfaces module-wide include
- *   \ingroup    ifaces
+ *   \brief   Interfaces module-wide include
+ *   \ingroup ifaces
  *
- *   \author     2025, 2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include "ifaces/gumball_iresource.h"
 #include "ifaces/gumball_iitemmodel.h"
 
 /*!  \defgroup ifaces Interfaces
- *   \brief    Interfaces
+ *   \brief   Interfaces
  *
  *   libGumball interfaces that can be implemented by types
 */

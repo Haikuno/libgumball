@@ -5,17 +5,17 @@
 void onPressCallback(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
     GblType deviceType = GBL_TYPEOF(pEvent->pInputDevice);
     GUM_LOG_INFO("Button with label %s pressed   by a %s", GUM_Widget_label(pSelf), deviceType == GUM_MOUSE_TYPE    ? "mouse"    :
-                                                                                    deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
-                                                                                    deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
-                                                                                   "unknown device type");
+                 deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
+                 deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
+                 "unknown device type");
 }
 
 void onFocusGainedCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
     GblType deviceType = GBL_TYPEOF(pDevice);
     GUM_LOG_INFO("Button with label %s focused   by a %s", GUM_Widget_label(pSelf), deviceType == GUM_MOUSE_TYPE    ? "mouse"    :
-                                                                                    deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
-                                                                                    deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
-                                                                                   "unknown device type");
+                 deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
+                 deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
+                 "unknown device type");
     GUM_Widget_animate(pSelf, "w", 250.0f, 0.25, GUM_EASE_SINE_IN_OUT);
     GUM_Widget_animate(pSelf, "h", 350.0f, 0.25, GUM_EASE_SINE_IN_OUT);
 }
@@ -23,17 +23,17 @@ void onFocusGainedCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
 void onReleaseCallback(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
     GblType deviceType = GBL_TYPEOF(pEvent->pInputDevice);
     GUM_LOG_INFO("Button with label %s released  by a %s", GUM_Widget_label(pSelf),  deviceType == GUM_MOUSE_TYPE    ? "mouse"    :
-                                                                                     deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
-                                                                                     deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
-                                                                                     "unknown device type");
+                 deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
+                 deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
+                 "unknown device type");
 }
 
 void onFocusLostCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
     GblType deviceType = GBL_TYPEOF(pDevice);
     GUM_LOG_INFO("Button with label %s unfocused by a %s", GUM_Widget_label(pSelf),  deviceType == GUM_MOUSE_TYPE    ? "mouse"    :
-                                                                                     deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
-                                                                                     deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
-                                                                                     "unknown device type");
+                 deviceType == GUM_KEYBOARD_TYPE ? "keyboard" :
+                 deviceType == GUM_GAMEPAD_TYPE  ? "gamepad"  :
+                 "unknown device type");
     if (!GUM_Widget_isFocused(pSelf)) {
         GUM_Widget_animate(pSelf, "w", 200.0f, 0.25, GUM_EASE_SINE_IN_OUT);
         GUM_Widget_animate(pSelf, "h", 300.0f, 0.25, GUM_EASE_SINE_IN_OUT);
@@ -43,9 +43,9 @@ void onFocusLostCallback(GUM_Widget* pSelf, GUM_InputDevice* pDevice) {
 int main(int argc, char* argv[]) {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) return 1;
 
-    SDL_Window* pWindow = SDL_CreateWindow("libGumball SDL3 dev", 800, 600, SDL_WINDOW_RESIZABLE);
+    SDL_Window*   pWindow      = SDL_CreateWindow("libGumball SDL3 dev", 800, 600, SDL_WINDOW_RESIZABLE);
     SDL_Renderer* pSdlRenderer = pWindow ? SDL_CreateRenderer(pWindow, nullptr) : nullptr;
-    GUM_Renderer* pRenderer = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
+    GUM_Renderer* pRenderer    = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
     if (!pRenderer) return 1;
 
     GUM_Root* pRoot = GUM_Root_create();
@@ -67,16 +67,16 @@ int main(int argc, char* argv[]) {
                                                  "resizeWidgets", false);
 
     GUM_Container* pInner2 = GUM_Container_create("parent", pOuter,
-                                                "name", "Inner container 2",
-                                                "w", 600.0f, "h", 800.0f,
-                                                "border_color",  0x0000FFFF,
-                                                "margin", 10.0f,
-                                                "padding", 10.0f,
-                                                "resizeWidgets", false);
+                                                  "name", "Inner container 2",
+                                                  "w", 600.0f, "h", 800.0f,
+                                                  "border_color",  0x0000FFFF,
+                                                  "margin", 10.0f,
+                                                  "padding", 10.0f,
+                                                  "resizeWidgets", false);
 
 
-    const unsigned colors[]  = { 0x7C3AEDFF, 0x18B7A5FF, 0xD94F6EFF, 0x5FA84BFF, 0xF2C14EFF };
-    const char*    labels[]  = { "Inner A", "Inner B", "Inner C", "Inner D", "Inner E" };
+    const unsigned colors[] = { 0x7C3AEDFF, 0x18B7A5FF, 0xD94F6EFF, 0x5FA84BFF, 0xF2C14EFF };
+    const char*    labels[] = { "Inner A", "Inner B", "Inner C", "Inner D", "Inner E" };
     for (int i = 0; i < 5; ++i) {
         GUM_connect(GUM_Button_create("parent", pInner,
                                       "h",     300.0f,

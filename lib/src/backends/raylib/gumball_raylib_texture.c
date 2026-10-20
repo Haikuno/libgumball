@@ -1,23 +1,8 @@
 #include "../../ifaces/gumball_iresource_.h"
 #include <gumball/core/gumball_backend.h>
 #include <raylib.h>
-#include <ctype.h>
+#include <gimbal/strings/gimbal_string_view.h>
 #include <stdlib.h>
-#include <string.h>
-
-static bool GUM_Raylib_suffixEqualsIgnoreCase_(const char* pPath, const char* pSuffix) {
-    const size_t pathLen = strlen(pPath);
-    const size_t suffixLen = strlen(pSuffix);
-    if (suffixLen > pathLen)
-        return false;
-
-    const char* pCandidate = pPath + pathLen - suffixLen;
-    for (size_t i = 0; i < suffixLen; ++i) {
-        if (tolower((unsigned char)pCandidate[i]) != tolower((unsigned char)pSuffix[i]))
-            return false;
-    }
-    return true;
-}
 
 GblType GUM_Backend_resourceType(GblStringRef* pPath) {
     if (!pPath || !pPath[0])
@@ -33,19 +18,19 @@ GblType GUM_Backend_resourceType(GblStringRef* pPath) {
     };
 
     for (size_t i = 0; textureExtensions[i]; ++i) {
-        if (GUM_Raylib_suffixEqualsIgnoreCase_(pPath, textureExtensions[i]))
+        if (GblStringView_endsWithIgnoreCase(GBL_STRV(pPath), textureExtensions[i]))
             return GUM_TEXTURE_TYPE;
     }
     for (size_t i = 0; fontExtensions[i]; ++i) {
-        if (GUM_Raylib_suffixEqualsIgnoreCase_(pPath, fontExtensions[i]))
+        if (GblStringView_endsWithIgnoreCase(GBL_STRV(pPath), fontExtensions[i]))
             return GUM_FONT_TYPE;
     }
     return GBL_INVALID_TYPE;
 }
 
 GBL_EXPORT GUM_Vector2 GUM_Texture_size(GUM_Texture* pSelf) {
-    GUM_Vector2 size = { 0 };
-    Texture2D* pTexture = GUM_IResource_data_(GUM_IRESOURCE(pSelf));
+    GUM_Vector2 size     = { 0 };
+    Texture2D*  pTexture = GUM_IResource_data_(GUM_IRESOURCE(pSelf));
 
     if (pTexture) {
         size.x = (float)pTexture->width;

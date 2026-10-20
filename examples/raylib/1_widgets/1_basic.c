@@ -2,12 +2,12 @@
 #include <raylib.h>
 
 /*
- *	Welcome to the first Gumball example!
- *	This example demonstrates how to create a basic libGumball application
- *	using the GUM_Widget element, the fundamental element of libGumball
+ *  Welcome to the first Gumball example!
+ *  This example demonstrates how to create a basic libGumball application
+ *  using the GUM_Widget element, the fundamental element of libGumball
  *
- * 	Always remember to check the documentation for more information : https://libgumball.psyops.studio/
- *	Every header file is documented, so you can read them instead of going to the website if you prefer
+ *  Always remember to check the documentation for more information : https://libgumball.psyops.studio/
+ *  Every header file is documented, so you can read them instead of going to the website if you prefer
  *  If your editor supports it, just hovering over functions/macros should give you a brief description of what they do
  */
 
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     SetTargetFPS(60);
 
     // Create a basic widget
-    GUM_Widget* pWidget = GUM_Widget_create(); // No parameters pased in -- uses default values
+    GUM_Widget* pWidget = GUM_Widget_create(); // No parameters passed in -- uses default values
                                                // We'll see how to set properties in the next example
 
     // Main loop

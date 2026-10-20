@@ -20,7 +20,7 @@
 #define GUM_ROOT_(self) (GBL_PRIVATE(GUM_Root, self))
 
 typedef struct GUM_Root_ {
-    GblLogger*  pLogger;
+    GblLogger* pLogger;
     GblDoublyLinkedListNode drawOrder;
     GUM_Vector2 lastScreenSize;
     uint64_t    nextEnableOrder;
@@ -70,8 +70,8 @@ static void GUM_Root_linkBefore_(GUM_Root* pRoot, GUM_Widget* pBefore, GUM_Widge
 }
 
 static void GUM_Root_insertOrdered_(GUM_Root* pRoot, GUM_Widget* pWidget) {
-    GUM_Root_* pRoot_ = GUM_ROOT_(pRoot);
-    GUM_Widget* pIt   = nullptr;
+    GUM_Root_*  pRoot_ = GUM_ROOT_(pRoot);
+    GUM_Widget* pIt    = nullptr;
 
     for (GblDoublyLinkedListNode* pNode = pRoot_->drawOrder.pNext;
          pNode != &pRoot_->drawOrder;
@@ -90,18 +90,15 @@ static void GUM_Root_unlink_(GUM_Root* pRoot, GUM_Widget* pWidget) {
     GblDoublyLinkedList_remove(&GUM_WIDGET_(pWidget)->drawNode);
 }
 
-static void GUM_Root_resort_(GUM_Root* pRoot) {
-    GUM_Root_* pRoot_ = GUM_ROOT_(pRoot);
-    GblDoublyLinkedListNode oldOrder;
-    GblDoublyLinkedList_init(&oldOrder);
-    GblDoublyLinkedList_move(&oldOrder, &pRoot_->drawOrder);
+static int GUM_Root_drawNodeCmp_(const void* pA, const void* pB, void* pClosure) {
+    GBL_UNUSED(pClosure);
+    const GUM_Widget_* pA_ = GBL_DOUBLY_LINKED_LIST_ENTRY(pA, GUM_Widget_, drawNode);
+    const GUM_Widget_* pB_ = GBL_DOUBLY_LINKED_LIST_ENTRY(pB, GUM_Widget_, drawNode);
+    return GUM_Root_widgetCmp_(pA_->pWidget, pB_->pWidget);
+}
 
-    while (!GblDoublyLinkedList_empty(&oldOrder)) {
-        GblDoublyLinkedListNode* pNode = GblDoublyLinkedList_popFront(&oldOrder);
-        GUM_Widget* pWidget = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_Widget_, drawNode)->pWidget;
-        GblDoublyLinkedList_remove(pNode);
-        GUM_Root_insertOrdered_(pRoot, pWidget);
-    }
+static void GUM_Root_resort_(GUM_Root* pRoot) {
+    GblDoublyLinkedList_mergeSort(&GUM_ROOT_(pRoot)->drawOrder, GUM_Root_drawNodeCmp_, nullptr);
 }
 
 static void GUM_Root_snapshotRelease_(GUM_RootSnapshot_* pSnapshot) {
@@ -127,7 +124,7 @@ static GBL_RESULT GUM_Root_snapshot_(GUM_Root* pRoot, GUM_RootSnapshot_* pSnapsh
     for (GblDoublyLinkedListNode* pNode = GUM_ROOT_(pRoot)->drawOrder.pNext;
          pNode != &GUM_ROOT_(pRoot)->drawOrder;
          pNode = pNode->pNext) {
-        GUM_Widget* pIt = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_Widget_, drawNode)->pWidget;
+        GUM_Widget* pIt       = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_Widget_, drawNode)->pWidget;
         GUM_Widget* pRetained = GUM_WIDGET(GblBox_ref(GBL_BOX(pIt)));
         result = GblArrayList_pushBack(&pSnapshot->widgets, &pRetained);
 
@@ -329,7 +326,7 @@ GBL_RESULT GUM_Root_foreachDrawable_(GUM_Root* pRoot,
         return GBL_RESULT_PARTIAL;
 
     GUM_RootSnapshot_ snapshot;
-    GBL_RESULT result = GUM_Root_snapshot_(pRoot, &snapshot);
+    GBL_RESULT        result = GUM_Root_snapshot_(pRoot, &snapshot);
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
@@ -352,15 +349,15 @@ GBL_RESULT GUM_Root_draw_(GUM_Root* pRoot, GUM_Renderer* pRenderer) {
         return GBL_RESULT_PARTIAL;
 
     GUM_RootSnapshot_ snapshot;
-    GBL_RESULT result = GUM_Root_snapshot_(pRoot, &snapshot);
+    GBL_RESULT        result = GUM_Root_snapshot_(pRoot, &snapshot);
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
-    GBL_RESULT firstFailure = GBL_RESULT_SUCCESS;
-    const size_t count = GblArrayList_size(&snapshot.widgets);
+    GBL_RESULT   firstFailure = GBL_RESULT_SUCCESS;
+    const size_t count        = GblArrayList_size(&snapshot.widgets);
 
     for (size_t i = 0; i < count; ++i) {
-        GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
+        GUM_Widget*      pWidget    = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
         const GBL_RESULT drawResult = GUM_WIDGET_CLASSOF(pWidget)->pFnDraw(pWidget, pRenderer);
 
         if (GBL_RESULT_SUCCESS(firstFailure) && !GBL_RESULT_SUCCESS(drawResult))
@@ -400,10 +397,10 @@ static GUM_Widget* GUM_Root_pointerWidgetAt_(GUM_Root* pRoot,
         if (activeOnly && !GUM_Widget_isActive(pWidget) && !GUM_Root_scrollbarHit_(pWidget, position))
             continue;
 
-        const GUM_Vector2 widgetPos  = GUM_get_absolute_position_(pWidget);
-        const GUM_Vector2 widgetSize = { pWidget->w, pWidget->h };
-        const GUM_Rectangle clip     = GUM_Widget_clipRect_(pWidget);
-        const bool inClip = position.x >= clip.x && position.x < clip.x + clip.width &&
+        const GUM_Vector2   widgetPos  = GUM_get_absolute_position_(pWidget);
+        const GUM_Vector2   widgetSize = { pWidget->w, pWidget->h };
+        const GUM_Rectangle clip       = GUM_Widget_clipRect_(pWidget);
+        const bool          inClip     = position.x >= clip.x && position.x < clip.x + clip.width &&
                             position.y >= clip.y && position.y < clip.y + clip.height;
 
         if (inClip &&
@@ -433,7 +430,7 @@ GBL_RESULT GUM_Root_update(GUM_Root* pRoot) {
         return GBL_RESULT_NOT_READY;
 
     GblBox_ref(GBL_BOX(pRoot));
-    GUM_Root_* pSelf_ = GUM_ROOT_(pRoot);
+    GUM_Root_* pSelf_       = GUM_ROOT_(pRoot);
     GBL_RESULT firstFailure = GBL_RESULT_SUCCESS;
 
     GUM_Backend_update();
@@ -445,7 +442,7 @@ GBL_RESULT GUM_Root_update(GUM_Root* pRoot) {
     if (screenSize.x != pSelf_->lastScreenSize.x ||
         screenSize.y != pSelf_->lastScreenSize.y) {
         GUM_RootChildSnapshot_ snapshot;
-        GBL_RESULT result = GUM_Root_childSnapshot_(pRoot, &snapshot);
+        GBL_RESULT             result = GUM_Root_childSnapshot_(pRoot, &snapshot);
         if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result)) {
             firstFailure = result;
             goto done;
@@ -456,7 +453,7 @@ GBL_RESULT GUM_Root_update(GUM_Root* pRoot) {
             if (GUM_Root_active_() != pRoot)
                 break;
 
-            GblObject* pObject = *(GblObject**)GblArrayList_at(&snapshot.objects, i);
+            GblObject*     pObject    = *(GblObject**)GblArrayList_at(&snapshot.objects, i);
             GUM_Container* pContainer = GBL_AS(GUM_Container, pObject);
             if (!pContainer)
                 continue;

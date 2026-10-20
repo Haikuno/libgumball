@@ -16,12 +16,17 @@
 
 #include <gumball/ifaces/gumball_iitemmodel.h>
 
-#define GUM_OBJECTTREEMODEL_TYPE          (GBL_TYPEID     (GUM_ObjectTreeModel))
-#define GUM_OBJECTTREEMODEL(self)         (GBL_CAST       (GUM_ObjectTreeModel, self))
-#define GUM_OBJECTTREEMODEL_CLASS(klass)  (GBL_CLASS_CAST (GUM_ObjectTreeModel, klass))
-#define GUM_OBJECTTREEMODEL_CLASSOF(self) (GBL_CLASSOF    (GUM_ObjectTreeModel, self))
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
+*/
+#define GUM_OBJECTTREEMODEL_TYPE          (GBL_TYPEID     (GUM_ObjectTreeModel))           //!< Returns the GUM_ObjectTreeModel Type UUID
+#define GUM_OBJECTTREEMODEL(self)         (GBL_CAST       (GUM_ObjectTreeModel, self))     //!< Casts an instance of a compatible model to a GUM_ObjectTreeModel
+#define GUM_OBJECTTREEMODEL_CLASS(klass)  (GBL_CLASS_CAST (GUM_ObjectTreeModel, klass))    //!< Casts a class     of a compatible model to a GUM_ObjectTreeModelClass
+#define GUM_OBJECTTREEMODEL_CLASSOF(self) (GBL_CLASSOF    (GUM_ObjectTreeModel, self))     //!< Casts an instance of a compatible model to a GUM_ObjectTreeModelClass
+//! @}
 
-#define GBL_SELF_TYPE GUM_ObjectTreeModel
+#define GBL_SELF_TYPE                GUM_ObjectTreeModel
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_ObjectTreeModel);
@@ -29,11 +34,12 @@ GBL_FORWARD_DECLARE_STRUCT(GUM_ObjectTreeModel);
 GBL_CLASS_DERIVE_EMPTY(GUM_ObjectTreeModel, GblBox, GUM_IItemModel)
 GBL_INSTANCE_DERIVE_EMPTY(GUM_ObjectTreeModel, GblBox)
 
-GBL_EXPORT GblType              GUM_ObjectTreeModel_type    (void) GBL_NOEXCEPT;
-GBL_EXPORT GUM_ObjectTreeModel* GUM_ObjectTreeModel_create  (GblObject* pRoot) GBL_NOEXCEPT;
-GBL_EXPORT GblObject*           GUM_ObjectTreeModel_root    (const GUM_ObjectTreeModel* pSelf) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT           GUM_ObjectTreeModel_setRoot (GUM_ObjectTreeModel* pSelf, GblObject* pRoot) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT           GUM_ObjectTreeModel_refresh (GUM_ObjectTreeModel* pSelf) GBL_NOEXCEPT;
+GBL_EXPORT GblType GUM_ObjectTreeModel_type(void) GBL_NOEXCEPT;
+
+GBL_EXPORT GUM_ObjectTreeModel* GUM_ObjectTreeModel_create (GblObject* pRoot)                             GBL_NOEXCEPT;
+GBL_EXPORT GblObject*           GUM_ObjectTreeModel_root   (const GUM_ObjectTreeModel* pSelf)             GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT           GUM_ObjectTreeModel_setRoot(GUM_ObjectTreeModel* pSelf, GblObject* pRoot) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT           GUM_ObjectTreeModel_refresh(GUM_ObjectTreeModel* pSelf)                   GBL_NOEXCEPT;
 
 GBL_DECLS_END
 #undef GBL_SELF_TYPE

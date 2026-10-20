@@ -9,33 +9,34 @@
  *
  *   GUM_Texture is the backend-agnostic type that represents a texture.
  *
- *   \author     2025, 2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
+
 #include <gumball/types/gumball_vector2.h>
 #include <gumball/ifaces/gumball_iresource.h>
 
-/*!  \name  Type System
- *   \brief Type UUID and cast operators
- *   @{
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
 */
 #define GUM_TEXTURE_TYPE          (GBL_TYPEID     (GUM_Texture))           //!< Returns the GUM_Texture Type UUID
-#define GUM_TEXTURE(self)         (GBL_CAST       (GUM_Texture, self))     //!< Casts an instance of a compatible resource to a GUM_Texture
-#define GUM_TEXTURE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Texture, klass))    //!< Casts a class of a compatible resource to a GUM_TextureClass
-#define GUM_TEXTURE_CLASSOF(self) (GBL_CLASSOF    (GUM_Texture, self))     //!< Casts an instance of a compatible resource to a GUM_TextureClass
+#define GUM_TEXTURE(self)         (GBL_CAST       (GUM_Texture, self))     //!< Casts an instance of a compatible type to a GUM_Texture
+#define GUM_TEXTURE_CLASS(klass)  (GBL_CLASS_CAST (GUM_Texture, klass))    //!< Casts a class     of a compatible type to a GUM_TextureClass
+#define GUM_TEXTURE_CLASSOF(self) (GBL_CLASSOF    (GUM_Texture, self))     //!< Casts an instance of a compatible type to a GUM_TextureClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Texture
+#define GBL_SELF_TYPE                GUM_Texture
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Texture);
 
-/*!  \struct      GUM_TextureClass
- *   \extends     GblBoxClass
- *   \implements  GUM_IResource
- *   \brief       GUM_Texture structure
+/*!  \struct     GUM_TextureClass
+ *   \extends    GblBoxClass
+ *   \implements GUM_IResource
+ *   \brief      GUM_Texture structure
  *
  *   GUM_TextureClass derives from GblBoxClass, adding nothing new.
  *   It also implements the GUM_IResource interface.

@@ -96,11 +96,11 @@ GBL_TEST_CASE(deviceControls)
     GBL_TEST_COMPARE(GUM_InputSystem_enableFocusRing(nullptr), GBL_RESULT_ERROR_INVALID_POINTER);
     GBL_TEST_COMPARE(GUM_InputSystem_disableFocusRing(nullptr), GBL_RESULT_ERROR_INVALID_POINTER);
 
-    GUM_InputDevice* pDevice = GUM_INPUTDEVICE(pFixture->pKeyboard);
-    GUM_Keyboard* pOtherKeyboard = GUM_Keyboard_create();
-    GUM_InputDevice* pOther = GUM_INPUTDEVICE(pOtherKeyboard);
-    GUM_Button* pButton = GUM_Button_create();
-    GUM_Button* pOtherButton = GUM_Button_create();
+    GUM_InputDevice* pDevice        = GUM_INPUTDEVICE(pFixture->pKeyboard);
+    GUM_Keyboard*    pOtherKeyboard = GUM_Keyboard_create();
+    GUM_InputDevice* pOther         = GUM_INPUTDEVICE(pOtherKeyboard);
+    GUM_Button*      pButton        = GUM_Button_create();
+    GUM_Button*      pOtherButton   = GUM_Button_create();
     GBL_TEST_VERIFY(pOtherKeyboard && pButton && pOtherButton);
 
     GUM_Nav_focus(pDevice, GUM_WIDGET(pButton));
@@ -128,14 +128,14 @@ GBL_TEST_CASE(deviceControls)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(typeControls)
-    GUM_InputDevice* pKeyboard = GUM_INPUTDEVICE(pFixture->pKeyboard);
-    GUM_Keyboard* pOtherKeyboard = GUM_Keyboard_create();
-    GUM_Mouse* pMouseObject = GUM_Mouse_create();
-    GUM_InputDevice* pOther = GUM_INPUTDEVICE(pOtherKeyboard);
-    GUM_InputDevice* pMouse = GUM_INPUTDEVICE(pMouseObject);
-    GUM_Button* pKeyboardButton = GUM_Button_create();
-    GUM_Button* pOtherButton = GUM_Button_create();
-    GUM_Button* pMouseButton = GUM_Button_create();
+    GUM_InputDevice* pKeyboard       = GUM_INPUTDEVICE(pFixture->pKeyboard);
+    GUM_Keyboard*    pOtherKeyboard  = GUM_Keyboard_create();
+    GUM_Mouse*       pMouseObject    = GUM_Mouse_create();
+    GUM_InputDevice* pOther          = GUM_INPUTDEVICE(pOtherKeyboard);
+    GUM_InputDevice* pMouse          = GUM_INPUTDEVICE(pMouseObject);
+    GUM_Button*      pKeyboardButton = GUM_Button_create();
+    GUM_Button*      pOtherButton    = GUM_Button_create();
+    GUM_Button*      pMouseButton    = GUM_Button_create();
     GBL_TEST_VERIFY(pOtherKeyboard && pMouseObject && pKeyboardButton && pOtherButton && pMouseButton);
 
     GUM_Nav_focus(pKeyboard, GUM_WIDGET(pKeyboardButton));
@@ -175,14 +175,14 @@ GBL_TEST_CASE(typeControls)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(focusRingControls)
-    GUM_InputDevice* pKeyboard = GUM_INPUTDEVICE(pFixture->pKeyboard);
-    GUM_Keyboard* pOtherKeyboard = GUM_Keyboard_create();
-    GUM_Mouse* pMouseObject = GUM_Mouse_create();
-    GUM_InputDevice* pOther = GUM_INPUTDEVICE(pOtherKeyboard);
-    GUM_InputDevice* pMouse = GUM_INPUTDEVICE(pMouseObject);
-    GUM_Button* pKeyboardButton = GUM_Button_create();
-    GUM_Button* pOtherButton = GUM_Button_create();
-    GUM_Button* pMouseButton = GUM_Button_create();
+    GUM_InputDevice* pKeyboard       = GUM_INPUTDEVICE(pFixture->pKeyboard);
+    GUM_Keyboard*    pOtherKeyboard  = GUM_Keyboard_create();
+    GUM_Mouse*       pMouseObject    = GUM_Mouse_create();
+    GUM_InputDevice* pOther          = GUM_INPUTDEVICE(pOtherKeyboard);
+    GUM_InputDevice* pMouse          = GUM_INPUTDEVICE(pMouseObject);
+    GUM_Button*      pKeyboardButton = GUM_Button_create();
+    GUM_Button*      pOtherButton    = GUM_Button_create();
+    GUM_Button*      pMouseButton    = GUM_Button_create();
     GBL_TEST_VERIFY(pOtherKeyboard && pMouseObject && pKeyboardButton && pOtherButton && pMouseButton);
 
     GUM_Nav_focus(pKeyboard, GUM_WIDGET(pKeyboardButton));
@@ -224,9 +224,9 @@ GBL_TEST_CASE_END
 
 GBL_TEST_CASE(focusDisable)
     resetState_();
-    GUM_InputDevice* pDevice = GUM_INPUTDEVICE(pFixture->pKeyboard);
-    GUM_Button* pInstance = GUM_Button_create();
-    GUM_Button* pType = GUM_Button_create();
+    GUM_InputDevice* pDevice   = GUM_INPUTDEVICE(pFixture->pKeyboard);
+    GUM_Button*      pInstance = GUM_Button_create();
+    GUM_Button*      pType     = GUM_Button_create();
     GBL_TEST_VERIFY(pInstance && pType);
 
     GUM_connect(pInstance,
@@ -261,9 +261,9 @@ GBL_TEST_CASE_END
 
 GBL_TEST_CASE(focusLoss)
     resetState_();
-    GUM_InputDevice* pDevice = GUM_INPUTDEVICE(pFixture->pKeyboard);
-    GUM_Button* pOld = GUM_Button_create();
-    GUM_Button* pRequested = GUM_Button_create();
+    GUM_InputDevice* pDevice    = GUM_INPUTDEVICE(pFixture->pKeyboard);
+    GUM_Button*      pOld       = GUM_Button_create();
+    GUM_Button*      pRequested = GUM_Button_create();
     GBL_TEST_VERIFY(pOld && pRequested);
 
     GUM_Nav_focus(pDevice, GUM_WIDGET(pOld));
@@ -283,7 +283,7 @@ GBL_TEST_CASE(focusLoss)
 
     resetState_();
     GUM_Keyboard* pVictim = GUM_Keyboard_create();
-    pOld = GUM_Button_create();
+    pOld       = GUM_Button_create();
     pRequested = GUM_Button_create();
     GBL_TEST_VERIFY(pVictim && pOld && pRequested);
 
@@ -304,7 +304,7 @@ GBL_TEST_CASE_END
 GBL_TEST_CASE(typeReentry)
     resetState_();
     GUM_InputDevice* pDevice = GUM_INPUTDEVICE(pFixture->pKeyboard);
-    GUM_Button* pButton = GUM_Button_create();
+    GUM_Button*      pButton = GUM_Button_create();
     GBL_TEST_VERIFY(pButton);
 
     GUM_Nav_focus(pDevice, GUM_WIDGET(pButton));

@@ -10,11 +10,12 @@
  *   common to all elements in libGumball.
  *
  *   \author    2025, 2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
 #include <gimbal/containers/gimbal_ring_list.h>
+
 #include <gumball/types/gumball_renderer.h>
 
 //! Passes a backend event to libGumball.
@@ -147,21 +148,21 @@ GBL_EXPORT void GUM_processEvent(const void* pEvent) GBL_NOEXCEPT;
     GUM_CONNECT_PAIRS__2(emitter, signal, callback) \
     GUM_CONNECT_PAIRS__18(emitter, __VA_ARGS__)
 
-GBL_EXPORT GBL_RESULT (GUM_draw)              (GUM_Renderer* pRenderer)                  GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update)            (void)                                    GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update_disable)    (GblObject* pSelf)                        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update_enable)     (GblObject* pSelf)                        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update_disableAll) (GblObject* pSelf)                        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_update_enableAll)  (GblObject* pSelf)                        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_draw_enable)       (GblObject* pSelf)                        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_draw_disable)      (GblObject* pSelf)                        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)    (GblObject* pSelf)                        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)   (GblObject* pSelf)                        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_setProperty)       (GblObject* pSelf, const char* pName, ...) GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_add_child)         (GblObject* pSelf, GblObject* pChild)     GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_remove_child)      (GblObject* pSelf, GblObject* pChild)     GBL_NOEXCEPT;
-GBL_EXPORT GblObject* (GUM_ref)               (GblObject* pSelf)                        GBL_NOEXCEPT;
-GBL_EXPORT GBL_RESULT (GUM_unref)             (GblObject* pSelf)                        GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw)             (GUM_Renderer* pRenderer)                  GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update)           (void)                                     GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_disable)   (GblObject* pSelf)                         GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_enable)    (GblObject* pSelf)                         GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_disableAll)(GblObject* pSelf)                         GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_update_enableAll) (GblObject* pSelf)                         GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_enable)      (GblObject* pSelf)                         GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_disable)     (GblObject* pSelf)                         GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_enableAll)   (GblObject* pSelf)                         GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_draw_disableAll)  (GblObject* pSelf)                         GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_setProperty)      (GblObject* pSelf, const char* pName, ...) GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_add_child)        (GblObject* pSelf, GblObject* pChild)      GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_remove_child)     (GblObject* pSelf, GblObject* pChild)      GBL_NOEXCEPT;
+GBL_EXPORT GblObject* (GUM_ref)              (GblObject* pSelf)                         GBL_NOEXCEPT;
+GBL_EXPORT GBL_RESULT (GUM_unref)            (GblObject* pSelf)                         GBL_NOEXCEPT;
 //!\endcond
 
-#endif
+#endif // GUM_COMMON_H

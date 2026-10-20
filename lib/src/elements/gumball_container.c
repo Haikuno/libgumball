@@ -11,7 +11,7 @@
 #include "gumball_widget_.h"
 
 typedef struct GUM_ContainerLayoutSnapshot_ {
-    GblArrayList    containers;
+    GblArrayList   containers;
     GUM_Container* stack[GUM_SNAPSHOT_INLINE_CAPACITY];
 } GUM_ContainerLayoutSnapshot_;
 
@@ -60,11 +60,11 @@ static float GUM_Container_scrollbarGutter_(const GUM_Container* pSelf) {
     if (!GUM_Container_scrollbarVisible(pSelf))
         return 0.0f;
 
-    const GUM_Widget* pWidget = GUM_WIDGET(pSelf);
-    const bool horizontal = GUM_Container_direction(pSelf) == GUM_DIRECTION_HORIZONTAL;
-    const float crossDim = horizontal ? pWidget->h : pWidget->w;
-    const float innerCrossDim = GBL_MAX(crossDim - 2.0f * pWidget->border_width, 0.0f);
-    const float thickness = GBL_MIN(GUM_Container_scrollbarThickness(pSelf), innerCrossDim);
+    const GUM_Widget* pWidget       = GUM_WIDGET(pSelf);
+    const bool        horizontal    = GUM_Container_direction(pSelf) == GUM_DIRECTION_HORIZONTAL;
+    const float       crossDim      = horizontal ? pWidget->h : pWidget->w;
+    const float       innerCrossDim = GBL_MAX(crossDim - 2.0f * pWidget->border_width, 0.0f);
+    const float       thickness     = GBL_MIN(GUM_Container_scrollbarThickness(pSelf), innerCrossDim);
     return GBL_MIN(thickness + GUM_Container_scrollbarGap(pSelf), crossDim);
 }
 
@@ -77,7 +77,7 @@ static void GUM_Container_layoutSnapshotRelease_(GUM_ContainerLayoutSnapshot_* p
     GblArrayList_destruct(&pSnapshot->containers);
 }
 
-static GBL_RESULT GUM_Container_layoutSnapshot_(GUM_Container* pSelf,
+static GBL_RESULT GUM_Container_layoutSnapshot_(GUM_Container*                pSelf,
                                                 GUM_ContainerLayoutSnapshot_* pSnapshot) {
     GBL_RESULT result = GblArrayList_construct(&pSnapshot->containers,
                                                sizeof(GUM_Container*),
@@ -128,67 +128,67 @@ static GBL_RESULT GUM_Container_init_(GblInstance* pInstance) {
 }
 
 GBL_EXPORT float GUM_Container_padding(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->padding : 0.0f;
+    return GUM_CONTAINER_(pSelf)->padding;
 }
 
 GBL_EXPORT float GUM_Container_margin(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->margin : 0.0f;
+    return GUM_CONTAINER_(pSelf)->margin;
 }
 
 GBL_EXPORT float GUM_Container_minChildSize(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->minChildSize : 0.0f;
+    return GUM_CONTAINER_(pSelf)->minChildSize;
 }
 
 GBL_EXPORT GUM_Direction GUM_Container_direction(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->direction : GUM_DIRECTION_NULL;
+    return GUM_CONTAINER_(pSelf)->direction;
 }
 
 GBL_EXPORT GblBool GUM_Container_resizeWidgets(const GUM_Container* pSelf) {
-    return pSelf && GUM_CONTAINER_(pSelf)->resizeWidgets;
+    return GUM_CONTAINER_(pSelf)->resizeWidgets;
 }
 
 GBL_EXPORT GblBool GUM_Container_alignWidgets(const GUM_Container* pSelf) {
-    return pSelf && GUM_CONTAINER_(pSelf)->alignWidgets;
+    return GUM_CONTAINER_(pSelf)->alignWidgets;
 }
 
 GBL_EXPORT GblBool GUM_Container_scrollable(const GUM_Container* pSelf) {
-    return pSelf && GUM_CONTAINER_(pSelf)->scrollable;
+    return GUM_CONTAINER_(pSelf)->scrollable;
 }
 
 GBL_EXPORT GUM_ScrollbarPolicy GUM_Container_scrollbarPolicy(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->scrollbarPolicy : GUM_SCROLLBAR_NONE;
+    return GUM_CONTAINER_(pSelf)->scrollbarPolicy;
 }
 
 GBL_EXPORT float GUM_Container_scrollbarThickness(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->scrollbarThickness : 0.0f;
+    return GUM_CONTAINER_(pSelf)->scrollbarThickness;
 }
 
 GBL_EXPORT float GUM_Container_scrollbarGap(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->scrollbarGap : 0.0f;
+    return GUM_CONTAINER_(pSelf)->scrollbarGap;
 }
 
 GBL_EXPORT float GUM_Container_scrollbarMinThumbSize(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->scrollbarMinThumbSize : 0.0f;
+    return GUM_CONTAINER_(pSelf)->scrollbarMinThumbSize;
 }
 
 GBL_EXPORT float GUM_Container_scrollbarRoundness(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->scrollbarRoundness : 0.0f;
+    return GUM_CONTAINER_(pSelf)->scrollbarRoundness;
 }
 
 GBL_EXPORT uint32_t GUM_Container_scrollbarTrackColor(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->scrollbarTrackColor : 0u;
+    return GUM_CONTAINER_(pSelf)->scrollbarTrackColor;
 }
 
 GBL_EXPORT uint32_t GUM_Container_scrollbarThumbColor(const GUM_Container* pSelf) {
-    return pSelf ? GUM_CONTAINER_(pSelf)->scrollbarThumbColor : 0u;
+    return GUM_CONTAINER_(pSelf)->scrollbarThumbColor;
 }
 
-static GBL_RESULT GUM_Container_GblObject_setProperty_(GblObject* pObject,
+static GBL_RESULT GUM_Container_GblObject_setProperty_(GblObject*         pObject,
                                                        const GblProperty* pProp,
-                                                       GblVariant* pValue) {
-    GUM_Container*  pSelf  = GUM_CONTAINER(pObject);
-    GUM_Container_* pSelf_ = GUM_CONTAINER_(pSelf);
-    bool refreshLayout = true;
+                                                       GblVariant*        pValue) {
+    GUM_Container*  pSelf         = GUM_CONTAINER(pObject);
+    GUM_Container_* pSelf_        = GUM_CONTAINER_(pSelf);
+    bool            refreshLayout = true;
 
     switch (pProp->id) {
         case GUM_Container_Property_Id_padding:
@@ -201,7 +201,7 @@ static GBL_RESULT GUM_Container_GblObject_setProperty_(GblObject* pObject,
             pSelf_->minChildSize = GBL_CLAMP(GblVariant_float(pValue), 0.0f, 1.0f);
             break;
         case GUM_Container_Property_Id_direction:
-            pSelf_->direction = GblVariant_enum(pValue);
+            pSelf_->direction         = GblVariant_enum(pValue);
             pSelf_->scrollbarDragging = false;
             break;
         case GUM_Container_Property_Id_resizeWidgets:
@@ -228,19 +228,19 @@ static GBL_RESULT GUM_Container_GblObject_setProperty_(GblObject* pObject,
             break;
         case GUM_Container_Property_Id_scrollbarMinThumbSize:
             pSelf_->scrollbarMinThumbSize = GBL_MAX(GblVariant_float(pValue), 1.0f);
-            refreshLayout = false;
+            refreshLayout                 = false;
             break;
         case GUM_Container_Property_Id_scrollbarRoundness:
             pSelf_->scrollbarRoundness = GBL_CLAMP(GblVariant_float(pValue), 0.0f, 1.0f);
-            refreshLayout = false;
+            refreshLayout              = false;
             break;
         case GUM_Container_Property_Id_scrollbarTrackColor:
             pSelf_->scrollbarTrackColor = GblVariant_uint32(pValue);
-            refreshLayout = false;
+            refreshLayout               = false;
             break;
         case GUM_Container_Property_Id_scrollbarThumbColor:
             pSelf_->scrollbarThumbColor = GblVariant_uint32(pValue);
-            refreshLayout = false;
+            refreshLayout               = false;
             break;
         default:
             return GBL_RESULT_ERROR_INVALID_PROPERTY;
@@ -250,9 +250,9 @@ static GBL_RESULT GUM_Container_GblObject_setProperty_(GblObject* pObject,
                          : GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_Container_GblObject_property_(const GblObject* pObject,
+static GBL_RESULT GUM_Container_GblObject_property_(const GblObject*   pObject,
                                                     const GblProperty* pProp,
-                                                    GblVariant* pValue) {
+                                                    GblVariant*        pValue) {
     const GUM_Container*  pSelf  = GUM_CONTAINER(pObject);
     const GUM_Container_* pSelf_ = GUM_CONTAINER_(pSelf);
 
@@ -332,36 +332,36 @@ GBL_EXPORT GblBool GUM_Container_scrollbarVisible(const GUM_Container* pSelf) {
 }
 
 GblBool GUM_Container_scrollbarGeometry_(const GUM_Container* pSelf,
-                                         GUM_Rectangle* pTrack,
-                                         GUM_Rectangle* pThumb) {
+                                         GUM_Rectangle*       pTrack,
+                                         GUM_Rectangle*       pThumb) {
     if (!pSelf || !pTrack || !pThumb || !GUM_Container_scrollbarVisible(pSelf))
         return GBL_FALSE;
 
-    const GUM_Widget* pWidget = GUM_WIDGET(pSelf);
-    const GUM_Direction direction = GUM_Container_direction(pSelf);
-    const bool horizontal = direction == GUM_DIRECTION_HORIZONTAL;
-    const GUM_Vector2 position = GUM_get_absolute_position_(pWidget);
-    const float borderWidth = pWidget->border_width;
-    const float innerWidth  = GBL_MAX(pWidget->w - 2.0f * borderWidth, 0.0f);
-    const float innerHeight = GBL_MAX(pWidget->h - 2.0f * borderWidth, 0.0f);
-    const float crossSize   = horizontal ? innerHeight : innerWidth;
-    const float thickness   = GBL_MIN(GUM_Container_scrollbarThickness(pSelf), crossSize);
+    const GUM_Widget*   pWidget     = GUM_WIDGET(pSelf);
+    const GUM_Direction direction   = GUM_Container_direction(pSelf);
+    const bool          horizontal  = direction == GUM_DIRECTION_HORIZONTAL;
+    const GUM_Vector2   position    = GUM_get_absolute_position_(pWidget);
+    const float         borderWidth = pWidget->border_width;
+    const float         innerWidth  = GBL_MAX(pWidget->w - 2.0f * borderWidth, 0.0f);
+    const float         innerHeight = GBL_MAX(pWidget->h - 2.0f * borderWidth, 0.0f);
+    const float         crossSize   = horizontal ? innerHeight : innerWidth;
+    const float         thickness   = GBL_MIN(GUM_Container_scrollbarThickness(pSelf), crossSize);
 
     if (thickness <= 0.0f)
         return GBL_FALSE;
 
     if (horizontal) {
         *pTrack = (GUM_Rectangle){
-            .x = position.x + borderWidth,
-            .y = position.y + pWidget->h - borderWidth - thickness,
-            .width = innerWidth,
+            .x      = position.x + borderWidth,
+            .y      = position.y + pWidget->h - borderWidth - thickness,
+            .width  = innerWidth,
             .height = thickness
         };
     } else {
         *pTrack = (GUM_Rectangle){
-            .x = position.x + pWidget->w - borderWidth - thickness,
-            .y = position.y + borderWidth,
-            .width = thickness,
+            .x      = position.x + pWidget->w - borderWidth - thickness,
+            .y      = position.y + borderWidth,
+            .width  = thickness,
             .height = innerHeight
         };
     }
@@ -370,33 +370,33 @@ GblBool GUM_Container_scrollbarGeometry_(const GUM_Container* pSelf,
     if (trackLength <= 0.0f)
         return GBL_FALSE;
 
-    const float range = GUM_Container_scrollRange(pSelf);
+    const float range          = GUM_Container_scrollRange(pSelf);
     const float viewportLength = horizontal ? innerWidth : innerHeight;
-    const float contentLength = viewportLength + range;
-    float thumbLength = range > 0.0f && contentLength > 0.0f
+    const float contentLength  = viewportLength + range;
+    float       thumbLength    = range > 0.0f && contentLength > 0.0f
                       ? trackLength * viewportLength / contentLength
                       : trackLength;
     thumbLength = GBL_CLAMP(thumbLength,
                             GBL_MIN(GUM_Container_scrollbarMinThumbSize(pSelf), trackLength),
                             trackLength);
 
-    const float travel = trackLength - thumbLength;
-    const float ratio = range > 0.0f ? GUM_Container_scrollPosition(pSelf) / range : 0.0f;
+    const float travel     = trackLength - thumbLength;
+    const float ratio      = range > 0.0f ? GUM_Container_scrollPosition(pSelf) / range : 0.0f;
     const float thumbStart = GUM_Container_scrollbarMainStart_(direction, *pTrack)
                            + GBL_CLAMP(ratio, 0.0f, 1.0f) * travel;
 
     if (horizontal) {
         *pThumb = (GUM_Rectangle){
-            .x = thumbStart,
-            .y = pTrack->y,
-            .width = thumbLength,
+            .x      = thumbStart,
+            .y      = pTrack->y,
+            .width  = thumbLength,
             .height = pTrack->height
         };
     } else {
         *pThumb = (GUM_Rectangle){
-            .x = pTrack->x,
-            .y = thumbStart,
-            .width = pTrack->width,
+            .x      = pTrack->x,
+            .y      = thumbStart,
+            .width  = pTrack->width,
             .height = thumbLength
         };
     }
@@ -426,13 +426,13 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     const float cornerRadius = pSelfWidget->border_radius
                              * GBL_MIN(containerMainDim, containerSecondaryDim)
                              * 0.5f;
-    const float roundnessInset = cornerRadius * (1.0f - 1.0f / sqrtf(2.0f));
-    const float totalPaddingWithRoundness = totalPadding + roundnessInset * 2.0f;
-    const float availableMainDim = GBL_MAX(containerMainDim - totalMargin - totalPaddingWithRoundness, 0.0f);
-    const float minimumMainDim = GBL_MAX(containerMainDim, 0.0f) * pSelf_->minChildSize;
-    const float resizedMainDim = GBL_MAX(availableMainDim / (float)childCount, minimumMainDim);
-    const GUM_ScrollAxis_ scrollAxis = GUM_Container_scrollAxis_(pSelf_->direction);
-    const float scrollOffset = GUM_ScrollViewport_position_(&pSelf_->viewport, scrollAxis);
+    const float           roundnessInset            = cornerRadius * (1.0f - 1.0f / sqrtf(2.0f));
+    const float           totalPaddingWithRoundness = totalPadding + roundnessInset * 2.0f;
+    const float           availableMainDim          = GBL_MAX(containerMainDim - totalMargin - totalPaddingWithRoundness, 0.0f);
+    const float           minimumMainDim            = GBL_MAX(containerMainDim, 0.0f) * pSelf_->minChildSize;
+    const float           resizedMainDim            = GBL_MAX(availableMainDim / (float)childCount, minimumMainDim);
+    const GUM_ScrollAxis_ scrollAxis                = GUM_Container_scrollAxis_(pSelf_->direction);
+    const float           scrollOffset              = GUM_ScrollViewport_position_(&pSelf_->viewport, scrollAxis);
 
     float  offset        = containerMainPos + pSelf_->padding + roundnessInset;
     float  contentExtent = offset;
@@ -464,8 +464,8 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     }
 
     const bool  contentOverflows = contentExtent > containerMainPos + containerMainDim;
-    const float maxScroll = contentOverflows ? contentExtent - containerMainPos - containerMainDim : 0.0f;
-    const float scrollRange = pSelf_->scrollable ? maxScroll : 0.0f;
+    const float maxScroll        = contentOverflows ? contentExtent - containerMainPos - containerMainDim : 0.0f;
+    const float scrollRange      = pSelf_->scrollable ? maxScroll : 0.0f;
 
     GUM_ScrollViewport_setRange_(&pSelf_->viewport,
                                  GUM_SCROLL_AXIS_X,
@@ -474,19 +474,19 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
                                  GUM_SCROLL_AXIS_Y,
                                  horizontal ? 0.0f : scrollRange);
 
-    const float scrollbarGutter = GUM_Container_scrollbarGutter_(pSelf);
+    const float scrollbarGutter       = GUM_Container_scrollbarGutter_(pSelf);
     const float availableSecondaryDim = GBL_MAX(containerSecondaryDim
-                                              - totalPaddingWithRoundness
-                                              - scrollbarGutter,
-                                              0.0f);
-    const float resizedSecondaryDim = availableSecondaryDim;
-    const float clampedScrollOffset = GUM_ScrollViewport_position_(&pSelf_->viewport, scrollAxis);
-    GUM_Rectangle outgoingClip = GUM_Widget_clipRect_(pSelfWidget);
+                                                - totalPaddingWithRoundness
+                                                - scrollbarGutter,
+                                                0.0f);
+    const float   resizedSecondaryDim = availableSecondaryDim;
+    const float   clampedScrollOffset = GUM_ScrollViewport_position_(&pSelf_->viewport, scrollAxis);
+    GUM_Rectangle outgoingClip        = GUM_Widget_clipRect_(pSelfWidget);
 
     if (pSelf_->scrollable && (contentOverflows || scrollbarGutter > 0.0f)) {
-        const GUM_Vector2 position = GUM_get_absolute_position_(pSelfWidget);
-        const float borderWidth = pSelfWidget->border_width;
-        GUM_Rectangle selfRect = {
+        const GUM_Vector2 position    = GUM_get_absolute_position_(pSelfWidget);
+        const float       borderWidth = pSelfWidget->border_width;
+        GUM_Rectangle     selfRect    = {
             position.x + borderWidth,
             position.y + borderWidth,
             GBL_MAX(pSelfWidget->w - 2.0f * borderWidth, 0.0f),
@@ -528,8 +528,8 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
-    GBL_RESULT firstFailure = GBL_RESULT_SUCCESS;
-    const size_t count = GblArrayList_size(&snapshot.containers);
+    GBL_RESULT   firstFailure = GBL_RESULT_SUCCESS;
+    const size_t count        = GblArrayList_size(&snapshot.containers);
     for (size_t i = 0; i < count; ++i) {
         GUM_Container* pChild = *(GUM_Container**)GblArrayList_at(&snapshot.containers, i);
         result = GUM_CONTAINER_CLASSOF(pChild)->pFnUpdateContent(pChild);
@@ -555,15 +555,13 @@ void GUM_Container_scrollBy_(GUM_Container* pSelf, GUM_Direction axis, float del
 }
 
 GBL_EXPORT float GUM_Container_scrollPosition(const GUM_Container* pSelf) {
-    return pSelf ? GUM_ScrollViewport_position_(&GUM_CONTAINER_(pSelf)->viewport,
-                                                 GUM_Container_scrollAxis_(GUM_Container_direction(pSelf)))
-                 : 0.0f;
+    return GUM_ScrollViewport_position_(&GUM_CONTAINER_(pSelf)->viewport,
+                                        GUM_Container_scrollAxis_(GUM_Container_direction(pSelf)));
 }
 
 GBL_EXPORT float GUM_Container_scrollRange(const GUM_Container* pSelf) {
-    return pSelf ? GUM_ScrollViewport_range_(&GUM_CONTAINER_(pSelf)->viewport,
-                                              GUM_Container_scrollAxis_(GUM_Container_direction(pSelf)))
-                 : 0.0f;
+    return GUM_ScrollViewport_range_(&GUM_CONTAINER_(pSelf)->viewport,
+                                     GUM_Container_scrollAxis_(GUM_Container_direction(pSelf)));
 }
 
 GBL_EXPORT void GUM_Container_scrollTo(GUM_Container* pSelf, float position) {
@@ -586,15 +584,15 @@ static GBL_RESULT GUM_Container_scrollbarDragTo_(GUM_Container* pSelf, GUM_Vecto
     if (range <= 0.0f)
         return GBL_RESULT_SUCCESS;
 
-    const GUM_Direction direction = GUM_Container_direction(pSelf);
-    const float trackStart = GUM_Container_scrollbarMainStart_(direction, track);
-    const float trackLength = GUM_Container_scrollbarMainLength_(direction, track);
-    const float thumbLength = GUM_Container_scrollbarMainLength_(direction, thumb);
-    const float travel = trackLength - thumbLength;
+    const GUM_Direction direction   = GUM_Container_direction(pSelf);
+    const float         trackStart  = GUM_Container_scrollbarMainStart_(direction, track);
+    const float         trackLength = GUM_Container_scrollbarMainLength_(direction, track);
+    const float         thumbLength = GUM_Container_scrollbarMainLength_(direction, thumb);
+    const float         travel      = trackLength - thumbLength;
     if (travel <= 0.0f)
         return GBL_RESULT_SUCCESS;
 
-    const float pointer = GUM_Container_pointerMain_(direction, point);
+    const float pointer    = GUM_Container_pointerMain_(direction, point);
     const float thumbStart = GBL_CLAMP(pointer - GUM_CONTAINER_(pSelf)->scrollbarGrabOffset,
                                        trackStart,
                                        trackStart + travel);
@@ -615,11 +613,11 @@ static GBL_RESULT GUM_Container_scrollbarPress_(GUM_Container* pSelf, GUM_Vector
         !GUM_Container_pointInRect_(point, track))
         return GBL_RESULT_PARTIAL;
 
-    GUM_Container_* pSelf_ = GUM_CONTAINER_(pSelf);
-    const GUM_Direction direction = GUM_Container_direction(pSelf);
-    const float pointer = GUM_Container_pointerMain_(direction, point);
-    const float thumbStart = GUM_Container_scrollbarMainStart_(direction, thumb);
-    const float thumbLength = GUM_Container_scrollbarMainLength_(direction, thumb);
+    GUM_Container_*     pSelf_      = GUM_CONTAINER_(pSelf);
+    const GUM_Direction direction   = GUM_Container_direction(pSelf);
+    const float         pointer     = GUM_Container_pointerMain_(direction, point);
+    const float         thumbStart  = GUM_Container_scrollbarMainStart_(direction, thumb);
+    const float         thumbLength = GUM_Container_scrollbarMainLength_(direction, thumb);
 
     if (GUM_Container_scrollRange(pSelf) <= 0.0f) {
         pSelf_->scrollbarDragging = false;
@@ -645,7 +643,7 @@ static void GUM_Container_scrollbarDragVisit_(GUM_InputDevice* pDevice, void* pC
         return;
 
     pState->mouseFound = true;
-    pState->leftDown = (pDevice->buttons & GUM_MOUSE_BUTTON_LEFT) != 0;
+    pState->leftDown   = (pDevice->buttons & GUM_MOUSE_BUTTON_LEFT) != 0;
     if (pState->leftDown)
         pState->result = GUM_Container_scrollbarDragTo_(pState->pContainer,
                                                         GUM_POINTER(pMouse)->position);
@@ -663,9 +661,9 @@ static GBL_RESULT GUM_Container_updateScrollbarDrag_(GUM_Container* pSelf) {
 
     GUM_ContainerScrollbarDragState_ state = {
         .pContainer = pSelf,
-        .result = GBL_RESULT_SUCCESS,
+        .result     = GBL_RESULT_SUCCESS,
         .mouseFound = false,
-        .leftDown = false
+        .leftDown   = false
     };
 
     const GBL_RESULT visitResult = GUM_InputDevice_foreach_(GUM_MOUSE_TYPE,
@@ -683,12 +681,12 @@ static GBL_RESULT GUM_Container_updateScrollbarDrag_(GUM_Container* pSelf) {
 }
 
 static GBL_RESULT GUM_Container_inputEvent_(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
-    GUM_Container* pContainer = GUM_CONTAINER(pSelf);
+    GUM_Container*   pContainer  = GUM_CONTAINER(pSelf);
     GUM_Event_Mouse* pMouseEvent = GBL_AS(GUM_Event_Mouse, pEvent);
 
     if (pMouseEvent && GUM_Container_scrollable(pContainer) && GUM_Container_scrollRange(pContainer) > 0.0f) {
-        const GUM_Direction axis = GUM_Container_direction(pContainer);
-        const float delta = (axis == GUM_DIRECTION_HORIZONTAL ? pMouseEvent->wheel.x : pMouseEvent->wheel.y) * -70.0f;
+        const GUM_Direction axis  = GUM_Container_direction(pContainer);
+        const float         delta = (axis == GUM_DIRECTION_HORIZONTAL ? pMouseEvent->wheel.x : pMouseEvent->wheel.y) * -70.0f;
         if (delta) {
             GUM_Container_scrollBy_(pContainer, axis, delta);
             GblEvent_accept(GBL_EVENT(pEvent));
@@ -717,18 +715,18 @@ static GBL_RESULT GUM_Container_inputEvent_(GUM_Widget* pSelf, GUM_Event_Input* 
 
 static GBL_RESULT GUM_Container_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
     GUM_WidgetClass* pWidgetClass = GUM_WIDGET_CLASS(GblClass_weakRefDefault(GUM_WIDGET_TYPE));
-    GBL_RESULT result = pWidgetClass->pFnDraw(pSelf, pRenderer);
+    GBL_RESULT       result       = pWidgetClass->pFnDraw(pSelf, pRenderer);
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
     GUM_Container* pContainer = GUM_CONTAINER(pSelf);
-    GUM_Rectangle track;
-    GUM_Rectangle thumb;
+    GUM_Rectangle  track;
+    GUM_Rectangle  thumb;
     if (!GUM_Container_scrollbarGeometry_(pContainer, &track, &thumb))
         return GBL_RESULT_SUCCESS;
 
-    const GUM_Rectangle clip = GUM_Widget_clipRect_(pSelf);
-    const bool needsClip = clip.x != GUM_CLIP_RECT_NONE_.x ||
+    const GUM_Rectangle clip      = GUM_Widget_clipRect_(pSelf);
+    const bool          needsClip = clip.x != GUM_CLIP_RECT_NONE_.x ||
                            clip.width != GUM_CLIP_RECT_NONE_.width;
     bool scissorActive = false;
 
@@ -745,7 +743,7 @@ static GBL_RESULT GUM_Container_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer
 
     const GUM_Color trackColor = GUM_Container_color_(GUM_Container_scrollbarTrackColor(pContainer));
     const GUM_Color thumbColor = GUM_Container_color_(GUM_Container_scrollbarThumbColor(pContainer));
-    const float roundness = GUM_Container_scrollbarRoundness(pContainer);
+    const float     roundness  = GUM_Container_scrollbarRoundness(pContainer);
 
     if (trackColor.a) {
         result = GUM_Backend_rectangleDraw(pRenderer, track, roundness, trackColor);
@@ -780,8 +778,8 @@ static GBL_RESULT GUM_Container_update_(GUM_Widget* pSelf) {
 }
 
 static GBL_RESULT GUM_Container_Object_instantiated_(GblObject* pObject) {
-    GblObjectClass* pWidgetClass = GBL_OBJECT_CLASS(GblClass_weakRefDefault(GUM_WIDGET_TYPE));
-    const GBL_RESULT result = pWidgetClass->pFnInstantiated(pObject);
+    GblObjectClass*  pWidgetClass = GBL_OBJECT_CLASS(GblClass_weakRefDefault(GUM_WIDGET_TYPE));
+    const GBL_RESULT result       = pWidgetClass->pFnInstantiated(pObject);
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 

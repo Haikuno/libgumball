@@ -8,23 +8,23 @@
  *
  *   Event type for gamepad input transitions.
  *
- *   \author     2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gumball/events/gumball_event_input.h>
 
-/*!  \name  Type System
- *   \brief Type UUID and Cast Operators
- *   @{
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
 */
 #define GUM_EVENT_GAMEPAD_TYPE          (GBL_TYPEID     (GUM_Event_Gamepad))           //!< Returns the GUM_Event_Gamepad Type UUID
 #define GUM_EVENT_GAMEPAD(self)         (GBL_CAST       (GUM_Event_Gamepad, self))     //!< Casts an instance of a compatible event to a GUM_Event_Gamepad
-#define GUM_EVENT_GAMEPAD_CLASS(klass)  (GBL_CLASS_CAST (GUM_Event_Gamepad, klass))    //!< Casts a class of a compatible event to a GUM_Event_GamepadClass
+#define GUM_EVENT_GAMEPAD_CLASS(klass)  (GBL_CLASS_CAST (GUM_Event_Gamepad, klass))    //!< Casts a class     of a compatible event to a GUM_Event_GamepadClass
 #define GUM_EVENT_GAMEPAD_CLASSOF(self) (GBL_CLASSOF    (GUM_Event_Gamepad, self))     //!< Casts an instance of a compatible event to a GUM_Event_GamepadClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Event_Gamepad
+#define GBL_SELF_TYPE                GUM_Event_Gamepad
 
 GBL_DECLS_BEGIN
 GBL_FORWARD_DECLARE_STRUCT(GUM_Event_Gamepad);
@@ -52,4 +52,4 @@ GblType GUM_Event_Gamepad_type(void) GBL_NOEXCEPT;
 GBL_DECLS_END
 #undef GBL_SELF_TYPE
 
-#endif
+#endif // GUM_EVENT_GAMEPAD_H

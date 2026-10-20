@@ -39,16 +39,16 @@ static bool testResourceDirectoryInit_(void) {
 #if defined(GUM_TEST_BACKEND_SDL3)
 #include <SDL3/SDL.h>
 
-static SDL_Surface* pSurface_ = nullptr;
+static SDL_Surface*  pSurface_     = nullptr;
 static SDL_Renderer* pSdlRenderer_ = nullptr;
-static GUM_Renderer* pRenderer_ = nullptr;
+static GUM_Renderer* pRenderer_    = nullptr;
 
 static bool backendInit_(void) {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) return false;
 
-    pSurface_ = SDL_CreateSurface(320, 240, SDL_PIXELFORMAT_RGBA32);
+    pSurface_     = SDL_CreateSurface(320, 240, SDL_PIXELFORMAT_RGBA32);
     pSdlRenderer_ = pSurface_ ? SDL_CreateSoftwareRenderer(pSurface_) : nullptr;
-    pRenderer_ = pSdlRenderer_ ? GUM_Renderer_create(pSdlRenderer_) : nullptr;
+    pRenderer_    = pSdlRenderer_ ? GUM_Renderer_create(pSdlRenderer_) : nullptr;
     return pRenderer_ != nullptr;
 }
 
@@ -83,8 +83,8 @@ int main(int argc, const char* pArgv[]) {
     }
 
     GblContext_setLogFilter(GBL_CONTEXT(pScenario), GBL_LOG_LEVEL_INFO |
-                                                    GBL_LOG_LEVEL_WARNING |
-                                                    GBL_LOG_LEVEL_ERROR);
+                            GBL_LOG_LEVEL_WARNING |
+                            GBL_LOG_LEVEL_ERROR);
 
     GblTestScenario_enqueueSuite(pScenario,
                                  GblTestSuite_create(GUM_ANIMATOR_TEST_SUITE_TYPE));

@@ -5,8 +5,8 @@ static bool GUM_Vector2_normalized_(GUM_Vector2 value, GUM_Vector2* pNormalized)
     if (scale == 0.0f || !isfinite(scale))
         return false;
 
-    const float x = value.x / scale;
-    const float y = value.y / scale;
+    const float x         = value.x / scale;
+    const float y         = value.y / scale;
     const float magnitude = sqrtf(x * x + y * y);
 
     pNormalized->x = x / magnitude;

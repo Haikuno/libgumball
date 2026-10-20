@@ -70,7 +70,7 @@ GBL_TEST_CASE_END
 
 GBL_TEST_CASE(onDone)
     GUM_Animator animator = GUM_Animator_make(0.0f, 1.0f, GUM_EASE_LINEAR);
-    GblClosure* pClosure = GBL_CLOSURE(GblCClosure_create((GblFnPtr)noop_, nullptr));
+    GblClosure*  pClosure = GBL_CLOSURE(GblCClosure_create((GblFnPtr)noop_, nullptr));
     GBL_TEST_VERIFY(pClosure);
 
     GUM_Animator_setOnDone(&animator, pClosure);

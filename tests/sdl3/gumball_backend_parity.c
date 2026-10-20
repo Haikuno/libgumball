@@ -24,7 +24,7 @@ static const char* outputPath_(int argc, char* pArgv[], char path[GUM_PARITY_PAT
 int main(int argc, char* pArgv[]) {
     if (!SDL_Init(SDL_INIT_VIDEO)) return 1;
 
-    char outputPath[GUM_PARITY_PATH_CAPACITY];
+    char        outputPath[GUM_PARITY_PATH_CAPACITY];
     const char* pOutputPath = outputPath_(argc, pArgv, outputPath);
     if (!pOutputPath) {
         SDL_Quit();
@@ -35,7 +35,7 @@ int main(int argc, char* pArgv[]) {
                                               GUM_BACKEND_PARITY_HEIGHT,
                                               SDL_PIXELFORMAT_RGBA32);
     SDL_Renderer* pSdlRenderer = pSurface ? SDL_CreateSoftwareRenderer(pSurface) : nullptr;
-    GUM_Renderer* pRenderer = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
+    GUM_Renderer* pRenderer    = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
     if (!pRenderer) {
         SDL_DestroyRenderer(pSdlRenderer);
         SDL_DestroySurface(pSurface);
@@ -43,8 +43,8 @@ int main(int argc, char* pArgv[]) {
         return 1;
     }
 
-    GUM_Root* pRoot = GUM_BackendParityScene_create();
-    bool rendered = false;
+    GUM_Root* pRoot    = GUM_BackendParityScene_create();
+    bool      rendered = false;
 
     if (pRoot) {
         SDL_SetRenderDrawColor(pSdlRenderer, 24, 24, 24, 255);

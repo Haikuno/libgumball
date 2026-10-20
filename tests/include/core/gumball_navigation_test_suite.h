@@ -3,7 +3,15 @@
 
 #include <gimbal/test/gimbal_test_suite.h>
 
-#define GUM_NAVIGATION_TEST_SUITE_TYPE (GBL_TYPEID(GUM_NavigationTestSuite))
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
+*/
+#define GUM_NAVIGATION_TEST_SUITE_TYPE          (GBL_TYPEID     (GUM_NavigationTestSuite))           //!< Returns the GUM_NavigationTestSuite Type UUID
+#define GUM_NAVIGATION_TEST_SUITE(self)         (GBL_CAST       (GUM_NavigationTestSuite, self))     //!< Casts an instance of a compatible test suite to a GUM_NavigationTestSuite
+#define GUM_NAVIGATION_TEST_SUITE_CLASS(klass)  (GBL_CLASS_CAST (GUM_NavigationTestSuite, klass))    //!< Casts a class     of a compatible test suite to a GUM_NavigationTestSuiteClass
+#define GUM_NAVIGATION_TEST_SUITE_CLASSOF(self) (GBL_CLASSOF    (GUM_NavigationTestSuite, self))     //!< Casts an instance of a compatible test suite to a GUM_NavigationTestSuiteClass
+//! @}
 
 GBL_DECLS_BEGIN
 

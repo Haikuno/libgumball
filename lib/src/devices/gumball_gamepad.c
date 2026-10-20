@@ -38,9 +38,9 @@ static GBL_RESULT GUM_Gamepad_GblObject_setProperty_(GblObject* pObject, const G
             GUM_Gamepad_applyPlayerColor_(pSelf);
             break;
         case GUM_Gamepad_Property_Id_rawIndex: {
-            const uint8_t rawIndex = GblVariant_uint8(pValue);
-            const GBL_RESULT result = GUM_InputDevice_setName_(GUM_INPUTDEVICE(pSelf),
-                                                               GUM_Backend_Gamepad_name(rawIndex));
+            const uint8_t    rawIndex = GblVariant_uint8(pValue);
+            const GBL_RESULT result   = GUM_InputDevice_setName_(GUM_INPUTDEVICE(pSelf),
+                                                                 GUM_Backend_Gamepad_name(rawIndex));
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                 return result;
 

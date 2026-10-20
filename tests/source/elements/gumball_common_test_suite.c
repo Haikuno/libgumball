@@ -2,7 +2,7 @@
 #include <gimbal/test/gimbal_test_macros.h>
 #include <gumball/gumball.h>
 
-#define GUM_RECURSIVE_PROBE_TYPE (GBL_TYPEID(GUM_RecursiveProbe))
+#define GUM_RECURSIVE_PROBE_TYPE  (GBL_TYPEID(GUM_RecursiveProbe))
 #define GUM_RECURSIVE_PROBE(self) (GBL_CAST(GUM_RecursiveProbe, self))
 
 GBL_FORWARD_DECLARE_STRUCT(GUM_RecursiveProbe);
@@ -65,7 +65,7 @@ GBL_TEST_INIT()
     drawCount_          = 0;
     nestedUpdateResult_ = GBL_RESULT_SUCCESS;
     nestedDrawResult_   = GBL_RESULT_SUCCESS;
-    pFixture->pRoot = GUM_Root_create();
+    pFixture->pRoot     = GUM_Root_create();
     GBL_TEST_VERIFY(pFixture->pRoot);
 GBL_TEST_CASE_END
 

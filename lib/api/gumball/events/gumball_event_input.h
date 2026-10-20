@@ -8,26 +8,27 @@
  *
  *   Base event type for input.
  *
- *   \author     2025, 2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include "gumball_event.h"
 #include <gumball/devices/gumball_inputdevice.h>
+
 #include <gimbal/meta/classes/gimbal_enum.h>
 #include <gimbal/containers/gimbal_array_list.h>
 
-/*!  \name  Type System
- *   \brief Type UUID and Cast Operators
- *   @{
+/*! \name  Type System
+ *  \brief Type UUID and cast operators
+ *  @{
 */
-#define GUM_EVENT_INPUT_TYPE            (GBL_TYPEID     (GUM_Event_Input))          //!< Returns the GUM_Event_Input Type UUID
-#define GUM_EVENT_INPUT(self)           (GBL_CAST       (GUM_Event_Input, self))    //!< Casts an instance of a compatible element to a GUM_Event_Input
-#define GUM_EVENT_INPUT_CLASS(klass)    (GBL_CLASS_CAST (GUM_Event_Input, klass))   //!< Casts a  class    of a compatible element to a GUM_Event_InputClass
-#define GUM_EVENT_INPUT_CLASSOF(self)   (GBL_CLASSOF    (GUM_Event_Input, self))    //!< Casts an instance of a compatible element to a GUM_Event_InputClass
+#define GUM_EVENT_INPUT_TYPE          (GBL_TYPEID     (GUM_Event_Input))           //!< Returns the GUM_Event_Input Type UUID
+#define GUM_EVENT_INPUT(self)         (GBL_CAST       (GUM_Event_Input, self))     //!< Casts an instance of a compatible event to a GUM_Event_Input
+#define GUM_EVENT_INPUT_CLASS(klass)  (GBL_CLASS_CAST (GUM_Event_Input, klass))    //!< Casts a class     of a compatible event to a GUM_Event_InputClass
+#define GUM_EVENT_INPUT_CLASSOF(self) (GBL_CLASSOF    (GUM_Event_Input, self))     //!< Casts an instance of a compatible event to a GUM_Event_InputClass
 //! @}
 
-#define GBL_SELF_TYPE GUM_Event_Input
+#define GBL_SELF_TYPE                GUM_Event_Input
 
 GBL_DECLS_BEGIN
 
@@ -63,9 +64,9 @@ GBL_ENUM(GUM_InputAction,
 */
 GBL_INSTANCE_DERIVE(GUM_Event_Input, GUM_Event)
     GUM_InputDevice* pInputDevice; //!< Borrowed emitting device; valid during synchronous dispatch.
-    GblFlags button;               //!< Physical button/key bit associated with this transition.
-    GUM_InputState state;          //!< Press or release transition state.
-    GUM_InputAction action;        //!< Bound semantic action, or GUM_INPUTACTION_UNBOUND.
+    GblFlags         button;       //!< Physical button/key bit associated with this transition.
+    GUM_InputState   state;        //!< Press or release transition state.
+    GUM_InputAction  action;       //!< Bound semantic action, or GUM_INPUTACTION_UNBOUND.
 GBL_INSTANCE_END
 
 GblType GUM_Event_Input_type(void);
@@ -73,4 +74,4 @@ GblType GUM_Event_Input_type(void);
 GBL_DECLS_END
 #undef GBL_SELF_TYPE
 
-#endif
+#endif // GUM_EVENT_INPUT_H

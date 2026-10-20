@@ -8,11 +8,13 @@
  *
  *   GUM_Rectangle is a simple rectangle structure
  *
- *   \author     2025, 2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2025, 2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include <gimbal/gimbal_meta.h>
+
+#define GUM_RECTANGLE_TYPE (GBL_TYPEID(GUM_Rectangle)) //!< Returns the GUM_Rectangle Type UUID
 
 GBL_DECLS_BEGIN
 
@@ -25,8 +27,6 @@ typedef struct {
     float width;
     float height;
 } GUM_Rectangle;
-
-#define GUM_RECTANGLE_TYPE (GBL_TYPEID(GUM_Rectangle)) //!< Returns the GUM_Rectangle Type UUID
 
 //! \cond
 GblType GUM_Rectangle_type(void) GBL_NOEXCEPT;

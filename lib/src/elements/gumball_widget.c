@@ -25,7 +25,7 @@ static GBL_RESULT GUM_Widget_handleInputEvent_(GUM_Widget* pSelf, GUM_Event_Inpu
         (pEvent->action >= GUM_INPUTACTION_COUNT && pEvent->action != GUM_INPUTACTION_UNBOUND))
         return GBL_RESULT_SUCCESS;
 
-    const GUM_InputState state = pEvent->state;
+    const GUM_InputState  state  = pEvent->state;
     const GUM_InputAction action = pEvent->action;
 
     static const char* pressActionSignals_[] = {
@@ -122,7 +122,7 @@ static GBL_RESULT GUM_Widget_init_(GblInstance* pInstance) {
 }
 
 GUM_Rectangle GUM_Widget_clipRect_(const GUM_Widget* pWidget) {
-    return pWidget ? GUM_WIDGET_(pWidget)->clipRect : GUM_CLIP_RECT_NONE_;
+    return GUM_WIDGET_(pWidget)->clipRect;
 }
 
 void GUM_Widget_setClipRect_(GUM_Widget* pWidget, GUM_Rectangle clip) {
@@ -146,27 +146,27 @@ void GUM_Widget_initActive_(GUM_Widget* pWidget, bool active) {
 }
 
 GBL_EXPORT GblBool GUM_Widget_isActive(const GUM_Widget* pSelf) {
-    return pSelf && GUM_WIDGET_(pSelf)->active;
+    return GUM_WIDGET_(pSelf)->active;
 }
 
 GBL_EXPORT GblBool GUM_Widget_isFocused(const GUM_Widget* pSelf) {
-    return pSelf && GUM_WIDGET_(pSelf)->focusCount != 0;
+    return GUM_WIDGET_(pSelf)->focusCount != 0;
 }
 
 GBL_EXPORT uint8_t GUM_Widget_zIndex(const GUM_Widget* pSelf) {
-    return pSelf ? GUM_WIDGET_(pSelf)->zIndex : 0;
+    return GUM_WIDGET_(pSelf)->zIndex;
 }
 
 GBL_EXPORT GblStringRef* GUM_Widget_label(const GUM_Widget* pSelf) {
-    return pSelf ? GUM_WIDGET_(pSelf)->pLabel : nullptr;
+    return GUM_WIDGET_(pSelf)->pLabel;
 }
 
 GBL_EXPORT GUM_Font* GUM_Widget_font(const GUM_Widget* pSelf) {
-    return pSelf ? GUM_WIDGET_(pSelf)->pFont : nullptr;
+    return GUM_WIDGET_(pSelf)->pFont;
 }
 
 GBL_EXPORT GUM_Texture* GUM_Widget_texture(const GUM_Widget* pSelf) {
-    return pSelf ? GUM_WIDGET_(pSelf)->pTexture : nullptr;
+    return GUM_WIDGET_(pSelf)->pTexture;
 }
 
 static GBL_RESULT GUM_Widget_refreshContainer_(GblObject* pObject) {
@@ -176,9 +176,9 @@ static GBL_RESULT GUM_Widget_refreshContainer_(GblObject* pObject) {
 }
 
 static void GUM_Widget_reconcileDrawMembership_(GUM_Widget* pSelf) {
-    GUM_Widget_* pSelf_ = GUM_WIDGET_(pSelf);
-    GUM_Root* pRoot = GUM_Root_active_();
-    const bool inActiveRoot = pRoot &&
+    GUM_Widget_* pSelf_       = GUM_WIDGET_(pSelf);
+    GUM_Root*    pRoot        = GUM_Root_active_();
+    const bool   inActiveRoot = pRoot &&
         GblObject_findAncestorByType(GBL_OBJECT(pSelf), GUM_ROOT_TYPE) == GBL_OBJECT(pRoot);
 
     if (pSelf_->drawEnabled && inActiveRoot)
@@ -197,7 +197,7 @@ static void GUM_Widget_reconcileDrawSubtree_(GblObject* pObject) {
 }
 
 static GBL_RESULT GUM_Widget_refreshHierarchyLayout_(GUM_Widget* pSelf,
-                                                     GblObject* pOldParent) {
+                                                     GblObject*  pOldParent) {
     // Layout callbacks may reparent the child; refresh its final parent.
     GBL_RESULT firstFailure = GUM_Widget_refreshContainer_(pOldParent);
 
@@ -225,8 +225,8 @@ static GBL_RESULT GUM_Widget_refreshHierarchyLayout_(GUM_Widget* pSelf,
 }
 
 GBL_RESULT GUM_Widget_hierarchyChanged_(GUM_Widget* pSelf,
-                                        GblObject* pOldParent,
-                                        GblObject* pNewParent) {
+                                        GblObject*  pOldParent,
+                                        GblObject*  pNewParent) {
     if (!pSelf || pOldParent == pNewParent)
         return GBL_RESULT_SUCCESS;
 
@@ -260,7 +260,7 @@ static void GUM_Widget_childSnapshotRelease_(GUM_WidgetChildSnapshot_* pSnapshot
     GblArrayList_destruct(&pSnapshot->widgets);
 }
 
-static GBL_RESULT GUM_Widget_childSnapshot_(GblObject* pParent,
+static GBL_RESULT GUM_Widget_childSnapshot_(GblObject*                pParent,
                                             GUM_WidgetChildSnapshot_* pSnapshot) {
     GBL_RESULT result = GblArrayList_construct(&pSnapshot->widgets,
                                                sizeof(GUM_Widget*),
@@ -359,14 +359,14 @@ static GBL_RESULT GUM_Widget_setActive_(GUM_Widget* pSelf, bool requested) {
 
     const bool previous = pSelf_->active;
     pSelf_->activeTransition = true;
-    pSelf_->active = requested;
+    pSelf_->active           = requested;
 
-    GUM_WidgetClass* pClass = GUM_WIDGET_CLASSOF(pSelf);
+    GUM_WidgetClass* pClass     = GUM_WIDGET_CLASSOF(pSelf);
     const GBL_RESULT hookResult = requested ?
         pClass->pFnActivate(pSelf) : pClass->pFnDeactivate(pSelf);
 
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(hookResult)) {
-        pSelf_->active = previous;
+        pSelf_->active           = previous;
         pSelf_->activeTransition = false;
         GblBox_unref(GBL_BOX(pSelf));
         return hookResult;
@@ -380,12 +380,12 @@ static GBL_RESULT GUM_Widget_setActive_(GUM_Widget* pSelf, bool requested) {
     return GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
+static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject*         pObject,
                                                     const GblProperty* pProp,
-                                                    GblVariant* pValue) {
-    GUM_Widget* pSelf = GUM_WIDGET(pObject);
-    GUM_Widget_* pSelf_ = GUM_WIDGET_(pSelf);
-    bool refreshLayout = false;
+                                                    GblVariant*        pValue) {
+    GUM_Widget*  pSelf         = GUM_WIDGET(pObject);
+    GUM_Widget_* pSelf_        = GUM_WIDGET_(pSelf);
+    bool         refreshLayout = false;
 
     switch (pProp->id) {
         case GUM_Widget_Property_Id_z_index: {
@@ -399,7 +399,7 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
         case GUM_Widget_Property_Id_x: {
             const float value = GblVariant_float(pValue);
             if (pSelf->x != value) {
-                pSelf->x = value;
+                pSelf->x      = value;
                 refreshLayout = true;
             }
             break;
@@ -407,7 +407,7 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
         case GUM_Widget_Property_Id_y: {
             const float value = GblVariant_float(pValue);
             if (pSelf->y != value) {
-                pSelf->y = value;
+                pSelf->y      = value;
                 refreshLayout = true;
             }
             break;
@@ -415,7 +415,7 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
         case GUM_Widget_Property_Id_w: {
             const float value = GblVariant_float(pValue);
             if (pSelf->w != value) {
-                pSelf->w = value;
+                pSelf->w      = value;
                 refreshLayout = true;
             }
             break;
@@ -423,7 +423,7 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
         case GUM_Widget_Property_Id_h: {
             const float value = GblVariant_float(pValue);
             if (pSelf->h != value) {
-                pSelf->h = value;
+                pSelf->h      = value;
                 refreshLayout = true;
             }
             break;
@@ -432,7 +432,7 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
             const bool value = GblVariant_bool(pValue);
             if (pSelf->isRelative != value) {
                 pSelf->isRelative = value;
-                refreshLayout = true;
+                refreshLayout     = true;
             }
             break;
         }
@@ -507,7 +507,7 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
             const uint8_t value = GblVariant_uint8(pValue);
             if (pSelf->border_width != value) {
                 pSelf->border_width = value;
-                refreshLayout = true;
+                refreshLayout       = true;
             }
             break;
         }
@@ -515,7 +515,7 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
             const float value = GBL_CLAMP(GblVariant_float(pValue), 0.0f, 1.0f);
             if (pSelf->border_radius != value) {
                 pSelf->border_radius = value;
-                refreshLayout = true;
+                refreshLayout        = true;
             }
             break;
         }
@@ -580,10 +580,10 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject* pObject,
                          : GBL_RESULT_SUCCESS;
 }
 
-static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject* pObject,
+static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject*   pObject,
                                                  const GblProperty* pProp,
-                                                 GblVariant* pValue) {
-    const GUM_Widget* pSelf = GUM_WIDGET(pObject);
+                                                 GblVariant*        pValue) {
+    const GUM_Widget*  pSelf  = GUM_WIDGET(pObject);
     const GUM_Widget_* pSelf_ = GUM_WIDGET_(pSelf);
 
     switch (pProp->id) {
@@ -645,29 +645,75 @@ static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject* pObject,
                                  (uint32_t)pSelf->font_border_b << 8  |
                                  (uint32_t)pSelf->font_border_a);
             break;
-        case GUM_Widget_Property_Id_r: GblVariant_setUint8(pValue, pSelf->r); break;
-        case GUM_Widget_Property_Id_g: GblVariant_setUint8(pValue, pSelf->g); break;
-        case GUM_Widget_Property_Id_b: GblVariant_setUint8(pValue, pSelf->b); break;
-        case GUM_Widget_Property_Id_a: GblVariant_setUint8(pValue, pSelf->a); break;
-        case GUM_Widget_Property_Id_border_r: GblVariant_setUint8(pValue, pSelf->border_r); break;
-        case GUM_Widget_Property_Id_border_g: GblVariant_setUint8(pValue, pSelf->border_g); break;
-        case GUM_Widget_Property_Id_border_b: GblVariant_setUint8(pValue, pSelf->border_b); break;
-        case GUM_Widget_Property_Id_border_a: GblVariant_setUint8(pValue, pSelf->border_a); break;
-        case GUM_Widget_Property_Id_border_width: GblVariant_setUint8(pValue, pSelf->border_width); break;
-        case GUM_Widget_Property_Id_border_radius: GblVariant_setFloat(pValue, pSelf->border_radius); break;
-        case GUM_Widget_Property_Id_border_highlight: GblVariant_setBool(pValue, pSelf->border_highlight); break;
-        case GUM_Widget_Property_Id_label: GblVariant_setString(pValue, pSelf_->pLabel); break;
-        case GUM_Widget_Property_Id_textAlignment: GblVariant_setEnum(pValue, GUM_TEXT_ALIGNMENT_TYPE, pSelf->textAlignment); break;
-        case GUM_Widget_Property_Id_font_size: GblVariant_setUint8(pValue, pSelf->font_size); break;
-        case GUM_Widget_Property_Id_font_r: GblVariant_setUint8(pValue, pSelf->font_r); break;
-        case GUM_Widget_Property_Id_font_g: GblVariant_setUint8(pValue, pSelf->font_g); break;
-        case GUM_Widget_Property_Id_font_b: GblVariant_setUint8(pValue, pSelf->font_b); break;
-        case GUM_Widget_Property_Id_font_a: GblVariant_setUint8(pValue, pSelf->font_a); break;
-        case GUM_Widget_Property_Id_font_border_r: GblVariant_setUint8(pValue, pSelf->font_border_r); break;
-        case GUM_Widget_Property_Id_font_border_g: GblVariant_setUint8(pValue, pSelf->font_border_g); break;
-        case GUM_Widget_Property_Id_font_border_b: GblVariant_setUint8(pValue, pSelf->font_border_b); break;
-        case GUM_Widget_Property_Id_font_border_a: GblVariant_setUint8(pValue, pSelf->font_border_a); break;
-        case GUM_Widget_Property_Id_font_border_thickness: GblVariant_setUint8(pValue, pSelf->font_border_thickness); break;
+        case GUM_Widget_Property_Id_r:
+            GblVariant_setUint8(pValue, pSelf->r);
+            break;
+        case GUM_Widget_Property_Id_g:
+            GblVariant_setUint8(pValue, pSelf->g);
+            break;
+        case GUM_Widget_Property_Id_b:
+            GblVariant_setUint8(pValue, pSelf->b);
+            break;
+        case GUM_Widget_Property_Id_a:
+            GblVariant_setUint8(pValue, pSelf->a);
+            break;
+        case GUM_Widget_Property_Id_border_r:
+            GblVariant_setUint8(pValue, pSelf->border_r);
+            break;
+        case GUM_Widget_Property_Id_border_g:
+            GblVariant_setUint8(pValue, pSelf->border_g);
+            break;
+        case GUM_Widget_Property_Id_border_b:
+            GblVariant_setUint8(pValue, pSelf->border_b);
+            break;
+        case GUM_Widget_Property_Id_border_a:
+            GblVariant_setUint8(pValue, pSelf->border_a);
+            break;
+        case GUM_Widget_Property_Id_border_width:
+            GblVariant_setUint8(pValue, pSelf->border_width);
+            break;
+        case GUM_Widget_Property_Id_border_radius:
+            GblVariant_setFloat(pValue, pSelf->border_radius);
+            break;
+        case GUM_Widget_Property_Id_border_highlight:
+            GblVariant_setBool(pValue, pSelf->border_highlight);
+            break;
+        case GUM_Widget_Property_Id_label:
+            GblVariant_setString(pValue, pSelf_->pLabel);
+            break;
+        case GUM_Widget_Property_Id_textAlignment:
+            GblVariant_setEnum(pValue, GUM_TEXT_ALIGNMENT_TYPE, pSelf->textAlignment);
+            break;
+        case GUM_Widget_Property_Id_font_size:
+            GblVariant_setUint8(pValue, pSelf->font_size);
+            break;
+        case GUM_Widget_Property_Id_font_r:
+            GblVariant_setUint8(pValue, pSelf->font_r);
+            break;
+        case GUM_Widget_Property_Id_font_g:
+            GblVariant_setUint8(pValue, pSelf->font_g);
+            break;
+        case GUM_Widget_Property_Id_font_b:
+            GblVariant_setUint8(pValue, pSelf->font_b);
+            break;
+        case GUM_Widget_Property_Id_font_a:
+            GblVariant_setUint8(pValue, pSelf->font_a);
+            break;
+        case GUM_Widget_Property_Id_font_border_r:
+            GblVariant_setUint8(pValue, pSelf->font_border_r);
+            break;
+        case GUM_Widget_Property_Id_font_border_g:
+            GblVariant_setUint8(pValue, pSelf->font_border_g);
+            break;
+        case GUM_Widget_Property_Id_font_border_b:
+            GblVariant_setUint8(pValue, pSelf->font_border_b);
+            break;
+        case GUM_Widget_Property_Id_font_border_a:
+            GblVariant_setUint8(pValue, pSelf->font_border_a);
+            break;
+        case GUM_Widget_Property_Id_font_border_thickness:
+            GblVariant_setUint8(pValue, pSelf->font_border_thickness);
+            break;
         case GUM_Widget_Property_Id_font:
             if (pSelf_->pFont) GblVariant_setBoxCopy(pValue, GBL_BOX(pSelf_->pFont));
             break;
@@ -687,9 +733,9 @@ static GBL_RESULT GUM_Widget_update_(GUM_Widget* pSelf) {
 }
 
 static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
-    GUM_Widget_* pSelf_ = GUM_WIDGET_(pSelf);
+    GUM_Widget_*      pSelf_   = GUM_WIDGET_(pSelf);
     const GUM_Vector2 position = GUM_get_absolute_position_(pSelf);
-    GUM_Rectangle rec = { position.x, position.y, pSelf->w, pSelf->h };
+    GUM_Rectangle     rec      = { position.x, position.y, pSelf->w, pSelf->h };
 
     if (pSelf_->clipRect.x != GUM_CLIP_RECT_NONE_.x) {
         GUM_Rectangle overlap = GUM_Rectangle_intersect(pSelf_->clipRect, rec);
@@ -699,8 +745,8 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
 
     const bool needsClip = pSelf_->clipRect.x != GUM_CLIP_RECT_NONE_.x ||
                            pSelf_->clipRect.width != GUM_CLIP_RECT_NONE_.width;
-    bool scissorActive = false;
-    GBL_RESULT result = GBL_RESULT_SUCCESS;
+    bool       scissorActive = false;
+    GBL_RESULT result        = GBL_RESULT_SUCCESS;
 
     if (needsClip) {
         result = GUM_Backend_beginScissor(pRenderer, pSelf_->clipRect);
@@ -723,9 +769,9 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
             goto cleanup;
 
         if (pSelf->border_highlight) {
-            const float inner_thickness = 1.0f;
-            const float inset = (pSelf->border_width - inner_thickness) / 2.0f;
-            const GUM_Rectangle inner = { rec.x - inset / 2, rec.y - inset / 2,
+            const float         inner_thickness = 1.0f;
+            const float         inset           = (pSelf->border_width - inner_thickness) / 2.0f;
+            const GUM_Rectangle inner           = { rec.x - inset / 2, rec.y - inset / 2,
                                           rec.width + inset, rec.height + inset };
             result = GUM_Backend_rectangleLinesDraw(pRenderer, inner, pSelf->border_radius, inner_thickness,
                                                     (GUM_Color){ 255, 255, 255, 255 });
@@ -772,10 +818,10 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
                 for (int dy = -pSelf->font_border_thickness; dy <= pSelf->font_border_thickness; dy++) {
                     if (dx == 0 && dy == 0) continue;
                     result = GUM_Backend_Font_draw(pRenderer, pSelf_->pFont, pSelf_->pLabel,
-                                                  (GUM_Vector2){ .x = textPos.x + dx, .y = textPos.y + dy },
-                                                  (GUM_Color){ pSelf->font_border_r, pSelf->font_border_g,
+                                                   (GUM_Vector2){ .x = textPos.x + dx, .y = textPos.y + dy },
+                                                   (GUM_Color){ pSelf->font_border_r, pSelf->font_border_g,
                                                                pSelf->font_border_b, pSelf->font_border_a },
-                                                  pSelf->font_size, 1.0f);
+                                                   pSelf->font_size, 1.0f);
                     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                         goto cleanup;
                 }
@@ -792,7 +838,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
 
     if (pSelf_->pTexture) {
         GUM_Vector2 textureSize = { rec.width, rec.height };
-        GUM_Vector2 texturePos = { rec.x, rec.y };
+        GUM_Vector2 texturePos  = { rec.x, rec.y };
 
         if (GblStringRef_length(pSelf_->pLabel)) {
             textureSize.y *= 0.6f;
@@ -845,7 +891,7 @@ typedef struct {
 } GUM_WidgetTween_;
 
 static GUM_WidgetTween_ s_widgetTweens_[GUM_WIDGET_ANIMATE_MAX_ACTIVE_];
-static uint64_t s_widgetTweenRevision_ = 0;
+static uint64_t         s_widgetTweenRevision_ = 0;
 
 static GUM_WidgetTween_* GUM_Widget_findTween_(GUM_Widget* pWidget, GblQuark property) {
     for (size_t i = 0; i < GUM_WIDGET_ANIMATE_MAX_ACTIVE_; ++i) {
@@ -877,9 +923,9 @@ static void GUM_Widget_applyTweenValue_(GUM_WidgetTween_* pTween) {
         return;
 
     // setProperty may destroy the Widget and cancel this tween.
-    GUM_Widget* pWidget = GUM_WIDGET(GblBox_ref(GBL_BOX(pTween->pWidget)));
+    GUM_Widget*    pWidget  = GUM_WIDGET(GblBox_ref(GBL_BOX(pTween->pWidget)));
     const GblQuark property = pTween->property;
-    const float current = pTween->animator.current;
+    const float    current  = pTween->animator.current;
 
     GBL_VARIANT(value);
     GblVariant_setFloat(&value, current);
@@ -888,14 +934,18 @@ static void GUM_Widget_applyTweenValue_(GUM_WidgetTween_* pTween) {
     GblBox_unref(GBL_BOX(pWidget));
 }
 
-static void GUM_Widget_animateStart_(GUM_Widget* pSelf, const char* pProperty, float target,
-                                     float duration, GUM_EasingType easing, GUM_EasingFn pFnEase) {
+static void GUM_Widget_animateStart_(GUM_Widget*    pSelf,
+                                     const char*    pProperty,
+                                     float          target,
+                                     float          duration,
+                                     GUM_EasingType easing,
+                                     GUM_EasingFn   pFnEase) {
     if (!pSelf || !pProperty || !pProperty[0] || easing >= GUM_EASE_COUNT)
         return;
     if (easing == GUM_EASE_CUSTOM && !pFnEase)
         return;
 
-    const GblQuark quark = GblQuark_fromString(pProperty);
+    const GblQuark     quark = GblQuark_fromString(pProperty);
     const GblProperty* pProp = GblProperty_findQuark(GBL_TYPEOF(pSelf), quark);
     if GBL_UNLIKELY (!pProp ||
                      (pProp->flags & GBL_PROPERTY_FLAG_READ_WRITE) != GBL_PROPERTY_FLAG_READ_WRITE ||
@@ -930,7 +980,7 @@ static void GUM_Widget_animateStart_(GUM_Widget* pSelf, const char* pProperty, f
         pTween->animator.easing   = easing;
     }
 
-    pTween->revision = ++s_widgetTweenRevision_;
+    pTween->revision         = ++s_widgetTweenRevision_;
     pTween->animator.pFnEase = pFnEase;
     GUM_Animator_set(&pTween->animator, target);
 
@@ -939,18 +989,27 @@ static void GUM_Widget_animateStart_(GUM_Widget* pSelf, const char* pProperty, f
         GUM_Widget_applyTweenValue_(pTween);
 }
 
-GBL_EXPORT void GUM_Widget_animate(GUM_Widget* pSelf, const char* pProperty,
-                                   float target, float duration, GUM_EasingType easing) {
+GBL_EXPORT void GUM_Widget_animate(GUM_Widget*    pSelf,
+                                   const char*    pProperty,
+                                   float          target,
+                                   float          duration,
+                                   GUM_EasingType easing) {
     GUM_Widget_animateStart_(pSelf, pProperty, target, duration, easing, nullptr);
 }
 
-GBL_EXPORT void GUM_Widget_animateCustom(GUM_Widget* pSelf, const char* pProperty,
-                                         float target, float duration, GUM_EasingFn pFnEase) {
+GBL_EXPORT void GUM_Widget_animateCustom(GUM_Widget*  pSelf,
+                                         const char*  pProperty,
+                                         float        target,
+                                         float        duration,
+                                         GUM_EasingFn pFnEase) {
     GUM_Widget_animateStart_(pSelf, pProperty, target, duration, GUM_EASE_CUSTOM, pFnEase);
 }
 
-static GBL_RESULT GUM_Widget_animateMarshal_(GblClosure* pClosure, GblVariant* pRetValue,
-                                             size_t argCount, GblVariant* pArgs, GblPtr pMarshalData) {
+static GBL_RESULT GUM_Widget_animateMarshal_(GblClosure* pClosure,
+                                             GblVariant* pRetValue,
+                                             size_t      argCount,
+                                             GblVariant* pArgs,
+                                             GblPtr      pMarshalData) {
     GBL_UNUSED(pRetValue, argCount, pArgs, pMarshalData);
     const GUM_Widget_doneFn pFnDone = (GUM_Widget_doneFn)GblCClosure_callback(GBL_C_CLOSURE(pClosure));
     pFnDone(GUM_WIDGET(GblBox_userdata(GBL_BOX(pClosure))));
@@ -1003,7 +1062,7 @@ void GUM_Widget_animate_update_(void) {
             continue;
 
         const uint64_t revision = pTween->revision;
-        GblClosure* pOnDone = pTween->animator.pOnDone ?
+        GblClosure*    pOnDone  = pTween->animator.pOnDone ?
             GblClosure_ref(pTween->animator.pOnDone) : nullptr;
 
         if (pOnDone) {
@@ -1029,7 +1088,7 @@ void GUM_Widget_animate_widgetDestroyed_(GUM_Widget* pSelf) {
 }
 
 static GBL_RESULT GUM_Widget_GblBox_destructor_(GblBox* pBox) {
-    GUM_Widget* pSelf = GUM_WIDGET(pBox);
+    GUM_Widget*  pSelf  = GUM_WIDGET(pBox);
     GUM_Widget_* pSelf_ = GUM_WIDGET_(pSelf);
 
     GUM_Root_drawDisable_(pSelf);
@@ -1048,10 +1107,10 @@ static GBL_RESULT GUM_Widget_GblBox_destructor_(GblBox* pBox) {
 
 static GBL_RESULT GUM_Widget_receiveEvent_(GblIEventReceiver* pSelf,
                                            GblIEventReceiver* pDest,
-                                           GblEvent* pEvent) {
+                                           GblEvent*          pEvent) {
     GBL_UNUSED(pDest);
-    GUM_Widget* pWidget = GUM_WIDGET(pSelf);
-    GUM_WidgetClass* pClass = GUM_WIDGET_CLASSOF(pWidget);
+    GUM_Widget*      pWidget = GUM_WIDGET(pSelf);
+    GUM_WidgetClass* pClass  = GUM_WIDGET_CLASSOF(pWidget);
 
     if (GblType_check(GBL_TYPEOF(pEvent), GUM_EVENT_INPUT_TYPE))
         return pClass->pFnInputEvent(pWidget, GUM_EVENT_INPUT(pEvent));
@@ -1065,26 +1124,9 @@ static GBL_RESULT GUM_WidgetClass_init_(GblClass* pClass, const void* pData) {
     if (!GblType_classRefCount(GUM_WIDGET_TYPE)) {
         GBL_PROPERTIES_REGISTER(GUM_Widget);
 
-        GblSignal_install(GUM_WIDGET_TYPE, "onPress",            GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_EVENT_INPUT_TYPE);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressConfirm",     GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressCancel",      GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressMoveUp",      GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressMoveDown",    GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressMoveLeft",    GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressMoveRight",   GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onPressUnbound",     GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onRelease",          GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_EVENT_INPUT_TYPE);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseConfirm",   GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseCancel",    GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveUp",    GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveDown",  GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveLeft",  GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseMoveRight", GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onReleaseUnbound",   GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onActivate",         GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onDeactivate",       GblMarshal_CClosure_VOID__INSTANCE, 0);
-        GblSignal_install(GUM_WIDGET_TYPE, "onFocusGained",      GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
-        GblSignal_install(GUM_WIDGET_TYPE, "onFocusLost",        GblMarshal_CClosure_VOID__INSTANCE_BOX, 1, GUM_INPUTDEVICE_TYPE);
+        const GBL_RESULT result = GBL_SIGNALS_REGISTER(GUM_Widget);
+        if (!GBL_RESULT_SUCCESS(result))
+            return result;
     }
 
     GBL_IEVENT_RECEIVER_CLASS(pClass)->pFnReceiveEvent = GUM_Widget_receiveEvent_;
@@ -1157,7 +1199,7 @@ GUM_Vector2 GUM_get_absolute_position_(const GUM_Widget* pWidget) {
     if (!pWidget->isRelative)
         return pos;
 
-    GblObject* pParent = GblObject_parent(GBL_OBJECT(pWidget));
+    GblObject*  pParent       = GblObject_parent(GBL_OBJECT(pWidget));
     GUM_Widget* pParentWidget = GBL_AS(GUM_Widget, pParent);
     if (!pParentWidget)
         return pos;

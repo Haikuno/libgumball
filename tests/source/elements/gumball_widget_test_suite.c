@@ -2,7 +2,7 @@
 #include <gimbal/test/gimbal_test_macros.h>
 #include <gumball/gumball.h>
 
-#define GUM_WIDGET_LIFECYCLE_PROBE_TYPE (GBL_TYPEID(GUM_WidgetLifecycleProbe))
+#define GUM_WIDGET_LIFECYCLE_PROBE_TYPE  (GBL_TYPEID(GUM_WidgetLifecycleProbe))
 #define GUM_WIDGET_LIFECYCLE_PROBE(self) (GBL_CAST(GUM_WidgetLifecycleProbe, self))
 
 GBL_FORWARD_DECLARE_STRUCT(GUM_WidgetLifecycleProbe);
@@ -27,30 +27,30 @@ typedef enum GUM_LifecycleAction_ {
     GUM_LIFECYCLE_ACTION_UNREF
 } GUM_LifecycleAction_;
 
-static GUM_LifecycleAction_ activateHookAction_      = GUM_LIFECYCLE_ACTION_NONE;
-static GUM_LifecycleAction_ deactivateHookAction_    = GUM_LIFECYCLE_ACTION_NONE;
-static GUM_LifecycleAction_ activateSignalAction_    = GUM_LIFECYCLE_ACTION_NONE;
-static GUM_LifecycleAction_ deactivateSignalAction_  = GUM_LIFECYCLE_ACTION_NONE;
-static GBL_RESULT           nestedLifecycleResult_   = GBL_RESULT_SUCCESS;
-static size_t               lifecycleUnrefCount_     = 0;
-static size_t               lifecycleDestroyCount_   = 0;
-static size_t               inputSignalCount_        = 0;
-static size_t               inputActionSignalCount_  = 0;
-static size_t               animationDoneCount_      = 0;
-static size_t               animationNextDoneCount_  = 0;
+static GUM_LifecycleAction_ activateHookAction_     = GUM_LIFECYCLE_ACTION_NONE;
+static GUM_LifecycleAction_ deactivateHookAction_   = GUM_LIFECYCLE_ACTION_NONE;
+static GUM_LifecycleAction_ activateSignalAction_   = GUM_LIFECYCLE_ACTION_NONE;
+static GUM_LifecycleAction_ deactivateSignalAction_ = GUM_LIFECYCLE_ACTION_NONE;
+static GBL_RESULT nestedLifecycleResult_  = GBL_RESULT_SUCCESS;
+static size_t     lifecycleUnrefCount_    = 0;
+static size_t     lifecycleDestroyCount_  = 0;
+static size_t     inputSignalCount_       = 0;
+static size_t     inputActionSignalCount_ = 0;
+static size_t     animationDoneCount_     = 0;
+static size_t     animationNextDoneCount_ = 0;
 
 static void resetState_(void) {
-    activateHookAction_      = GUM_LIFECYCLE_ACTION_NONE;
-    deactivateHookAction_    = GUM_LIFECYCLE_ACTION_NONE;
-    activateSignalAction_    = GUM_LIFECYCLE_ACTION_NONE;
-    deactivateSignalAction_  = GUM_LIFECYCLE_ACTION_NONE;
-    nestedLifecycleResult_   = GBL_RESULT_SUCCESS;
-    lifecycleUnrefCount_     = 0;
-    lifecycleDestroyCount_   = 0;
-    inputSignalCount_        = 0;
-    inputActionSignalCount_  = 0;
-    animationDoneCount_      = 0;
-    animationNextDoneCount_  = 0;
+    activateHookAction_     = GUM_LIFECYCLE_ACTION_NONE;
+    deactivateHookAction_   = GUM_LIFECYCLE_ACTION_NONE;
+    activateSignalAction_   = GUM_LIFECYCLE_ACTION_NONE;
+    deactivateSignalAction_ = GUM_LIFECYCLE_ACTION_NONE;
+    nestedLifecycleResult_  = GBL_RESULT_SUCCESS;
+    lifecycleUnrefCount_    = 0;
+    lifecycleDestroyCount_  = 0;
+    inputSignalCount_       = 0;
+    inputActionSignalCount_ = 0;
+    animationDoneCount_     = 0;
+    animationNextDoneCount_ = 0;
 }
 
 static void lifecycleAction_(GUM_Widget* pWidget, GUM_LifecycleAction_ action, bool active) {

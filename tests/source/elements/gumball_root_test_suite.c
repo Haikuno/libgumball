@@ -4,7 +4,7 @@
 
 #include "../../../lib/src/elements/gumball_root_.h"
 
-#define GUM_ROOT_PROBE_TYPE (GBL_TYPEID(GUM_RootProbe))
+#define GUM_ROOT_PROBE_TYPE  (GBL_TYPEID(GUM_RootProbe))
 #define GUM_ROOT_PROBE(self) (GBL_CAST(GUM_RootProbe, self))
 
 GBL_FORWARD_DECLARE_STRUCT(GUM_RootProbe);
@@ -23,16 +23,16 @@ typedef enum GUM_RootProbeAction_ {
 } GUM_RootProbeAction_;
 
 GBL_INSTANCE_DERIVE(GUM_RootProbe, GUM_Widget)
-    uint8_t              id;
-    uint8_t*             pOrder;
-    size_t*              pDrawCount;
-    size_t*              pUpdateCount;
-    GBL_RESULT           drawResult;
-    GBL_RESULT           updateResult;
+    uint8_t    id;
+    uint8_t*   pOrder;
+    size_t*    pDrawCount;
+    size_t*    pUpdateCount;
+    GBL_RESULT drawResult;
+    GBL_RESULT updateResult;
     GUM_RootProbeAction_ action;
-    GUM_Widget*          pTarget;
-    GblObject*           pNewParent;
-    uint8_t              targetZ;
+    GUM_Widget* pTarget;
+    GblObject*  pNewParent;
+    uint8_t     targetZ;
     GUM_RootProbe**      ppSelfOwner;
     GUM_RootProbe**      ppTargetOwner;
 GBL_INSTANCE_END
@@ -159,12 +159,12 @@ GBL_TEST_CASE(singleRoot)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(drawOrder)
-    uint8_t order[4] = { 0 };
-    size_t count = 0;
-    GUM_RootProbe* pA = rootProbe_(nullptr, 1, 100, order, &count);
-    GUM_RootProbe* pB = rootProbe_(nullptr, 2,  50, order, &count);
-    GUM_RootProbe* pC = rootProbe_(nullptr, 3, 100, order, &count);
-    GUM_RootProbe* pChild = rootProbe_(GBL_OBJECT(pA), 4, 100, order, &count);
+    uint8_t        order[4] = { 0 };
+    size_t         count    = 0;
+    GUM_RootProbe* pA       = rootProbe_(nullptr, 1, 100, order, &count);
+    GUM_RootProbe* pB       = rootProbe_(nullptr, 2,  50, order, &count);
+    GUM_RootProbe* pC       = rootProbe_(nullptr, 3, 100, order, &count);
+    GUM_RootProbe* pChild   = rootProbe_(GBL_OBJECT(pA), 4, 100, order, &count);
     GBL_TEST_VERIFY(pA && pB && pC && pChild);
 
     GBL_TEST_CALL(GUM_draw());
@@ -205,13 +205,13 @@ GBL_TEST_CASE(drawOrder)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(membership)
-    uint8_t order[2] = { 0 };
-    size_t count = 0;
-    GUM_Container* pA = GUM_Container_create();
-    GUM_Container* pB = GUM_Container_create();
-    GUM_Container* pNested = GUM_Container_create("parent", pA);
-    GUM_RootProbe* pOne = rootProbe_(GBL_OBJECT(pNested), 1, 50, order, &count);
-    GUM_RootProbe* pTwo = rootProbe_(GBL_OBJECT(pNested), 2, 50, order, &count);
+    uint8_t        order[2] = { 0 };
+    size_t         count    = 0;
+    GUM_Container* pA       = GUM_Container_create();
+    GUM_Container* pB       = GUM_Container_create();
+    GUM_Container* pNested  = GUM_Container_create("parent", pA);
+    GUM_RootProbe* pOne     = rootProbe_(GBL_OBJECT(pNested), 1, 50, order, &count);
+    GUM_RootProbe* pTwo     = rootProbe_(GBL_OBJECT(pNested), 2, 50, order, &count);
     GBL_TEST_VERIFY(pA && pB && pNested && pOne && pTwo);
 
     GBL_TEST_CALL(GUM_draw_disable(pTwo));
@@ -242,10 +242,10 @@ GBL_TEST_CASE_END
 
 GBL_TEST_CASE(largeSubtree)
     enum { ProbeCount = 65 };
-    uint8_t order[ProbeCount];
-    size_t count = 0;
+    uint8_t        order[ProbeCount];
+    size_t         count              = 0;
     GUM_RootProbe* probes[ProbeCount] = { nullptr };
-    GUM_Container* pContainer = GUM_Container_create();
+    GUM_Container* pContainer         = GUM_Container_create();
     GBL_TEST_VERIFY(pContainer);
 
     for (size_t i = 0; i < ProbeCount; ++i) {
@@ -269,10 +269,10 @@ GBL_TEST_CASE(largeSubtree)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(drawLifetime)
-    uint8_t order[2] = { 0 };
-    size_t count = 0;
-    GUM_RootProbe* pA = rootProbe_(nullptr, 1, 10, order, &count);
-    GUM_RootProbe* pB = rootProbe_(nullptr, 2, 20, order, &count);
+    uint8_t        order[2] = { 0 };
+    size_t         count    = 0;
+    GUM_RootProbe* pA       = rootProbe_(nullptr, 1, 10, order, &count);
+    GUM_RootProbe* pB       = rootProbe_(nullptr, 2, 20, order, &count);
     GBL_TEST_VERIFY(pA && pB);
 
     pA->action      = GUM_ROOT_PROBE_UNREF_SELF;
@@ -290,8 +290,8 @@ GBL_TEST_CASE(drawLifetime)
     GUM_unref(pB);
 
     count = 0;
-    pA = rootProbe_(nullptr, 1, 10, order, &count);
-    pB = rootProbe_(nullptr, 2, 20, order, &count);
+    pA    = rootProbe_(nullptr, 1, 10, order, &count);
+    pB    = rootProbe_(nullptr, 2, 20, order, &count);
     GBL_TEST_VERIFY(pA && pB);
 
     pA->action        = GUM_ROOT_PROBE_UNREF_TARGET;
@@ -318,10 +318,10 @@ GBL_TEST_CASE(drawLifetime)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(drawMutation)
-    uint8_t order[2] = { 0 };
-    size_t count = 0;
-    GUM_RootProbe* pA = rootProbe_(nullptr, 1, 10, order, &count);
-    GUM_RootProbe* pB = rootProbe_(nullptr, 2, 20, order, &count);
+    uint8_t        order[2] = { 0 };
+    size_t         count    = 0;
+    GUM_RootProbe* pA       = rootProbe_(nullptr, 1, 10, order, &count);
+    GUM_RootProbe* pB       = rootProbe_(nullptr, 2, 20, order, &count);
     GBL_TEST_VERIFY(pA && pB);
 
     pA->pTarget = GUM_WIDGET(pB);
@@ -329,7 +329,7 @@ GBL_TEST_CASE(drawMutation)
     GBL_TEST_CALL(GUM_draw());
     GBL_TEST_COMPARE(count, 2u);
 
-    count = 0;
+    count      = 0;
     pA->action = GUM_ROOT_PROBE_ENABLE_TARGET;
     GBL_TEST_CALL(GUM_draw());
     GBL_TEST_COMPARE(count, 1u);
@@ -340,7 +340,7 @@ GBL_TEST_CASE(drawMutation)
 
     pA->action     = GUM_ROOT_PROBE_REPARENT_TARGET;
     pA->pNewParent = nullptr;
-    count = 0;
+    count          = 0;
     GBL_TEST_CALL(GUM_draw());
     GBL_TEST_COMPARE(count, 2u);
 
@@ -357,7 +357,7 @@ GBL_TEST_CASE(drawMutation)
 
     pA->action  = GUM_ROOT_PROBE_SET_TARGET_Z;
     pA->targetZ = 5;
-    count = 0;
+    count       = 0;
     GBL_TEST_CALL(GUM_draw());
     GBL_TEST_COMPARE(order[0], 1u);
     GBL_TEST_COMPARE(order[1], 2u);
@@ -401,12 +401,12 @@ GBL_TEST_CASE(pointerTargets)
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(results)
-    uint8_t order[2] = { 0 };
-    size_t drawCount = 0;
-    size_t updateA = 0;
-    size_t updateB = 0;
-    GUM_RootProbe* pA = rootProbe_(nullptr, 1, 10, order, &drawCount);
-    GUM_RootProbe* pB = rootProbe_(nullptr, 2, 20, order, &drawCount);
+    uint8_t        order[2]  = { 0 };
+    size_t         drawCount = 0;
+    size_t         updateA   = 0;
+    size_t         updateB   = 0;
+    GUM_RootProbe* pA        = rootProbe_(nullptr, 1, 10, order, &drawCount);
+    GUM_RootProbe* pB        = rootProbe_(nullptr, 2, 20, order, &drawCount);
     GBL_TEST_VERIFY(pA && pB);
 
     pA->drawResult = GBL_RESULT_ERROR_INTERNAL;

@@ -32,7 +32,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* p
     if (!pFont || !pText) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     TTF_TextEngine* pTextEngine = GUM_SDL3_textEngine_(pRenderer);
-    TTF_Font* pSdlFont = GUM_IResource_data_(GUM_IRESOURCE(pFont));
+    TTF_Font*       pSdlFont    = GUM_IResource_data_(GUM_IRESOURCE(pFont));
     if (!pTextEngine || !pSdlFont) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     if (!TTF_SetFontSize(pSdlFont, (float)fontSize))

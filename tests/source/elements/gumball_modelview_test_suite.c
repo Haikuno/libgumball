@@ -5,8 +5,8 @@
 
 #include <string.h>
 
-#define GUM_PROPERTY_OVERRIDE_WIDGET_TYPE          (GBL_TYPEID     (GUM_PropertyOverrideWidget))
-#define GUM_PROPERTY_OVERRIDE_WIDGET(self)         (GBL_CAST       (GUM_PropertyOverrideWidget, self))
+#define GUM_PROPERTY_OVERRIDE_WIDGET_TYPE  (GBL_TYPEID     (GUM_PropertyOverrideWidget))
+#define GUM_PROPERTY_OVERRIDE_WIDGET(self) (GBL_CAST       (GUM_PropertyOverrideWidget, self))
 
 GBL_FORWARD_DECLARE_STRUCT(GUM_PropertyOverrideWidget);
 GblType GUM_PropertyOverrideWidget_type(void) GBL_NOEXCEPT;
@@ -19,8 +19,8 @@ GBL_PROPERTIES(GUM_PropertyOverrideWidget,
 )
 
 static GBL_RESULT GUM_PropertyOverrideWidget_setProperty_(GblObject* pObject,
-                                                           const GblProperty* pProp,
-                                                           GblVariant* pValue) {
+                                                          const GblProperty* pProp,
+                                                          GblVariant* pValue) {
     if (pProp->id == GUM_PropertyOverrideWidget_Property_Id_x) {
         GUM_WIDGET(pObject)->x = GblVariant_float(pValue);
         return GBL_RESULT_SUCCESS;
@@ -29,8 +29,8 @@ static GBL_RESULT GUM_PropertyOverrideWidget_setProperty_(GblObject* pObject,
 }
 
 static GBL_RESULT GUM_PropertyOverrideWidget_property_(const GblObject* pObject,
-                                                        const GblProperty* pProp,
-                                                        GblVariant* pValue) {
+                                                       const GblProperty* pProp,
+                                                       GblVariant* pValue) {
     if (pProp->id == GUM_PropertyOverrideWidget_Property_Id_x)
         return GblVariant_setFloat(pValue, GUM_WIDGET(pObject)->x);
     return GBL_RESULT_ERROR_INVALID_PROPERTY;
@@ -59,9 +59,9 @@ GblType GUM_PropertyOverrideWidget_type(void) {
         type = GblType_register(GblQuark_internStatic("GUM_PropertyOverrideWidget"),
                                 GUM_WIDGET_TYPE,
                                 &(static GblTypeInfo){
-                                    .classSize = sizeof(GUM_PropertyOverrideWidgetClass),
-                                    .instanceSize = sizeof(GUM_PropertyOverrideWidget),
-                                    .pFnClassInit = GUM_PropertyOverrideWidgetClass_init_,
+                                    .classSize     = sizeof(GUM_PropertyOverrideWidgetClass),
+                                    .instanceSize  = sizeof(GUM_PropertyOverrideWidget),
+                                    .pFnClassInit  = GUM_PropertyOverrideWidgetClass_init_,
                                     .pFnClassFinal = GUM_PropertyOverrideWidgetClass_final_
                                 },
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC);
@@ -69,8 +69,8 @@ GblType GUM_PropertyOverrideWidget_type(void) {
     return type;
 }
 
-#define GUM_LARGE_HIERARCHY_MODEL_TYPE          (GBL_TYPEID     (GUM_LargeHierarchyModel))
-#define GUM_LARGE_HIERARCHY_MODEL(self)         (GBL_CAST       (GUM_LargeHierarchyModel, self))
+#define GUM_LARGE_HIERARCHY_MODEL_TYPE  (GBL_TYPEID     (GUM_LargeHierarchyModel))
+#define GUM_LARGE_HIERARCHY_MODEL(self) (GBL_CAST       (GUM_LargeHierarchyModel, self))
 
 GBL_FORWARD_DECLARE_STRUCT(GUM_LargeHierarchyModel);
 GblType GUM_LargeHierarchyModel_type(void) GBL_NOEXCEPT;
@@ -82,19 +82,19 @@ enum { GUM_LARGE_HIERARCHY_CHILD_COUNT_ = 1024 };
 static char largeHierarchyHandles_[GUM_LARGE_HIERARCHY_CHILD_COUNT_ + 1];
 
 static GUM_ModelIndex GUM_LargeHierarchyModel_indexFor_(const GUM_IItemModel* pModel,
-                                                         const void* pHandle) {
+                                                        const void* pHandle) {
     return pHandle ? (GUM_ModelIndex){ .pModel = pModel, .pHandle = pHandle }
                    : GUM_MODEL_INDEX_INVALID;
 }
 
 static size_t GUM_LargeHierarchyModel_columnCount_(const GUM_IItemModel* pModel,
-                                                    GUM_ModelIndex parent) {
+                                                   GUM_ModelIndex parent) {
     GBL_UNUSED(pModel, parent);
     return 1;
 }
 
 static size_t GUM_LargeHierarchyModel_rowCount_(const GUM_IItemModel* pModel,
-                                                 GUM_ModelIndex parent) {
+                                                GUM_ModelIndex parent) {
     GBL_UNUSED(pModel);
     if (!GUM_ModelIndex_valid(parent))
         return 1;
@@ -104,9 +104,9 @@ static size_t GUM_LargeHierarchyModel_rowCount_(const GUM_IItemModel* pModel,
 }
 
 static GUM_ModelIndex GUM_LargeHierarchyModel_index_(const GUM_IItemModel* pModel,
-                                                      size_t row,
-                                                      size_t column,
-                                                      GUM_ModelIndex parent) {
+                                                     size_t row,
+                                                     size_t column,
+                                                     GUM_ModelIndex parent) {
     if (column)
         return GUM_MODEL_INDEX_INVALID;
 
@@ -122,29 +122,29 @@ static GUM_ModelIndex GUM_LargeHierarchyModel_index_(const GUM_IItemModel* pMode
 }
 
 static GUM_ModelIndex GUM_LargeHierarchyModel_parent_(const GUM_IItemModel* pModel,
-                                                       GUM_ModelIndex index) {
+                                                      GUM_ModelIndex index) {
     if (index.pHandle == &largeHierarchyHandles_[0])
         return GUM_MODEL_INDEX_INVALID;
     return GUM_LargeHierarchyModel_indexFor_(pModel, &largeHierarchyHandles_[0]);
 }
 
 static GBL_RESULT GUM_LargeHierarchyModel_data_(const GUM_IItemModel* pModel,
-                                                 GUM_ModelIndex index,
-                                                 GblVariant* pValue) {
+                                                GUM_ModelIndex index,
+                                                GblVariant* pValue) {
     GBL_UNUSED(pModel);
     return GblVariant_setString(pValue,
                                 index.pHandle == &largeHierarchyHandles_[0] ? "root" : "row");
 }
 
 static GBL_RESULT GUM_LargeHierarchyModel_setData_(GUM_IItemModel* pModel,
-                                                    GUM_ModelIndex index,
-                                                    GblVariant* pValue) {
+                                                   GUM_ModelIndex index,
+                                                   GblVariant* pValue) {
     GBL_UNUSED(pModel, index, pValue);
     return GBL_RESULT_UNSUPPORTED;
 }
 
 static GblFlags GUM_LargeHierarchyModel_flags_(const GUM_IItemModel* pModel,
-                                                GUM_ModelIndex index) {
+                                               GUM_ModelIndex index) {
     GBL_UNUSED(pModel, index);
     return GUM_ITEM_SELECTABLE;
 }
@@ -163,22 +163,22 @@ static GBL_RESULT GUM_LargeHierarchyModelClass_init_(GblClass* pClass, const voi
 }
 
 GblType GUM_LargeHierarchyModel_type(void) {
-    static GblType type = GBL_INVALID_TYPE;
+    static GblType          type = GBL_INVALID_TYPE;
     static GblInterfaceImpl interfaces[1];
 
     if GBL_UNLIKELY (type == GBL_INVALID_TYPE) {
         interfaces[0] = (GblInterfaceImpl){
             .interfaceType = GUM_IITEMMODEL_TYPE,
-            .classOffset = offsetof(GUM_LargeHierarchyModelClass, GUM_IItemModelImpl)
+            .classOffset   = offsetof(GUM_LargeHierarchyModelClass, GUM_IItemModelImpl)
         };
         type = GblType_register(GblQuark_internStatic("GUM_LargeHierarchyModel"),
                                 GBL_BOX_TYPE,
                                 &(static GblTypeInfo){
-                                    .classSize = sizeof(GUM_LargeHierarchyModelClass),
-                                    .pFnClassInit = GUM_LargeHierarchyModelClass_init_,
-                                    .instanceSize = sizeof(GUM_LargeHierarchyModel),
+                                    .classSize       = sizeof(GUM_LargeHierarchyModelClass),
+                                    .pFnClassInit    = GUM_LargeHierarchyModelClass_init_,
+                                    .instanceSize    = sizeof(GUM_LargeHierarchyModel),
                                     .pInterfaceImpls = interfaces,
-                                    .interfaceCount = GBL_COUNT_OF(interfaces)
+                                    .interfaceCount  = GBL_COUNT_OF(interfaces)
                                 },
                                 GBL_TYPE_FLAG_TYPEINFO_STATIC);
     }
@@ -200,19 +200,19 @@ GBL_TEST_FIXTURE {
     GUM_Root* pRoot;
 };
 
-static size_t modelDataChangedCount_ = 0;
-static const void* pModelChangedHandle_ = nullptr;
-static size_t modelChangedColumn_ = 0;
-static size_t modelStructureChangedCount_ = 0;
-static size_t selectionChangedCount_ = 0;
-static const void* pSelectionHandle_ = nullptr;
-static size_t selectionColumn_ = 0;
+static size_t      modelDataChangedCount_      = 0;
+static const void* pModelChangedHandle_        = nullptr;
+static size_t      modelChangedColumn_         = 0;
+static size_t      modelStructureChangedCount_ = 0;
+static size_t      selectionChangedCount_      = 0;
+static const void* pSelectionHandle_           = nullptr;
+static size_t      selectionColumn_            = 0;
 
 static void modelDataChanged_(GblInstance* pReceiver, void* pHandle, size_t column) {
     GBL_UNUSED(pReceiver);
     ++modelDataChangedCount_;
     pModelChangedHandle_ = pHandle;
-    modelChangedColumn_ = column;
+    modelChangedColumn_  = column;
 }
 
 static void modelStructureChanged_(GblInstance* pReceiver) {
@@ -224,24 +224,24 @@ static void selectionChanged_(GblInstance* pReceiver, void* pHandle, size_t colu
     GBL_UNUSED(pReceiver);
     ++selectionChangedCount_;
     pSelectionHandle_ = pHandle;
-    selectionColumn_ = column;
+    selectionColumn_  = column;
 }
 
 static void countersReset_(void) {
-    modelDataChangedCount_ = 0;
-    pModelChangedHandle_ = nullptr;
-    modelChangedColumn_ = 0;
+    modelDataChangedCount_      = 0;
+    pModelChangedHandle_        = nullptr;
+    modelChangedColumn_         = 0;
     modelStructureChangedCount_ = 0;
-    selectionChangedCount_ = 0;
-    pSelectionHandle_ = nullptr;
-    selectionColumn_ = 0;
+    selectionChangedCount_      = 0;
+    pSelectionHandle_           = nullptr;
+    selectionColumn_            = 0;
 }
 
 static GUM_ModelIndex findProperty_(GUM_PropertyModel* pModel,
                                     const char* pName,
                                     size_t column) {
     GUM_IItemModel* pItemModel = GUM_IITEMMODEL(pModel);
-    const size_t rows = GUM_IItemModel_rowCount(pItemModel, GUM_MODEL_INDEX_INVALID);
+    const size_t    rows       = GUM_IItemModel_rowCount(pItemModel, GUM_MODEL_INDEX_INVALID);
 
     for (size_t row = 0; row < rows; ++row) {
         const GUM_ModelIndex nameIndex = GUM_IItemModel_index(pItemModel,
@@ -267,8 +267,8 @@ static GUM_ModelIndex findProperty_(GUM_PropertyModel* pModel,
 
 static size_t propertyCount_(GUM_PropertyModel* pModel, const char* pName) {
     GUM_IItemModel* pItemModel = GUM_IITEMMODEL(pModel);
-    const size_t rows = GUM_IItemModel_rowCount(pItemModel, GUM_MODEL_INDEX_INVALID);
-    size_t count = 0;
+    const size_t    rows       = GUM_IItemModel_rowCount(pItemModel, GUM_MODEL_INDEX_INVALID);
+    size_t          count      = 0;
 
     for (size_t row = 0; row < rows; ++row) {
         const GUM_ModelIndex index = GUM_IItemModel_index(pItemModel,
@@ -298,20 +298,20 @@ GBL_TEST_CASE_END
 GBL_TEST_CASE(objectTreeModel)
     countersReset_();
 
-    GblObject* pRoot = GBL_NEW(GblObject, "name", "root");
-    GblObject* pChild = GBL_NEW(GblObject, "name", "child");
+    GblObject* pRoot       = GBL_NEW(GblObject, "name", "root");
+    GblObject* pChild      = GBL_NEW(GblObject, "name", "child");
     GblObject* pGrandchild = GBL_NEW(GblObject, "name", "grandchild");
-    GblObject* pOtherRoot = GBL_NEW(GblObject, "name", "other");
+    GblObject* pOtherRoot  = GBL_NEW(GblObject, "name", "other");
     GBL_TEST_VERIFY(pRoot && pChild && pGrandchild && pOtherRoot);
 
     GblObject_addChild(pRoot, pChild);
     GblObject_addChild(pChild, pGrandchild);
 
-    GUM_ObjectTreeModel* pModel = GUM_ObjectTreeModel_create(pRoot);
+    GUM_ObjectTreeModel* pModel      = GUM_ObjectTreeModel_create(pRoot);
     GUM_ObjectTreeModel* pOtherModel = GUM_ObjectTreeModel_create(pOtherRoot);
     GBL_TEST_VERIFY(pModel && pOtherModel);
 
-    GUM_IItemModel* pItemModel = GUM_IITEMMODEL(pModel);
+    GUM_IItemModel* pItemModel      = GUM_IITEMMODEL(pModel);
     GUM_IItemModel* pOtherItemModel = GUM_IITEMMODEL(pOtherModel);
     GBL_TEST_COMPARE(GUM_IItemModel_columnCount(pItemModel, GUM_MODEL_INDEX_INVALID), 1u);
     GBL_TEST_COMPARE(GUM_IItemModel_rowCount(pItemModel, GUM_MODEL_INDEX_INVALID), 1u);
@@ -320,7 +320,7 @@ GBL_TEST_CASE(objectTreeModel)
                                                           0,
                                                           0,
                                                           GUM_MODEL_INDEX_INVALID);
-    const GUM_ModelIndex childIndex = GUM_IItemModel_index(pItemModel, 0, 0, rootIndex);
+    const GUM_ModelIndex childIndex      = GUM_IItemModel_index(pItemModel, 0, 0, rootIndex);
     const GUM_ModelIndex grandchildIndex = GUM_IItemModel_index(pItemModel, 0, 0, childIndex);
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(rootIndex));
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(childIndex));
@@ -382,7 +382,7 @@ GBL_TEST_CASE(propertyModel)
     GUM_Widget* pReplacement = GUM_Widget_create("x", 5.0f);
     GBL_TEST_VERIFY(pWidget && pReplacement);
 
-    GblObject* pPropertyChild = GBL_NEW(GblObject, "name", "property child");
+    GblObject* pPropertyChild       = GBL_NEW(GblObject, "name", "property child");
     GblObject* pSecondPropertyChild = GBL_NEW(GblObject, "name", "second child");
     GBL_TEST_VERIFY(pPropertyChild && pSecondPropertyChild);
     GblObject_addChild(GBL_OBJECT(pWidget), pPropertyChild);
@@ -407,10 +407,10 @@ GBL_TEST_CASE(propertyModel)
     GBL_TEST_VERIFY(!GUM_ModelIndex_valid(findProperty_(pModel, "children", 1)));
 
     // Acquire indices after the visibility changes, which structurally invalidate old indices.
-    const GUM_ModelIndex xName = findProperty_(pModel, "x", 0);
-    const GUM_ModelIndex xValue = findProperty_(pModel, "x", 1);
+    const GUM_ModelIndex xName           = findProperty_(pModel, "x", 0);
+    const GUM_ModelIndex xValue          = findProperty_(pModel, "x", 1);
     const GUM_ModelIndex objectNameValue = findProperty_(pModel, "name", 1);
-    const GUM_ModelIndex writeOnly = findProperty_(pModel, "labelAcquire", 0);
+    const GUM_ModelIndex writeOnly       = findProperty_(pModel, "labelAcquire", 0);
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(xName));
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(xValue));
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(objectNameValue));
@@ -529,6 +529,44 @@ GBL_TEST_CASE(propertyModel)
     GUM_unref(pReplacement);
 GBL_TEST_CASE_END
 
+GBL_TEST_CASE(childrenDisplay)
+    GblObject* pObject = GBL_NEW(GblObject);
+    GBL_TEST_VERIFY(pObject);
+
+    GUM_PropertyModel* pModel = GUM_PropertyModel_create(pObject);
+    GBL_TEST_VERIFY(pModel);
+
+    const GUM_ModelIndex children = findProperty_(pModel, "children", 1);
+    GBL_TEST_VERIFY(GUM_ModelIndex_valid(children));
+
+    GBL_VARIANT(display);
+    GBL_TEST_CALL(GUM_IItemModel_displayData(GUM_IITEMMODEL(pModel), children, &display));
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&display), "[]"), 0);
+
+    GblObject* pChild = GBL_NEW(GblObject, "name", "child", "parent", pObject);
+    GBL_TEST_VERIFY(pChild);
+    GBL_TEST_CALL(GUM_IItemModel_displayData(GUM_IITEMMODEL(pModel), children, &display));
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&display), "[child]"), 0);
+
+    const char longName[] = "0123456789012345678901234567890123456789"
+                            "0123456789012345678901234567890123456789"
+                            "0123456789012345678901234567890123456789"
+                            "0123456789012345678901234567890123456789";
+    GblObject_setName(pChild, longName);
+    GBL_TEST_CALL(GUM_IItemModel_displayData(GUM_IITEMMODEL(pModel), children, &display));
+
+    const char* pText = GblVariant_string(&display);
+    GBL_TEST_COMPARE(strlen(pText), sizeof(longName) + 1);
+    GBL_TEST_COMPARE(pText[0], '[');
+    GBL_TEST_COMPARE(strncmp(pText + 1, longName, sizeof(longName) - 1), 0);
+    GBL_TEST_COMPARE(pText[sizeof(longName)], ']');
+
+    GblVariant_destruct(&display);
+    GUM_IItemModel_unref(GUM_IITEMMODEL(pModel));
+    GBL_UNREF(pChild);
+    GBL_UNREF(pObject);
+GBL_TEST_CASE_END
+
 GBL_TEST_CASE(propertyOverride)
     countersReset_();
 
@@ -575,7 +613,7 @@ GBL_TEST_CASE(treeView)
     }
 
     GUM_ObjectTreeModel* pModel = GUM_ObjectTreeModel_create(pRoot);
-    GUM_Tree* pTree = GUM_Tree_create("h", 48.0f);
+    GUM_Tree*            pTree  = GUM_Tree_create("h", 48.0f);
     GBL_TEST_VERIFY(pModel && pTree);
     GBL_TEST_VERIFY(GUM_Widget_isActive(GUM_WIDGET(pTree)));
     GBL_TEST_CALL(GUM_Tree_setModel(pTree, GUM_IITEMMODEL(pModel)));
@@ -586,11 +624,11 @@ GBL_TEST_CASE(treeView)
                                     (GblFnPtr)selectionChanged_,
                                     nullptr));
 
-    GUM_IItemModel* pItemModel = GUM_IITEMMODEL(pModel);
-    const GUM_ModelIndex rootIndex = GUM_IItemModel_index(pItemModel,
-                                                          0,
-                                                          0,
-                                                          GUM_MODEL_INDEX_INVALID);
+    GUM_IItemModel*      pItemModel = GUM_IITEMMODEL(pModel);
+    const GUM_ModelIndex rootIndex  = GUM_IItemModel_index(pItemModel,
+                                                           0,
+                                                           0,
+                                                           GUM_MODEL_INDEX_INVALID);
     GBL_TEST_VERIFY(GUM_Tree_expanded(pTree, rootIndex));
     GBL_TEST_CALL(GUM_Tree_select(pTree, rootIndex));
     GBL_TEST_COMPARE(selectionChangedCount_, 1u);
@@ -693,10 +731,10 @@ GBL_TEST_CASE(treeView)
     GBL_TEST_COMPARE(GUM_Tree_scrollRange(pTree), 0.0f);
 
     GUM_PropertyModel* pPanelModel = GUM_PropertyModel_create(pRoot);
-    GUM_Table* pPanelTable = GUM_Table_create("x", 350.0f,
-                                              "y", 0.0f,
-                                              "w", 520.0f,
-                                              "h", 500.0f);
+    GUM_Table*         pPanelTable = GUM_Table_create("x", 350.0f,
+                                                      "y", 0.0f,
+                                                      "w", 520.0f,
+                                                      "h", 500.0f);
     GUM_Keyboard* pKeyboard = GUM_Keyboard_create();
     GBL_TEST_VERIFY(pPanelModel && pPanelTable && pKeyboard);
     GBL_TEST_CALL(GUM_Table_setModel(pPanelTable, GUM_IITEMMODEL(pPanelModel)));
@@ -723,12 +761,12 @@ GBL_TEST_CASE_END
 GBL_TEST_CASE(tableView)
     countersReset_();
 
-    GUM_Widget* pWidget = GUM_Widget_create("x", 3.0f);
+    GUM_Widget* pWidget      = GUM_Widget_create("x", 3.0f);
     GUM_Widget* pReplacement = GUM_Widget_create("x", 7.0f);
     GBL_TEST_VERIFY(pWidget && pReplacement);
 
     GUM_PropertyModel* pModel = GUM_PropertyModel_create(GBL_OBJECT(pWidget));
-    GUM_Table* pTable = GUM_Table_create("h", 48.0f);
+    GUM_Table*         pTable = GUM_Table_create("h", 48.0f);
     GBL_TEST_VERIFY(pModel && pTable);
     GBL_TEST_VERIFY(GUM_Widget_isActive(GUM_WIDGET(pTable)));
     GBL_TEST_CALL(GUM_Table_setModel(pTable, GUM_IITEMMODEL(pModel)));
@@ -739,11 +777,11 @@ GBL_TEST_CASE(tableView)
                                     (GblFnPtr)selectionChanged_,
                                     nullptr));
 
-    GUM_IItemModel* pItemModel = GUM_IITEMMODEL(pModel);
-    const GUM_ModelIndex firstName = GUM_IItemModel_index(pItemModel,
-                                                          0,
-                                                          0,
-                                                          GUM_MODEL_INDEX_INVALID);
+    GUM_IItemModel*      pItemModel = GUM_IITEMMODEL(pModel);
+    const GUM_ModelIndex firstName  = GUM_IItemModel_index(pItemModel,
+                                                           0,
+                                                           0,
+                                                           GUM_MODEL_INDEX_INVALID);
     const GUM_ModelIndex firstValue = GUM_IItemModel_index(pItemModel,
                                                            0,
                                                            1,
@@ -828,11 +866,11 @@ GBL_TEST_CASE(largeHierarchy)
     GUM_Tree* pTree = GUM_Tree_create("h", 120.0f, "rowHeight", 20.0f);
     GBL_TEST_VERIFY(pModel && pTree);
 
-    GUM_IItemModel* pItemModel = GUM_IITEMMODEL(pModel);
-    const GUM_ModelIndex rootIndex = GUM_IItemModel_index(pItemModel,
-                                                          0,
-                                                          0,
-                                                          GUM_MODEL_INDEX_INVALID);
+    GUM_IItemModel*      pItemModel = GUM_IITEMMODEL(pModel);
+    const GUM_ModelIndex rootIndex  = GUM_IItemModel_index(pItemModel,
+                                                           0,
+                                                           0,
+                                                           GUM_MODEL_INDEX_INVALID);
     GBL_TEST_VERIFY(GUM_ModelIndex_valid(rootIndex));
     GBL_TEST_COMPARE(GUM_IItemModel_rowCount(pItemModel, rootIndex),
                      (size_t)GUM_LARGE_HIERARCHY_CHILD_COUNT_);
@@ -848,6 +886,7 @@ GBL_TEST_CASE_END
 
 GBL_TEST_REGISTER(objectTreeModel,
                   propertyModel,
+                  childrenDisplay,
                   propertyOverride,
                   treeView,
                   tableView,

@@ -12,9 +12,9 @@ int main(int argc, char* argv[]) {
     GBL_UNUSED(argc, argv);
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) return 1;
 
-    SDL_Window* pWindow = SDL_CreateWindow("Model/View - Tree + Table", 1300, 600, 0);
+    SDL_Window*   pWindow      = SDL_CreateWindow("Model/View - Tree + Table", 1300, 600, 0);
     SDL_Renderer* pSdlRenderer = pWindow ? SDL_CreateRenderer(pWindow, nullptr) : nullptr;
-    GUM_Renderer* pRenderer = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
+    GUM_Renderer* pRenderer    = pSdlRenderer ? GUM_Renderer_create(pSdlRenderer) : nullptr;
     if (!pRenderer) return 1;
 
     GUM_Root* pRoot = GUM_Root_create();
@@ -113,8 +113,8 @@ int main(int argc, char* argv[]) {
                       "border_width", 1,
                       "isInteractive", false);
 
-    GUM_ObjectTreeModel* pTreeModel = GUM_ObjectTreeModel_create(GBL_OBJECT(pPreview));
-    GUM_PropertyModel* pPropertyModel = GUM_PropertyModel_create(GBL_OBJECT(pPreview));
+    GUM_ObjectTreeModel* pTreeModel     = GUM_ObjectTreeModel_create(GBL_OBJECT(pPreview));
+    GUM_PropertyModel*   pPropertyModel = GUM_PropertyModel_create(GBL_OBJECT(pPreview));
     if (!pTreeModel || !pPropertyModel) return 1;
 
     GUM_Tree_setModel(pTree, GUM_IITEMMODEL(pTreeModel));

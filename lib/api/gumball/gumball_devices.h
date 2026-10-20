@@ -4,11 +4,11 @@
 // View this file's documentation online: https://libgumball.psyops.studio/gumball__devices_8h.html
 
 /*!  \file
- *   \brief      Devices module-wide include
- *   \ingroup    devices
+ *   \brief   Devices module-wide include
+ *   \ingroup devices
  *
- *   \author     2026 Agustín Bellagamba
- *   \copyright  MIT License
+ *   \author    2026 Agustín Bellagamba
+ *   \copyright MIT License
 */
 
 #include "devices/gumball_inputdevice.h"
@@ -18,7 +18,7 @@
 #include "devices/gumball_keyboard.h"
 
 /*!  \defgroup devices Devices
- *   \brief Input devices
+ *   \brief   Input devices
 */
 
 #endif // GUM_DEVICES_H

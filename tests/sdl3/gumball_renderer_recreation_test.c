@@ -29,10 +29,10 @@ static bool rectEquals_(SDL_Rect a, SDL_Rect b) {
 
 static bool rendererStateTransactions_(GUM_Renderer* pRenderer, SDL_Renderer* pSdlRenderer) {
     const SDL_BlendMode expectedBlend = SDL_BLENDMODE_NONE;
-    const Uint8 expectedR = 17;
-    const Uint8 expectedG = 34;
-    const Uint8 expectedB = 51;
-    const Uint8 expectedA = 68;
+    const Uint8         expectedR     = 17;
+    const Uint8         expectedG     = 34;
+    const Uint8         expectedB     = 51;
+    const Uint8         expectedA     = 68;
 
     if (!SDL_SetRenderDrawBlendMode(pSdlRenderer, expectedBlend) ||
         !SDL_SetRenderDrawColor(pSdlRenderer, expectedR, expectedG, expectedB, expectedA)) {
@@ -62,9 +62,9 @@ static bool rendererStateTransactions_(GUM_Renderer* pRenderer, SDL_Renderer* pS
     }
 
     const SDL_Rect original = { 1, 2, 40, 41 };
-    const SDL_Rect outer = { 5, 6, 30, 31 };
-    const SDL_Rect inner = { 9, 10, 20, 21 };
-    SDL_Rect actual = { 0 };
+    const SDL_Rect outer    = { 5, 6, 30, 31 };
+    const SDL_Rect inner    = { 9, 10, 20, 21 };
+    SDL_Rect       actual   = { 0 };
 
     if (!SDL_SetRenderClipRect(pSdlRenderer, &original) ||
         GUM_Backend_beginScissor(pRenderer,
@@ -84,27 +84,27 @@ static bool rendererStateTransactions_(GUM_Renderer* pRenderer, SDL_Renderer* pS
 }
 
 int main(void) {
-    bool passed = false;
-    GUM_Root* pRootA = nullptr;
-    GUM_Root* pRootB = nullptr;
-    GUM_Texture* pTexture = nullptr;
-    GUM_Font* pFont = nullptr;
-    SDL_Surface* pSurfaceA = nullptr;
-    SDL_Surface* pSurfaceB = nullptr;
+    bool          passed        = false;
+    GUM_Root*     pRootA        = nullptr;
+    GUM_Root*     pRootB        = nullptr;
+    GUM_Texture*  pTexture      = nullptr;
+    GUM_Font*     pFont         = nullptr;
+    SDL_Surface*  pSurfaceA     = nullptr;
+    SDL_Surface*  pSurfaceB     = nullptr;
     SDL_Renderer* pSdlRendererA = nullptr;
     SDL_Renderer* pSdlRendererB = nullptr;
-    GUM_Renderer* pRendererA = nullptr;
-    GUM_Renderer* pRendererB = nullptr;
+    GUM_Renderer* pRendererA    = nullptr;
+    GUM_Renderer* pRendererB    = nullptr;
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
         goto cleanup;
     }
 
-    pRootA = GUM_Root_create();
-    pSurfaceA = SDL_CreateSurface(64, 64, SDL_PIXELFORMAT_RGBA32);
+    pRootA        = GUM_Root_create();
+    pSurfaceA     = SDL_CreateSurface(64, 64, SDL_PIXELFORMAT_RGBA32);
     pSdlRendererA = pSurfaceA ? SDL_CreateSoftwareRenderer(pSurfaceA) : nullptr;
-    pRendererA = pSdlRendererA ? GUM_Renderer_create(pSdlRendererA) : nullptr;
+    pRendererA    = pSdlRendererA ? GUM_Renderer_create(pSdlRendererA) : nullptr;
     if (!pRootA || !pRendererA) {
         fprintf(stderr, "Failed to create renderer without loaded textures: %s\n", SDL_GetError());
         goto cleanup;
@@ -118,7 +118,7 @@ int main(void) {
     pSurfaceA = nullptr;
 
     pTexture = pRootA ? GUM_TEXTURE(GUM_Manager_load("koslogo.png")) : nullptr;
-    pFont = pRootA ? GUM_FONT(GUM_Manager_load("gumball_test.ttf")) : nullptr;
+    pFont    = pRootA ? GUM_FONT(GUM_Manager_load("gumball_test.ttf")) : nullptr;
     if (!pRootA || !pTexture || !pFont) {
         fprintf(stderr, "Failed to create first Root/load test resources: %s\n", SDL_GetError());
         goto cleanup;
@@ -130,9 +130,9 @@ int main(void) {
         goto cleanup;
     }
 
-    pSurfaceA = SDL_CreateSurface(64, 64, SDL_PIXELFORMAT_RGBA32);
+    pSurfaceA     = SDL_CreateSurface(64, 64, SDL_PIXELFORMAT_RGBA32);
     pSdlRendererA = pSurfaceA ? SDL_CreateSoftwareRenderer(pSurfaceA) : nullptr;
-    pRendererA = pSdlRendererA ? GUM_Renderer_create(pSdlRendererA) : nullptr;
+    pRendererA    = pSdlRendererA ? GUM_Renderer_create(pSdlRendererA) : nullptr;
     if (!pRendererA ||
         !rendererStateTransactions_(pRendererA, pSdlRendererA) ||
         !drawResources_(pRendererA, pTexture, pFont)) {
@@ -158,10 +158,10 @@ int main(void) {
         goto cleanup;
     }
 
-    pRootB = GUM_Root_create();
-    pSurfaceB = SDL_CreateSurface(64, 64, SDL_PIXELFORMAT_RGBA32);
+    pRootB        = GUM_Root_create();
+    pSurfaceB     = SDL_CreateSurface(64, 64, SDL_PIXELFORMAT_RGBA32);
     pSdlRendererB = pSurfaceB ? SDL_CreateSoftwareRenderer(pSurfaceB) : nullptr;
-    pRendererB = pSdlRendererB ? GUM_Renderer_create(pSdlRendererB) : nullptr;
+    pRendererB    = pSdlRendererB ? GUM_Renderer_create(pSdlRendererB) : nullptr;
     if (!pRootB || !pRendererB ||
         !drawResources_(pRendererB, pTexture, pFont)) {
         fprintf(stderr, "SDL resource use after Root/backend/renderer recreation failed\n");
@@ -179,7 +179,7 @@ int main(void) {
     pFont = nullptr;
     GUM_IResource_unref(GUM_IRESOURCE(pTexture));
     pTexture = nullptr;
-    passed = true;
+    passed   = true;
 
 cleanup:
     if (pRendererB) GUM_Renderer_destroy(pRendererB);

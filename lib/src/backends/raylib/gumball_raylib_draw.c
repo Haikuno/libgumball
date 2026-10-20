@@ -3,15 +3,15 @@
 #include <math.h>
 
 constexpr int GUM_RAYLIB_ROUNDED_SEGMENTS_ = 8;
-constexpr int GUM_RAYLIB_CLIP_STACK_MAX_ = 16;
+constexpr int GUM_RAYLIB_CLIP_STACK_MAX_   = 16;
 
 static GUM_Rectangle clipStack_[GUM_RAYLIB_CLIP_STACK_MAX_];
-static uint8_t clipDepth_ = 0;
+static uint8_t       clipDepth_ = 0;
 
 static void GUM_Raylib_beginScissor_(GUM_Rectangle clipRect) {
-    const int x = (int)floorf(clipRect.x);
-    const int y = (int)floorf(clipRect.y);
-    const int right = (int)ceilf(clipRect.x + clipRect.width);
+    const int x      = (int)floorf(clipRect.x);
+    const int y      = (int)floorf(clipRect.y);
+    const int right  = (int)ceilf(clipRect.x + clipRect.width);
     const int bottom = (int)ceilf(clipRect.y + clipRect.height);
     BeginScissorMode(x, y, right - x, bottom - y);
 }
