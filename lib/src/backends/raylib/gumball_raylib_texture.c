@@ -58,7 +58,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Texture_draw(GUM_Renderer* pRenderer, GUM_Text
 }
 
 GBL_RESULT GUM_Backend_Texture_load(GUM_IResource* pSelf, GblStringRef* pPath) {
-    if (!pSelf || !pPath) return GBL_RESULT_ERROR_INVALID_POINTER;
+    if (!pPath) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     Texture2D* pTexture = malloc(sizeof(*pTexture));
     if (!pTexture) return GBL_RESULT_ERROR_MEM_ALLOC;
@@ -76,8 +76,6 @@ GBL_RESULT GUM_Backend_Texture_load(GUM_IResource* pSelf, GblStringRef* pPath) {
 }
 
 GBL_RESULT GUM_Backend_Texture_unload(GUM_IResource* pSelf) {
-    if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
-
     Texture2D* pTexture = GUM_IResource_data_(pSelf);
     if (!pTexture) return GBL_RESULT_SUCCESS;
 

@@ -79,7 +79,9 @@ GBL_CLASS_DERIVE_EMPTY(GUM_LargeHierarchyModel, GblBox, GUM_IItemModel)
 GBL_INSTANCE_DERIVE_EMPTY(GUM_LargeHierarchyModel, GblBox)
 
 enum { GUM_LARGE_HIERARCHY_CHILD_COUNT_ = 1024 };
-static char largeHierarchyHandles_[GUM_LARGE_HIERARCHY_CHILD_COUNT_ + 1];
+static char   largeHierarchyHandles_[GUM_LARGE_HIERARCHY_CHILD_COUNT_ + 1];
+static size_t largeHierarchyIndexCount_ = 0;
+static bool   largeHierarchySkipMiddle_ = false;
 
 static GUM_ModelIndex GUM_LargeHierarchyModel_indexFor_(const GUM_IItemModel* pModel,
                                                         const void* pHandle) {
@@ -107,6 +109,7 @@ static GUM_ModelIndex GUM_LargeHierarchyModel_index_(const GUM_IItemModel* pMode
                                                      size_t row,
                                                      size_t column,
                                                      GUM_ModelIndex parent) {
+    ++largeHierarchyIndexCount_;
     if (column)
         return GUM_MODEL_INDEX_INVALID;
 
@@ -145,8 +148,12 @@ static GBL_RESULT GUM_LargeHierarchyModel_setData_(GUM_IItemModel* pModel,
 
 static GblFlags GUM_LargeHierarchyModel_flags_(const GUM_IItemModel* pModel,
                                                GUM_ModelIndex index) {
-    GBL_UNUSED(pModel, index);
-    return GUM_ITEM_SELECTABLE;
+    GBL_UNUSED(pModel);
+    return !largeHierarchySkipMiddle_ ||
+           index.pHandle == &largeHierarchyHandles_[0] ||
+           index.pHandle == &largeHierarchyHandles_[GUM_LARGE_HIERARCHY_CHILD_COUNT_]
+         ? GUM_ITEM_SELECTABLE
+         : GUM_ITEM_NONE;
 }
 
 static GBL_RESULT GUM_LargeHierarchyModelClass_init_(GblClass* pClass, const void* pData) {
@@ -833,6 +840,28 @@ GBL_TEST_CASE(tableView)
                                                             GUM_INPUTACTION_MOVE_RIGHT));
     GBL_TEST_COMPARE(GUM_Table_selection(pTable).column, 1u);
 
+    // Vertical movement preserves the column and stops at the top edge.
+    const GUM_ModelIndex secondName = GUM_IItemModel_index(pItemModel,
+                                                           1,
+                                                           0,
+                                                           GUM_MODEL_INDEX_INVALID);
+    GBL_TEST_CALL(GUM_Table_select(pTable, firstName));
+    GBL_TEST_VERIFY(GUM_WIDGET_CLASSOF(pTable)->pFnNavigate(GUM_WIDGET(pTable),
+                                                            GUM_INPUTACTION_MOVE_DOWN));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Table_selection(pTable), secondName));
+    GBL_TEST_VERIFY(GUM_WIDGET_CLASSOF(pTable)->pFnNavigate(GUM_WIDGET(pTable),
+                                                            GUM_INPUTACTION_MOVE_UP));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Table_selection(pTable), firstName));
+    GBL_TEST_VERIFY(!GUM_WIDGET_CLASSOF(pTable)->pFnNavigate(GUM_WIDGET(pTable),
+                                                             GUM_INPUTACTION_MOVE_UP));
+    GBL_TEST_VERIFY(!GUM_WIDGET_CLASSOF(pTable)->pFnNavigate(GUM_WIDGET(pTable),
+                                                             GUM_INPUTACTION_MOVE_LEFT));
+    GBL_TEST_VERIFY(GUM_WIDGET_CLASSOF(pTable)->pFnNavigate(GUM_WIDGET(pTable),
+                                                            GUM_INPUTACTION_MOVE_RIGHT));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Table_selection(pTable), firstValue));
+    GBL_TEST_VERIFY(!GUM_WIDGET_CLASSOF(pTable)->pFnNavigate(GUM_WIDGET(pTable),
+                                                             GUM_INPUTACTION_MOVE_RIGHT));
+
     GBL_TEST_CALL(GUM_WIDGET_CLASSOF(pTable)->pFnUpdate(GUM_WIDGET(pTable)));
     GBL_TEST_VERIFY(GUM_Table_scrollRange(pTable) > 0.0f);
 
@@ -878,6 +907,31 @@ GBL_TEST_CASE(largeHierarchy)
     GBL_TEST_CALL(GUM_Tree_setModel(pTree, pItemModel));
     GBL_TEST_CALL(GUM_WIDGET_CLASSOF(pTree)->pFnUpdate(GUM_WIDGET(pTree)));
     GBL_TEST_VERIFY(GUM_Tree_scrollRange(pTree) > 20000.0f);
+
+    // Skip a long run in both directions without restarting at every row.
+    const GUM_ModelIndex lastIndex = GUM_IItemModel_index(pItemModel,
+                                                          GUM_LARGE_HIERARCHY_CHILD_COUNT_ - 1,
+                                                          0,
+                                                          rootIndex);
+    largeHierarchySkipMiddle_ = true;
+    GBL_TEST_CALL(GUM_Tree_select(pTree, rootIndex));
+    largeHierarchyIndexCount_ = 0;
+    GBL_TEST_VERIFY(GUM_WIDGET_CLASSOF(pTree)->pFnNavigate(GUM_WIDGET(pTree),
+                                                           GUM_INPUTACTION_MOVE_DOWN));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Tree_selection(pTree), lastIndex));
+    GBL_TEST_VERIFY(largeHierarchyIndexCount_ < 8 * GUM_LARGE_HIERARCHY_CHILD_COUNT_);
+
+    largeHierarchyIndexCount_ = 0;
+    GBL_TEST_VERIFY(GUM_WIDGET_CLASSOF(pTree)->pFnNavigate(GUM_WIDGET(pTree),
+                                                           GUM_INPUTACTION_MOVE_UP));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Tree_selection(pTree), rootIndex));
+    GBL_TEST_VERIFY(largeHierarchyIndexCount_ < 8 * GUM_LARGE_HIERARCHY_CHILD_COUNT_);
+
+    GBL_TEST_CALL(GUM_Tree_setExpanded(pTree, rootIndex, GBL_FALSE));
+    GBL_TEST_VERIFY(!GUM_WIDGET_CLASSOF(pTree)->pFnNavigate(GUM_WIDGET(pTree),
+                                                            GUM_INPUTACTION_MOVE_DOWN));
+    GBL_TEST_VERIFY(GUM_ModelIndex_equal(GUM_Tree_selection(pTree), rootIndex));
+    largeHierarchySkipMiddle_ = false;
 
     // Keep the model attached so Tree destruction exercises its live-model teardown path.
     GUM_unref(pTree);

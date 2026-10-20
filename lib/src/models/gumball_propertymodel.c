@@ -353,9 +353,6 @@ GBL_EXPORT GblObject* GUM_PropertyModel_object(const GUM_PropertyModel* pSelf) {
 
 GBL_EXPORT GBL_RESULT GUM_PropertyModel_setObject(GUM_PropertyModel* pSelf,
                                                   GblObject* pObject) {
-    if (!pSelf)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
-
     GUM_PropertyModel_* pSelf_ = GUM_PROPERTYMODEL_(pSelf);
     if (pSelf_->pObject == pObject)
         return GBL_RESULT_SUCCESS;
@@ -398,7 +395,7 @@ GBL_EXPORT GBL_RESULT GUM_PropertyModel_setObject(GUM_PropertyModel* pSelf,
 
 GBL_EXPORT GblBool GUM_PropertyModel_propertyVisible(const GUM_PropertyModel* pSelf,
                                                      const char* pName) {
-    if (!pSelf || !pName || !pName[0])
+    if (!pName || !pName[0])
         return GBL_FALSE;
     return !GUM_PropertyModel_hidden_(&GUM_PROPERTYMODEL_(pSelf)->hidden,
                                       GblQuark_fromString(pName));
@@ -407,8 +404,6 @@ GBL_EXPORT GblBool GUM_PropertyModel_propertyVisible(const GUM_PropertyModel* pS
 GBL_EXPORT GBL_RESULT GUM_PropertyModel_setPropertyVisible(GUM_PropertyModel* pSelf,
                                                            const char* pName,
                                                            GblBool visible) {
-    if (!pSelf)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
     if (!pName || !pName[0])
         return GBL_RESULT_ERROR_INVALID_ARG;
 

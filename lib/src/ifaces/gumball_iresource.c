@@ -21,9 +21,6 @@ GBL_EXPORT GblRefCount GUM_IResource_unref(GUM_IResource* pResource) {
 }
 
 GBL_RESULT GUM_IResource_setPath_(GUM_IResource* pResource, GblStringRef* pPath) {
-    if (!pResource)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
-
     const GblQuark key = GblQuark_fromStatic(GUM_IRESOURCE_PATH_FIELD_NAME_);
     if (!pPath) {
         GblBox_clearField(GBL_BOX(pResource), key);

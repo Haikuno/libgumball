@@ -316,7 +316,7 @@ static size_t GUM_Container_widgetChildCount_(const GUM_Container* pSelf) {
 }
 
 GBL_EXPORT GblBool GUM_Container_scrollbarVisible(const GUM_Container* pSelf) {
-    if (!pSelf || !GUM_Container_scrollable(pSelf))
+    if (!GUM_Container_scrollable(pSelf))
         return GBL_FALSE;
 
     const GUM_Direction direction = GUM_Container_direction(pSelf);
@@ -334,7 +334,7 @@ GBL_EXPORT GblBool GUM_Container_scrollbarVisible(const GUM_Container* pSelf) {
 GblBool GUM_Container_scrollbarGeometry_(const GUM_Container* pSelf,
                                          GUM_Rectangle*       pTrack,
                                          GUM_Rectangle*       pThumb) {
-    if (!pSelf || !pTrack || !pThumb || !GUM_Container_scrollbarVisible(pSelf))
+    if (!pTrack || !pThumb || !GUM_Container_scrollbarVisible(pSelf))
         return GBL_FALSE;
 
     const GUM_Widget*   pWidget     = GUM_WIDGET(pSelf);
@@ -541,17 +541,15 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
 }
 
 void GUM_Container_scrollTo_(GUM_Container* pSelf, GUM_Direction axis, float offset) {
-    if (pSelf)
-        GUM_ScrollViewport_scrollTo_(&GUM_CONTAINER_(pSelf)->viewport,
-                                     GUM_Container_scrollAxis_(axis),
-                                     offset);
+    GUM_ScrollViewport_scrollTo_(&GUM_CONTAINER_(pSelf)->viewport,
+                                 GUM_Container_scrollAxis_(axis),
+                                 offset);
 }
 
 void GUM_Container_scrollBy_(GUM_Container* pSelf, GUM_Direction axis, float delta) {
-    if (pSelf)
-        GUM_ScrollViewport_scrollBy_(&GUM_CONTAINER_(pSelf)->viewport,
-                                     GUM_Container_scrollAxis_(axis),
-                                     delta);
+    GUM_ScrollViewport_scrollBy_(&GUM_CONTAINER_(pSelf)->viewport,
+                                 GUM_Container_scrollAxis_(axis),
+                                 delta);
 }
 
 GBL_EXPORT float GUM_Container_scrollPosition(const GUM_Container* pSelf) {
@@ -565,13 +563,11 @@ GBL_EXPORT float GUM_Container_scrollRange(const GUM_Container* pSelf) {
 }
 
 GBL_EXPORT void GUM_Container_scrollTo(GUM_Container* pSelf, float position) {
-    if (pSelf)
-        GUM_Container_scrollTo_(pSelf, GUM_Container_direction(pSelf), position);
+    GUM_Container_scrollTo_(pSelf, GUM_Container_direction(pSelf), position);
 }
 
 GBL_EXPORT void GUM_Container_scrollBy(GUM_Container* pSelf, float delta) {
-    if (pSelf)
-        GUM_Container_scrollBy_(pSelf, GUM_Container_direction(pSelf), delta);
+    GUM_Container_scrollBy_(pSelf, GUM_Container_direction(pSelf), delta);
 }
 
 static GBL_RESULT GUM_Container_scrollbarDragTo_(GUM_Container* pSelf, GUM_Vector2 point) {

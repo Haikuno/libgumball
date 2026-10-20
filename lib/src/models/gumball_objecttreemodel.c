@@ -116,9 +116,6 @@ GBL_EXPORT GblObject* GUM_ObjectTreeModel_root(const GUM_ObjectTreeModel* pSelf)
 
 GBL_EXPORT GBL_RESULT GUM_ObjectTreeModel_setRoot(GUM_ObjectTreeModel* pSelf,
                                                   GblObject* pRoot) {
-    if (!pSelf)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
-
     GUM_ObjectTreeModel_* pSelf_ = GUM_OBJECTTREEMODEL_(pSelf);
     if (pSelf_->pRoot == pRoot)
         return GBL_RESULT_SUCCESS;
@@ -134,8 +131,7 @@ GBL_EXPORT GBL_RESULT GUM_ObjectTreeModel_setRoot(GUM_ObjectTreeModel* pSelf,
 }
 
 GBL_EXPORT GBL_RESULT GUM_ObjectTreeModel_refresh(GUM_ObjectTreeModel* pSelf) {
-    return pSelf ? GUM_IItemModel_emitStructureChanged(GUM_IITEMMODEL(pSelf))
-                 : GBL_RESULT_ERROR_INVALID_POINTER;
+    return GUM_IItemModel_emitStructureChanged(GUM_IITEMMODEL(pSelf));
 }
 
 GBL_EXPORT GUM_ObjectTreeModel* GUM_ObjectTreeModel_create(GblObject* pRoot) {

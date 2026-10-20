@@ -15,7 +15,7 @@
 #include "gumball_widget_.h"
 
 static GBL_RESULT GUM_Widget_handleInputEvent_(GUM_Widget* pSelf, GUM_Event_Input* pEvent) {
-    if (!pSelf || !pEvent || !pSelf->isInteractive || !GUM_Widget_isActive(pSelf))
+    if (!pEvent || !pSelf->isInteractive || !GUM_Widget_isActive(pSelf))
         return GBL_RESULT_SUCCESS;
 
     if (pEvent->state != GUM_INPUTSTATE_PRESS && pEvent->state != GUM_INPUTSTATE_RELEASE)
@@ -126,23 +126,20 @@ GUM_Rectangle GUM_Widget_clipRect_(const GUM_Widget* pWidget) {
 }
 
 void GUM_Widget_setClipRect_(GUM_Widget* pWidget, GUM_Rectangle clip) {
-    if (pWidget)
-        GUM_WIDGET_(pWidget)->clipRect = clip;
+    GUM_WIDGET_(pWidget)->clipRect = clip;
 }
 
 void GUM_Widget_focusAcquire_(GUM_Widget* pWidget) {
-    if (pWidget)
-        ++GUM_WIDGET_(pWidget)->focusCount;
+    ++GUM_WIDGET_(pWidget)->focusCount;
 }
 
 void GUM_Widget_focusRelease_(GUM_Widget* pWidget) {
-    if (pWidget && GUM_WIDGET_(pWidget)->focusCount)
+    if (GUM_WIDGET_(pWidget)->focusCount)
         --GUM_WIDGET_(pWidget)->focusCount;
 }
 
 void GUM_Widget_initActive_(GUM_Widget* pWidget, bool active) {
-    if (pWidget)
-        GUM_WIDGET_(pWidget)->active = active;
+    GUM_WIDGET_(pWidget)->active = active;
 }
 
 GBL_EXPORT GblBool GUM_Widget_isActive(const GUM_Widget* pSelf) {
@@ -227,7 +224,7 @@ static GBL_RESULT GUM_Widget_refreshHierarchyLayout_(GUM_Widget* pSelf,
 GBL_RESULT GUM_Widget_hierarchyChanged_(GUM_Widget* pSelf,
                                         GblObject*  pOldParent,
                                         GblObject*  pNewParent) {
-    if (!pSelf || pOldParent == pNewParent)
+    if (pOldParent == pNewParent)
         return GBL_RESULT_SUCCESS;
 
     // Parenting is already committed even if layout fails.
@@ -940,7 +937,7 @@ static void GUM_Widget_animateStart_(GUM_Widget*    pSelf,
                                      float          duration,
                                      GUM_EasingType easing,
                                      GUM_EasingFn   pFnEase) {
-    if (!pSelf || !pProperty || !pProperty[0] || easing >= GUM_EASE_COUNT)
+    if (!pProperty || !pProperty[0] || easing >= GUM_EASE_COUNT)
         return;
     if (easing == GUM_EASE_CUSTOM && !pFnEase)
         return;
@@ -1017,7 +1014,7 @@ static GBL_RESULT GUM_Widget_animateMarshal_(GblClosure* pClosure,
 }
 
 GBL_EXPORT void GUM_Widget_animateOnDone(GUM_Widget* pSelf, const char* pProperty, GUM_Widget_doneFn pFnDone) {
-    if (!pSelf || !pProperty || !pProperty[0])
+    if (!pProperty || !pProperty[0])
         return;
 
     GUM_WidgetTween_* pTween = GUM_Widget_findTween_(pSelf, GblQuark_fromString(pProperty));
@@ -1037,7 +1034,7 @@ GBL_EXPORT void GUM_Widget_animateOnDone(GUM_Widget* pSelf, const char* pPropert
 }
 
 GBL_EXPORT void GUM_Widget_animateCancel(GUM_Widget* pSelf, const char* pProperty) {
-    if (!pSelf || !pProperty || !pProperty[0])
+    if (!pProperty || !pProperty[0])
         return;
 
     GUM_WidgetTween_* pTween = GUM_Widget_findTween_(pSelf, GblQuark_fromString(pProperty));

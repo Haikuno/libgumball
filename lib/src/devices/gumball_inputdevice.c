@@ -45,9 +45,6 @@ bool GUM_InputDevice_baselinePending_(const GUM_InputDevice* pDevice) {
 }
 
 bool GUM_InputDevice_takeBaseline_(GUM_InputDevice* pDevice) {
-    if (!pDevice)
-        return false;
-
     GUM_InputDevice_* pSelf_  = GUM_INPUTDEVICE_(pDevice);
     const bool        pending = pSelf_->baselinePending;
     pSelf_->baselinePending = false;
@@ -55,24 +52,18 @@ bool GUM_InputDevice_takeBaseline_(GUM_InputDevice* pDevice) {
 }
 
 void GUM_InputDevice_setEnabled_(GUM_InputDevice* pDevice, bool enabled) {
-    if (pDevice)
-        GUM_INPUTDEVICE_(pDevice)->enabled = enabled;
+    GUM_INPUTDEVICE_(pDevice)->enabled = enabled;
 }
 
 void GUM_InputDevice_setFocusRingEnabled_(GUM_InputDevice* pDevice, bool enabled) {
-    if (pDevice)
-        GUM_INPUTDEVICE_(pDevice)->focusRingEnabled = enabled;
+    GUM_INPUTDEVICE_(pDevice)->focusRingEnabled = enabled;
 }
 
 void GUM_InputDevice_requestBaseline_(GUM_InputDevice* pDevice) {
-    if (pDevice)
-        GUM_INPUTDEVICE_(pDevice)->baselinePending = true;
+    GUM_INPUTDEVICE_(pDevice)->baselinePending = true;
 }
 
 void GUM_InputDevice_resetTransient_(GUM_InputDevice* pDevice) {
-    if (!pDevice)
-        return;
-
     pDevice->buttons     = 0;
     pDevice->buttonsPrev = 0;
 }
@@ -136,12 +127,11 @@ GBL_RESULT GUM_InputDevice_foreach_(GblType deviceType,
 }
 
 void GUM_InputDevice_focusSet_(GUM_InputDevice* pDevice, GUM_Widget* pWidget) {
-    if (pDevice)
-        GUM_INPUTDEVICE_(pDevice)->pFocusedWidget = pWidget;
+    GUM_INPUTDEVICE_(pDevice)->pFocusedWidget = pWidget;
 }
 
 GBL_RESULT GUM_InputDevice_setName_(GUM_InputDevice* pDevice, const char* pName) {
-    if (!pDevice || !pName)
+    if (!pName)
         return GBL_RESULT_ERROR_INVALID_POINTER;
 
     GblStringRef* pNewName = GblStringRef_create(pName);
@@ -156,9 +146,6 @@ GBL_RESULT GUM_InputDevice_setName_(GUM_InputDevice* pDevice, const char* pName)
 }
 
 bool GUM_InputDevice_focusTransitionBegin_(GUM_InputDevice* pDevice) {
-    if (!pDevice)
-        return false;
-
     GUM_InputDevice_* pSelf_ = GUM_INPUTDEVICE_(pDevice);
     if (pSelf_->focusTransition) {
         GUM_LOG_WARN("Ignoring reentrant focus change on '%s'.",
@@ -171,9 +158,6 @@ bool GUM_InputDevice_focusTransitionBegin_(GUM_InputDevice* pDevice) {
 }
 
 void GUM_InputDevice_focusTransitionEnd_(GUM_InputDevice* pDevice) {
-    if (!pDevice)
-        return;
-
     GUM_InputDevice_* pSelf_  = GUM_INPUTDEVICE_(pDevice);
     GUM_Widget*       pWidget = pSelf_->pFocusedWidget;
     if (pWidget)
@@ -190,9 +174,6 @@ void GUM_InputDevice_focusTransitionEnd_(GUM_InputDevice* pDevice) {
 }
 
 void GUM_InputDevice_focusRelease_(GUM_InputDevice* pDevice) {
-    if (!pDevice)
-        return;
-
     GUM_InputDevice_* pSelf_ = GUM_INPUTDEVICE_(pDevice);
     if (!pSelf_->pFocusedWidget)
         return;

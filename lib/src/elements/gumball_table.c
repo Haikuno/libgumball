@@ -152,26 +152,15 @@ static GUM_ModelIndex GUM_Table_moveVertical_(const GUM_Table* pSelf,
     if (!rows)
         return GUM_MODEL_INDEX_INVALID;
 
-    if (direction < 0) {
-        for (size_t current = row; current > 0; --current) {
-            const GUM_ModelIndex index = GUM_IItemModel_index(pSelf_->pModel,
-                                                              current - 1,
-                                                              column,
-                                                              GUM_MODEL_INDEX_INVALID);
-            if (GUM_ModelIndex_valid(index) &&
-                (GUM_IItemModel_flags(pSelf_->pModel, index) & GUM_ITEM_SELECTABLE))
-                return index;
-        }
-    } else {
-        for (size_t current = row + 1; current < rows; ++current) {
-            const GUM_ModelIndex index = GUM_IItemModel_index(pSelf_->pModel,
-                                                              current,
-                                                              column,
-                                                              GUM_MODEL_INDEX_INVALID);
-            if (GUM_ModelIndex_valid(index) &&
-                (GUM_IItemModel_flags(pSelf_->pModel, index) & GUM_ITEM_SELECTABLE))
-                return index;
-        }
+    while (direction < 0 ? row > 0 : row + 1 < rows) {
+        row = direction < 0 ? row - 1 : row + 1;
+        const GUM_ModelIndex index = GUM_IItemModel_index(pSelf_->pModel,
+                                                          row,
+                                                          column,
+                                                          GUM_MODEL_INDEX_INVALID);
+        if (GUM_ModelIndex_valid(index) &&
+            (GUM_IItemModel_flags(pSelf_->pModel, index) & GUM_ITEM_SELECTABLE))
+            return index;
     }
     return GUM_MODEL_INDEX_INVALID;
 }
@@ -185,26 +174,15 @@ static GUM_ModelIndex GUM_Table_moveHorizontal_(const GUM_Table* pSelf,
     if (!columns)
         return GUM_MODEL_INDEX_INVALID;
 
-    if (direction < 0) {
-        for (size_t current = column; current > 0; --current) {
-            const GUM_ModelIndex index = GUM_IItemModel_index(pSelf_->pModel,
-                                                              row,
-                                                              current - 1,
-                                                              GUM_MODEL_INDEX_INVALID);
-            if (GUM_ModelIndex_valid(index) &&
-                (GUM_IItemModel_flags(pSelf_->pModel, index) & GUM_ITEM_SELECTABLE))
-                return index;
-        }
-    } else {
-        for (size_t current = column + 1; current < columns; ++current) {
-            const GUM_ModelIndex index = GUM_IItemModel_index(pSelf_->pModel,
-                                                              row,
-                                                              current,
-                                                              GUM_MODEL_INDEX_INVALID);
-            if (GUM_ModelIndex_valid(index) &&
-                (GUM_IItemModel_flags(pSelf_->pModel, index) & GUM_ITEM_SELECTABLE))
-                return index;
-        }
+    while (direction < 0 ? column > 0 : column + 1 < columns) {
+        column = direction < 0 ? column - 1 : column + 1;
+        const GUM_ModelIndex index = GUM_IItemModel_index(pSelf_->pModel,
+                                                          row,
+                                                          column,
+                                                          GUM_MODEL_INDEX_INVALID);
+        if (GUM_ModelIndex_valid(index) &&
+            (GUM_IItemModel_flags(pSelf_->pModel, index) & GUM_ITEM_SELECTABLE))
+            return index;
     }
     return GUM_MODEL_INDEX_INVALID;
 }
@@ -256,7 +234,7 @@ static GBL_RESULT GUM_Table_draw_(GUM_Widget* pWidget, GUM_Renderer* pRenderer) 
         return result;
 
     const float  scroll      = GUM_ScrollViewport_position_(&pSelf_->viewport, GUM_SCROLL_AXIS_Y);
-    const float  columnWidth = columns ? rec.width / (float)columns : rec.width;
+    const float  columnWidth = rec.width / (float)columns;
     const size_t firstRow    = pSelf->rowHeight > 0.0f ? (size_t)(scroll / pSelf->rowHeight) : 0;
     const size_t visibleRows = pSelf->rowHeight > 0.0f
                              ? (size_t)(GBL_MAX(rec.height, 0.0f) / pSelf->rowHeight) + 2
@@ -457,9 +435,6 @@ GBL_EXPORT GUM_IItemModel* GUM_Table_model(const GUM_Table* pSelf) {
 }
 
 GBL_EXPORT GBL_RESULT GUM_Table_setModel(GUM_Table* pSelf, GUM_IItemModel* pModel) {
-    if (!pSelf)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
-
     GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
     if (pSelf_->pModel == pModel)
         return GBL_RESULT_SUCCESS;
@@ -499,9 +474,6 @@ GBL_EXPORT GUM_ModelIndex GUM_Table_selection(const GUM_Table* pSelf) {
 }
 
 GBL_EXPORT GBL_RESULT GUM_Table_select(GUM_Table* pSelf, GUM_ModelIndex index) {
-    if (!pSelf)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
-
     GUM_Table_* pSelf_ = GUM_TABLE_(pSelf);
     if (GUM_ModelIndex_valid(index)) {
         if (!pSelf_->pModel ||
@@ -529,13 +501,11 @@ GBL_EXPORT float GUM_Table_scrollRange(const GUM_Table* pSelf) {
 }
 
 GBL_EXPORT void GUM_Table_scrollTo(GUM_Table* pSelf, float position) {
-    if (pSelf)
-        GUM_ScrollViewport_scrollTo_(&GUM_TABLE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y, position);
+    GUM_ScrollViewport_scrollTo_(&GUM_TABLE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y, position);
 }
 
 GBL_EXPORT void GUM_Table_scrollBy(GUM_Table* pSelf, float delta) {
-    if (pSelf)
-        GUM_ScrollViewport_scrollBy_(&GUM_TABLE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y, delta);
+    GUM_ScrollViewport_scrollBy_(&GUM_TABLE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y, delta);
 }
 
 GBL_EXPORT GblType GUM_Table_type(void) {

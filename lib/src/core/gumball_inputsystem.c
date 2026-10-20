@@ -288,7 +288,7 @@ GBL_EXPORT GblBool GUM_InputSystem_deviceTypeEnabled(GblType deviceType) {
 }
 
 GBL_EXPORT GblBool GUM_InputSystem_deviceEnabled(const GUM_InputDevice* pDevice) {
-    if (!initialized_ || !pDevice || !GUM_InputDevice_enabled_(pDevice))
+    if (!initialized_ || !GUM_InputDevice_enabled_(pDevice))
         return GBL_FALSE;
 
     return GUM_InputSystem_deviceTypeEnabled(GBL_TYPEOF(pDevice));
@@ -394,7 +394,7 @@ GBL_EXPORT GblBool GUM_InputSystem_focusRingTypeEnabled(GblType deviceType) {
 }
 
 GBL_EXPORT GblBool GUM_InputSystem_focusRingEnabled(const GUM_InputDevice* pDevice) {
-    if (!initialized_ || !pDevice || !GUM_InputDevice_focusRingEnabled_(pDevice))
+    if (!initialized_ || !GUM_InputDevice_focusRingEnabled_(pDevice))
         return GBL_FALSE;
 
     return GUM_InputSystem_focusRingTypeEnabled(GBL_TYPEOF(pDevice));

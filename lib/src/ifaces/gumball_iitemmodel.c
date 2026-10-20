@@ -30,14 +30,14 @@ GBL_EXPORT GblBool GUM_ModelIndex_belongs(GUM_ModelIndex        index,
 
 GBL_EXPORT size_t GUM_IItemModel_columnCount(const GUM_IItemModel* pSelf,
                                              GUM_ModelIndex        parent) {
-    if (!pSelf || !GUM_IItemModel_parentAccepted_(pSelf, parent))
+    if (!GUM_IItemModel_parentAccepted_(pSelf, parent))
         return 0;
     return GUM_IITEMMODEL_CLASSOF(pSelf)->pFnColumnCount(pSelf, parent);
 }
 
 GBL_EXPORT size_t GUM_IItemModel_rowCount(const GUM_IItemModel* pSelf,
                                           GUM_ModelIndex        parent) {
-    if (!pSelf || !GUM_IItemModel_parentAccepted_(pSelf, parent))
+    if (!GUM_IItemModel_parentAccepted_(pSelf, parent))
         return 0;
     return GUM_IITEMMODEL_CLASSOF(pSelf)->pFnRowCount(pSelf, parent);
 }
@@ -46,14 +46,14 @@ GBL_EXPORT GUM_ModelIndex GUM_IItemModel_index(const GUM_IItemModel* pSelf,
                                                size_t                row,
                                                size_t                column,
                                                GUM_ModelIndex        parent) {
-    if (!pSelf || !GUM_IItemModel_parentAccepted_(pSelf, parent))
+    if (!GUM_IItemModel_parentAccepted_(pSelf, parent))
         return GUM_MODEL_INDEX_INVALID;
     return GUM_IITEMMODEL_CLASSOF(pSelf)->pFnIndex(pSelf, row, column, parent);
 }
 
 GBL_EXPORT GUM_ModelIndex GUM_IItemModel_parent(const GUM_IItemModel* pSelf,
                                                 GUM_ModelIndex        index) {
-    if (!pSelf || !GUM_ModelIndex_belongs(index, pSelf))
+    if (!GUM_ModelIndex_belongs(index, pSelf))
         return GUM_MODEL_INDEX_INVALID;
     return GUM_IITEMMODEL_CLASSOF(pSelf)->pFnParent(pSelf, index);
 }
@@ -61,7 +61,7 @@ GBL_EXPORT GUM_ModelIndex GUM_IItemModel_parent(const GUM_IItemModel* pSelf,
 GBL_EXPORT GBL_RESULT GUM_IItemModel_data(const GUM_IItemModel* pSelf,
                                           GUM_ModelIndex        index,
                                           GblVariant*           pValue) {
-    if (!pSelf || !pValue)
+    if (!pValue)
         return GBL_RESULT_ERROR_INVALID_POINTER;
     if (!GUM_ModelIndex_belongs(index, pSelf))
         return GBL_RESULT_ERROR_INVALID_ARG;
@@ -71,7 +71,7 @@ GBL_EXPORT GBL_RESULT GUM_IItemModel_data(const GUM_IItemModel* pSelf,
 GBL_EXPORT GBL_RESULT GUM_IItemModel_displayData(const GUM_IItemModel* pSelf,
                                                  GUM_ModelIndex        index,
                                                  GblVariant*           pValue) {
-    if (!pSelf || !pValue)
+    if (!pValue)
         return GBL_RESULT_ERROR_INVALID_POINTER;
     if (!GUM_ModelIndex_belongs(index, pSelf))
         return GBL_RESULT_ERROR_INVALID_ARG;
@@ -82,7 +82,7 @@ GBL_EXPORT GBL_RESULT GUM_IItemModel_displayData(const GUM_IItemModel* pSelf,
 GBL_EXPORT GBL_RESULT GUM_IItemModel_setData(GUM_IItemModel* pSelf,
                                              GUM_ModelIndex  index,
                                              GblVariant*     pValue) {
-    if (!pSelf || !pValue)
+    if (!pValue)
         return GBL_RESULT_ERROR_INVALID_POINTER;
     if (!GUM_ModelIndex_belongs(index, pSelf))
         return GBL_RESULT_ERROR_INVALID_ARG;
@@ -91,23 +91,20 @@ GBL_EXPORT GBL_RESULT GUM_IItemModel_setData(GUM_IItemModel* pSelf,
 
 GBL_EXPORT GblFlags GUM_IItemModel_flags(const GUM_IItemModel* pSelf,
                                          GUM_ModelIndex        index) {
-    if (!pSelf || !GUM_ModelIndex_belongs(index, pSelf))
+    if (!GUM_ModelIndex_belongs(index, pSelf))
         return GUM_ITEM_NONE;
     return GUM_IITEMMODEL_CLASSOF(pSelf)->pFnFlags(pSelf, index);
 }
 
 GBL_EXPORT GBL_RESULT GUM_IItemModel_emitDataChanged(GUM_IItemModel* pSelf,
                                                      GUM_ModelIndex  index) {
-    if (!pSelf)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
     if (!GUM_ModelIndex_belongs(index, pSelf))
         return GBL_RESULT_ERROR_INVALID_ARG;
     return GBL_EMIT(pSelf, "dataChanged", (void*)index.pHandle, index.column);
 }
 
 GBL_EXPORT GBL_RESULT GUM_IItemModel_emitStructureChanged(GUM_IItemModel* pSelf) {
-    return pSelf ? GBL_EMIT(pSelf, "structureChanged")
-                 : GBL_RESULT_ERROR_INVALID_POINTER;
+    return GBL_EMIT(pSelf, "structureChanged");
 }
 
 static size_t GUM_IItemModel_columnCount_(const GUM_IItemModel* pSelf,

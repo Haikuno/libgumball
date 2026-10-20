@@ -130,32 +130,54 @@ static GblBool GUM_Tree_visibleRow_(const GUM_Tree* pSelf,
     return GBL_FALSE;
 }
 
-static GblBool GUM_Tree_selectVisible_(GUM_Tree* pSelf, size_t row, int direction) {
-    const size_t count = GUM_Tree_visibleCount_(pSelf, GUM_MODEL_INDEX_INVALID);
-    if (!count || row >= count || !direction)
-        return GBL_FALSE;
+static GUM_ModelIndex GUM_Tree_findSelectable_(const GUM_Tree* pSelf,
+                                               GUM_ModelIndex  parent,
+                                               size_t          target,
+                                               int             direction,
+                                               size_t*         pCursor) {
+    GUM_IItemModel* pModel = GUM_TREE_(pSelf)->pModel;
+    GUM_ModelIndex  found  = GUM_MODEL_INDEX_INVALID;
+    const size_t   rows   = GUM_IItemModel_rowCount(pModel, parent);
 
-    for (;;) {
-        size_t cursor = 0;
-        const GUM_ModelIndex index = GUM_Tree_visibleAt_(pSelf,
-                                                         GUM_MODEL_INDEX_INVALID,
-                                                         0,
-                                                         row,
-                                                         &cursor,
-                                                         nullptr);
-        if (GUM_Tree_selectable_(pSelf, index))
-            return GBL_RESULT_SUCCESS(GUM_Tree_select(pSelf, index));
+    for (size_t row = 0; row < rows; ++row) {
+        if (direction < 0 && *pCursor > target)
+            break;
 
-        if (direction < 0) {
-            if (!row)
-                break;
-            --row;
-        } else {
-            if (++row >= count)
-                break;
+        const GUM_ModelIndex index = GUM_IItemModel_index(pModel, row, 0, parent);
+        if (!GUM_ModelIndex_valid(index))
+            continue;
+
+        const size_t current = (*pCursor)++;
+        if ((direction < 0 || current >= target) && GUM_Tree_selectable_(pSelf, index)) {
+            found = index;
+            if (direction > 0)
+                return found;
+        }
+
+        if (GUM_Tree_expanded_(pSelf, index)) {
+            const GUM_ModelIndex child = GUM_Tree_findSelectable_(pSelf,
+                                                                  index,
+                                                                  target,
+                                                                  direction,
+                                                                  pCursor);
+            if (GUM_ModelIndex_valid(child)) {
+                found = child;
+                if (direction > 0)
+                    return found;
+            }
         }
     }
-    return GBL_FALSE;
+    return found;
+}
+
+static GblBool GUM_Tree_selectVisible_(GUM_Tree* pSelf, size_t row, int direction) {
+    size_t cursor = 0;
+    const GUM_ModelIndex index = GUM_Tree_findSelectable_(pSelf,
+                                                          GUM_MODEL_INDEX_INVALID,
+                                                          row,
+                                                          direction,
+                                                          &cursor);
+    return GUM_ModelIndex_valid(index) && GBL_RESULT_SUCCESS(GUM_Tree_select(pSelf, index));
 }
 
 static GblBool GUM_Tree_selectParent_(GUM_Tree* pSelf, GUM_ModelIndex index) {
@@ -357,9 +379,11 @@ static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree*      pSelf,
             continue;
 
         const float y = rec.y + (float)(*pRow) * pSelf->rowHeight - scroll;
+        if (y >= rec.y + rec.height)
+            return GBL_RESULT_SUCCESS;
         ++*pRow;
 
-        if (y + pSelf->rowHeight > rec.y && y < rec.y + rec.height) {
+        if (y + pSelf->rowHeight > rec.y) {
             if (GUM_ModelIndex_equal(index, pSelf_->selection)) {
                 const GBL_RESULT result = GUM_Backend_rectangleDraw(
                     pRenderer,
@@ -445,12 +469,9 @@ static GBL_RESULT GUM_Tree_pointerPress_(GUM_Tree* pSelf, GUM_Event_Mouse* pEven
     if (localY < 0.0f || pSelf->rowHeight <= 0.0f)
         return GBL_RESULT_PARTIAL;
 
-    const size_t row = (size_t)(localY / pSelf->rowHeight);
-    if (row >= GUM_Tree_visibleCount_(pSelf, GUM_MODEL_INDEX_INVALID))
-        return GBL_RESULT_PARTIAL;
-
-    size_t cursor = 0;
-    size_t depth  = 0;
+    const size_t row    = (size_t)(localY / pSelf->rowHeight);
+    size_t       cursor = 0;
+    size_t       depth  = 0;
     const GUM_ModelIndex index = GUM_Tree_visibleAt_(pSelf,
                                                      GUM_MODEL_INDEX_INVALID,
                                                      0,
@@ -599,9 +620,6 @@ GBL_EXPORT GUM_IItemModel* GUM_Tree_model(const GUM_Tree* pSelf) {
 }
 
 GBL_EXPORT GBL_RESULT GUM_Tree_setModel(GUM_Tree* pSelf, GUM_IItemModel* pModel) {
-    if (!pSelf)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
-
     GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
     if (pSelf_->pModel == pModel)
         return GBL_RESULT_SUCCESS;
@@ -642,9 +660,6 @@ GBL_EXPORT GUM_ModelIndex GUM_Tree_selection(const GUM_Tree* pSelf) {
 }
 
 GBL_EXPORT GBL_RESULT GUM_Tree_select(GUM_Tree* pSelf, GUM_ModelIndex index) {
-    if (!pSelf)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
-
     GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
     if (GUM_ModelIndex_valid(index)) {
         if (!GUM_Tree_selectable_(pSelf, index))
@@ -668,7 +683,7 @@ GBL_EXPORT GblBool GUM_Tree_expanded(const GUM_Tree* pSelf, GUM_ModelIndex index
 GBL_EXPORT GBL_RESULT GUM_Tree_setExpanded(GUM_Tree*      pSelf,
                                            GUM_ModelIndex index,
                                            GblBool        expanded) {
-    if (!pSelf || !GUM_ModelIndex_valid(index))
+    if (!GUM_ModelIndex_valid(index))
         return GBL_RESULT_ERROR_INVALID_ARG;
 
     GUM_Tree_* pSelf_ = GUM_TREE_(pSelf);
@@ -699,13 +714,11 @@ GBL_EXPORT float GUM_Tree_scrollRange(const GUM_Tree* pSelf) {
 }
 
 GBL_EXPORT void GUM_Tree_scrollTo(GUM_Tree* pSelf, float position) {
-    if (pSelf)
-        GUM_ScrollViewport_scrollTo_(&GUM_TREE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y, position);
+    GUM_ScrollViewport_scrollTo_(&GUM_TREE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y, position);
 }
 
 GBL_EXPORT void GUM_Tree_scrollBy(GUM_Tree* pSelf, float delta) {
-    if (pSelf)
-        GUM_ScrollViewport_scrollBy_(&GUM_TREE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y, delta);
+    GUM_ScrollViewport_scrollBy_(&GUM_TREE_(pSelf)->viewport, GUM_SCROLL_AXIS_Y, delta);
 }
 
 GBL_EXPORT GblType GUM_Tree_type(void) {

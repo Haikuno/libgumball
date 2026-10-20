@@ -73,7 +73,7 @@ GBL_EXPORT bool GUM_Animator_update(GUM_Animator* pSelf, float dt) {
     const float previous = pSelf->current;
     pSelf->elapsed = GBL_MIN(pSelf->elapsed + dt, pSelf->duration);
 
-    const float        t       = pSelf->duration > 0.0f ? pSelf->elapsed / pSelf->duration : 1.0f;
+    const float        t       = pSelf->elapsed / pSelf->duration;
     const GUM_EasingFn pFnEase = GUM_Animator_easingFn_(pSelf);
 
     pSelf->current = pSelf->from + (pSelf->to - pSelf->from) * pFnEase(t);

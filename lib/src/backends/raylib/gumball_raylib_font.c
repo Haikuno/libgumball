@@ -46,7 +46,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* p
 }
 
 GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
-    if (!pSelf || !pPath) return GBL_RESULT_ERROR_INVALID_POINTER;
+    if (!pPath) return GBL_RESULT_ERROR_INVALID_POINTER;
 
     Font* pFont = malloc(sizeof(*pFont));
     if (!pFont) return GBL_RESULT_ERROR_MEM_ALLOC;
@@ -68,8 +68,6 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
 }
 
 GBL_RESULT GUM_Backend_Font_unload(GUM_IResource* pSelf) {
-    if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
-
     Font* pFont = GUM_IResource_data_(pSelf);
     if (!pFont) return GBL_RESULT_SUCCESS;
 

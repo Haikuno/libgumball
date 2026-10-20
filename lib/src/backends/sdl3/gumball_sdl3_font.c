@@ -60,7 +60,7 @@ GBL_EXPORT GBL_RESULT GUM_Backend_Font_draw(GUM_Renderer* pRenderer, GUM_Font* p
 }
 
 GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
-    if (!pSelf || !pPath) return GBL_RESULT_ERROR_INVALID_POINTER;
+    if (!pPath) return GBL_RESULT_ERROR_INVALID_POINTER;
     if (!GUM_SDL3_ttfEnsure_()) return GBL_RESULT_ERROR_INTERNAL;
 
     TTF_Font* pFont = TTF_OpenFont(pPath, 22.0f);
@@ -71,8 +71,6 @@ GBL_RESULT GUM_Backend_Font_load(GUM_IResource* pSelf, GblStringRef* pPath) {
 }
 
 GBL_RESULT GUM_Backend_Font_unload(GUM_IResource* pSelf) {
-    if (!pSelf) return GBL_RESULT_ERROR_INVALID_POINTER;
-
     TTF_Font* pFont = GUM_IResource_data_(pSelf);
     if (pFont) TTF_CloseFont(pFont);
     GUM_IResource_setData_(pSelf, nullptr);
