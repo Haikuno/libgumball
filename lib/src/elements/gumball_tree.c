@@ -83,8 +83,7 @@ static GUM_ModelIndex GUM_Tree_visibleAt_(const GUM_Tree* pSelf,
             continue;
 
         if ((*pCursor)++ == target) {
-            if (pDepth)
-                *pDepth = depth;
+            *pDepth = depth;
             return index;
         }
 
@@ -303,7 +302,7 @@ static GBL_RESULT GUM_Tree_update_(GUM_Widget* pWidget) {
 
     GUM_ScrollViewport_setRange_(&pSelf_->viewport,
                                  GUM_SCROLL_AXIS_Y,
-                                 GBL_MAX(contentHeight - pWidget->h, 0.0f));
+                                 contentHeight - pWidget->h);
     GUM_ScrollViewport_update_(&pSelf_->viewport, GUM_Backend_frametime());
     return GBL_RESULT_SUCCESS;
 }
@@ -352,17 +351,6 @@ static GBL_RESULT GUM_Tree_drawDisclosure_(GUM_Tree*      pSelf,
                                      color);
 }
 
-static GBL_RESULT GUM_Tree_drawText_(GUM_Tree*      pSelf,
-                                     GUM_Renderer*  pRenderer,
-                                     GUM_ModelIndex index,
-                                     GUM_Vector2    position) {
-    return GUM_ItemView_drawText_(GUM_WIDGET(pSelf),
-                                  pRenderer,
-                                  GUM_TREE_(pSelf)->pModel,
-                                  index,
-                                  position);
-}
-
 static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree*      pSelf,
                                      GUM_Renderer*  pRenderer,
                                      GUM_ModelIndex parent,
@@ -402,12 +390,13 @@ static GBL_RESULT GUM_Tree_drawRows_(GUM_Tree*      pSelf,
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                 return result;
 
-            result = GUM_Tree_drawText_(pSelf,
-                                        pRenderer,
-                                        index,
-                                        (GUM_Vector2){ nodeX + 13.0f,
-                                                       y + (pSelf->rowHeight
-                                                            - GUM_WIDGET(pSelf)->font_size) * 0.5f });
+            result = GUM_ItemView_drawText_(GUM_WIDGET(pSelf),
+                                            pRenderer,
+                                            pSelf_->pModel,
+                                            index,
+                                            (GUM_Vector2){ nodeX + 13.0f,
+                                                           y + (pSelf->rowHeight
+                                                                - GUM_WIDGET(pSelf)->font_size) * 0.5f });
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                 return result;
         }
@@ -526,10 +515,6 @@ static GblBool GUM_Tree_navigate_(GUM_Widget* pWidget, GUM_InputAction action) {
     if (!pSelf_->pModel)
         return GBL_FALSE;
 
-    const size_t visibleCount = GUM_Tree_visibleCount_(pSelf, GUM_MODEL_INDEX_INVALID);
-    if (!visibleCount)
-        return GBL_FALSE;
-
     size_t        cursor       = 0;
     size_t        currentRow   = 0;
     const GblBool hasSelection = GUM_ModelIndex_valid(pSelf_->selection) &&
@@ -548,9 +533,9 @@ static GblBool GUM_Tree_navigate_(GUM_Widget* pWidget, GUM_InputAction action) {
             break;
 
         case GUM_INPUTACTION_MOVE_DOWN:
-            handled = hasSelection && currentRow + 1 < visibleCount
+            handled = hasSelection
                     ? GUM_Tree_selectVisible_(pSelf, currentRow + 1, 1)
-                    : !hasSelection && GUM_Tree_selectVisible_(pSelf, 0, 1);
+                    : GUM_Tree_selectVisible_(pSelf, 0, 1);
             break;
 
         case GUM_INPUTACTION_MOVE_RIGHT:

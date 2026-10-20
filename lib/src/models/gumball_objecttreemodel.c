@@ -68,7 +68,8 @@ static GBL_RESULT GUM_ObjectTreeModel_data_(const GUM_IItemModel* pModel,
                                             GblVariant* pValue) {
     GBL_UNUSED(pModel);
     GblStringRef* pName = GblObject_name((const GblObject*)index.pHandle);
-    return GblVariant_setString(pValue, pName ? pName : "");
+    return pName ? GblVariant_setStringRef(pValue, GblStringRef_ref(pName))
+                 : GblVariant_setString(pValue, "");
 }
 
 static GBL_RESULT GUM_ObjectTreeModel_setData_(GUM_IItemModel* pModel,
@@ -89,8 +90,7 @@ static GblFlags GUM_ObjectTreeModel_flags_(const GUM_IItemModel* pModel,
 
 static GBL_RESULT GUM_ObjectTreeModel_GblBox_destructor_(GblBox* pBox) {
     GUM_ObjectTreeModel_* pSelf_ = GUM_OBJECTTREEMODEL_(GUM_OBJECTTREEMODEL(pBox));
-    if (pSelf_->pRoot)
-        GblBox_unref(GBL_BOX(pSelf_->pRoot));
+    GBL_UNREF(pSelf_->pRoot);
     pSelf_->pRoot = nullptr;
     return GBL_BOX_CLASS(GblClass_weakRefDefault(GBL_BOX_TYPE))->pFnDestructor(pBox);
 }
@@ -124,8 +124,7 @@ GBL_EXPORT GBL_RESULT GUM_ObjectTreeModel_setRoot(GUM_ObjectTreeModel* pSelf,
         GblBox_ref(GBL_BOX(pRoot));
     GblObject* pOldRoot = pSelf_->pRoot;
     pSelf_->pRoot = pRoot;
-    if (pOldRoot)
-        GblBox_unref(GBL_BOX(pOldRoot));
+    GBL_UNREF(pOldRoot);
 
     return GUM_IItemModel_emitStructureChanged(GUM_IITEMMODEL(pSelf));
 }
@@ -135,12 +134,7 @@ GBL_EXPORT GBL_RESULT GUM_ObjectTreeModel_refresh(GUM_ObjectTreeModel* pSelf) {
 }
 
 GBL_EXPORT GUM_ObjectTreeModel* GUM_ObjectTreeModel_create(GblObject* pRoot) {
-    GUM_ObjectTreeModel* pSelf = GUM_OBJECTTREEMODEL(
-        GblBox_create(GUM_OBJECTTREEMODEL_TYPE,
-                      sizeof(GUM_ObjectTreeModel),
-                      nullptr,
-                      nullptr,
-                      nullptr));
+    GUM_ObjectTreeModel* pSelf = GUM_OBJECTTREEMODEL(GblBox_create(GUM_OBJECTTREEMODEL_TYPE));
     if (!pSelf)
         return nullptr;
 

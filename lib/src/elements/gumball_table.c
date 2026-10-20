@@ -101,8 +101,7 @@ static GblBool GUM_Table_rowForIndex_(const GUM_Table* pSelf,
                                                           target.column,
                                                           GUM_MODEL_INDEX_INVALID);
         if (GUM_ModelIndex_equal(index, target)) {
-            if (pRow)
-                *pRow = row;
+            *pRow = row;
             return GBL_TRUE;
         }
     }
@@ -194,20 +193,9 @@ static GBL_RESULT GUM_Table_update_(GUM_Widget* pWidget) {
 
     GUM_ScrollViewport_setRange_(&pSelf_->viewport,
                                  GUM_SCROLL_AXIS_Y,
-                                 GBL_MAX(contentHeight - pWidget->h, 0.0f));
+                                 contentHeight - pWidget->h);
     GUM_ScrollViewport_update_(&pSelf_->viewport, GUM_Backend_frametime());
     return GBL_RESULT_SUCCESS;
-}
-
-static GBL_RESULT GUM_Table_drawText_(GUM_Table*     pSelf,
-                                      GUM_Renderer*  pRenderer,
-                                      GUM_ModelIndex index,
-                                      GUM_Vector2    position) {
-    return GUM_ItemView_drawText_(GUM_WIDGET(pSelf),
-                                  pRenderer,
-                                  GUM_TABLE_(pSelf)->pModel,
-                                  index,
-                                  position);
 }
 
 static GBL_RESULT GUM_Table_draw_(GUM_Widget* pWidget, GUM_Renderer* pRenderer) {
@@ -271,11 +259,12 @@ static GBL_RESULT GUM_Table_draw_(GUM_Widget* pWidget, GUM_Renderer* pRenderer) 
                     goto cleanup;
             }
 
-            result = GUM_Table_drawText_(pSelf,
-                                         pRenderer,
-                                         index,
-                                         (GUM_Vector2){ cell.x + 4.0f,
-                                                        y + (pSelf->rowHeight - pWidget->font_size) * 0.5f });
+            result = GUM_ItemView_drawText_(pWidget,
+                                            pRenderer,
+                                            pSelf_->pModel,
+                                            index,
+                                            (GUM_Vector2){ cell.x + 4.0f,
+                                                           y + (pSelf->rowHeight - pWidget->font_size) * 0.5f });
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                 goto cleanup;
         }

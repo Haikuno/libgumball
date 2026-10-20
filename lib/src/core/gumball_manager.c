@@ -71,8 +71,6 @@ static GUM_HashSetEntry* resourceFind_(GUM_Manager_* pManager,
 }
 
 static GBL_RESULT currentPath_(char** ppPath) {
-    if (!ppPath)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
     *ppPath = nullptr;
 
     size_t capacity = 256;
@@ -108,8 +106,6 @@ static GBL_RESULT currentPath_(char** ppPath) {
 static GBL_RESULT normalizePosixPath_(const char* pBasePath,
                                       const char* pPath,
                                       char**      ppNormalized) {
-    if (!ppNormalized)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
     *ppNormalized = nullptr;
     if (!pBasePath || !pPath || !pPath[0])
         return GBL_RESULT_ERROR_INVALID_ARG;
@@ -212,8 +208,6 @@ static GBL_RESULT windowsFullPath_(const char* pPath, char** ppNormalized) {
 static GBL_RESULT normalizeWindowsPath_(const char* pBasePath,
                                         const char* pPath,
                                         char**      ppNormalized) {
-    if (!ppNormalized)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
     *ppNormalized = nullptr;
     if (!pBasePath || !pPath || !pPath[0])
         return GBL_RESULT_ERROR_INVALID_ARG;
@@ -242,8 +236,6 @@ static GBL_RESULT normalizeWindowsPath_(const char* pBasePath,
 #endif
 
 static GBL_RESULT normalizeBasePath_(const char* pPath, char** ppNormalized) {
-    if (!ppNormalized)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
     *ppNormalized = nullptr;
     if (!pPath || !pPath[0])
         return GBL_RESULT_ERROR_INVALID_ARG;
@@ -266,8 +258,6 @@ static GBL_RESULT normalizeBasePath_(const char* pPath, char** ppNormalized) {
 static GBL_RESULT normalizedPath_(const GUM_Manager_* pManager,
                                   const char*         pPath,
                                   char**              ppNormalized) {
-    if (!ppNormalized)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
     *ppNormalized = nullptr;
     if (!pManager || !pManager->pBasePath || !pPath || !pPath[0])
         return GBL_RESULT_ERROR_INVALID_ARG;
@@ -280,15 +270,10 @@ static GBL_RESULT normalizedPath_(const GUM_Manager_* pManager,
 }
 
 static GUM_Manager* GUM_Manager_active_(void) {
-    GblModule* pModule = GblModule_find(GUM_MANAGER_MODULE_NAME);
-    return pModule && GblType_check(GBL_TYPEOF(pModule), GUM_MANAGER_TYPE)
-         ? GUM_MANAGER(pModule)
-         : nullptr;
+    return GBL_AS(GUM_Manager, GblModule_find(GUM_MANAGER_MODULE_NAME));
 }
 
 static GBL_RESULT GUM_Manager_start_(GUM_Manager** ppManager) {
-    if (!ppManager)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
     *ppManager = nullptr;
 
     GUM_Manager* pManager = GUM_Manager_active_();
@@ -485,7 +470,7 @@ GBL_EXPORT GBL_RESULT GUM_Manager_evict(GUM_IResource* pResource) {
     if (!pPath)
         return GBL_RESULT_NOT_FOUND;
 
-    const GblHash     pathHash = gblHash(pPath, GblStringRef_length(pPath));
+    const GblHash     pathHash = GblStringRef_hash(pPath);
     GUM_HashSetEntry* pCached  = resourceFind_(pManager, pPath, pathHash);
     if (!pCached || pCached->pResource != pResource)
         return GBL_RESULT_NOT_FOUND;

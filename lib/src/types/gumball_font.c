@@ -63,8 +63,7 @@ void GUM_Font_setDefault(GUM_Font* pFont) {
     GUM_Font* pPrevious = pDefaultFont_;
     pDefaultFont_ = pFont;
 
-    if (pPrevious)
-        GUM_IResource_unref(GUM_IRESOURCE(pPrevious));
+    GBL_UNREF(pPrevious);
 }
 
 GUM_Font* GUM_Backend_Font_default(void) {

@@ -74,9 +74,10 @@ typedef struct GUM_InputDeviceSnapshot_ {
 } GUM_InputDeviceSnapshot_;
 
 static void GUM_InputDevice_snapshotRelease_(GUM_InputDeviceSnapshot_* pSnapshot) {
+    GUM_InputDevice* const* ppDevices = GblArrayList_data(&pSnapshot->devices);
     const size_t count = GblArrayList_size(&pSnapshot->devices);
     for (size_t i = 0; i < count; ++i) {
-        GUM_InputDevice* pDevice = *(GUM_InputDevice**)GblArrayList_at(&pSnapshot->devices, i);
+        GUM_InputDevice* pDevice = ppDevices[i];
         GblBox_unref(GBL_BOX(pDevice));
     }
     GblArrayList_destruct(&pSnapshot->devices);
@@ -85,17 +86,12 @@ static void GUM_InputDevice_snapshotRelease_(GUM_InputDeviceSnapshot_* pSnapshot
 GBL_RESULT GUM_InputDevice_foreach_(GblType deviceType,
                                     GUM_InputDeviceVisitFn_ pFnVisit,
                                     void* pClosure) {
-    if (!pFnVisit)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
-    if (deviceType == GBL_INVALID_TYPE)
-        return GBL_RESULT_ERROR_INVALID_ARG;
-
     GUM_InputDeviceSnapshot_ snapshot;
     GBL_RESULT result = GblArrayList_construct(&snapshot.devices,
-                                                               sizeof(GUM_InputDevice*),
-                                                               0,
-                                                               nullptr,
-                                                               sizeof(snapshot));
+                                               sizeof(GUM_InputDevice*),
+                                               0,
+                                               nullptr,
+                                               sizeof(snapshot));
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
@@ -116,9 +112,10 @@ GBL_RESULT GUM_InputDevice_foreach_(GblType deviceType,
         }
     }
 
+    GUM_InputDevice* const* ppDevices = GblArrayList_data(&snapshot.devices);
     const size_t count = GblArrayList_size(&snapshot.devices);
     for (size_t i = 0; i < count; ++i) {
-        GUM_InputDevice* pDevice = *(GUM_InputDevice**)GblArrayList_at(&snapshot.devices, i);
+        GUM_InputDevice* pDevice = ppDevices[i];
         pFnVisit(pDevice, pClosure);
     }
 
@@ -160,8 +157,7 @@ bool GUM_InputDevice_focusTransitionBegin_(GUM_InputDevice* pDevice) {
 void GUM_InputDevice_focusTransitionEnd_(GUM_InputDevice* pDevice) {
     GUM_InputDevice_* pSelf_  = GUM_INPUTDEVICE_(pDevice);
     GUM_Widget*       pWidget = pSelf_->pFocusedWidget;
-    if (pWidget)
-        GblBox_unref(GBL_BOX(pWidget));
+    GBL_UNREF(pWidget);
 
     pSelf_->focusTransition = false;
 
@@ -188,9 +184,6 @@ void GUM_InputDevice_focusRelease_(GUM_InputDevice* pDevice) {
 }
 
 void GUM_InputDevice_widgetDestroyed_(GUM_Widget* pWidget) {
-    if (!pWidget)
-        return;
-
     for (GblDoublyLinkedListNode* pNode = devices_.pNext;
          pNode != &devices_;
          pNode = pNode->pNext) {

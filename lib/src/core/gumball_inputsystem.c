@@ -45,10 +45,10 @@ static bool GUM_InputSystem_deviceTypeValid_(GblType deviceType) {
 }
 
 static size_t GUM_InputSystem_typeGateIndex_(const GblArrayList* pList, GblType deviceType) {
-    const size_t count = GblArrayList_size(pList);
+    const GblType* pTypes = GblArrayList_data(pList);
+    const size_t   count  = GblArrayList_size(pList);
     for (size_t i = 0; i < count; ++i) {
-        const GblType* pDisabledType = GblArrayList_at(pList, i);
-        if (*pDisabledType == deviceType)
+        if (pTypes[i] == deviceType)
             return i;
     }
     return GBL_INDEX_INVALID;
@@ -56,10 +56,10 @@ static size_t GUM_InputSystem_typeGateIndex_(const GblArrayList* pList, GblType 
 
 static bool GUM_InputSystem_typeGateEnabled_(const GblArrayList* pList,
                                              GblType deviceType) {
-    const size_t count = GblArrayList_size(pList);
+    const GblType* pTypes = GblArrayList_data(pList);
+    const size_t   count  = GblArrayList_size(pList);
     for (size_t i = 0; i < count; ++i) {
-        const GblType* pDisabledType = GblArrayList_at(pList, i);
-        if (GblType_check(deviceType, *pDisabledType))
+        if (GblType_check(deviceType, pTypes[i]))
             return false;
     }
     return true;
@@ -249,12 +249,12 @@ GBL_RESULT GUM_InputSystem_unbind(GblType deviceType, GUM_InputAction action, Gb
     if (action <= GUM_INPUTACTION_NULL || action >= GUM_INPUTACTION_COUNT)
         return GBL_RESULT_ERROR_INVALID_ARG;
 
+    const GUM_InputBinding* pBindings = GblArrayList_data(&bindings_[action]);
     GblArrayList* pList = &bindings_[action];
+    const size_t  count = GblArrayList_size(pList);
 
-    for (size_t i = 0; i < GblArrayList_size(pList); i++) {
-        GUM_InputBinding* pBinding = GblArrayList_at(pList, i);
-
-        if (pBinding->deviceType == deviceType && pBinding->button == button)
+    for (size_t i = 0; i < count; i++) {
+        if (pBindings[i].deviceType == deviceType && pBindings[i].button == button)
             return GblArrayList_erase(pList, i, 1);
     }
 
@@ -262,11 +262,13 @@ GBL_RESULT GUM_InputSystem_unbind(GblType deviceType, GUM_InputAction action, Gb
 }
 
 static void GUM_InputSystem_resetPointerTransient_(GUM_InputDevice* pDevice) {
-    const GblType type = GBL_TYPEOF(pDevice);
-    if (GblType_check(type, GUM_POINTER_TYPE))
-        GUM_POINTER(pDevice)->delta = (GUM_Vector2){ 0, 0 };
-    if (GblType_check(type, GUM_MOUSE_TYPE))
-        GUM_MOUSE(pDevice)->wheel = (GUM_Vector2){ 0, 0 };
+    GUM_Pointer* pPointer = GBL_AS(GUM_Pointer, pDevice);
+    GUM_Mouse*   pMouse   = GBL_AS(GUM_Mouse, pDevice);
+
+    if (pPointer)
+        pPointer->delta = (GUM_Vector2){ 0, 0 };
+    if (pMouse)
+        pMouse->wheel = (GUM_Vector2){ 0, 0 };
 }
 
 static void GUM_InputSystem_disableDevice_(GUM_InputDevice* pDevice, void* pClosure) {
@@ -448,12 +450,11 @@ static GUM_InputAction GUM_InputSystem_actionFor_(GblType deviceType, GblFlags b
         return GUM_INPUTACTION_UNBOUND;
 
     for (GUM_InputAction action = GUM_INPUTACTION_NULL + 1; action < GUM_INPUTACTION_COUNT; ++action) {
-        GblArrayList* pList = &bindings_[action];
+        const GUM_InputBinding* pBindings = GblArrayList_data(&bindings_[action]);
+        const size_t count = GblArrayList_size(&bindings_[action]);
 
-        for (size_t i = 0; i < GblArrayList_size(pList); i++) {
-            GUM_InputBinding* pBinding = GblArrayList_at(pList, i);
-
-            if (pBinding->deviceType == deviceType && pBinding->button == button)
+        for (size_t i = 0; i < count; i++) {
+            if (pBindings[i].deviceType == deviceType && pBindings[i].button == button)
                 return action;
         }
     }
@@ -462,21 +463,19 @@ static GUM_InputAction GUM_InputSystem_actionFor_(GblType deviceType, GblFlags b
 }
 
 void GUM_InputSystem_widgetDestroyed_(GUM_Widget* pWidget) {
-    if (!pWidget) return;
-
     if (pHoveredWidget_ == pWidget)
         pHoveredWidget_ = nullptr;
 
     GUM_InputDevice_widgetDestroyed_(pWidget);
 }
 
-static size_t GUM_InputSystem_liveDevices_(GUM_InputDevice* pOut[], size_t maxOut) {
+static size_t GUM_InputSystem_liveDevices_(GUM_InputDevice* pOut[]) {
     size_t n = 0;
 
-    if (pMouse_    && n < maxOut) pOut[n++] = GUM_INPUTDEVICE(pMouse_);
-    if (pKeyboard_ && n < maxOut) pOut[n++] = GUM_INPUTDEVICE(pKeyboard_);
+    if (pMouse_)    pOut[n++] = GUM_INPUTDEVICE(pMouse_);
+    if (pKeyboard_) pOut[n++] = GUM_INPUTDEVICE(pKeyboard_);
 
-    for (int i = 0; i < GUM_MAX_GAMEPADS && n < maxOut; i++)
+    for (int i = 0; i < GUM_MAX_GAMEPADS; i++)
         if (pGamepads_[i]) pOut[n++] = GUM_INPUTDEVICE(pGamepads_[i]);
 
     return n;
@@ -484,7 +483,7 @@ static size_t GUM_InputSystem_liveDevices_(GUM_InputDevice* pOut[], size_t maxOu
 
 GBL_RESULT GUM_InputSystem_drawFocusRings_(GUM_Renderer* pRenderer) {
     GUM_InputDevice* devices[2 + GUM_MAX_GAMEPADS];
-    size_t           deviceCount = GUM_InputSystem_liveDevices_(devices, GBL_COUNT_OF(devices));
+    size_t           deviceCount = GUM_InputSystem_liveDevices_(devices);
 
     const float thickness = 3.0f;
     const float gap       = 1.0f;
@@ -509,14 +508,12 @@ GBL_RESULT GUM_InputSystem_drawFocusRings_(GUM_Renderer* pRenderer) {
         const GUM_Rectangle clip      = GUM_Widget_clipRect_(pWidget);
         const bool          needsClip = clip.x != GUM_CLIP_RECT_NONE_.x ||
                                clip.width != GUM_CLIP_RECT_NONE_.width;
-        bool       scissorActive = false;
-        GBL_RESULT result        = GBL_RESULT_SUCCESS;
+        GBL_RESULT result = GBL_RESULT_SUCCESS;
 
         if (needsClip) {
             result = GUM_Backend_beginScissor(pRenderer, clip);
             if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
                 return result;
-            scissorActive = true;
         }
 
         result = GUM_Backend_rectangleLinesDraw(pRenderer,
@@ -528,7 +525,7 @@ GBL_RESULT GUM_InputSystem_drawFocusRings_(GUM_Renderer* pRenderer) {
                                                              devices[i]->highlight_b,
                                                              devices[i]->highlight_a });
 
-        if (scissorActive) {
+        if (needsClip) {
             const GBL_RESULT endResult = GUM_Backend_endScissor(pRenderer);
             if (GBL_RESULT_SUCCESS(result) && !GBL_RESULT_SUCCESS(endResult))
                 result = endResult;
@@ -558,7 +555,7 @@ typedef struct GUM_InputSystem_MouseDispatch_ {
 static void GUM_InputSystem_dispatchButton_(GUM_InputDevice* pDevice, void* pContext,
                                             GUM_InputSystem_ButtonDispatchFn_ pFnDispatch,
                                             uint64_t generation) {
-    if (!pDevice || !pFnDispatch || !GUM_InputSystem_deviceEnabled(pDevice))
+    if (!GUM_InputSystem_deviceEnabled(pDevice))
         return;
 
     GblBox_ref(GBL_BOX(pDevice));

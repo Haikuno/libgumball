@@ -26,9 +26,10 @@ static bool updating_ = false;
 static bool drawing_  = false;
 
 static void GUM_update_snapshotRelease_(GUM_UpdateSnapshot_* pSnapshot) {
-    const size_t count = GblArrayList_size(&pSnapshot->widgets);
+    GUM_Widget* const* ppWidgets = GblArrayList_data(&pSnapshot->widgets);
+    const size_t      count     = GblArrayList_size(&pSnapshot->widgets);
     for (size_t i = 0; i < count; ++i) {
-        GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&pSnapshot->widgets, i);
+        GUM_Widget* pWidget = ppWidgets[i];
         GblBox_unref(GBL_BOX(pWidget));
     }
     GblArrayList_destruct(&pSnapshot->widgets);
@@ -110,8 +111,7 @@ static GBL_RESULT GUM_reparent_(GblObject* pChild, GblObject* pParent) {
                                                     pOldParent,
                                                     GblObject_parent(pChild));
 
-    if (pOldParent)
-        GblBox_unref(GBL_BOX(pOldParent));
+    GBL_UNREF(pOldParent);
     GblBox_unref(GBL_BOX(pChild));
     return result;
 }
@@ -151,12 +151,14 @@ GBL_EXPORT GBL_RESULT (GUM_update)(void) {
         return result;
     }
 
+    GUM_Widget* const* ppWidgets = GblArrayList_data(&snapshot.widgets);
+
     GBL_RESULT   firstFailure = GBL_RESULT_SUCCESS;
     const size_t count        = GblArrayList_size(&snapshot.widgets);
     bool         rootActive   = true;
 
     for (size_t i = 0; i < count; ++i) {
-        GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
+        GUM_Widget* pWidget = ppWidgets[i];
         if (!pWidget->shouldUpdate)
             continue;
 
@@ -312,8 +314,7 @@ GBL_EXPORT GBL_RESULT (GUM_setProperty)(GblObject* pSelf, const char* pName, ...
     if (parentMutation && GBL_RESULT_SUCCESS(result))
         result = GUM_hierarchyChanged_(pSelf, pOldParent, GblObject_parent(pSelf));
 
-    if (pOldParent)
-        GblBox_unref(GBL_BOX(pOldParent));
+    GBL_UNREF(pOldParent);
     GblBox_unref(GBL_BOX(pSelf));
     return result;
 }

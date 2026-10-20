@@ -91,9 +91,10 @@ static GBL_RESULT GUM_PropertyModel_buildProperties_(const GblObject* pObject,
 
 static const GblProperty* GUM_PropertyModel_propertyAt_(const GUM_PropertyModel* pSelf,
                                                         size_t row) {
-    const GblArrayList* pProperties = &GUM_PROPERTYMODEL_(pSelf)->properties;
+    const GblArrayList*       pProperties  = &GUM_PROPERTYMODEL_(pSelf)->properties;
+    const GblProperty* const* ppProperties = GblArrayList_data(pProperties);
     return row < GblArrayList_size(pProperties)
-         ? *(const GblProperty* const*)GblArrayList_at(pProperties, row)
+         ? ppProperties[row]
          : nullptr;
 }
 
@@ -201,11 +202,10 @@ static GBL_RESULT GUM_PropertyModel_displayData_(const GUM_IItemModel* pModel,
         return GblVariant_setString(pValue, pName);
 
     if (pName && !strcmp(pName, "name")) {
-        const char* pObjectName = GblObject_name(pSelf_->pObject);
-        return GblVariant_setString(pValue,
-                                    pObjectName && pObjectName[0]
-                                    ? pObjectName
-                                    : GblType_name(GBL_TYPEOF(pSelf_->pObject)));
+        GblStringRef* pObjectName = GblObject_name(pSelf_->pObject);
+        if (pObjectName && pObjectName[0])
+            return GblVariant_setStringRef(pValue, GblStringRef_ref(pObjectName));
+        return GblVariant_setString(pValue, GblType_name(GBL_TYPEOF(pSelf_->pObject)));
     }
 
     if (pName && !strcmp(pName, "children"))
@@ -231,11 +231,10 @@ static GBL_RESULT GUM_PropertyModel_displayData_(const GUM_IItemModel* pModel,
         if (!pObject)
             return GblVariant_setString(pValue, "(null)");
 
-        const char* pObjectName = GblObject_name(pObject);
-        return GblVariant_setString(pValue,
-                                    pObjectName && pObjectName[0]
-                                    ? pObjectName
-                                    : GblType_name(GBL_TYPEOF(pObject)));
+        GblStringRef* pObjectName = GblObject_name(pObject);
+        if (pObjectName && pObjectName[0])
+            return GblVariant_setStringRef(pValue, GblStringRef_ref(pObjectName));
+        return GblVariant_setString(pValue, GblType_name(GBL_TYPEOF(pObject)));
     }
 
     return GBL_RESULT_SUCCESS;
@@ -291,11 +290,10 @@ static void GUM_PropertyModel_propertyChange_(GblInstance* pReceiver,
 }
 
 static void GUM_PropertyModel_disconnect_(GUM_PropertyModel* pSelf, GblObject* pObject) {
-    if (pObject)
-        GblSignal_disconnect(GBL_INSTANCE(pObject),
-                             "propertyChange",
-                             GBL_INSTANCE(pSelf),
-                             nullptr);
+    GblSignal_disconnect(GBL_INSTANCE(pObject),
+                         "propertyChange",
+                         GBL_INSTANCE(pSelf),
+                         nullptr);
 }
 
 static GBL_RESULT GUM_PropertyModel_init_(GblInstance* pInstance) {
@@ -387,8 +385,7 @@ GBL_EXPORT GBL_RESULT GUM_PropertyModel_setObject(GUM_PropertyModel* pSelf,
     pSelf_->properties = properties;
 
     GblArrayList_destruct(&oldProperties);
-    if (pOldObject)
-        GblBox_unref(GBL_BOX(pOldObject));
+    GBL_UNREF(pOldObject);
 
     return GUM_IItemModel_emitStructureChanged(GUM_IITEMMODEL(pSelf));
 }
@@ -398,7 +395,7 @@ GBL_EXPORT GblBool GUM_PropertyModel_propertyVisible(const GUM_PropertyModel* pS
     if (!pName || !pName[0])
         return GBL_FALSE;
     return !GUM_PropertyModel_hidden_(&GUM_PROPERTYMODEL_(pSelf)->hidden,
-                                      GblQuark_fromString(pName));
+                                      GblQuark_tryString(pName));
 }
 
 GBL_EXPORT GBL_RESULT GUM_PropertyModel_setPropertyVisible(GUM_PropertyModel* pSelf,
@@ -455,12 +452,7 @@ GBL_EXPORT GBL_RESULT GUM_PropertyModel_setPropertyVisible(GUM_PropertyModel* pS
 }
 
 GBL_EXPORT GUM_PropertyModel* GUM_PropertyModel_create(GblObject* pObject) {
-    GUM_PropertyModel* pSelf = GUM_PROPERTYMODEL(
-        GblBox_create(GUM_PROPERTYMODEL_TYPE,
-                      sizeof(GUM_PropertyModel),
-                      nullptr,
-                      nullptr,
-                      nullptr));
+    GUM_PropertyModel* pSelf = GUM_PROPERTYMODEL(GblBox_create(GUM_PROPERTYMODEL_TYPE));
     if (!pSelf)
         return nullptr;
 

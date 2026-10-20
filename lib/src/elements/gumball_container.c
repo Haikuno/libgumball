@@ -69,9 +69,10 @@ static float GUM_Container_scrollbarGutter_(const GUM_Container* pSelf) {
 }
 
 static void GUM_Container_layoutSnapshotRelease_(GUM_ContainerLayoutSnapshot_* pSnapshot) {
+    GUM_Container* const* ppContainers = GblArrayList_data(&pSnapshot->containers);
     const size_t count = GblArrayList_size(&pSnapshot->containers);
     for (size_t i = 0; i < count; ++i) {
-        GUM_Container* pContainer = *(GUM_Container**)GblArrayList_at(&pSnapshot->containers, i);
+        GUM_Container* pContainer = ppContainers[i];
         GblBox_unref(GBL_BOX(pContainer));
     }
     GblArrayList_destruct(&pSnapshot->containers);
@@ -528,10 +529,12 @@ static GBL_RESULT GUM_Container_updateContent_(GUM_Container* pSelf) {
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
+    GUM_Container* const* ppContainers = GblArrayList_data(&snapshot.containers);
+
     GBL_RESULT   firstFailure = GBL_RESULT_SUCCESS;
     const size_t count        = GblArrayList_size(&snapshot.containers);
     for (size_t i = 0; i < count; ++i) {
-        GUM_Container* pChild = *(GUM_Container**)GblArrayList_at(&snapshot.containers, i);
+        GUM_Container* pChild = ppContainers[i];
         result = GUM_CONTAINER_CLASSOF(pChild)->pFnUpdateContent(pChild);
         if (GBL_RESULT_SUCCESS(firstFailure) && !GBL_RESULT_SUCCESS(result))
             firstFailure = result;
@@ -634,9 +637,7 @@ static void GUM_Container_scrollbarDragVisit_(GUM_InputDevice* pDevice, void* pC
     if (pState->mouseFound || !GUM_InputSystem_deviceEnabled(pDevice))
         return;
 
-    GUM_Mouse* pMouse = GBL_AS(GUM_Mouse, pDevice);
-    if (!pMouse)
-        return;
+    GUM_Mouse* pMouse = GUM_MOUSE(pDevice);
 
     pState->mouseFound = true;
     pState->leftDown   = (pDevice->buttons & GUM_MOUSE_BUTTON_LEFT) != 0;
@@ -724,7 +725,6 @@ static GBL_RESULT GUM_Container_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer
     const GUM_Rectangle clip      = GUM_Widget_clipRect_(pSelf);
     const bool          needsClip = clip.x != GUM_CLIP_RECT_NONE_.x ||
                            clip.width != GUM_CLIP_RECT_NONE_.width;
-    bool scissorActive = false;
 
     if (needsClip) {
         const GUM_Rectangle overlap = GUM_Rectangle_intersect(clip, track);
@@ -734,7 +734,6 @@ static GBL_RESULT GUM_Container_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer
         result = GUM_Backend_beginScissor(pRenderer, clip);
         if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
             return result;
-        scissorActive = true;
     }
 
     const GUM_Color trackColor = GUM_Container_color_(GUM_Container_scrollbarTrackColor(pContainer));
@@ -751,7 +750,7 @@ static GBL_RESULT GUM_Container_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer
         result = GUM_Backend_rectangleDraw(pRenderer, thumb, roundness, thumbColor);
 
 cleanup:
-    if (scissorActive) {
+    if (needsClip) {
         const GBL_RESULT endResult = GUM_Backend_endScissor(pRenderer);
         if (GBL_RESULT_SUCCESS(result) && !GBL_RESULT_SUCCESS(endResult))
             result = endResult;

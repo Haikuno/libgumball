@@ -23,7 +23,7 @@ GBL_RESULT GUM_ItemView_drawText_(GUM_Widget* pWidget,
     if (GblType_check(valueType, GBL_STRING_TYPE)) {
         pText = GblVariant_string(&value);
     } else if (GblVariant_canConvert(valueType, GBL_STRING_TYPE)) {
-        result = GblVariant_constructString(&text, "");
+        result = GblVariant_constructDefault(&text, GBL_STRING_TYPE);
         if (GBL_RESULT_SUCCESS(result)) {
             result = GblVariant_convert(&value, &text);
             if (GBL_RESULT_SUCCESS(result))

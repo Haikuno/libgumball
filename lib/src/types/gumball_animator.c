@@ -90,8 +90,7 @@ GBL_EXPORT void GUM_Animator_setOnDone(GUM_Animator* pSelf, GblClosure* pClosure
      * even when the Animator owns its final reference. */
     GblClosure* pReplacement = pClosure ? GblClosure_ref(pClosure) : nullptr;
 
-    if (pSelf->pOnDone)
-        GblClosure_unref(pSelf->pOnDone);
+    GblClosure_unref(pSelf->pOnDone);
 
     pSelf->pOnDone = pReplacement;
 }

@@ -11,11 +11,8 @@
 #include "../elements/gumball_widget_.h"
 
 static GUM_Widget* GUM_Nav_asSelectable_(GblObject* pObject) {
-    if (!pObject || !GBL_TYPECHECK(GUM_Widget, pObject))
-        return nullptr;
-
-    GUM_Widget* pWidget = GUM_WIDGET(pObject);
-    return pWidget->isSelectable ? pWidget : nullptr;
+    GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
+    return pWidget && pWidget->isSelectable ? pWidget : nullptr;
 }
 
 static GblBool GUM_Nav_isWidgetType_(const GblObject* pObject, void* pClosure) {
@@ -30,7 +27,8 @@ static GblBool GUM_Nav_isContainerType_(const GblObject* pObject, void* pClosure
 
 static GblBool GUM_Nav_isSelectable_(const GblObject* pObject, void* pClosure) {
     GBL_UNUSED(pClosure);
-    return GBL_TYPECHECK(GUM_Widget, pObject) && GUM_WIDGET(pObject)->isSelectable;
+    const GUM_Widget* pWidget = GBL_AS(GUM_Widget, pObject);
+    return pWidget && pWidget->isSelectable;
 }
 
 static GblObject* GUM_Nav_siblingStep_(GblObject* pObject, GblObjectCmpFn pFnCmp, bool forwards) {
@@ -39,16 +37,8 @@ static GblObject* GUM_Nav_siblingStep_(GblObject* pObject, GblObjectCmpFn pFnCmp
 }
 
 static GUM_Widget* GUM_Nav_findSelectableSibling_(GblObject* pObject, bool forwards) {
-    GblObject* pSibling = GUM_Nav_siblingStep_(pObject, GUM_Nav_isWidgetType_, forwards);
-
-    while (pSibling) {
-        GUM_Widget* pWidget = GUM_Nav_asSelectable_(pSibling);
-        if (pWidget)
-            return pWidget;
-        pSibling = GUM_Nav_siblingStep_(pSibling, GUM_Nav_isWidgetType_, forwards);
-    }
-
-    return nullptr;
+    GblObject* pSibling = GUM_Nav_siblingStep_(pObject, GUM_Nav_isSelectable_, forwards);
+    return pSibling ? GUM_WIDGET(pSibling) : nullptr;
 }
 
 static GUM_Widget* GUM_Nav_findSelectableInContainer_(GblObject* pContainer,
@@ -62,11 +52,9 @@ static GUM_Widget* GUM_Nav_findSelectableInContainer_(GblObject* pContainer,
     }
 
     if (forwards) {
-        GblObject_foreachChild(pContainer, pChild) {
-            GUM_Widget* pWidget = GUM_Nav_asSelectable_(pChild);
-            if (pWidget)
-                return pWidget;
-        }
+        GblObject* pChild = GblObject_findChildByCmpFn(pContainer, GUM_Nav_isSelectable_, nullptr);
+        if (pChild)
+            return GUM_WIDGET(pChild);
     } else {
         GblObject_foreachChildReverse(pContainer, pChild) {
             GUM_Widget* pWidget = GUM_Nav_asSelectable_(pChild);
@@ -179,14 +167,16 @@ static GUM_Widget* GUM_Nav_moveCursor_(GblObject* pSelf, GUM_InputAction directi
     GblObject* pParent = GblObject_parent(pSelf);
     if (!pParent)
         return nullptr;
-    if (!GBL_TYPECHECK(GUM_Container, pParent))
+
+    GUM_Container* pContainer = GBL_AS(GUM_Container, pParent);
+    if (!pContainer)
         return GUM_Nav_findSelectableByPosition_(GUM_WIDGET(pSelf), direction);
 
-    const GUM_Direction parentDirection      = GUM_Container_direction(GUM_CONTAINER(pParent));
-    GblObject*          pGrandParent         = GblObject_parent(pParent);
+    GUM_Container* pGrandParent = GBL_AS(GUM_Container, GblObject_parent(pParent));
+
+    const GUM_Direction parentDirection      = GUM_Container_direction(pContainer);
     const GUM_Direction grandParentDirection =
-        pGrandParent && GBL_TYPECHECK(GUM_Container, pGrandParent) ?
-        GUM_Container_direction(GUM_CONTAINER(pGrandParent)) : GUM_DIRECTION_NULL;
+        pGrandParent ? GUM_Container_direction(pGrandParent) : GUM_DIRECTION_NULL;
 
     const GUM_Direction axis =
         direction == GUM_INPUTACTION_MOVE_LEFT || direction == GUM_INPUTACTION_MOVE_RIGHT ?

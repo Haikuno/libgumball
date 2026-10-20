@@ -2,7 +2,7 @@
 
 #include "gumball_iresource_.h"
 
-#include <string.h>
+#include <gimbal/strings/gimbal_string_view.h>
 
 static GBL_RESULT GUM_IResource_pathDtor_(const GblArrayMap* pMap,
                                           uintptr_t key,
@@ -41,9 +41,6 @@ GBL_RESULT GUM_IResource_setPath_(GUM_IResource* pResource, GblStringRef* pPath)
 }
 
 GBL_RESULT GUM_IResource_convertString_(const GblVariant* pValue, GblVariant* pString) {
-    if (!pValue || !pString)
-        return GBL_RESULT_ERROR_INVALID_POINTER;
-
     GblBox* pBox = GblVariant_boxPeek(pValue);
     if (!pBox)
         return GblVariant_setString(pString, "(null)");
@@ -51,12 +48,9 @@ GBL_RESULT GUM_IResource_convertString_(const GblVariant* pValue, GblVariant* pS
     GUM_IResource* pResource = GUM_IRESOURCE(pBox);
     const char*    pName     = GUM_IResource_path_(pResource);
     if (pName) {
-        const char* pSlash     = strrchr(pName, '/');
-        const char* pBackslash = strrchr(pName, '\\');
-        if (!pSlash || (pBackslash && pBackslash > pSlash))
-            pSlash = pBackslash;
-        if (pSlash && pSlash[1])
-            pName = pSlash + 1;
+        const size_t slash = GblStringView_findLastOf(GblStringRef_view(pName), "/\\");
+        if (slash != GBL_STRING_VIEW_NPOS && pName[slash + 1])
+            pName += slash + 1;
     }
 
     return GblVariant_setString(pString,

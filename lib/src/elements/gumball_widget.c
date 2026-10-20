@@ -216,8 +216,7 @@ static GBL_RESULT GUM_Widget_refreshHierarchyLayout_(GUM_Widget* pSelf,
     if (GBL_RESULT_SUCCESS(firstFailure) && !GBL_RESULT_SUCCESS(result))
         firstFailure = result;
 
-    if (pCurrentParent)
-        GblBox_unref(GBL_BOX(pCurrentParent));
+    GBL_UNREF(pCurrentParent);
     return firstFailure;
 }
 
@@ -249,9 +248,10 @@ typedef struct GUM_WidgetChildSnapshot_ {
 } GUM_WidgetChildSnapshot_;
 
 static void GUM_Widget_childSnapshotRelease_(GUM_WidgetChildSnapshot_* pSnapshot) {
-    const size_t count = GblArrayList_size(&pSnapshot->widgets);
+    GUM_Widget* const* ppWidgets = GblArrayList_data(&pSnapshot->widgets);
+    const size_t      count     = GblArrayList_size(&pSnapshot->widgets);
     for (size_t i = 0; i < count; ++i) {
-        GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&pSnapshot->widgets, i);
+        GUM_Widget* pWidget = ppWidgets[i];
         GblBox_unref(GBL_BOX(pWidget));
     }
     GblArrayList_destruct(&pSnapshot->widgets);
@@ -305,9 +305,10 @@ static GBL_RESULT GUM_Widget_Object_instantiated_(GblObject* pSelf) {
     GUM_WidgetChildSnapshot_ snapshot;
     GBL_RESULT result = GUM_Widget_childSnapshot_(pSelf, &snapshot);
     if GBL_LIKELY (GBL_RESULT_SUCCESS(result)) {
-        const size_t count = GblArrayList_size(&snapshot.widgets);
+        GUM_Widget* const* ppWidgets = GblArrayList_data(&snapshot.widgets);
+        const size_t      count     = GblArrayList_size(&snapshot.widgets);
         for (size_t i = 0; i < count; ++i) {
-            GUM_Widget* pChildWidget = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
+            GUM_Widget* pChildWidget = ppWidgets[i];
             if (GblObject_parent(GBL_OBJECT(pChildWidget)) != pSelf)
                 continue;
 
@@ -558,14 +559,12 @@ static GBL_RESULT GUM_Widget_GblObject_setProperty_(GblObject*         pObject,
             pSelf->font_border_thickness = GblVariant_uint8(pValue);
             break;
         case GUM_Widget_Property_Id_font: {
-            if (pSelf_->pFont)
-                GUM_IResource_unref(GUM_IRESOURCE(pSelf_->pFont));
+            GBL_UNREF(pSelf_->pFont);
             pSelf_->pFont = GUM_FONT(GblVariant_boxMove(pValue));
             break;
         }
         case GUM_Widget_Property_Id_texture: {
-            if (pSelf_->pTexture)
-                GUM_IResource_unref(GUM_IRESOURCE(pSelf_->pTexture));
+            GBL_UNREF(pSelf_->pTexture);
             pSelf_->pTexture = GUM_TEXTURE(GblVariant_boxMove(pValue));
             break;
         }
@@ -676,7 +675,7 @@ static GBL_RESULT GUM_Widget_GblObject_property_(const GblObject*   pObject,
             GblVariant_setBool(pValue, pSelf->border_highlight);
             break;
         case GUM_Widget_Property_Id_label:
-            GblVariant_setString(pValue, pSelf_->pLabel);
+            GblVariant_setStringRef(pValue, GblStringRef_ref(pSelf_->pLabel));
             break;
         case GUM_Widget_Property_Id_textAlignment:
             GblVariant_setEnum(pValue, GUM_TEXT_ALIGNMENT_TYPE, pSelf->textAlignment);
@@ -742,14 +741,12 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
 
     const bool needsClip = pSelf_->clipRect.x != GUM_CLIP_RECT_NONE_.x ||
                            pSelf_->clipRect.width != GUM_CLIP_RECT_NONE_.width;
-    bool       scissorActive = false;
-    GBL_RESULT result        = GBL_RESULT_SUCCESS;
+    GBL_RESULT result = GBL_RESULT_SUCCESS;
 
     if (needsClip) {
         result = GUM_Backend_beginScissor(pRenderer, pSelf_->clipRect);
         if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
             return result;
-        scissorActive = true;
     }
 
     if (pSelf->a) {
@@ -868,7 +865,7 @@ static GBL_RESULT GUM_Widget_draw_(GUM_Widget* pSelf, GUM_Renderer* pRenderer) {
     }
 
 cleanup:
-    if (scissorActive) {
+    if (needsClip) {
         const GBL_RESULT endResult = GUM_Backend_endScissor(pRenderer);
         if (GBL_RESULT_SUCCESS(result) && !GBL_RESULT_SUCCESS(endResult))
             result = endResult;
@@ -916,7 +913,7 @@ static void GUM_Widget_freeTween_(GUM_WidgetTween_* pTween) {
 }
 
 static void GUM_Widget_applyTweenValue_(GUM_WidgetTween_* pTween) {
-    if (!pTween || !pTween->inUse || !pTween->pWidget)
+    if (!pTween->inUse || !pTween->pWidget)
         return;
 
     // setProperty may destroy the Widget and cancel this tween.
@@ -1017,7 +1014,7 @@ GBL_EXPORT void GUM_Widget_animateOnDone(GUM_Widget* pSelf, const char* pPropert
     if (!pProperty || !pProperty[0])
         return;
 
-    GUM_WidgetTween_* pTween = GUM_Widget_findTween_(pSelf, GblQuark_fromString(pProperty));
+    GUM_WidgetTween_* pTween = GUM_Widget_findTween_(pSelf, GblQuark_tryString(pProperty));
     if (!pTween) return;
 
     if (!pFnDone) {
@@ -1037,7 +1034,7 @@ GBL_EXPORT void GUM_Widget_animateCancel(GUM_Widget* pSelf, const char* pPropert
     if (!pProperty || !pProperty[0])
         return;
 
-    GUM_WidgetTween_* pTween = GUM_Widget_findTween_(pSelf, GblQuark_fromString(pProperty));
+    GUM_WidgetTween_* pTween = GUM_Widget_findTween_(pSelf, GblQuark_tryString(pProperty));
     if (pTween)
         GUM_Widget_freeTween_(pTween);
 }
@@ -1093,10 +1090,8 @@ static GBL_RESULT GUM_Widget_GblBox_destructor_(GblBox* pBox) {
     GUM_Widget_animate_widgetDestroyed_(pSelf);
     GblStringRef_unref(pSelf_->pLabel);
 
-    if (pSelf_->pTexture)
-        GUM_IResource_unref(GUM_IRESOURCE(pSelf_->pTexture));
-    if (pSelf_->pFont)
-        GUM_IResource_unref(GUM_IRESOURCE(pSelf_->pFont));
+    GBL_UNREF(pSelf_->pTexture);
+    GBL_UNREF(pSelf_->pFont);
 
     GblObjectClass* pObjClass = GBL_OBJECT_CLASS(GblClass_weakRefDefault(GBL_OBJECT_TYPE));
     return pObjClass->base.pFnDestructor(pBox);
@@ -1106,11 +1101,12 @@ static GBL_RESULT GUM_Widget_receiveEvent_(GblIEventReceiver* pSelf,
                                            GblIEventReceiver* pDest,
                                            GblEvent*          pEvent) {
     GBL_UNUSED(pDest);
-    GUM_Widget*      pWidget = GUM_WIDGET(pSelf);
-    GUM_WidgetClass* pClass  = GUM_WIDGET_CLASSOF(pWidget);
+    GUM_Widget*      pWidget     = GUM_WIDGET(pSelf);
+    GUM_WidgetClass* pClass      = GUM_WIDGET_CLASSOF(pWidget);
+    GUM_Event_Input* pInputEvent = GBL_AS(GUM_Event_Input, pEvent);
 
-    if (GblType_check(GBL_TYPEOF(pEvent), GUM_EVENT_INPUT_TYPE))
-        return pClass->pFnInputEvent(pWidget, GUM_EVENT_INPUT(pEvent));
+    if (pInputEvent)
+        return pClass->pFnInputEvent(pWidget, pInputEvent);
 
     return GBL_RESULT_SUCCESS;
 }

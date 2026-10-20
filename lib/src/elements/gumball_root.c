@@ -36,16 +36,6 @@ typedef struct GUM_RootChildSnapshot_ {
     GblObject*   stack[GUM_SNAPSHOT_INLINE_CAPACITY];
 } GUM_RootChildSnapshot_;
 
-static size_t GUM_Root_widgetDepth_(const GUM_Widget* pWidget) {
-    size_t depth = 0;
-    for (GblObject* pParent = GblObject_parent(GBL_OBJECT(pWidget));
-         pParent && GBL_TYPEOF(pParent) != GUM_ROOT_TYPE;
-         pParent = GblObject_parent(pParent)) {
-        ++depth;
-    }
-    return depth;
-}
-
 static int GUM_Root_widgetCmp_(const GUM_Widget* pA, const GUM_Widget* pB) {
     const GUM_Widget_* pA_ = GUM_WIDGET_(pA);
     const GUM_Widget_* pB_ = GUM_WIDGET_(pB);
@@ -53,8 +43,8 @@ static int GUM_Root_widgetCmp_(const GUM_Widget* pA, const GUM_Widget* pB) {
     if (pA_->zIndex < pB_->zIndex) return -1;
     if (pA_->zIndex > pB_->zIndex) return 1;
 
-    const size_t depthA = GUM_Root_widgetDepth_(pA);
-    const size_t depthB = GUM_Root_widgetDepth_(pB);
+    const size_t depthA = GblObject_depth(GBL_OBJECT(pA));
+    const size_t depthB = GblObject_depth(GBL_OBJECT(pB));
     if (depthA < depthB) return -1;
     if (depthA > depthB) return 1;
 
@@ -63,31 +53,17 @@ static int GUM_Root_widgetCmp_(const GUM_Widget* pA, const GUM_Widget* pB) {
     return 0;
 }
 
-static void GUM_Root_linkBefore_(GUM_Root* pRoot, GUM_Widget* pBefore, GUM_Widget* pWidget) {
-    GblDoublyLinkedListNode* pNode = pBefore ? &GUM_WIDGET_(pBefore)->drawNode
-                                             : &GUM_ROOT_(pRoot)->drawOrder;
-    GblDoublyLinkedList_insertBefore(pNode, &GUM_WIDGET_(pWidget)->drawNode);
-}
-
 static void GUM_Root_insertOrdered_(GUM_Root* pRoot, GUM_Widget* pWidget) {
-    GUM_Root_*  pRoot_ = GUM_ROOT_(pRoot);
-    GUM_Widget* pIt    = nullptr;
+    GblDoublyLinkedListNode* pHead = &GUM_ROOT_(pRoot)->drawOrder;
+    GblDoublyLinkedListNode* pNode = pHead->pNext;
 
-    for (GblDoublyLinkedListNode* pNode = pRoot_->drawOrder.pNext;
-         pNode != &pRoot_->drawOrder;
-         pNode = pNode->pNext) {
-        pIt = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_Widget_, drawNode)->pWidget;
+    for (; pNode != pHead; pNode = pNode->pNext) {
+        GUM_Widget* pIt = GBL_DOUBLY_LINKED_LIST_ENTRY(pNode, GUM_Widget_, drawNode)->pWidget;
         if (GUM_Root_widgetCmp_(pIt, pWidget) > 0)
             break;
-        pIt = nullptr;
     }
 
-    GUM_Root_linkBefore_(pRoot, pIt, pWidget);
-}
-
-static void GUM_Root_unlink_(GUM_Root* pRoot, GUM_Widget* pWidget) {
-    GBL_UNUSED(pRoot);
-    GblDoublyLinkedList_remove(&GUM_WIDGET_(pWidget)->drawNode);
+    GblDoublyLinkedList_insertBefore(pNode, &GUM_WIDGET_(pWidget)->drawNode);
 }
 
 static int GUM_Root_drawNodeCmp_(const void* pA, const void* pB, void* pClosure) {
@@ -97,15 +73,12 @@ static int GUM_Root_drawNodeCmp_(const void* pA, const void* pB, void* pClosure)
     return GUM_Root_widgetCmp_(pA_->pWidget, pB_->pWidget);
 }
 
-static void GUM_Root_resort_(GUM_Root* pRoot) {
-    GblDoublyLinkedList_mergeSort(&GUM_ROOT_(pRoot)->drawOrder, GUM_Root_drawNodeCmp_, nullptr);
-}
-
 static void GUM_Root_snapshotRelease_(GUM_RootSnapshot_* pSnapshot) {
-    const size_t count = GblArrayList_size(&pSnapshot->widgets);
+    GUM_Widget* const* ppWidgets = GblArrayList_data(&pSnapshot->widgets);
+    const size_t      count     = GblArrayList_size(&pSnapshot->widgets);
 
     for (size_t i = 0; i < count; ++i) {
-        GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&pSnapshot->widgets, i);
+        GUM_Widget* pWidget = ppWidgets[i];
         GblBox_unref(GBL_BOX(pWidget));
     }
 
@@ -139,10 +112,11 @@ static GBL_RESULT GUM_Root_snapshot_(GUM_Root* pRoot, GUM_RootSnapshot_* pSnapsh
 }
 
 static void GUM_Root_childSnapshotRelease_(GUM_RootChildSnapshot_* pSnapshot) {
-    const size_t count = GblArrayList_size(&pSnapshot->objects);
+    GblObject* const* ppObjects = GblArrayList_data(&pSnapshot->objects);
+    const size_t     count     = GblArrayList_size(&pSnapshot->objects);
 
     for (size_t i = 0; i < count; ++i) {
-        GblObject* pObject = *(GblObject**)GblArrayList_at(&pSnapshot->objects, i);
+        GblObject* pObject = ppObjects[i];
         GblBox_unref(GBL_BOX(pObject));
     }
 
@@ -158,9 +132,7 @@ static GBL_RESULT GUM_Root_childSnapshot_(GUM_Root* pRoot, GUM_RootChildSnapshot
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
-    for (GblObject* pChild = GblObject_childFirst(GBL_OBJECT(pRoot));
-         pChild;
-         pChild = GblObject_siblingNext(pChild)) {
+    GblObject_foreachChild(GBL_OBJECT(pRoot), pChild) {
         GblObject* pRetained = GBL_OBJECT(GblBox_ref(GBL_BOX(pChild)));
         result = GblArrayList_pushBack(&pSnapshot->objects, &pRetained);
 
@@ -175,9 +147,7 @@ static GBL_RESULT GUM_Root_childSnapshot_(GUM_Root* pRoot, GUM_RootChildSnapshot
 }
 
 GUM_Root* GUM_Root_active_(void) {
-    GblModule* pModule = GblModule_find("GUM_Root");
-    return pModule && GblType_check(GBL_TYPEOF(pModule), GUM_ROOT_TYPE) ?
-           GUM_ROOT(pModule) : nullptr;
+    return GBL_AS(GUM_Root, GblModule_find("GUM_Root"));
 }
 
 GBL_EXPORT GUM_Root* GUM_Root_create(void) {
@@ -306,14 +276,14 @@ void GUM_Root_drawDisable_(GUM_Widget* pWidget) {
     if (!pWidget_->drawMember)
         return;
 
-    GUM_Root_unlink_(pRoot, pWidget);
+    GblDoublyLinkedList_remove(&pWidget_->drawNode);
     pWidget_->drawMember = false;
 }
 
 void GUM_Root_drawOrderChanged_(void) {
     GUM_Root* pRoot = GUM_Root_active_();
     if (pRoot)
-        GUM_Root_resort_(pRoot);
+        GblDoublyLinkedList_mergeSort(&GUM_ROOT_(pRoot)->drawOrder, GUM_Root_drawNodeCmp_, nullptr);
 }
 
 GBL_RESULT GUM_Root_foreachDrawable_(GUM_Root* pRoot,
@@ -330,9 +300,10 @@ GBL_RESULT GUM_Root_foreachDrawable_(GUM_Root* pRoot,
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
-    const size_t count = GblArrayList_size(&snapshot.widgets);
+    GUM_Widget* const* ppWidgets = GblArrayList_data(&snapshot.widgets);
+    const size_t      count     = GblArrayList_size(&snapshot.widgets);
     for (size_t i = 0; i < count; ++i) {
-        GUM_Widget* pWidget = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
+        GUM_Widget* pWidget = ppWidgets[i];
         if (pFnIter(pWidget, pClosure))
             break;
     }
@@ -353,11 +324,13 @@ GBL_RESULT GUM_Root_draw_(GUM_Root* pRoot, GUM_Renderer* pRenderer) {
     if GBL_UNLIKELY (!GBL_RESULT_SUCCESS(result))
         return result;
 
+    GUM_Widget* const* ppWidgets = GblArrayList_data(&snapshot.widgets);
+
     GBL_RESULT   firstFailure = GBL_RESULT_SUCCESS;
     const size_t count        = GblArrayList_size(&snapshot.widgets);
 
     for (size_t i = 0; i < count; ++i) {
-        GUM_Widget*      pWidget    = *(GUM_Widget**)GblArrayList_at(&snapshot.widgets, i);
+        GUM_Widget*      pWidget    = ppWidgets[i];
         const GBL_RESULT drawResult = GUM_WIDGET_CLASSOF(pWidget)->pFnDraw(pWidget, pRenderer);
 
         if (GBL_RESULT_SUCCESS(firstFailure) && !GBL_RESULT_SUCCESS(drawResult))
@@ -448,12 +421,13 @@ GBL_RESULT GUM_Root_update(GUM_Root* pRoot) {
             goto done;
         }
 
-        const size_t count = GblArrayList_size(&snapshot.objects);
+        GblObject* const* ppObjects = GblArrayList_data(&snapshot.objects);
+        const size_t     count     = GblArrayList_size(&snapshot.objects);
         for (size_t i = 0; i < count; ++i) {
             if (GUM_Root_active_() != pRoot)
                 break;
 
-            GblObject*     pObject    = *(GblObject**)GblArrayList_at(&snapshot.objects, i);
+            GblObject*     pObject    = ppObjects[i];
             GUM_Container* pContainer = GBL_AS(GUM_Container, pObject);
             if (!pContainer)
                 continue;

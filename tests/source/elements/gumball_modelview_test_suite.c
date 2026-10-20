@@ -193,12 +193,7 @@ GblType GUM_LargeHierarchyModel_type(void) {
 }
 
 static GUM_LargeHierarchyModel* GUM_LargeHierarchyModel_create_(void) {
-    return GUM_LARGE_HIERARCHY_MODEL(
-        GblBox_create(GUM_LARGE_HIERARCHY_MODEL_TYPE,
-                      sizeof(GUM_LargeHierarchyModel),
-                      nullptr,
-                      nullptr,
-                      nullptr));
+    return GUM_LARGE_HIERARCHY_MODEL(GblBox_create(GUM_LARGE_HIERARCHY_MODEL_TYPE));
 }
 
 #define GBL_SELF_TYPE GUM_ModelViewTestSuite
@@ -340,7 +335,6 @@ GBL_TEST_CASE(objectTreeModel)
     GBL_VARIANT(value);
     GBL_TEST_CALL(GUM_IItemModel_data(pItemModel, childIndex, &value));
     GBL_TEST_COMPARE(strcmp(GblVariant_string(&value), "child"), 0);
-    GblVariant_destruct(&value);
 
     // Models that do not override displayData inherit their typed data unchanged.
     GBL_VARIANT(displayValue);
@@ -366,6 +360,7 @@ GBL_TEST_CASE(objectTreeModel)
     GBL_TEST_COMPARE(modelDataChangedCount_, 1u);
     GBL_TEST_VERIFY(pModelChangedHandle_ == childIndex.pHandle);
     GBL_TEST_COMPARE(modelChangedColumn_, 0u);
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&value), "child"), 0);
     GblVariant_destruct(&name);
 
     // The model owns a live root reference independently of the caller.
@@ -378,6 +373,8 @@ GBL_TEST_CASE(objectTreeModel)
     GUM_IItemModel_unref(pItemModel);
     GUM_IItemModel_unref(pOtherItemModel);
     GBL_UNREF(pOtherRoot);
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&value), "child"), 0);
+    GblVariant_destruct(&value);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(propertyModel)
@@ -388,6 +385,11 @@ GBL_TEST_CASE(propertyModel)
                                             "color", 0x1234ABCDu);
     GUM_Widget* pReplacement = GUM_Widget_create("x", 5.0f);
     GBL_TEST_VERIFY(pWidget && pReplacement);
+
+    GBL_VARIANT(label);
+    GBL_TEST_CALL(GblObject_propertyVariant(GBL_OBJECT(pWidget), "label", &label));
+    GBL_TEST_CALL(GUM_setProperty(pWidget, "label", "changed"));
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&label), "target"), 0);
 
     GblObject* pPropertyChild       = GBL_NEW(GblObject, "name", "property child");
     GblObject* pSecondPropertyChild = GBL_NEW(GblObject, "name", "second child");
@@ -534,6 +536,8 @@ GBL_TEST_CASE(propertyModel)
     GUM_IItemModel_unref(pItemModel);
     GUM_unref(pWidget);
     GUM_unref(pReplacement);
+    GBL_TEST_COMPARE(strcmp(GblVariant_string(&label), "target"), 0);
+    GblVariant_destruct(&label);
 GBL_TEST_CASE_END
 
 GBL_TEST_CASE(childrenDisplay)

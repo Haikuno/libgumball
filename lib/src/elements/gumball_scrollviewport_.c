@@ -58,16 +58,10 @@ void GUM_ScrollViewport_setRange_(GUM_ScrollViewport_* pSelf,
     if (!pAnimator)
         return;
 
-    switch (axis) {
-        case GUM_SCROLL_AXIS_X:
-            pSelf->rangeX = range;
-            break;
-        case GUM_SCROLL_AXIS_Y:
-            pSelf->rangeY = range;
-            break;
-        default:
-            return;
-    }
+    if (axis == GUM_SCROLL_AXIS_X)
+        pSelf->rangeX = range;
+    else
+        pSelf->rangeY = range;
 
     const float from    = GBL_CLAMP(pAnimator->from,    0.0f, range);
     const float to      = GBL_CLAMP(pAnimator->to,      0.0f, range);
